@@ -1,0 +1,133 @@
+<html>
+
+<head>
+    <title>Livecountsedit v5</title>
+    <link href="odometer.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel="stylesheet" type="text/css">
+    <link href="index.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="logo.png">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Livecountsedit">
+    <meta property="og:url" content="/">
+    <meta property="og:description" content="Livecountsedit v5">
+    <meta name="twitter:site" content="Livecountsedit">
+    <meta name="twitter:description" content="Livecountsedit v5">
+    <meta name="twitter:url" content="/">
+    <style>
+
+    </style>
+</head> 
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-0')" id="tabs.0">General</button>
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-1')" id="tabs.1">Counter</button>
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-2')" id="tabs.2">Styles</button>
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-3')" id="tabs.3">Themes</button>
+        </div>
+        <div id="options-0" class="tab-content" tab="tabs.0">
+            <div class="option">
+                <label for="options.counter.title">Counter title/Username</label><br>
+                <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title">
+            </div>
+            <div class="option">
+                <label for="options.counter.value">Counter value (integers only)</label><br>
+                <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value">
+                <button onclick="submit()">Submit</button>
+            </div>
+            <div class="option">
+                <label for="options.counter.footer">Counter footer (e.g. "Subscribers", "Followers")</label><br>
+                <input type="text" placeholder="Followers, Subscribers, etc" class="option-input" id="options.counter.footer"> 
+            </div>
+            <div class="option">
+                <label for="options.counter.banner.url">Banner URL</label><br>
+                <input type="text" class="option-input" id="options.counter.banner.url"><br>
+                <strong>OR</strong>
+                <input type="file" class="option-input" id="options.counter.banner.file">
+            </div>
+            <div class="option">
+                <label for="options.counter.avatar.url">Avatar URL</label><br>
+                <input type="text" class="option-input" id="options.counter.avatar.url"><br>
+                <strong>OR</strong>
+                <input type="file" class="option-input" id="options.counter.avatar.file">
+            </div>
+        </div>
+        <div id="options-1" class="tab-content" tab="tabs.1">
+            <p>Counter Gain Rate</p>
+            <div class="option-section" id="options.counter.rates.mode.0">
+                <div class="option">
+                    <p>
+                        <span>Min Subs</span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMinimum"></span>
+                      <br>
+                      <br>
+                        <span>Max Subs</span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMaximum"></span>                  
+                   <br>
+                   <br>
+                        <span>Per Every</span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.mode.basic.units"></span>
+                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day">day(s)</option>
+                        </select></span>
+                        <br>
+                        <br>
+                       <span>Sub Gain Rate In:</span>
+                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day2">day(s)</option>
+                        </select></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div id="options-2" class="tab-content" tab="tabs.2">
+              <div class="option">
+                <h2>Style Settings:</h2>
+                <p>Odometer up color:</p>
+                <input value="#FFFFFF" type="color" id="odometer.up.color.settings">
+                <p>Odometer down color:</p>
+                <input value="#FFFFFF" type="color" id="odometer.down.color.settings">
+                <p>Username color:</p>
+                <input value="#FFFFFF" type="color" id="username.color.settings">
+                <p>Footer color:</p>
+                <input value="#FFFFFF" type="color" id="footer.color.settings">
+                <p>Main Counter color:</p>
+                <input value="#FFFFFF" type="color" id="counter.color.settings">
+                <p>Graph color:</p>
+                <input value="#FFFFFF" type="color" id="graph.color.settings">
+            </div>
+        </div>
+        <div id="options-3" class="tab-content" tab="tabs.3">
+<h1>Themes:</h1>
+<br>
+<center>
+<a style="color: #FFFFFF" href="./Socialblade/index.html"><h1 style="color: #FFFFFF">SocialBlade Theme</h1></a>
+</center>
+        </div>
+        <div class="counter-content">
+            <div class="counter-container">
+                <img class="banner" src="default_banner.png">
+                <img class="avatar" src="https://i.imgur.com/WeKLZYQ.jpg">
+                <div class="counter-title" id="counter-title">Username</div>
+                <div class="counter odometer" id="counter">0</div>
+                <div class="footer" id="footer">Followers</div>
+                 <br>
+                <div id="chart" style="height: 45%;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="settings">
+        
+    </div>
+    <script src="odometer.js"></script>
+    <script src="highstock.js"></script>
+    <script src="jquery.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>

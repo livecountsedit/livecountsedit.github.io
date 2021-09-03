@@ -1,0 +1,119 @@
+:root {
+    --border-color: #ddd;
+    --bg-color: #1a1a20;
+    --fg-color: #fff;
+    --counter-bg-color: #223;
+    --avatar-border-radius: 50%;
+    --title-font-size: 4.5vh;
+    --counter-font-size: 8vh;
+    --footer-font-size: 2vh;
+}
+
+body {
+    background-color: var(--bg-color, #1a1a20);
+    font-family: Lato, Arial, Helvetica, sans-serif;
+    color: var(--fg-color, #fff)
+}
+
+.container {
+    width: 100%;
+    height: 90%;
+}
+
+.tabs {
+    float: left;
+    border: 1px solid var(--border-color, #ddd);
+    width: 15%;
+    height: 100%;
+    border-radius: 15px;
+}
+
+.tab-link {
+    display: block;
+    background-color: inherit;
+    color: var(--fg-color, #fff);
+    padding: 22px 16px;
+    width: 100%;
+    border: 1px solid var(--border-color, #ddd);
+    outline: none;
+    cursor: pointer;
+    transition: .3s;
+    border-radius: 15px;
+}
+
+.tab-link:hover {
+    background-color: #222;
+    border-radius: 15px;
+}
+
+.tabs button.active {
+    background-color: #43436f
+}
+
+.tab-content {
+    float: left;
+    padding: 0px 12px;
+    border: 1px solid var(--border-color, #ddd);
+    border-left: none;
+    width: 30%;
+    height: 100%;
+    border-radius: 15px;
+}
+
+.counter-content {
+    float: left;
+    padding: 0px 4px;
+    border: 1px solid var(--border-color, #ddd);
+    border-left: none;
+    width: 50%;
+    height: 100%;
+    text-align: center;
+    border-radius: 15px;
+}
+
+.counter-container {
+    padding: 20px 5px;
+    width: 98%;
+    height: 87%;
+    background-color: var(--counter-bg-color, #223);
+    border-radius: 15px;
+}
+
+.banner {
+    width: 100%;
+    height: 20%;
+    filter: blur(4px);
+    border-radius: 15px;
+}
+
+.avatar {
+    width: 8em;
+    height: 8em;
+    vertical-align: middle;
+    border-radius: var(--avatar-border-radius, 50%);
+    border: 2px solid #fff;
+    margin-top: -4em;
+    position: relative;
+}
+
+.counter-title {
+    font-size: var(--title-font-size, 4.5vh)
+}
+
+.counter {
+    font-size: var(--counter-font-size, 8vh)
+}
+
+.footer {
+    font-size: var(--footer-font-size, 2vh)
+}
+
+.option {
+    padding: 5px 5px;
+    height: 65px;
+}
+
+.invalid {
+    border: 2px solid red;
+    background-color: #ffcccc
+}
