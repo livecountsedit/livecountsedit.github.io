@@ -81,7 +81,10 @@ function updateManager() {
     rate3 = parseFloat(rate3)
     rate4 = parseFloat(rate4)
     subs += random(rate3, rate4)
-    current = subs
+    if (subs == NaN) {
+    } else { 
+        current = subs
+    }
     document.getElementById("channelSubs").innerHTML = Math.floor(subs)
     if (chart.series[0].points.length == 1500) chart.series[0].data[0].remove();
     chart.series[0].addPoint([Date.now(), Math.floor(subs)])
