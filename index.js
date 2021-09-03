@@ -225,7 +225,7 @@ chart = new Highcharts.chart({
   
     series: [{
       showInLegend: false,
-       name: 'Clicks',
+       name: 'Subscribers',
       marker: { enabled: false },
       color: '#000000',
       lineColor: newcolor,
@@ -234,6 +234,66 @@ chart = new Highcharts.chart({
   });
                     })
 
+                    function resetgraph() {
+                 
+                        chart = new Highcharts.chart({
+                            chart: {
+                                renderTo: 'chart',
+                                type: 'spline',
+                                  zoomType: 'x',
+                                  backgroundColor: 'transparent',
+                                  plotBorderColor: 'transparent'
+                            },
+                            title: {
+                                text: ' '
+                            },
+                            xAxis: {
+                                type: 'datetime',
+                                tickPixelInterval: 500,
+                                  gridLineColor: textBright,
+                                  labels: {
+                                      style: {
+                                          color: textBright
+                                      }
+                                  },
+                                  lineColor: lineColor,
+                                  minorGridLineColor: '#bdbdbd',
+                                  tickColor: lineColor,
+                                  title: {
+                                      style: {
+                                          color: textBright
+                                      }
+                                  }
+                            },
+                            yAxis: {
+                                title: {
+                                    text: ''
+                                },
+                                  gridLineColor: textBright,
+                                  labels: {
+                                      style: {
+                                          color: textBright
+                                      }
+                                  },
+                                  lineColor: lineColor,
+                                  minorGridLineColor: '#bdbdbd',
+                                  tickColor: lineColor
+                            },
+                            credits: {
+                                enabled: true,
+                                text: "Livecountsedit"
+                            },
+                          
+                            series: [{
+                              showInLegend: false,
+                               name: 'Subscribers',
+                              marker: { enabled: false },
+                              color: '#000000',
+                              lineColor: "#b3382c"
+                            }]
+                          });
+                        
+                        }
 
 function random(min, max) {
     return Math.random() * (max - min) + min
@@ -291,7 +351,7 @@ function random(min, max) {
     
       series: [{
         showInLegend: false,
-         name: 'Clicks',
+         name: 'Subscribers',
         marker: { enabled: false },
         color: '#000000',
         lineColor: '#FFFFFF'
