@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Livecountsedit v5.1</title>
+    <title>Livecountsedit v5</title>
     <link href="odometer.css" rel="stylesheet">
     <link href='https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel="stylesheet" type="text/css">
     <link href="index.css" rel="stylesheet" type="text/css">
@@ -24,6 +24,7 @@
             <button class="tab-link" onclick="Interface.openTab(event, 'options-1')" id="tabs.1">Counter</button>
             <button class="tab-link" onclick="Interface.openTab(event, 'options-2')" id="tabs.2">Styles</button>
             <button class="tab-link" onclick="Interface.openTab(event, 'options-3')" id="tabs.3">Themes</button>
+            <h4>This site is a parody of popular realtime counters.</h4>
         </div>
         <div id="options-0" class="tab-content" tab="tabs.0">
             <div class="option">
@@ -51,6 +52,8 @@
                 <strong>OR</strong>
                 <input type="file" class="option-input" id="options.counter.avatar.file">
             </div>
+            <br>
+            <button onclick="resetgraph()">Clear Graph</button>
         </div>
         <div id="options-1" class="tab-content" tab="tabs.1">
             <p>Counter Gain Rate</p>
@@ -108,8 +111,6 @@
 <br>
 <center>
 <a style="color: #FFFFFF" href="./Socialblade/index.html"><h1 style="color: #FFFFFF">SocialBlade Theme</h1></a>
-<br>
-<a style="color: #FFFFFF" href="./Livecounts/index.html"><h1 style="color: #FFFFFF">Livecounts.net Theme</h1></a>
 </center>
         </div>
         <div class="counter-content">
