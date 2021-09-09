@@ -34,7 +34,8 @@ class LivecountseditInterface {
         }
         this.setTitle = function () {
                 document.getElementById("userName").innerHTML = document.getElementById("options.counter.title").value
-        }
+       document.title = document.getElementById("options.counter.title").value+"'s Real-Time Subscriber Count - Social Blade YouTube Stats | YouTube Statistics"
+    }
         this.setValue = function () {
             document.getElementById("counter").innerHTML = parseFloat(document.getElementById("options.counter.value").value)
             current = parseFloat(document.getElementById("options.counter.value").value)
