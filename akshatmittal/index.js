@@ -133,3 +133,11 @@ document.getElementById("options.counter.rates.mode.basic.baseUnit2").addEventLi
 function random(min, max) {
     return Math.random() * (max - min) + min
   }
+
+  function hidenav() {
+      if (document.querySelector("#main-wrapper > aside").style.visibility == "hidden") {
+        document.querySelector("#main-wrapper > aside").style.visibility = "visible"
+      } else {
+    document.querySelector("#main-wrapper > aside").style.visibility = "hidden"
+      }
+  }
