@@ -162,15 +162,17 @@ $('style').append(`.odometer.odometer-auto-theme.odometer-animating-up.odometer-
     color: ${newcolor};
   }`) 
     })
-
-    
-    document.getElementById("odometer.down.color.settings").addEventListener('input', function(e) {
+ 
+document.getElementById("odometer.down.color.settings").addEventListener('input', function(e) {
         var newcolor = document.getElementById('odometer.down.color.settings').value
         $('style').append(`.odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
             color: ${newcolor};
           }`) 
             })
 
+document.getElementById("box.color.settings").addEventListener('input', function(e) {
+document.querySelector("body > div.container > div.counter-content > div").style.backgroundColor = document.getElementById('box.color.settings').value
+})
             var textBright = "#bdbdbd" //line color
             document.getElementById("graph.color.settings").addEventListener('input', function(e) {
                 var newcolor = document.getElementById('graph.color.settings').value
