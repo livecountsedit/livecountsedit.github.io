@@ -45,6 +45,7 @@ class LivecountseditInterface {
 var rate1 = 0;
 var rate2 = 0;
 var updatetime;
+var updatetime2;
 this.setMin = function () {
     rate1 = document.getElementById("options.counter.rates.basicMinimum").value
 }
@@ -59,16 +60,21 @@ this.setRate = function () {
      else {
      if (t == "1") {
          e = e*1000
+         var a = e/2
        updatetime = setInterval(updateManager,e)
+       updatetime2 = setInterval(graphManager,a)
      } else if (t == "60") {
         e = e*60000
         updatetime = setInterval(updateManager,e)
+        updatetime2 = setInterval(graphManager,a)
      } else if (t == "3600") {
         e = e*3.6e+6
         updatetime = setInterval(updateManager,e)
+        updatetime2 = setInterval(graphManager,a)
      } else if (t == "86400") {
         e = e*8.64e+7
         updatetime = setInterval(updateManager,e)
+        updatetime2 = setInterval(graphManager,a)
      }
     }
 }
@@ -98,13 +104,15 @@ function updateManager() {
         current = subs
     }
     document.getElementById("counter").innerHTML = Math.floor(subs)
-    if (chart.series[0].points.length == 1500) chart.series[0].data[0].remove();
-    chart.series[0].addPoint([Date.now(), Math.floor(subs)])
 }
     }
 }
 
-
+function graphManager() {
+    console.log(current)
+    if (chart.series[0].points.length == 1500) chart.series[0].data[0].remove();
+    chart.series[0].addPoint([Date.now(), Math.floor(current)])
+}
 const Interface = new LivecountseditInterface()
 window.onload = function () {
     if (document.getElementById('tabs.0')) document.getElementById('tabs.0').click();
