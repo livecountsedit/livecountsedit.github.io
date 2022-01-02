@@ -1,0 +1,290 @@
+<html>
+
+<head>
+    <title>Livecountsedit v5</title>
+    <link href="../odometer.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Lato&subset=latin,latin-ext' rel="stylesheet" type="text/css">
+    <link href="./index.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="logo.png">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Livecountsedit">
+    <meta property="og:url" content="/">
+    <meta property="og:description" content="Livecountsedit v5">
+    <meta name="twitter:site" content="Livecountsedit">
+    <meta name="twitter:description" content="Livecountsedit v5">
+    <meta name="twitter:url" content="/">
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-0')" id="tabs.0">General</button>
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-1')" id="tabs.1">Counter</button>
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-2')" id="tabs.2">Styles</button>
+            <button class="tab-link" onclick="window.location.href = './'" id="tabs.3">Back To Home</button>
+            <h4>This site is a parody of popular realtime counters.</h4>
+            <a href="https://discord.gg/Sn6Mxdwcxt"><h4>Join the discord.</h4></a>
+        </div>
+        <div style="overflow: scroll;" id="options-0" class="tab-content" tab="tabs.0">
+            <div class="option">
+                <label for="options.counter.title">Counter title/Video Name</label><br>
+                <input type="text" placeholder="Video Name" class="option-input" id="options.counter.title">
+            </div>
+            <div class="option">
+                <label for="options.counter.value">Counter 1 value (integers only)</label><br>
+                <input type="text" placeholder="Counter 1" class="option-input" id="options.counter.value">
+                <button onclick="submit1()">Submit</button>
+            </div>
+            <div class="option">
+                <label for="options.counter.value">Counter 2 value (integers only)</label><br>
+                <input type="text" placeholder="Counter 2" class="option-input" id="options.counter.value2">
+                <button onclick="submit2()">Submit</button>
+            </div>
+            <div class="option">
+                <label for="options.counter.value">Counter 3 value (integers only)</label><br>
+                <input type="text" placeholder="Counter 3" class="option-input" id="options.counter.value3">
+                <button onclick="submit3()">Submit</button>
+            </div>
+            <div class="option">
+                <label for="options.counter.value">Counter 4 value (integers only)</label><br>
+                <input type="text" placeholder="Counter 4" class="option-input" id="options.counter.value4">
+                <button onclick="submit4()">Submit</button>
+            </div>
+            <div class="option">
+                <label for="options.counter.footer">Counter 1 footer (e.g. "Views", "Likes", "Disikes",
+                    "Comments")</label><br>
+                <input type="text" placeholder="Views, Likes, etc" class="option-input" id="options.counter.footer">
+            </div>
+            <div class="option">
+                <label for="options.counter.footer">Counter 2 footer (e.g. "Views", "Likes", "Disikes",
+                    "Comments")</label><br>
+                <input type="text" placeholder="Views, Likes, etc" class="option-input" id="options.counter.footer2">
+            </div>
+            <div class="option">
+                <label for="options.counter.footer">Counter 3 footer (e.g. "Views", "Likes", "Disikes",
+                    "Comments")</label><br>
+                <input type="text" placeholder="Views, Likes, etc" class="option-input" id="options.counter.footer3">
+            </div>
+            <div class="option">
+                <label for="options.counter.footer">Counter 4 footer (e.g. "Views", "Likes", "Disikes",
+                    "Comments")</label><br>
+                <input type="text" placeholder="Views, Likes, etc" class="option-input" id="options.counter.footer4">
+            </div>
+            <div class="option">
+                <label for="options.counter.avatar.url">Thumbnail URL</label><br>
+                <input type="text" class="option-input" id="options.counter.avatar.url"><br>
+                <strong>OR</strong>
+                <input type="file" class="option-input" id="options.counter.avatar.file">
+            </div>
+        </div>
+        <div style="overflow:scroll;" id="options-1" class="tab-content" tab="tabs.1">
+            <p>Counter Gain Rate 1</p>
+            <div class="option-section" id="options.counter.rates.mode.0">
+                <div class="option">
+                    <span>Min Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMinimum0"></span>
+                    <br>
+                    <br>
+                    <span>Max Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMaximum0"></span>
+                    <br>
+                    <br>
+                    <span>Per Every</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.mode.basic.units0"></span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit0">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second0">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute0">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour0">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day0">day(s)</option>
+                        </select></span>
+                    <br>
+                    <br>
+                    <span>Counter Gain Rate In:</span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit00">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second00">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute00">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour00">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day00">day(s)</option>
+                        </select></span>
+                    </p>
+                </div>
+            </div>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <p>Counter Gain Rate 2</p>
+            <div class="option-section" id="options.counter.rates.mode.1">
+                <div class="option">
+                    <span>Min Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMinimum1"></span>
+                    <br>
+                    <br>
+                    <span>Max Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMaximum1"></span>
+                    <br>
+                    <br>
+                    <span>Per Every</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.mode.basic.units1"></span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit1">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second1">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute1">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour1">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day1">day(s)</option>
+                        </select></span>
+                    <br>
+                    <br>
+                    <span>Counter Gain Rate In:</span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit11">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second11">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute11">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour11">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day11">day(s)</option>
+                        </select></span>
+                    </p>
+                </div>
+            </div>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <p>Counter Gain Rate 3</p>
+            <div class="option-section" id="options.counter.rates.mode.2">
+                <div class="option">
+                    <span>Min Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMinimum2"></span>
+                    <br>
+                    <br>
+                    <span>Max Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMaximum2"></span>
+                    <br>
+                    <br>
+                    <span>Per Every</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.mode.basic.units2"></span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day2">day(s)</option>
+                        </select></span>
+                    <br>
+                    <br>
+                    <span>Counter Gain Rate In:</span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit22">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second22">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute22">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour22">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day22">day(s)</option>
+                        </select></span>
+                    </p>
+                </div>
+            </div>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <p>Counter Gain Rate 4</p>
+            <div class="option-section" id="options.counter.rates.mode.3">
+                <div class="option">
+                    <span>Min Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMinimum3"></span>
+                    <br>
+                    <br>
+                    <span>Max Rate</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.basicMaximum3"></span>
+                    <br>
+                    <br>
+                    <span>Per Every</span>
+                    <span><input type="number" class="short-input option-input"
+                            id="options.counter.rates.mode.basic.units3"></span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit3">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second3">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute3">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour3">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day3">day(s)</option>
+                        </select></span>
+                    <br>
+                    <br>
+                    <span>Counter Gain Rate In:</span>
+                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit33">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second33">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute33">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour33">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day33">day(s)</option>
+                        </select></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div id="options-2" class="tab-content" tab="tabs.2">
+            <div class="option">
+                <h2>Style Settings:</h2>
+                <p>Odometer up color:</p>
+                <input value="#FFFFFF" type="color" id="odometer.up.color.settings">
+                <p>Odometer down color:</p>
+                <input value="#FFFFFF" type="color" id="odometer.down.color.settings">
+                <p>Username color:</p>
+                <input value="#FFFFFF" type="color" id="username.color.settings">
+                <p>Footers color:</p>
+                <input value="#FFFFFF" type="color" id="footer.color.settings">
+                <p>Main Counter color:</p>
+                <input value="#FFFFFF" type="color" id="counter.color.settings">
+                <p>Side Counter color:</p>
+                <input value="#FFFFFF" type="color" id="counter.color.settings2">
+                <p>Box Background color:</p>
+                <input value="#FFFFFF" type="color" id="box.color.settings">
+            </div>
+        </div>
+        <div class="counter-content">
+            <div class="counter-container">
+                <img class="avatar" src="../default.png">
+                <div class="counter-title" id="counter-title">Loading</div>
+                <div class="counter odometer" id="counter">0</div>
+                <div class="footer" id="footer">Views</div>
+                <br>
+                <br>
+                <br>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr);">
+                    <div>
+                        <div class="counter2 odometer" id="counter2">0</div>
+                        <div class="footer" id="footer2">Likes</div>
+                    </div>
+                    <div>
+                        <div class="counter2 odometer" id="counter3">0</div>
+                        <div class="footer" id="footer3">Dislikes</div>
+                    </div>
+                    <div>
+                        <div class="counter2 odometer" id="counter4">0</div>
+                        <div class="footer" id="footer4">Comments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="settings">
+
+    </div>
+    <script src="../odometer.js"></script>
+    <script src="../highstock.js"></script>
+    <script src="../jquery.js"></script>
+    <script src="./index.js"></script>
+</body>
+
+</html>
