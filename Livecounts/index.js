@@ -30,7 +30,6 @@ class LivecountseditInterface {
         this.setValue = function () {
             document.getElementById("channelSubs").innerHTML = parseFloat(document.getElementById("options.counter.value").value)
             current = parseFloat(document.getElementById("options.counter.value").value)
-            document.getElementById('channelSubs2').innerHTML = GetGoal(current)
     }
 var rate1 = 0;
 var rate2 = 0;
@@ -87,7 +86,8 @@ function updateManager() {
         current = subs
     }
     document.getElementById("channelSubs").innerHTML = Math.floor(subs)
-    document.getElementById('channelSubs2').innerHTML = GetGoal(subs)
+    if (chart.series[0].points.length == 1500) chart.series[0].data[0].remove();
+    chart.series[0].addPoint([Date.now(), Math.floor(subs)])
 }
     }
 }
@@ -109,16 +109,3 @@ document.getElementById("options.counter.rates.mode.basic.baseUnit2").addEventLi
 function random(min, max) {
     return Math.random() * (max - min) + min
   }
-
- function GetGoal(count) {
-            if (count < 10) {
-             document.getElementById('smallText').innerHTML = "subscribers to 10"             
-                return Math.floor(10-count); 
-            }
-                
-                var x1 = Math.floor(Math.log10(count)); var x2 = Math.ceil(count / 10 ** x1); var x3 = x2 * 10 ** x1; 
-      document.getElementById('smallText').innerHTML = "subscribers to "+x3+""    
-     var goal = x3 - count; 
-     
-     return Math.floor(goal+1)
-        }
