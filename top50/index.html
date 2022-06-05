@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 50</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="../odometer.css">
+    <script src="../odometer.js"></script>
+</head>
+
+<body>
+    <div class="main" id="main" style="display: grid; grid-template-columns: repeat(5, 1fr);"></div>
+    <br>
+    <div class="other">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr);">
+            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
+                <label>Sort By:</label>
+                <select id="sort">
+                    <option value="">Select</option>
+                    <option value="num">Number</option>
+                    <option value="name">Name</option>
+                </select>
+            </div>
+            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
+                <button onclick="save()">Save (In Browser)</button>
+                <button onclick="save2()">Save (In File)</button>
+                <button onclick="reset()">Reset</button>
+            </div>
+            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
+                <button onclick="load()">Load Save</button>
+                <input type="file" id="loadData">
+            </div>
+        </div>
+        <br>
+        <div style="margin-top: 0px; display: grid; grid-template-columns: repeat(2, 1fr);">
+            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
+                <h2 style="margin-top: 0px;">Add Channel</h2>
+                <input placeholder="Name" id="add_name"><br>
+                <input placeholder="Image" id="add_image1"><label>or</label>
+                <input placeholder="Image" type="file" id="add_image2"><br>
+                <input placeholder="Count" id="add_count"><br>
+                <input placeholder="Min Count" id="add_min_gain"><br>
+                <input placeholder="Max Count" id="add_max_gain"><br>
+                <button onclick="create()">Create</button>
+            </div>
+            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
+                <h2 style="margin-top: 0px;">Edit Channel</h2>
+                <input placeholder="Name" id="edit_name" value=""><br>
+                <input placeholder="Image" id="edit_image1" value=""><label>or</label>
+                <input placeholder="Image" type="file" id="edit_image2" value=""><br>
+                <input placeholder="Count" id="edit_count" value=""><br>
+                <input placeholder="Min Count" id="edit_min_gain" value=""><br>
+                <input placeholder="Max Count" id="edit_max_gain" value=""><br>
+                <button onclick="edit()">Edit</button>
+            </div>
+        </div>
+    </div>
+    <script src="./index.js"></script>
+</body>
+
+</html>
