@@ -173,10 +173,9 @@ document.getElementById("odometer.down.color.settings").addEventListener('input'
 document.getElementById("box.color.settings").addEventListener('input', function (e) {
     document.querySelector("body > div.container > div.counter-content > div").style.backgroundColor = document.getElementById('box.color.settings').value
 })
-var textBright = "#bdbdbd" //line color
+var textBright = "#bdbdbd"
 document.getElementById("graph.color.settings").addEventListener('input', function (e) {
     newcolor = document.getElementById('graph.color.settings').value
-
     chart = new Highcharts.chart({
         chart: {
             renderTo: 'chart',
