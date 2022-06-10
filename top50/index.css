@@ -1,51 +1,56 @@
 /* #f7f5fe */
 body {
     font-family: Arial;
+    transition: color 2s;
 }
 
 .main {
     width: 100%;
+    transition: color 2s;
 }
 
 .card {
     background-color: #f7f5fe;
-    margin-top: 5px;
-    height: 60px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    margin-top: 0.1vw;
+    height: 3vw;
+    padding-top: 0.2vw;
+    padding-bottom: 0.2vw;
     width: 99%;
+    transition: color 2s;
 }
 
 .img {
     float: left;
-    height: 60px;
-    width: 60px;
+    height: 3vw;
+    width: 3vw;
+    transition: color 2s;
 }
 
 .num {
-    font-size: 25px;
-    margin-top: 10px;
+    font-size: 1.5vw;
+    margin-top: 0.7vw;
     float: left;
-    margin-right: 20px;
-    margin-left: 7.5px;
+    margin-right: 0.2vw;
+    margin-left: 0.2vw;
+    transition: color 2s;
 }
 
 .name {
-    margin-top: -5px;
+    margin-top: -0.1vw;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: hidden;
-    font-size: 23px;
-    color: black;
+    font-size: 1vw;
+    transition: color 2s;
 }
 
-.count {
+.odometer {
     transition: color 2s;
-    font-size: 35px;
+    font-size: 2vw;
     font-stretch: expanded;
-    white-space: nowrap; 
+    white-space: nowrap;
     overflow: hidden;
-    margin-top: -20px;
+    margin-top: -2vh;
 }
 
 .other {
@@ -54,8 +59,11 @@ body {
     overflow-y: scroll;
     overflow-x: hidden;
     border: solid 1px #000;
+    transition: color 2s;
 }
 
 .selected {
     background-color: #ccc;
+    transition: color 2s;
+    border: solid 1px red;
 }

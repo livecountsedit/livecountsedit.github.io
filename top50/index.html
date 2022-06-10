@@ -29,8 +29,9 @@
                 <button onclick="reset()">Reset</button>
             </div>
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
-                <button onclick="load()">Load Save</button>
+                <button onclick="load()">Load Save (From File =>)</button>
                 <input type="file" id="loadData">
+                <button onclick="reload()">Reload Save (From Browser)</button>
             </div>
         </div>
         <br>
@@ -47,13 +48,55 @@
             </div>
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
                 <h2 style="margin-top: 0px;">Edit Channel</h2>
-                <input placeholder="Name" id="edit_name" value=""><br>
-                <input placeholder="Image" id="edit_image1" value=""><label>or</label>
-                <input placeholder="Image" type="file" id="edit_image2" value=""><br>
-                <input placeholder="Count" id="edit_count" value=""><br>
-                <input placeholder="Min Count" id="edit_min_gain" value=""><br>
-                <input placeholder="Max Count" id="edit_max_gain" value=""><br>
+                <input placeholder="Name" id="edit_name" value=""><input type="checkbox" id="edit_name_check" checked>
+                <br>
+                <input placeholder="Image" id="edit_image1" value="">
+                <label>or</label>
+                <input placeholder="Image" type="file" id="edit_image2" value="">
+                <input type="checkbox" id="edit_image_check" checked>
+                <br>
+                <input placeholder="Count" id="edit_count" value="">
+                <input id="edit_count_check" type="checkbox" checked>
+                <br>
+                <input placeholder="Min Gain" id="edit_min_gain" value="">
+                <input id="edit_min_gain_check" type="checkbox" checked>
+                <br>
+                <input placeholder="Max Gain" id="edit_max_gain" value="">
+                <input id="edit_max_gain_check" type="checkbox" checked>
+                <br>
                 <button onclick="edit()">Edit</button>
+            </div>
+        </div>
+        <div style="display: flex; gap: 20px;">
+            <div style="margin-top: 0px;">
+                <br>
+                <button onclick="deleteChannel()" style="font-size: 30px;">Delete Channel</button>
+                <br>
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Background Color</label><br>
+                <input type="color" value="#000000" id="backPicker">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Text Color</label><br>
+                <input type="color" value="#000000" id="textPicker">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Box Background Color</label><br>
+                <input type="color" value="#000000" id="boxPicker">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Box Border Color</label><br>
+                <input type="color" value="#000000" id="borderPicker">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Image Border Radius</label><br>
+                <input type="number" value="#000000" id="imageBorder"><label>%</label>
             </div>
         </div>
     </div>
