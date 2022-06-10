@@ -33,7 +33,7 @@ if (localStorage.getItem("data") != null) {
         nameDiv.innerHTML = name;
         nameDiv.setAttribute("cid", id);
         let countDiv = document.createElement('h2');
-        countDiv.classList = "count odometer";
+        countDiv.classList = "odometer";
         countDiv.id = "count_" + currentIndex;
         countDiv.innerHTML = count;
         countDiv.setAttribute("cid", id);
@@ -111,7 +111,7 @@ function create() {
     nameDiv.innerHTML = name;
     nameDiv.setAttribute("cid", id);
     let countDiv = document.createElement('h2');
-    countDiv.classList = "count odometer";
+    countDiv.classList = "odometer odometer-auto-theme";
     countDiv.id = "count_" + currentIndex;
     countDiv.innerHTML = count;
     countDiv.setAttribute("cid", id);
@@ -121,6 +121,9 @@ function create() {
     card.appendChild(countDiv);
     document.getElementById('main').appendChild(card);
     currentIndex++;
+    odo = new Odometer({
+        el: countDiv,
+    });
     data.push({
         "name": name,
         "count": parseFloat(count),
@@ -189,7 +192,7 @@ document.getElementById('main').addEventListener('click', function (e) {
         document.querySelector('[cid = "' + id + '"]').classList.add('selected');
         let card = document.querySelector('[cid = "' + id + '"]');
         document.getElementById('edit_name').value = card.querySelector('.name').innerHTML;
-        document.getElementById('edit_count').value = card.querySelector('.count').innerHTML;
+        document.getElementById('edit_count').value = card.querySelector('.odometer').innerHTML;
         document.getElementById('edit_image1').value = card.querySelector('.img').src;
         for (let q = 0; q < data.length; q++) {
             if (data[q].id == id) {
@@ -228,8 +231,8 @@ function edit() {
                 }
             }
         }
-        if (card.querySelector('.count').innerHTML !== count && count !== "") {
-            card.querySelector('.count').innerHTML = count;
+        if (card.querySelector('.odometer').innerHTML !== count && count !== "") {
+            card.querySelector('.odometer').innerHTML = count;
             for (let i = 0; i < data.length; i++) {
                 if (data[i].id == id) {
                     data[i].count = count;
@@ -289,7 +292,7 @@ function load() {
             nameDiv.innerHTML = name;
             nameDiv.setAttribute("cid", id);
             let countDiv = document.createElement('h2');
-            countDiv.classList = "count odometer";
+            countDiv.classList = "odometer";
             countDiv.id = "count_" + currentIndex;
             countDiv.innerHTML = count;
             countDiv.setAttribute("cid", id);
@@ -316,21 +319,3 @@ function reset() {
     localStorage.clear();
     location.reload();
 }
-
-document.getElementById('bg_color').addEventListener('change', function () {
-    document.body.style.backgroundColor = this.value;
-    document.getElementById('bg_color').value = this.value;
-});
-
-document.getElementById('text_color').addEventListener('change', function () {
-});
-
-document.getElementById('border_color').addEventListener('change', function () {
-    document.getElementById('border_color').value = this.value;
-    document.querySelector('.other').style.borderColor = this.value;
-    document.querySelectorAll('.dashed').forEach(function (e) {
-        console.log(e.style.border)
-        e.style.border = "1px dashed " + this.value;
-        console.log(e.style.border)
-    });
-});
