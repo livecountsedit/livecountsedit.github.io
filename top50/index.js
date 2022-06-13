@@ -54,6 +54,9 @@ if (localStorage.getItem("data") != null) {
     document.body.style.backgroundColor = data.bgColor;
     document.body.style.color = data.textColor;
     fix()
+    setInterval(update, 2000);
+} else {
+    setInterval(update, 2000);
 }
 function randomGen() {
     var S4 = function () {
@@ -176,28 +179,37 @@ function update() {
             });
             data.sort = "name";
         }
-        for (let i = 0; i < data.data.length; i++) {
-            if ((i + 1) < 10) {
-                num = "0" + (i + 1);
+        let update1 = 1;
+        let update2 = 0;
+        let bruhh = setInterval(thing, 1);
+        function thing() {
+            if ((update2 + 1) < 10) {
+                num = "0" + (update2 + 1);
             } else {
-                num = (i + 1);
+                num = (update2 + 1);
             }
-            if (document.getElementById("num_" + i)) {
-                document.getElementById("num_" + i).innerHTML = num;
-                document.getElementById("name_" + i).innerHTML = data.data[i].name;
-                document.getElementById("count_" + i).innerHTML = data.data[i].count;
-                document.getElementById("img_" + i).src = data.data[i].image;
-                document.getElementById("num_" + i).setAttribute("cid", data.data[i].id)
-                document.getElementById("name_" + i).setAttribute("cid", data.data[i].id)
-                document.getElementById("count_" + i).setAttribute("cid", data.data[i].id)
-                document.getElementById("img_" + i).setAttribute("cid", data.data[i].id)
-                document.getElementById("card_" + i).setAttribute("cid", data.data[i].id)
+            if (document.getElementById("num_" + update2)) {
+                document.getElementById("num_" + update2).innerHTML = num;
+                document.getElementById("name_" + update2).innerHTML = data.data[update2].name;
+                document.getElementById("count_" + update2).innerHTML = data.data[update2].count;
+                document.getElementById("img_" + update2).src = data.data[update2].image;
+                document.getElementById("num_" + update2).setAttribute("cid", data.data[update2].id)
+                document.getElementById("name_" + update2).setAttribute("cid", data.data[update2].id)
+                document.getElementById("count_" + update2).setAttribute("cid", data.data[update2].id)
+                document.getElementById("img_" + update2).setAttribute("cid", data.data[update2].id)
+                document.getElementById("card_" + update2).setAttribute("cid", data.data[update2].id)
+            }
+            update2 += 10;
+            if (update2 >= data.data.length) {
+                update2 = update1;
+                update1++;
+                if (update2 + 10 > data.data.length) {
+                    clearInterval(bruhh);
+                }
             }
         }
     }
 }
-
-setInterval(update, 2000);
 
 document.getElementById('sort').addEventListener('change', function () {
     update();
@@ -205,18 +217,20 @@ document.getElementById('sort').addEventListener('change', function () {
 let selected = null;
 document.getElementById('main').addEventListener('click', function (e) {
     let id = e.target.getAttribute('cid');
-    if (selected !== null) {
+    if (selected != null) {
         document.querySelector('[cid = "' + selected + '"]').classList.remove('selected');
-        document.querySelector('[cid = "' + id + '"]').style.border = "solid 1px " + data.boxBorder + "";
+        document.querySelector('[cid = "' + selected + '"]').style.border = "solid 1px " + data.boxBorder + "";
     }
     if (id == selected) {
-        document.querySelector('[cid = "' + id + '"]').classList.remove('selected');
-        document.querySelector('[cid = "' + id + '"]').style.border = "solid 1px " + data.boxBorder + "";
-        selected = null;
+        if (selected != null) {
+            document.querySelector('[cid = "' + id + '"]').classList.remove('selected');
+            document.querySelector('[cid = "' + id + '"]').style.border = "solid 1px " + data.boxBorder + "";
+            selected = null;
+        }
     } else {
-        selected = id;
         document.querySelector('[cid = "' + id + '"]').classList.add('selected');
         document.querySelector('[cid = "' + id + '"]').style.border = "solid 1px red"
+        selected = id;
         for (let q = 0; q < data.data.length; q++) {
             if (data.data[q].id == id) {
                 document.getElementById('edit_min_gain').value = data.data[q].min_gain;
@@ -441,58 +455,6 @@ function fix() {
     document.getElementById('backPicker').value = data.bgColor;
     document.getElementById('textPicker').value = data.textColor;
     document.getElementById('boxPicker').value = data.boxColor;
-    document.getElementById('boxBorderPicker').value = data.boxBorder;
-    document.getElementById('imageBorderPicker').value = data.imageBorder;
-}
-
-function reload() {
-    document.getElementById('main').innerHTML = "";
-    if (localStorage.getItem("data") != null) {
-        data = JSON.parse(localStorage.getItem("data"));
-        for (let i = 0; i < data.data.length; i++) {
-            let id = data.data[i].id;
-            let image = data.data[i].image;
-            let name = data.data[i].name;
-            let count = data.data[i].count;
-            if (currentIndex < 10) {
-                num = "0" + (currentIndex + 1).toString();
-            } else {
-                num = currentIndex + 1;
-            }
-            let card = document.createElement('div');
-            card.className = "card";
-            card.id = "card_" + currentIndex;
-            card.setAttribute("cid", id);
-            let div = document.createElement('div');
-            div.className = "num";
-            div.id = "num_" + currentIndex;
-            div.innerHTML = num;
-            div.setAttribute("cid", id);
-            let img = document.createElement('img');
-            img.className = "img";
-            img.id = "img_" + currentIndex;
-            img.src = image;
-            img.setAttribute("cid", id);
-            let nameDiv = document.createElement('h1');
-            nameDiv.className = "name";
-            nameDiv.id = "name_" + currentIndex;
-            nameDiv.innerHTML = name;
-            nameDiv.setAttribute("cid", id);
-            let countDiv = document.createElement('h2');
-            countDiv.classList = "odometer";
-            countDiv.id = "count_" + currentIndex;
-            countDiv.innerHTML = count;
-            countDiv.setAttribute("cid", id);
-            card.appendChild(div);
-            card.appendChild(img);
-            card.appendChild(nameDiv);
-            card.appendChild(countDiv);
-            document.getElementById('main').appendChild(card);
-            currentIndex++;
-        }
-        document.body.style.backgroundColor = data.bgColor;
-        document.body.style.color = data.textColor;
-        fix()
-        document.getElementById('sort').value = data.sort;
-    }
+    document.getElementById('borderPicker').value = data.boxBorder;
+    document.getElementById('imageBorder').value = data.imageBorder;
 }
