@@ -179,35 +179,46 @@ function update() {
             });
             data.sort = "name";
         }
-        let update1 = 1;
-        let update2 = 0;
-        let bruhh = setInterval(thing, 1);
-        function thing() {
-            if ((update2 + 1) < 10) {
-                num = "0" + (update2 + 1);
+        for (let i = 0; i < data.data.length; i++) {
+            if ((i + 1) < 10) {
+                num = "0" + (i + 1);
             } else {
-                num = (update2 + 1);
+                num = (i + 1);
             }
-            if (document.getElementById("num_" + update2)) {
-                document.getElementById("num_" + update2).innerHTML = num;
-                document.getElementById("name_" + update2).innerHTML = data.data[update2].name;
-                document.getElementById("count_" + update2).innerHTML = data.data[update2].count;
-                document.getElementById("img_" + update2).src = data.data[update2].image;
-                document.getElementById("num_" + update2).setAttribute("cid", data.data[update2].id)
-                document.getElementById("name_" + update2).setAttribute("cid", data.data[update2].id)
-                document.getElementById("count_" + update2).setAttribute("cid", data.data[update2].id)
-                document.getElementById("img_" + update2).setAttribute("cid", data.data[update2].id)
-                document.getElementById("card_" + update2).setAttribute("cid", data.data[update2].id)
-            }
-            update2 += 10;
-            if (update2 >= data.data.length) {
-                update2 = update1;
-                update1++;
-                if (update2 + 10 > data.data.length) {
-                    clearInterval(bruhh);
+            if (document.getElementById("card_" + i)) {
+                let number = (i+1)
+                if (number / 5 <= data.data.length) {
+                    document.getElementById("num_" + i).innerHTML = num;
+                    document.getElementById("name_" + i).innerHTML = data.data[i].name;
+                    document.getElementById("count_" + i).innerHTML = data.data[i].count;
+                    document.getElementById("img_" + i).src = data.data[i].image;
+                    document.getElementById("num_" + i).setAttribute("cid", data.data[i].id)
+                    document.getElementById("name_" + i).setAttribute("cid", data.data[i].id)
+                    document.getElementById("count_" + i).setAttribute("cid", data.data[i].id)
+                    document.getElementById("img_" + i).setAttribute("cid", data.data[i].id)
+                    document.getElementById("card_" + i).setAttribute("cid", data.data[i].id)
                 }
             }
         }
+        /*   if ((update1 + 1) < 10) {
+               num = "0" + (update1 + 1);
+           } else {
+               num = (update1 + 1);
+           }
+           if (document.getElementById("num_" + update1)) {
+               document.getElementById("num_" + update1).innerHTML = num;
+               document.getElementById("name_" + update1).innerHTML = data.data[update1].name;
+               document.getElementById("count_" + update1).innerHTML = data.data[update1].count;
+               document.getElementById("img_" + update1).src = data.data[update1].image;
+               document.getElementById("num_" + update1).setAttribute("cid", data.data[update1].id)
+               document.getElementById("name_" + update1).setAttribute("cid", data.data[update1].id)
+               document.getElementById("count_" + update1).setAttribute("cid", data.data[update1].id)
+               document.getElementById("img_" + update1).setAttribute("cid", data.data[update1].id)
+               document.getElementById("card_" + update1).setAttribute("cid", data.data[update1].id)
+           }
+           if (update1 >= data.data.length) {
+           }
+       }*/
     }
 }
 
@@ -226,6 +237,11 @@ document.getElementById('main').addEventListener('click', function (e) {
             document.querySelector('[cid = "' + id + '"]').classList.remove('selected');
             document.querySelector('[cid = "' + id + '"]').style.border = "solid 1px " + data.boxBorder + "";
             selected = null;
+            document.getElementById('edit_min_gain').value = "";
+            document.getElementById('edit_max_gain').value = "";
+            document.getElementById('edit_name').value = "";
+            document.getElementById('edit_count').value = "";
+            document.getElementById('edit_image1').value = "";
         }
     } else {
         document.querySelector('[cid = "' + id + '"]').classList.add('selected');
@@ -375,6 +391,8 @@ function load() {
                 document.body.style.color = data.textColor;
                 fix()
                 document.getElementById('sort').value = data.sort;
+                localStorage.setItem("data", JSON.stringify(data));
+                location.reload();
             }
         });
     }
@@ -438,7 +456,7 @@ document.getElementById('borderPicker').addEventListener('change', function () {
 document.getElementById('imageBorder').addEventListener('change', function () {
     let num = this.value;
     data.imageBorder = num;
-    fix2()
+    fix()
 });
 
 function fix() {
@@ -451,10 +469,19 @@ function fix() {
     document.querySelectorAll('.img').forEach(function (card) {
         card.style.borderRadius = data.imageBorder + "%";
     });
+    document.getElementById('backPicker').value = convert3letterhexto6letters(data.bgColor);
+    document.getElementById('textPicker').value = convert3letterhexto6letters(data.textColor);
+    document.getElementById('boxPicker').value = convert3letterhexto6letters(data.boxColor);
+    document.getElementById('borderPicker').value = convert3letterhexto6letters(data.boxBorder);
+    document.getElementById('imageBorder').value = data.imageBorder
     document.getElementById('sort').value = data.sort;
-    document.getElementById('backPicker').value = data.bgColor;
-    document.getElementById('textPicker').value = data.textColor;
-    document.getElementById('boxPicker').value = data.boxColor;
-    document.getElementById('borderPicker').value = data.boxBorder;
-    document.getElementById('imageBorder').value = data.imageBorder;
+}
+function convert3letterhexto6letters(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length == 3) {
+        hex = "#" + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    } else {
+        hex = "#" + hex;
+    }
+    return hex;
 }
