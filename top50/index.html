@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="../odometer.css">
     <script src="../odometer.js"></script>
+    <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
 </head>
 
 <body>
@@ -100,6 +101,21 @@
         </div>
     </div>
     <script src="./index.js"></script>
+    <br>
+    <div id="disqus_thread"></div>
+    <script>
+        var disqus_config = function () {
+            this.page.url = "https://livecountsedit.github.io/";
+            this.page.identifier = "https://livecountsedit.github.io/";
+        };
+        (function () {
+            var d = document, s = d.createElement('script');
+            s.src = 'https://livecountsedit.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+
 </body>
 
 </html>
