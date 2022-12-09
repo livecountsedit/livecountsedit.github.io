@@ -159,8 +159,18 @@ function create() {
 
 function update() {
     if (data) {
+        let fastest = ""
+        let fastestCount = 0;
+        let fastestName = "";
         for (let i = 0; i < data.data.length; i++) {
+            data.data[i].lastCount = data.data[i].count;
             data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
+            console.log(data.data[i].count, data.data[i].lastCount, fastestCount);
+            if (data.data[i].count - data.data[i].lastCount > fastestCount) {
+                fastestCount = data.data[i].count - data.data[i].lastCount;
+                fastest = data.data[i].id;
+                fastestName = data.data[i].name;
+            }
         }
         if (document.getElementById('sort').value == "num") {
             data.data = data.data.sort(function (a, b) {
@@ -186,7 +196,7 @@ function update() {
                 num = (i + 1);
             }
             if (document.getElementById("card_" + i)) {
-                let number = (i+1)
+                let number = (i + 1)
                 if (number / 5 <= data.data.length) {
                     document.getElementById("num_" + i).innerHTML = num;
                     document.getElementById("name_" + i).innerHTML = data.data[i].name;
@@ -194,12 +204,16 @@ function update() {
                     document.getElementById("img_" + i).src = data.data[i].image;
                     document.getElementById("num_" + i).setAttribute("cid", data.data[i].id)
                     document.getElementById("name_" + i).setAttribute("cid", data.data[i].id)
+                    document.getElementById("name_" + i).setAttribute("cid2", data.data[i].id)
                     document.getElementById("count_" + i).setAttribute("cid", data.data[i].id)
                     document.getElementById("img_" + i).setAttribute("cid", data.data[i].id)
                     document.getElementById("card_" + i).setAttribute("cid", data.data[i].id)
                 }
             }
         }
+        document.querySelectorAll("[cid2="+fastest+"]").forEach(function (element) {
+            element.innerHTML = "🔥 "+fastestName;
+        });
         /*   if ((update1 + 1) < 10) {
                num = "0" + (update1 + 1);
            } else {
