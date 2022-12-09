@@ -165,7 +165,6 @@ function update() {
         for (let i = 0; i < data.data.length; i++) {
             data.data[i].lastCount = data.data[i].count;
             data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
-            console.log(data.data[i].count, data.data[i].lastCount, fastestCount);
             if (data.data[i].count - data.data[i].lastCount > fastestCount) {
                 fastestCount = data.data[i].count - data.data[i].lastCount;
                 fastest = data.data[i].id;
@@ -211,10 +210,10 @@ function update() {
                 }
             }
         }
-        document.querySelectorAll("[cid2="+fastest+"]").forEach(function (element) {
+        console.log(fastest, fastestName, fastestCount)
+        document.querySelectorAll('[cid2="'+fastest+'"]').forEach(function (element) {
             element.innerHTML = "🔥 "+fastestName;
         });
-        //hm
         /*   if ((update1 + 1) < 10) {
                num = "0" + (update1 + 1);
            } else {
