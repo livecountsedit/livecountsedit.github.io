@@ -214,6 +214,7 @@ function update() {
         document.querySelectorAll("[cid2="+fastest+"]").forEach(function (element) {
             element.innerHTML = "🔥 "+fastestName;
         });
+        //hm
         /*   if ((update1 + 1) < 10) {
                num = "0" + (update1 + 1);
            } else {
