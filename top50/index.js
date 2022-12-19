@@ -61,6 +61,7 @@ if (localStorage.getItem("data") != null) {
     fix()
     updateInterval = setInterval(update, data.updateInterval);
 } else {
+    let c = 1;
     for (var l = 1; l <= data.columns; l++) {
         var htmlcolumn = `<div class="column_${l} column"></div>`;
         $('.main').append(htmlcolumn);
