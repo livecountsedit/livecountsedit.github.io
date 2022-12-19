@@ -9,48 +9,47 @@ body {
     transition: color 2s;
 }
 
-.card {
-    background-color: #f7f5fe;
-    margin-top: 0.1vw;
-    height: 3vw;
-    padding-top: 0.2vw;
-    padding-bottom: 0.2vw;
-    width: 99%;
-    transition: color 2s;
-}
-
-.img {
-    float: left;
-    height: 3vw;
-    width: 3vw;
-    transition: color 2s;
-}
-
 .num {
-    font-size: 1.5vw;
-    margin-top: 0.7vw;
+    font-family: 'Roboto Medium';
     float: left;
     margin-right: 0.2vw;
     margin-left: 0.2vw;
+    color: #000;
+}
+
+.card {
+    height: 4.25vw;
+    padding: 0.2vw;
+    margin: 0.2vw;
+    text-align: left;
+    background: #141414;
+    border: 0.1vw solid #ffffff;
+    animation: 3s infinite alternate slidein;
+  }
+
+.image {
+    height: 4.25vw;
+    width: 4.25vw;
+    float: left;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.count {
     transition: color 2s;
+    font-size: 2vw;
+    font-family: 'Roboto', sans-serif;
+    margin-top: 0vw;
+    padding-left: 0.2vw;
 }
 
 .name {
-    margin-top: -0.1vw;
+    font-family: 'Roboto', sans-serif;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: hidden;
-    font-size: 1vw;
-    transition: color 2s;
-}
-
-.odometer {
-    transition: color 2s;
-    font-size: 2vw;
-    font-stretch: expanded;
-    white-space: nowrap;
-    overflow: hidden;
-    margin-top: -2vh;
+    text-overflow: ellipsis;
+    font-size: 1.3vw;
+    padding-left: 0.1vw;
 }
 
 .other {
