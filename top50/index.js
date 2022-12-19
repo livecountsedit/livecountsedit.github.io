@@ -487,7 +487,7 @@ if (window.location.href.includes('?code=')) {
 
 function connect() {
     if (window.location.href.includes('?code=')) {
-        alert("You are already connected.");
+        window.location.href = window.location.href.split('?code=')[0];
     } else {
         saveData2()
         window.location.href = window.location.href + "?code=" + code;
@@ -498,6 +498,7 @@ if (connected == true) {
     update2()
     update2Hold = setInterval(update2, 5000);
     document.getElementById('isconnected').innerHTML = "Yes";
+    document.getElementById('toConnect').innerHTML = "Disconnect";
 }
 
 function update2() {
