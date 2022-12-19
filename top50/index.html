@@ -7,12 +7,14 @@
     <title>Top 50</title>
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="../odometer.css">
+    <script src="../jquery.js"></script>
     <script src="../odometer.js"></script>
-    <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
+    <!--<script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>-->
 </head>
 
 <body>
-    <div class="main" id="main" style="display: grid; grid-template-columns: repeat(5, 1fr);"></div>
+    <div class="main" id="main"
+        style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr); height: 100vh;"></div>
     <br>
     <div class="other">
         <div style="display: grid; grid-template-columns: repeat(3, 1fr);">
@@ -28,6 +30,7 @@
                 <button onclick="save()">Save (In Browser)</button>
                 <button onclick="save2()">Save (In File)</button>
                 <button onclick="reset()">Reset</button>
+                <input type="checkbox" id="autosave"><label>Autosave (15s)</label>
             </div>
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
                 <button onclick="load()">Load Save (From File =>)</button>
@@ -65,14 +68,11 @@
                 <input id="edit_max_gain_check" type="checkbox" checked>
                 <br>
                 <button onclick="edit()">Edit</button>
+                <button onclick="deleteChannel()">Delete</button>
             </div>
         </div>
+        <label>Global Settings:</label>
         <div style="display: flex; gap: 20px;">
-            <div style="margin-top: 0px;">
-                <br>
-                <button onclick="deleteChannel()" style="font-size: 30px;">Delete Channel</button>
-                <br>
-            </div>
             <div style="margin-top: 0px; text-align: center;">
                 <br>
                 <label>Background Color</label><br>
@@ -96,7 +96,55 @@
             <div style="margin-top: 0px; text-align: center;">
                 <br>
                 <label>Image Border Radius</label><br>
-                <input type="number" value="#000000" id="imageBorder"><label>%</label>
+                <input value="50" id="imageBorder"><label>%</label>
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Min Gain (will update all channels)</label><br>
+                <input value="-10000" id="min_gain_global">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Max Gain (will update all channels)</label><br>
+                <input value="10000" id="max_gain_global">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Update Interval (in seconds)</label><br>
+                <input value="2" id="updateint">
+            </div>
+        </div>
+        <hr>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr);" id="stream">
+            <div style="border-right: solid 1px #000;">
+                <p>Add this to the response section of the nightbot command.</p>
+                <p>This command allows users to be added.</p>
+                <p>Example Usage: {!add 100/200} 100 is in the min and 200 is the max. You can limit the max and min.
+                </p>
+                <input id="connect" style="width: 95%;">
+            </div>
+            <div style="border-right: solid 1px #000;">
+                <p>Add this to the response section of the nightbot command.</p>
+                <p>This command allows users to be edited.</p>
+                <p>Example Usage: {!edit 100/200} 100 is in the min and 200 is the max. You can limit the max and min.
+                </p>
+                <input id="connect3" style="width: 95%;">
+            </div>
+            <div style="border-right: solid 1px #000;">
+                <p>Add this to the response section of the nightbot command.</p>
+                <p>This is an EXAMPLE command that just shows how to add example commands. ?values= shows the min and
+                    the max gains possible.</p>
+                <input id="connect2" style="width: 95%;">
+            </div>
+            <div style="border-right: solid 1px #000; text-align: center;">
+                <button onclick="custom()" style="font-size: 2vw;">Custom Command Maker</button>
+                <button onclick="window.location.href = '/'" style="font-size: 2vw;">Return to home page</button><br>
+                <a href="https://discord.gg/Uke3tdtYnD" style="font-size: 1.5vw;">Join the discord</a><hr>
+                <div style="border-right: solid 1px #000; font-size: 1vw;">
+                    <p>Click the button to connect!</p>
+                    <button onclick="connect()" style="font-size: 2vw;">Connect</button>
+                    <label>Connected: </label><label id="isconnected">No</label>
+                </div>
             </div>
         </div>
     </div>
@@ -104,16 +152,16 @@
     <br>
     <div id="disqus_thread"></div>
     <script>
-        var disqus_config = function () {
-            this.page.url = "https://livecountsedit.github.io/";
-            this.page.identifier = "https://livecountsedit.github.io/";
-        };
-        (function () {
-            var d = document, s = d.createElement('script');
-            s.src = 'https://livecountsedit.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-        })();
+        /* var disqus_config = function () {
+             this.page.url = "https://livecountsedit.github.io/";
+             this.page.identifier = "https://livecountsedit.github.io/";
+         };
+         (function () {
+             var d = document, s = d.createElement('script');
+             s.src = 'https://livecountsedit.disqus.com/embed.js';
+             s.setAttribute('data-timestamp', +new Date());
+             (d.head || d.body).appendChild(s);
+         })();*/
     </script>
 
 </body>
