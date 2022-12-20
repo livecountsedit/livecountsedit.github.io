@@ -43,14 +43,25 @@ if (localStorage.getItem("data") != null) {
             if (c < 10) {
                 cc = "0" + c;
             }
-            var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
+            if (data.data[c - 1]) {
+                var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
             <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
           <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
           <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
           <div class="count odometer" id="count_${data.data[c - 1].id}">${data.data[c - 1].count}</div>
           </div>`;
-            $('.column_' + l).append(htmlcard);
-            c += 1;
+                $('.column_' + l).append(htmlcard);
+                c += 1;
+            } else {
+                var htmlcard = `<div class="card card_${c - 1}" id="card_">
+                <div class="num" id="num_">${cc}</div>
+                <img src="../default.png" alt="" id="image_" class="image">
+                <div class="name" id="name_">Loading</div>
+                <div class="count odometer" id="count_">0</div>
+                </div>`;
+                $('.column_' + l).append(htmlcard);
+                c += 1;
+            }
         }
     }
     if (!data.uuid) {
@@ -81,6 +92,7 @@ if (localStorage.getItem("data") != null) {
         }
     }
     updateInterval = setInterval(update, data.updateInterval);
+    fix()
 }
 function randomGen() {
     var S4 = function () {
@@ -111,7 +123,8 @@ function create() {
     }
     if (document.getElementById('add_image1').value == "") {
         if (document.getElementById('add_image2').files.length == 0) {
-            alert("Please enter an image");
+            image = "../default.png";
+            bruh()
             return;
         } else {
             let file = document.getElementById('add_image2').files[0];
@@ -185,21 +198,28 @@ function update() {
                 num = (i + 1);
             }
             if (document.getElementsByClassName("card")[i]) {
-                document.getElementsByClassName("card")[i].children[1].src = data.data[i].image
-                document.getElementsByClassName("card")[i].children[2].innerHTML = data.data[i].name
-                document.getElementsByClassName("card")[i].children[3].innerHTML = data.data[i].count
-                document.getElementsByClassName("card")[i].children[1].id = "image_" + data.data[i].id
-                document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
-                document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
-                document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
-                document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
-                if (selected == data.data[i].id) {
-                    document.getElementById("card_" + selected).style.border = "1px solid red";
+                if (data.data[i]) {
+                    if (!data.data[i].image) {
+                        data.data[i].image = "../default.png";
+                    }
+                    document.getElementsByClassName("card")[i].children[1].src = data.data[i].image
+                    document.getElementsByClassName("card")[i].children[2].innerHTML = data.data[i].name
+                    document.getElementsByClassName("card")[i].children[3].innerHTML = data.data[i].count
+                    document.getElementsByClassName("card")[i].children[1].id = "image_" + data.data[i].id
+                    document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
+                    document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
+                    document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
+                    document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
+                    if (selected == data.data[i].id) {
+                        document.getElementById("card_" + selected).style.border = "1px solid red";
+                    } else {
+                        document.getElementById("card_" + data.data[i].id).style.border = "1px solid " + data.boxBorder + "";
+                    }
+                    if (fastest == data.data[i].id) {
+                        document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
+                    }
                 } else {
-                    document.getElementById("card_" + data.data[i].id).style.border = "1px solid " + data.boxBorder + "";
-                }
-                if (fastest == data.data[i].id) {
-                    document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
+                    fix()
                 }
             }
         }
@@ -465,8 +485,8 @@ function fix() {
     document.getElementById('borderPicker').value = convert3letterhexto6letters(data.boxBorder);
     document.getElementById('imageBorder').value = data.imageBorder
     if (data.updateInterval) {
-    document.getElementById('updateint').value = data.updateInterval
-    } 
+        document.getElementById('updateint').value = data.updateInterval
+    }
     document.getElementById('sort').value = data.sort;
 
 }

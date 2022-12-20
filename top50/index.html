@@ -9,15 +9,15 @@
     <link rel="stylesheet" href="../odometer.css">
     <script src="../jquery.js"></script>
     <script src="../odometer.js"></script>
-    <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
+    <!--<script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>-->
 </head>
 
 <body>
     <div class="main" id="main"
-        style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr); height: 100vh;"></div>
-    <br>
+        style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);"></div>
+    <hr>
     <div class="other">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr);">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 0px;">
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
                 <label>Sort By:</label>
                 <select id="sort">
@@ -72,7 +72,7 @@
             </div>
         </div>
         <label>Global Settings:</label>
-        <div style="display: flex; gap: 20px;">
+        <div style="display: flex; gap: 2vw; flex-wrap: wrap;">
             <div style="margin-top: 0px; text-align: center;">
                 <br>
                 <label>Background Color</label><br>
@@ -152,6 +152,7 @@
     <br>
     <div id="disqus_thread"></div>
     <script>
+        /*
          var disqus_config = function () {
              this.page.url = "https://livecountsedit.github.io/";
              this.page.identifier = "https://livecountsedit.github.io/";
@@ -161,7 +162,7 @@
              s.src = 'https://livecountsedit.disqus.com/embed.js';
              s.setAttribute('data-timestamp', +new Date());
              (d.head || d.body).appendChild(s);
-         })();
+         })();*/
     </script>
 
 </body>
