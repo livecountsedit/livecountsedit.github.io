@@ -18,7 +18,7 @@ let data = {
     "columns": 5,
     "gain_min": -10000,
     "gain_max": 10000,
-    "updateInterval": 2000,
+    "updateInterval": 2,
     "uuid": uuid
 };
 let updateInterval;
@@ -26,7 +26,7 @@ let updateInterval;
 if (localStorage.getItem("data") != null) {
     data = JSON.parse(localStorage.getItem("data"));
     if (!data.updateInterval) {
-        data.updateInterval = 2000;
+        data.updateInterval = 2;
     }
     let c = 1;
     if (!data.rows) {
@@ -70,7 +70,7 @@ if (localStorage.getItem("data") != null) {
     document.body.style.backgroundColor = data.bgColor;
     document.body.style.color = data.textColor;
     fix()
-    updateInterval = setInterval(update, data.updateInterval);
+    updateInterval = setInterval(update, data.updateInterval*1000);
 } else {
     let c = 1;
     for (var l = 1; l <= data.columns; l++) {
@@ -91,7 +91,7 @@ if (localStorage.getItem("data") != null) {
             c += 1;
         }
     }
-    updateInterval = setInterval(update, data.updateInterval);
+    updateInterval = setInterval(update, data.updateInterval*1000);
     fix()
 }
 function randomGen() {
@@ -218,8 +218,6 @@ function update() {
                     if (fastest == data.data[i].id) {
                         document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
                     }
-                } else {
-                    fix()
                 }
             }
         }
@@ -485,7 +483,7 @@ function fix() {
     document.getElementById('borderPicker').value = convert3letterhexto6letters(data.boxBorder);
     document.getElementById('imageBorder').value = data.imageBorder
     if (data.updateInterval) {
-        document.getElementById('updateint').value = data.updateInterval
+        document.getElementById('updateint').value = data.updateInterval;
     }
     document.getElementById('sort').value = data.sort;
 
