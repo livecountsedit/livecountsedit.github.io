@@ -18,7 +18,7 @@ let data = {
     "columns": 5,
     "gain_min": -10000,
     "gain_max": 10000,
-    "updateInterval": 2,
+    "updateInterval": 2000,
     "uuid": uuid
 };
 let updateInterval;
@@ -26,7 +26,7 @@ let updateInterval;
 if (localStorage.getItem("data") != null) {
     data = JSON.parse(localStorage.getItem("data"));
     if (!data.updateInterval) {
-        data.updateInterval = 2;
+        data.updateInterval = 2000;
     }
     let c = 1;
     if (!data.rows) {
@@ -70,7 +70,8 @@ if (localStorage.getItem("data") != null) {
     document.body.style.backgroundColor = data.bgColor;
     document.body.style.color = data.textColor;
     fix()
-    updateInterval = setInterval(update, data.updateInterval*1000);
+    alert(data.updateInterval)
+    updateInterval = setInterval(update, data.updateInterval);
 } else {
     let c = 1;
     for (var l = 1; l <= data.columns; l++) {
@@ -91,7 +92,7 @@ if (localStorage.getItem("data") != null) {
             c += 1;
         }
     }
-    updateInterval = setInterval(update, data.updateInterval*1000);
+    updateInterval = setInterval(update, data.updateInterval);
     fix()
 }
 function randomGen() {
@@ -286,7 +287,7 @@ function edit() {
             let min = document.getElementById('edit_min_gain').value;
             let max = document.getElementById('edit_max_gain').value;
             document.getElementById('edit_image2').value = "";
-            let card = document.querySelector('[cid = "' + id + '"]');
+            let card = document.getElementById('card_' + id);
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id == id) {
                     if (document.getElementById('edit_min_gain_check').checked) {
@@ -317,8 +318,8 @@ function edit() {
                     }
                 }
             }
-            if (card.querySelector('.img').src !== image && image !== "") {
-                card.querySelector('.img').src = image;
+            if (card.querySelector('.image').src !== image && image !== "") {
+                card.querySelector('.image').src = image;
                 for (let i = 0; i < data.data.length; i++) {
                     if (data.data[i].id == id) {
                         data.data[i].image = image;
@@ -483,10 +484,9 @@ function fix() {
     document.getElementById('borderPicker').value = convert3letterhexto6letters(data.boxBorder);
     document.getElementById('imageBorder').value = data.imageBorder
     if (data.updateInterval) {
-        document.getElementById('updateint').value = data.updateInterval;
+        document.getElementById('updateint').value = (data.updateInterval/1000).toString()
     }
     document.getElementById('sort').value = data.sort;
-
 }
 function convert3letterhexto6letters(hex) {
     hex = hex.replace('#', '');
@@ -636,7 +636,7 @@ document.getElementById('updateint').addEventListener('change', function () {
     clearInterval(updateInterval);
     int = int * 1000;
     updateInterval = setInterval(update, int);
-    data.update_interval = int;
+    data.updateInterval = int;
 })
 
 document.getElementById('min_gain_global').addEventListener('change', function () {
