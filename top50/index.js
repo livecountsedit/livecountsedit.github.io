@@ -70,7 +70,6 @@ if (localStorage.getItem("data") != null) {
     document.body.style.backgroundColor = data.bgColor;
     document.body.style.color = data.textColor;
     fix()
-    alert(data.updateInterval)
     updateInterval = setInterval(update, data.updateInterval);
 } else {
     let c = 1;
