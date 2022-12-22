@@ -425,7 +425,7 @@ function deleteChannel() {
     if (selected !== null) {
         if (confirm("Are you sure you want to delete this channel?")) {
             let id = selected;
-            let card = document.querySelector('[cid = "' + id + '"]');
+            let card = document.getElementById('card_' + id);
             card.remove();
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id == id) {
