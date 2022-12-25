@@ -230,6 +230,11 @@ document.getElementById('sort').addEventListener('change', function () {
 let selected = null;
 document.getElementById('main').addEventListener('click', function (e) {
     let id = e.target.id.split("_")[1];
+    if (e.target.id.split("_").length > 2) {
+        for (let i = 2; i < e.target.id.split("_").length; i++) {
+            id = id + "_" + e.target.id.split("_")[i];
+        }
+    }
     if (selected != null) {
         document.getElementById('card_' + selected + '').classList.remove('selected');
         document.getElementById('card_' + selected + '').style.border = "solid 1px " + data.boxBorder + "";
@@ -425,8 +430,12 @@ function deleteChannel() {
     if (selected !== null) {
         if (confirm("Are you sure you want to delete this channel?")) {
             let id = selected;
-            let card = document.getElementById('card_' + id);
-            card.remove();
+            let image = document.getElementById('image_' + id).src = "../default.png"
+            let name = document.getElementById('name_' + id).innerHTML = "Loading";
+            let count = document.getElementById('count_' + id).innerHTML = "0";
+            name.innerHTML = "";
+            count.innerHTML = "";
+            image.src = "";
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id == id) {
                     data.data.splice(i, 1);
