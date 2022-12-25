@@ -19,7 +19,8 @@ let data = {
     "gain_min": -10000,
     "gain_max": 10000,
     "updateInterval": 2000,
-    "uuid": uuid
+    "uuid": uuid,
+    "animation": true,
 };
 let updateInterval;
 
@@ -158,7 +159,6 @@ function update() {
     if (data) {
         let fastest = ""
         let fastestCount = 0;
-        let fastestName = "";
         for (let i = 0; i < data.data.length; i++) {
             data.data[i].lastCount = data.data[i].count;
             data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
@@ -204,12 +204,17 @@ function update() {
                     }
                     document.getElementsByClassName("card")[i].children[1].src = data.data[i].image
                     document.getElementsByClassName("card")[i].children[2].innerHTML = data.data[i].name
-                    document.getElementsByClassName("card")[i].children[3].innerHTML = data.data[i].count
                     document.getElementsByClassName("card")[i].children[1].id = "image_" + data.data[i].id
                     document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
-                    document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
                     document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
                     document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
+                    if (data.animation == false) {
+                        document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
+                        document.getElementsByClassName("card")[i].children[3].innerHTML = data.data[i].count.toLocaleString()
+                    } else {
+                        document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
+                        document.getElementsByClassName("card")[i].children[3].innerHTML = data.data[i].count
+                    }
                     if (selected == data.data[i].id) {
                         document.getElementById("card_" + selected).style.border = "1px solid red";
                     } else {
@@ -492,7 +497,7 @@ function fix() {
     document.getElementById('borderPicker').value = convert3letterhexto6letters(data.boxBorder);
     document.getElementById('imageBorder').value = data.imageBorder
     if (data.updateInterval) {
-        document.getElementById('updateint').value = (data.updateInterval/1000).toString()
+        document.getElementById('updateint').value = (data.updateInterval / 1000).toString()
     }
     document.getElementById('sort').value = data.sort;
 }
@@ -693,3 +698,19 @@ function custom() {
 document.getElementById('connect').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)/$(query))';
 document.getElementById('connect3').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)/$(query)?value=edit)';
 document.getElementById('connect2').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)?values=10,20';
+
+document.getElementById('animation').addEventListener('click', function () {
+    if (document.getElementById('animation').checked == true) {
+        data.animation = true;
+    } else {
+        data.animation = false;
+        for (let i = 0; i < 50; i++) {
+            document.getElementsByClassName("card")[i].children[3].remove();
+            let div = document.createElement("div");
+            div.className = "count";
+            div.innerHTML = data.data[i].count.toLocaleString();
+            document.getElementsByClassName("card")[i].appendChild(div);
+
+        }
+    }
+})

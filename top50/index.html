@@ -13,8 +13,7 @@
 </head>
 
 <body>
-    <div class="main" id="main"
-        style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);"></div>
+    <div class="main" id="main" style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);"></div>
     <hr>
     <div class="other">
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 0px;">
@@ -113,6 +112,10 @@
                 <label>Update Interval (in seconds)</label><br>
                 <input value="2" id="updateint">
             </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <input type="checkbox" id="animation" checked><label>Number Animation</label>
+            </div>
         </div>
         <hr>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr);" id="stream">
@@ -139,7 +142,8 @@
             <div style="border-right: solid 1px #000; text-align: center;">
                 <button onclick="custom()" style="font-size: 2vw;">Custom Command Maker</button>
                 <button onclick="window.location.href = '/'" style="font-size: 2vw;">Return to home page</button><br>
-                <a href="https://discord.gg/Uke3tdtYnD" style="font-size: 1.5vw;">Join the discord</a><hr>
+                <a href="https://discord.gg/Uke3tdtYnD" style="font-size: 1.5vw;">Join the discord</a>
+                <hr>
                 <div style="border-right: solid 1px #000; font-size: 1vw;">
                     <p>Click the button to connect!</p>
                     <button onclick="connect()" style="font-size: 2vw;" id="toConnect">Connect</button>
@@ -152,17 +156,16 @@
     <br>
     <div id="disqus_thread"></div>
     <script>
-        
-         var disqus_config = function () {
-             this.page.url = "https://livecountsedit.github.io/";
-             this.page.identifier = "https://livecountsedit.github.io/";
-         };
-         (function () {
-             var d = document, s = d.createElement('script');
-             s.src = 'https://livecountsedit.disqus.com/embed.js';
-             s.setAttribute('data-timestamp', +new Date());
-             (d.head || d.body).appendChild(s);
-         })();
+        var disqus_config = function () {
+            this.page.url = "https://livecountsedit.github.io/";
+            this.page.identifier = "https://livecountsedit.github.io/";
+        };
+        (function () {
+            var d = document, s = d.createElement('script');
+            s.src = 'https://livecountsedit.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
     </script>
 
 </body>
