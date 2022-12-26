@@ -21,6 +21,8 @@ let data = {
     "updateInterval": 2000,
     "uuid": uuid,
     "animation": true,
+    "fastest": true,
+    "hideSettings": 'q'
 };
 let updateInterval;
 
@@ -221,7 +223,9 @@ function update() {
                         document.getElementById("card_" + data.data[i].id).style.border = "1px solid " + data.boxBorder + "";
                     }
                     if (fastest == data.data[i].id) {
-                        document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
+                        if (data.fastest == true) {
+                            document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
+                        }
                     }
                 }
             }
@@ -482,6 +486,13 @@ document.getElementById('imageBorder').addEventListener('change', function () {
 });
 
 function fix() {
+    if (!data.fastest) {
+        data.fastest = true;
+    }
+    if (!data.hideSettings) {
+        data.hideSettings = 'q';
+    }
+    document.getElementById('setting').innerHTML = "Current: "+data.hideSettings+""
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
         if (card.className.split(' ').includes("selected") == false) {
@@ -710,7 +721,35 @@ document.getElementById('animation').addEventListener('click', function () {
             div.className = "count";
             div.innerHTML = data.data[i].count.toLocaleString();
             document.getElementsByClassName("card")[i].appendChild(div);
+        }
+    }
+})
+document.getElementById('fastest').addEventListener('click', function () {
+    if (document.getElementById('fastest').checked == true) {
+        data.fastest = true;
+    } else {
+        data.fastest = false;
+    }
+})
 
+
+
+function hideSettings() {
+    alert("Click what key you want after this alert.")
+    document.addEventListener('keydown', function (e) {
+        data.hideSettings = e.key;
+        alert("Key set to " + e.key)
+        document.getElementById('setting').innerHTML = "Current: "+e.key+""
+        this.removeEventListener('keydown', arguments.callee, false);
+    })
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key == data.hideSettings) {
+        if (document.getElementById('settings').style.display == "none") {
+            document.getElementById('settings').style.display = "block";
+        } else {
+            document.getElementById('settings').style.display = "none";
         }
     }
 })

@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="../odometer.css">
     <script src="../jquery.js"></script>
     <script src="../odometer.js"></script>
-    <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
+    <link rel="icon" href="../logo.png">
+    <!--<script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>-->
 </head>
 
 <body>
     <div class="main" id="main" style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);"></div>
     <hr>
-    <div class="other">
+    <div class="other" id="settings">
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 0px;">
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
                 <label>Sort By:</label>
@@ -116,6 +117,14 @@
                 <br>
                 <input type="checkbox" id="animation" checked><label>Number Animation</label>
             </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <input type="checkbox" id="fastest" checked><label>Show Fastest Channel</label>
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <input type="button" id="hideSettings" onclick="hideSettings()" value="Change Hotkey To Hide Settings"><label id="setting">Current: q</label>
+            </div>
         </div>
         <hr>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr);" id="stream">
@@ -156,7 +165,7 @@
     <br>
     <div id="disqus_thread"></div>
     <script>
-        var disqus_config = function () {
+        /*var disqus_config = function () {
             this.page.url = "https://livecountsedit.github.io/";
             this.page.identifier = "https://livecountsedit.github.io/";
         };
@@ -165,7 +174,7 @@
             s.src = 'https://livecountsedit.disqus.com/embed.js';
             s.setAttribute('data-timestamp', +new Date());
             (d.head || d.body).appendChild(s);
-        })();
+        })();*/
     </script>
 
 </body>

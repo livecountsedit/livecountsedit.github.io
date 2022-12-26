@@ -1,0 +1,174 @@
+<html>
+
+<head>
+    <title>Livecountsedit</title>
+    <link href="../odometer.css" rel="stylesheet">
+    <link href="./index.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="../logo.png"><meta charSet="utf-8" />
+    <meta name="description"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, TOP 50, FYSC, FSCW, ETC" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE STATS OF YOUTUBE, SOCIALBLADE, TOP 50, FYSC, FSCW, ETC" />
+    <meta name="twitter:description"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE STATS OF YOUTUBE, SOCIALBLADE, TOP 50, FYSC, FSCW, ETC" />
+    <meta name="twitter:image"
+        content="https://api.microlink.io/?url=https://livecountsedit.github.io/&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark" />
+    <meta property="og:title"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE STATS OF YOUTUBE, SOCIALBLADE, TOP 50, FYSC, FSCW, ETC" />
+    <meta property="og:description"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE STATS OF YOUTUBE, SOCIALBLADE, TOP 50, FYSC, FSCW, ETC" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://livecountsedit.github.io/" />
+    <meta property="og:image"
+        content="https://api.microlink.io/?url=https://livecountsedit.github.io/&amp;screenshot=true&amp;embed=screenshot.url&amp;overlay.browser=dark" />
+    <style>
+
+    </style>
+</head> 
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-0')" id="tabs.0">General</button>
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-1')" id="tabs.1">Counter</button>
+            <button class="tab-link" onclick="Interface.openTab(event, 'options-2')" id="tabs.2">Styles</button>
+            <button class="tab-link" onclick="window.location.href = '../index.html'" id="tabs.3">Back To Home</button>
+            <a style="color: #FFF; font-size: 2vw;" href="https://discord.gg/Uke3tdtYnD"><h4 style="color: #FFF; font-size: 2vw;" >Join the discord.</h4></a>
+            <h4>This site is a parody of popular realtime counters.</h4>
+        </div>
+        <div id="options-6" class="tab-content" tab="tabs.6">
+           <h1 style="color: #FFF;"><a style="color: #FFF; font-size: 3vw; text-decoration: none;" href="./top50/index.html">Fake Top 50 Count</a></h1>
+        </div>
+        <div id="options-0" class="tab-content" tab="tabs.0">
+            <div class="option">
+                <label for="options.counter.title">Counter title/Username</label><br>
+                <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title">
+            </div>
+            <div class="option">
+                <label for="options.counter.value">Counter value (integers only)</label><br>
+                <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value">
+                <button onclick="submit()">Submit</button>
+            </div>
+            <div class="option">
+                <label for="options.counter.footer">Counter footer (e.g. "Subscribers", "Followers")</label><br>
+                <input type="text" placeholder="Followers, Subscribers, etc" class="option-input" id="options.counter.footer"> 
+            </div>
+            <div class="option">
+                <label for="options.counter.banner.url">Banner URL</label><br>
+                <input type="text" class="option-input" id="options.counter.banner.url"><br>
+                <strong>OR</strong>
+                <input type="file" class="option-input" id="options.counter.banner.file">
+            </div>
+            <div class="option">
+                <label for="options.counter.avatar.url">Avatar URL</label><br>
+                <input type="text" class="option-input" id="options.counter.avatar.url"><br>
+                <strong>OR</strong>
+                <input type="file" class="option-input" id="options.counter.avatar.file">
+            </div>
+            <br>
+            <button onclick="resetgraph()">Clear Graph</button>
+        </div>
+        <div id="options-1" class="tab-content" tab="tabs.1">
+            <p>Counter Gain Rate</p>
+            <div class="option-section" id="options.counter.rates.mode.0">
+                <div class="option">
+                    <p>
+                        <span>Min Subs</span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMinimum"></span>
+                      <br>
+                      <br>
+                        <span>Max Subs</span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMaximum"></span>                  
+                   <br>
+                   <br>
+                        <span>Per Every</span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.mode.basic.units"></span>
+                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day">day(s)</option>
+                        </select></span>
+                        <br>
+                        <br>
+                       <span>Sub Gain Rate In:</span>
+                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
+                            <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour(s)</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day2">day(s)</option>
+                        </select></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div id="options-2" class="tab-content" tab="tabs.2">
+              <div class="option">
+                <h2>Style Settings:</h2>
+                <p>Odometer up color:</p>
+                <input value="#FFFFFF" type="color" id="odometer.up.color.settings">
+                <p>Odometer down color:</p>
+                <input value="#FFFFFF" type="color" id="odometer.down.color.settings">
+                <p>Username color:</p>
+                <input value="#FFFFFF" type="color" id="username.color.settings">
+                <p>Footer color:</p>
+                <input value="#FFFFFF" type="color" id="footer.color.settings">
+                <p>Main Counter color:</p>
+                <input value="#FFFFFF" type="color" id="counter.color.settings">
+                <p>Graph color:</p>
+                <input value="#FFFFFF" type="color" id="graph.color.settings">
+                <p>Box Background color:</p>
+                <input value="#FFFFFF" type="color" id="box.color.settings">
+            </div>
+        </div>
+        <div id="options-3" class="tab-content" tab="tabs.3">
+<h1>Themes:</h1>
+<br>
+<center>
+<a style="color: #FFFFFF" href="./Socialblade/index.html"><h1 style="color: #FFFFFF">SocialBlade Theme</h1></a>
+    <br>
+    <a style="color: #FFFFFF" href="./Livecounts/index.html"><h1 style="color: #FFFFFF">Livecounts.net Theme</h1></a>
+    <br>
+    <a style="color: #FFFFFF" href="./akshatmittal/index.html"><h1 style="color: #FFFFFF">Akshatmittal Theme</h1></a>
+</center>
+        </div>
+        <div id="options-4" class="tab-content" tab="tabs.4">
+            <h1>Themes:</h1>
+            <br>
+            <center>
+            <a style="color: #FFFFFF" href="./compare/index.html"><h1 style="color: #FFFFFF">Main Compare</h1></a>
+                <br>
+            <a style="color: #FFFFFF" href="./akshatmittal/compare/index.html"><h1 style="color: #FFFFFF">Akshatmittal Compare</h1></a>
+            </center>
+                    </div>
+                    <div id="options-5" class="tab-content" tab="tabs.5">
+                        <h1>Fake Views:</h1>
+                        <br>
+                        <center>
+                        <a style="color: #FFFFFF" href="./video/index.html"><h1 style="color: #FFFFFF">Main Fake View Count</h1></a>
+                            <br>
+                        <a style="color: #FFFFFF" href="./akshatmittal/video/index.html"><h1 style="color: #FFFFFF">Akshatmittal View Counter</h1></a>
+                        </center>
+                                </div>
+        <div class="counter-content">
+            <div class="counter-container">
+                <img class="banner" src="../default_banner.png">
+                <img class="avatar" src="../default.png">
+                <div class="counter-title" id="counter-title">Username</div>
+                <div class="counter odometer" id="counter">0</div>
+                <div class="footer" id="footer">Followers</div>
+                 <br>
+                <div id="chart" style="height: 45%;"></div>
+            </div>
+        </div>
+    </div>
+    <div id="settings">
+        
+    </div>
+    <script src="../odometer.js"></script>
+    <script src="../highstock.js"></script>
+    <script src="../jquery.js"></script>
+    <script src="./index.js"></script>
+</body>
+</html>
