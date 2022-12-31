@@ -1,4 +1,17 @@
 let currentIndex = 0;
+function abb(count) {
+    if (count >= 100000000) {
+        return Math.floor(count / 1000000) * 1000000;
+    } else if (count >= 1000000) {
+        return Math.floor(count / 100000) * 100000;
+    } else if (count >= 100000) {
+        return Math.floor(count / 1000) * 1000;
+    } else if (count >= 1000) {
+        return Math.floor(count / 100) * 100;
+    } else {
+        return count;
+    }
+}
 const uuidGen = function () {
     let a = function () {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -21,6 +34,7 @@ let data = {
     "updateInterval": 2000,
     "uuid": uuid,
     "animation": true,
+    "abbreviate": true,
     "fastest": true,
     "hideSettings": 'q'
 };
@@ -210,11 +224,10 @@ function update() {
                     document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
                     document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
                     document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
-                    if (data.animation == false) {
-                        document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].children[3].innerHTML = data.data[i].count.toLocaleString()
+                    document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
+                    if (data.abbreviate == true) {
+                        document.getElementsByClassName("card")[i].children[3].innerHTML = abb(data.data[i].count)
                     } else {
-                        document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
                         document.getElementsByClassName("card")[i].children[3].innerHTML = data.data[i].count
                     }
                     if (selected == data.data[i].id) {
@@ -492,7 +505,7 @@ function fix() {
     if (!data.hideSettings) {
         data.hideSettings = 'q';
     }
-    document.getElementById('setting').innerHTML = "Current: "+data.hideSettings+""
+    document.getElementById('setting').innerHTML = "Current: " + data.hideSettings + ""
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
         if (card.className.split(' ').includes("selected") == false) {
@@ -713,17 +726,48 @@ document.getElementById('connect2').value = '$(urlfetch https://Fake-Sub-Count.s
 document.getElementById('animation').addEventListener('click', function () {
     if (document.getElementById('animation').checked == true) {
         data.animation = true;
+        for (let i = 0; i < 50; i++) {
+            document.getElementsByClassName("card")[i].children[3].remove();
+            let div = document.createElement("div");
+            div.className = "count";
+            div.id = "count" + i;
+            div.innerHTML = data.data[i].count.toLocaleString();
+            document.getElementsByClassName("card")[i].appendChild(div);
+            new Odometer({
+                el: document.getElementById("count" + i),
+                value: data.data[i].count,
+                format: '(,ddd)',
+                theme: 'default'
+            })
+        }
     } else {
         data.animation = false;
         for (let i = 0; i < 50; i++) {
             document.getElementsByClassName("card")[i].children[3].remove();
             let div = document.createElement("div");
             div.className = "count";
+            div.id = "count" + i;
             div.innerHTML = data.data[i].count.toLocaleString();
             document.getElementsByClassName("card")[i].appendChild(div);
+            new Odometer({
+                el: document.getElementById("count" + i),
+                value: data.data[i].count,
+                format: '(,ddd)',
+                theme: 'default',
+                animation: 'count'
+            })
         }
     }
 })
+
+document.getElementById('abbreviate').addEventListener('click', function () {
+    if (document.getElementById('abbreviate').checked == true) {
+        data.abbreviate = true;
+    } else {
+        data.abbreviate = false;
+    }
+})
+
 document.getElementById('fastest').addEventListener('click', function () {
     if (document.getElementById('fastest').checked == true) {
         data.fastest = true;
@@ -732,14 +776,12 @@ document.getElementById('fastest').addEventListener('click', function () {
     }
 })
 
-
-
 function hideSettings() {
     alert("Click what key you want after this alert.")
     document.addEventListener('keydown', function (e) {
         data.hideSettings = e.key;
         alert("Key set to " + e.key)
-        document.getElementById('setting').innerHTML = "Current: "+e.key+""
+        document.getElementById('setting').innerHTML = "Current: " + e.key + ""
         this.removeEventListener('keydown', arguments.callee, false);
     })
 }
