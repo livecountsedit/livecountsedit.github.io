@@ -27,8 +27,6 @@ let data = {
     "boxBorder": "#FFF",
     "imageBorder": "0",
     "sort": "",
-    "rows": 10,
-    "columns": 5,
     "gain_min": -10000,
     "gain_max": 10000,
     "updateInterval": 2000,
@@ -46,16 +44,10 @@ if (localStorage.getItem("data") != null) {
         data.updateInterval = 2000;
     }
     let c = 1;
-    if (!data.rows) {
-        data.rows = 5;
-    }
-    if (!data.columns) {
-        data.columns = 10;
-    }
-    for (var l = 1; l <= data.rows; l++) {
+    for (var l = 1; l <= 5; l++) {
         var htmlcolumn = `<div class="column_${l} column"></div>`;
         $('.main').append(htmlcolumn);
-        for (var t = 1; t <= data.columns; t++) {
+        for (var t = 1; t <= 10; t++) {
             let cc = c;
             if (c < 10) {
                 cc = "0" + c;
@@ -90,10 +82,10 @@ if (localStorage.getItem("data") != null) {
     updateInterval = setInterval(update, data.updateInterval);
 } else {
     let c = 1;
-    for (var l = 1; l <= data.columns; l++) {
+    for (var l = 1; l <= 10; l++) {
         var htmlcolumn = `<div class="column_${l} column"></div>`;
         $('.main').append(htmlcolumn);
-        for (var t = 1; t <= data.rows; t++) {
+        for (var t = 1; t <= 5; t++) {
             let cc = c;
             if (c < 10) {
                 cc = "0" + c;
