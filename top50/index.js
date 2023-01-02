@@ -82,10 +82,10 @@ if (localStorage.getItem("data") != null) {
     updateInterval = setInterval(update, data.updateInterval);
 } else {
     let c = 1;
-    for (var l = 1; l <= 10; l++) {
+    for (var l = 1; l <= 5; l++) {
         var htmlcolumn = `<div class="column_${l} column"></div>`;
         $('.main').append(htmlcolumn);
-        for (var t = 1; t <= 5; t++) {
+        for (var t = 1; t <= 10; t++) {
             let cc = c;
             if (c < 10) {
                 cc = "0" + c;
@@ -163,6 +163,7 @@ function create() {
         fix()
     }
 }
+
 function update() {
     if (data) {
         let fastest = ""
@@ -198,8 +199,7 @@ function update() {
             });
             data.sort = "num";
         }
-        limit = data.rows * data.columns;
-        for (let i = 0; i < limit; i++) {
+        for (let i = 0; i < 50; i++) {
             if ((i + 1) < 10) {
                 num = "0" + (i + 1);
             } else {
@@ -608,7 +608,8 @@ function update2() {
                                         "image": image,
                                         "min_gain": min,
                                         "max_gain": max,
-                                        "id": id
+                                        "id": id,
+                                        "lastCount": 0
                                     });
                                     fix()
                                 })
