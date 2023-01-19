@@ -278,6 +278,7 @@ function initLoad() {
         }
         updateInterval = setInterval(update, data.updateInterval);
         fix()
+        updateOdo()
     }
 }
 
@@ -637,9 +638,6 @@ function update() {
                             }
                         }
                     }
-                }
-                if (data.abbreviate == true) {
-                    updateOdo()
                 }
                 idOrder = newIDOrder;
             }
@@ -1282,6 +1280,7 @@ document.getElementById('animation').addEventListener('click', function () {
 })
 
 function updateOdo() {
+    console.log('called')
     if (document.getElementById('animation').checked == true) {
         data.animation = true;
         for (let i = 0; i < data.max; i++) {
@@ -1297,7 +1296,11 @@ function updateOdo() {
                         div.innerHTML = data.data[i].count.toLocaleString();
                     }
                 } else {
+                    if (data.data[i]) {
                     div.innerHTML = data.data[i].count.toLocaleString();
+                    } else {
+                        div.innerHTML = 0;
+                    }
                 }
             } else {
                 div.innerHTML = 0;
@@ -1314,6 +1317,8 @@ function updateOdo() {
                 } else {
                     count = data.data[i].count;
                 }
+            } else {
+                count = 0;
             }
             if (data.abbreviate == true) {
                 if (data.data[i]) {
@@ -1334,7 +1339,11 @@ function updateOdo() {
             let div = document.createElement("div");
             div.className = "count";
             div.id = "count" + i;
-            div.innerHTML = data.data[i].count.toLocaleString();
+            if (data.data[i]) {
+                div.innerHTML = data.data[i].count.toLocaleString();
+            } else {
+                div.innerHTML = 0;
+            }
             document.getElementsByClassName("card")[i].appendChild(div);
             if (sequenceStuff.data) {
                 if (sequenceStuff.data[0].channels[i]) {
@@ -1355,13 +1364,23 @@ function updateOdo() {
                     })
                 }
             } else {
-                new Odometer({
-                    el: document.getElementById("count" + i),
-                    value: data.data[i].count,
-                    format: '(,ddd)',
-                    theme: 'default',
-                    animation: 'count'
-                })
+                if (data.data[i]) {
+                    new Odometer({
+                        el: document.getElementById("count" + i),
+                        value: data.data[i].count,
+                        format: '(,ddd)',
+                        theme: 'default',
+                        animation: 'count'
+                    })
+                } else {
+                    new Odometer({
+                        el: document.getElementById("count" + i),
+                        value: 0,
+                        format: '(,ddd)',
+                        theme: 'default',
+                        animation: 'count'
+                    })
+                }
             }
         }
     }
