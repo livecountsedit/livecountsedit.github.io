@@ -907,7 +907,6 @@ function load() {
                 }
                 document.body.style.backgroundColor = data.bgColor;
                 document.body.style.color = data.textColor;
-                fix()
                 document.getElementById('sort').value = data.sort;
                 if (!data.uuid) {
                     data.uuid = uuidGen();
