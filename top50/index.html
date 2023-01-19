@@ -9,49 +9,82 @@
     <link rel="stylesheet" href="../odometer.css">
     <script src="../jquery.js"></script>
     <script src="../odometer.js"></script>
+    <script src="../chart.js"></script>
     <link rel="icon" href="../logo.png">
+    <style></style>
     <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
 </head>
 
 <body>
     <div class="main" id="main" style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);"></div>
+    <canvas class="main" id="chart" style="margin-top: 0px; display: none;"></canvas>
     <hr>
     <div class="other" id="settings">
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 0px;">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); margin-top: 0px;">
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
                 <label>Sort By:</label>
                 <select id="sort">
                     <option value="">Select</option>
                     <option value="num">Number</option>
                     <option value="name">Name</option>
+                    <option value="fastest">Fastest</option>
                 </select>
+                <label>Theme:</label>
+                <select id="theme">
+                    <option value="top10">Top 10</option>
+                    <option value="top25">Top 25</option>
+                    <option value="top50">Top 50</option>
+                    <option value="top100">Top 100</option>
+                    <option value="line">Line</option>
+                </select>
+                <button id="pauseB" onclick="pause()">Pause</button>
+                <button id="newS" onclick="newSequence()">New Sequence</button>
+                <button onclick="loadSequence()">Load Sequence (From File =>)</button>
+                <input type="file" id="loadSequence">
             </div>
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
+                <button onclick="reset()">Reset</button>
                 <button onclick="save()">Save (In Browser)</button>
                 <button onclick="save2()">Save (In File)</button>
-                <button onclick="reset()">Reset</button>
-                <input type="checkbox" id="autosave"><label>Autosave (15s)</label>
-            </div>
-            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
                 <button onclick="load()">Load Save (From File =>)</button>
                 <input type="file" id="loadData">
+                <input type="checkbox" id="autosave"><label>Autosave (15s)</label>
+            </div>
+        </div>
+        <div>
+            <h1>Audit:</h1>
+            <div style="margin-top: 0px;">
+                <input placeholder="Min" id="auditMin">
+                <input placeholder="Max" id="auditMax">
+                <input placeholder="Audit Every (min seconds)" id="auditTimeMin">
+                <input placeholder="Audit Every (max seconds)" id="auditTimeMax">
+                <button onclick="audit2()" id="audit">Enable Audits</button>
             </div>
         </div>
         <br>
-        <div style="margin-top: 0px; display: grid; grid-template-columns: repeat(2, 1fr);">
+        <div style="margin-top: 0px; display: grid; grid-template-columns: repeat(2, 1fr); overflow-x: scroll;">
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
                 <h2 style="margin-top: 0px;">Add Channel</h2>
                 <input placeholder="Name" id="add_name"><br>
                 <input placeholder="Image" id="add_image1"><label>or</label>
                 <input placeholder="Image" type="file" id="add_image2"><br>
                 <input placeholder="Count" id="add_count"><br>
-                <input placeholder="Min Count" id="add_min_gain"><br>
-                <input placeholder="Max Count" id="add_max_gain"><br>
+                <input placeholder="Min Gain" id="add_min_gain"><br>
+                <input placeholder="Max Gain" id="add_max_gain">
+                <hr>
+                <label>If filled in then min/max is ignored. The "std" is the range from the mean.</label><br>
+                <input placeholder="Mean Gain" id="add_mean_gain"><br>
+                <input placeholder="STD" id="add_std_gain"><br>
                 <button onclick="create()">Create</button>
             </div>
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
-                <h2 style="margin-top: 0px;">Edit Channel</h2>
-                <input placeholder="Name" id="edit_name" value=""><input type="checkbox" id="edit_name_check" checked>
+                <h2 style="margin-top: 0px; height: 1px; float: left;">Edit Channel</h2>
+                <select id="quickSelect">
+                    <option value="select">Select</option>
+                </select><label> Quick Select</label><br>
+                <br>
+                <input placeholder="Name" id="edit_name" value="">
+                <input type="checkbox" id="edit_name_check" checked>
                 <br>
                 <input placeholder="Image" id="edit_image1" value="">
                 <label>or</label>
@@ -66,13 +99,19 @@
                 <br>
                 <input placeholder="Max Gain" id="edit_max_gain" value="">
                 <input id="edit_max_gain_check" type="checkbox" checked>
+                <hr>
+                <label>If filled in then min/max is ignored. The "std" is the range from the mean.</label><br>
+                <input placeholder="Mean Gain" id="edit_mean_gain" value="">
+                <input id="edit_mean_gain_check" type="checkbox" checked><br>
+                <input placeholder="STD" id="edit_std_gain">
+                <input id="edit_std_gain_check" type="checkbox" checked><br>
                 <br>
                 <button onclick="edit()">Edit</button>
                 <button onclick="deleteChannel()">Delete</button>
             </div>
         </div>
         <label>Global Settings:</label>
-        <div style="display: flex; gap: 2vw; flex-wrap: wrap;">
+        <div style="display: flex; gap: 2vw; flex-wrap: wrap; overflow-x: scroll;">
             <div style="margin-top: 0px; text-align: center;">
                 <br>
                 <label>Background Color</label><br>
@@ -115,7 +154,8 @@
             </div>
             <div style="margin-top: 0px; text-align: center;">
                 <br>
-                <input type="button" id="hideSettings" onclick="hideSettings()" value="Change Hotkey To Hide Settings"><label id="setting">Current: q</label>
+                <input type="button" id="hideSettings" onclick="hideSettings()"
+                    value="Change Hotkey To Hide Settings"><label id="setting">Current: q</label>
             </div>
             <div style="margin-top: 0px; text-align: center;">
                 <br>
@@ -128,6 +168,25 @@
             <div style="margin-top: 0px; text-align: center;">
                 <br>
                 <input type="checkbox" id="abbreviate"><label>Abbreviate Counts</label>
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <input type="checkbox" id="offline"><label>Offline Gains</label>
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Odometer Up Color</label><br>
+                <input type="color" value="#000000" id="odometerUp">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Odometer Down Color</label><br>
+                <input type="color" value="#000000" id="odometerDown">
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <label>Odometer Speed (in seconds)</label><br>
+                <input value="2" id="odometerSpeed">
             </div>
         </div>
         <hr>
@@ -155,7 +214,6 @@
             <div style="border-right: solid 1px #000; text-align: center;">
                 <button onclick="custom()" style="font-size: 2vw;">Custom Command Maker</button>
                 <button onclick="window.location.href = '/'" style="font-size: 2vw;">Return to home page</button><br>
-                <a href="https://discord.gg/Uke3tdtYnD" style="font-size: 1.5vw;">Join the discord</a>
                 <hr>
                 <div style="border-right: solid 1px #000; font-size: 1vw;">
                     <p>Click the button to connect!</p>
@@ -167,18 +225,21 @@
     </div>
     <script src="./index.js"></script>
     <br>
+    <center>
+    <a href="https://discord.gg/Uke3tdtYnD" style="font-size: 1.5vw;">Please Join The Discord For Better Support</a>
+</center>
     <div id="disqus_thread"></div>
     <script>
-        var disqus_config = function () {
-            this.page.url = "https://livecountsedit.github.io/";
-            this.page.identifier = "https://livecountsedit.github.io/";
-        };
-        (function () {
-            var d = document, s = d.createElement('script');
-            s.src = 'https://livecountsedit.disqus.com/embed.js';
-            s.setAttribute('data-timestamp', +new Date());
-            (d.head || d.body).appendChild(s);
-        })();
+          var disqus_config = function () {
+              this.page.url = "https://livecountsedit.github.io/";
+              this.page.identifier = "https://livecountsedit.github.io/";
+          };
+          (function () {
+              var d = document, s = d.createElement('script');
+              s.src = 'https://livecountsedit.disqus.com/embed.js';
+              s.setAttribute('data-timestamp', +new Date());
+              (d.head || d.body).appendChild(s);
+          })();
     </script>
 
 </body>
