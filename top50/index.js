@@ -1233,11 +1233,6 @@ document.getElementById('min_gain_global').addEventListener('change', function (
         alert("Please enter a number.")
         return;
     }
-    for (let i = 0; i < data.data.length; i++) {
-        if (data.data[i].min_gain > min) {
-            data.data[i].min_gain = min;
-        }
-    }
     data.gain_min = min;
 });
 
@@ -1246,11 +1241,6 @@ document.getElementById('max_gain_global').addEventListener('change', function (
     if (isNaN(max)) {
         alert("Please enter a number.")
         return;
-    }
-    for (let i = 0; i < data.data.length; i++) {
-        if (data.data[i].max_gain < max) {
-            data.data[i].max_gain = max;
-        }
     }
     data.gain_max = max;
 });
