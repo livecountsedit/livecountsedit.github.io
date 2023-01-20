@@ -495,7 +495,6 @@ function create() {
         if (!mean) {
             mean = (min + max) / 2;
         }
-        alert(std)
         data.data.push({
             "name": name,
             "count": parseFloat(count),
