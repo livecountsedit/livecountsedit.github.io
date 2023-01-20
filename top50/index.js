@@ -495,6 +495,7 @@ function create() {
         if (!mean) {
             mean = (min + max) / 2;
         }
+        alert(std)
         data.data.push({
             "name": name,
             "count": parseFloat(count),
@@ -779,14 +780,6 @@ function edit() {
         }
         function bruh() {
             let min = document.getElementById('edit_min_gain').value;
-            let mean;
-            let std;
-            if (document.getElementById('edit_mean_gain').value !== "") {
-                mean = document.getElementById('edit_mean_gain').value;
-            }
-            if (document.getElementById('edit_std_gain').value !== "") {
-                std = document.getElementById('edit_std_gain').value;
-            }
             let max = document.getElementById('edit_max_gain').value;
             document.getElementById('edit_image2').value = "";
             let card = document.getElementById('card_' + id);
@@ -800,12 +793,16 @@ function edit() {
                     }
                     if (document.getElementById('edit_mean_gain_check').checked) {
                         if (document.getElementById('edit_mean_gain').value !== "") {
-                            data.data[i].mean_gain = mean;
+                            data.data[i].mean_gain = parseFloat(document.getElementById('edit_mean_gain').value)
+                        } else {
+                            data.data[i].mean_gain = undefined;
                         }
                     }
                     if (document.getElementById('edit_std_gain_check').checked) {
                         if (document.getElementById('edit_std_gain').value !== "") {
-                            data.data[i].std_gain = std;
+                            data.data[i].std_gain = parseFloat(document.getElementById('edit_std_gain').value)
+                        } else {
+                            data.data[i].std_gain = undefined;
                         }
                     }
                 }
