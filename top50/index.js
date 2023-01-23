@@ -6,18 +6,11 @@ let sequenceStuff = {}
 let chart;
 let nextUpdateAudit = false;
 function abb(num) {
-    if (num < 1000) {
-      return num.toString();
-    }
-    var exp = Math.floor(Math.log(num) / Math.log(1000));
-    var base = Math.floor(num / Math.pow(1000, exp));
-    var suffix = "";
-    for (let i = 0; i < exp; i++) {
-      suffix += "0";
-    }
-    return base + "," + suffix;
-  }
-  
+    data.abbreviate = false;
+    document.getElementById('abbreviate').checked = false;
+    return num
+}
+
 const uuidGen = function () {
     let a = function () {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
