@@ -5,19 +5,19 @@ let makingSequence = false;
 let sequenceStuff = {}
 let chart;
 let nextUpdateAudit = false;
-function abb(count) {
-    if (count >= 100000000) {
-        return Math.floor(count / 1000000) * 1000000;
-    } else if (count >= 1000000) {
-        return Math.floor(count / 100000) * 100000;
-    } else if (count >= 100000) {
-        return Math.floor(count / 1000) * 1000;
-    } else if (count >= 1000) {
-        return Math.floor(count / 100) * 100;
-    } else {
-        return count;
+function abb(num) {
+    if (num < 1000) {
+      return num.toString();
     }
-}
+    var exp = Math.floor(Math.log(num) / Math.log(1000));
+    var base = Math.floor(num / Math.pow(1000, exp));
+    var suffix = "";
+    for (let i = 0; i < exp; i++) {
+      suffix += "0";
+    }
+    return base + "," + suffix;
+  }
+  
 const uuidGen = function () {
     let a = function () {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
@@ -1265,106 +1265,109 @@ document.getElementById('animation').addEventListener('click', function () {
 })
 
 function updateOdo() {
-    console.log('called')
     if (document.getElementById('animation').checked == true) {
         data.animation = true;
         for (let i = 0; i < data.max; i++) {
-            document.getElementsByClassName("card")[i].children[3].remove();
-            let div = document.createElement("div");
-            div.className = "count";
-            div.id = "count" + i;
-            if (data.data[i]) {
-                if (sequenceStuff.data) {
-                    if (sequenceStuff.data[0].channels[i]) {
-                        div.innerHTML = sequenceStuff.data[0].channels[i].count.toLocaleString();
-                    } else {
-                        div.innerHTML = data.data[i].count.toLocaleString();
-                    }
-                } else {
-                    if (data.data[i]) {
-                    div.innerHTML = data.data[i].count.toLocaleString();
-                    } else {
-                        div.innerHTML = 0;
-                    }
-                }
-            } else {
-                div.innerHTML = 0;
-            }
-            document.getElementsByClassName("card")[i].appendChild(div);
-            let count = 0;
-            if (data.data[i]) {
-                if (sequenceStuff.data) {
-                    if (sequenceStuff.data[0].channels[i]) {
-                        count = sequenceStuff.data[0].channels[i].count;
-                    } else {
-                        count = 0;
-                    }
-                } else {
-                    count = data.data[i].count;
-                }
-            } else {
-                count = 0;
-            }
-            if (data.abbreviate == true) {
+            if (document.getElementsByClassName("card")[i]) {
+                document.getElementsByClassName("card")[i].children[3].remove();
+                let div = document.createElement("div");
+                div.className = "count";
+                div.id = "count" + i;
                 if (data.data[i]) {
-                    count = abb(data.data[i].count);
+                    if (sequenceStuff.data) {
+                        if (sequenceStuff.data[0].channels[i]) {
+                            div.innerHTML = sequenceStuff.data[0].channels[i].count.toLocaleString();
+                        } else {
+                            div.innerHTML = data.data[i].count.toLocaleString();
+                        }
+                    } else {
+                        if (data.data[i]) {
+                            div.innerHTML = data.data[i].count.toLocaleString();
+                        } else {
+                            div.innerHTML = 0;
+                        }
+                    }
+                } else {
+                    div.innerHTML = 0;
                 }
+                document.getElementsByClassName("card")[i].appendChild(div);
+                let count = 0;
+                if (data.data[i]) {
+                    if (sequenceStuff.data) {
+                        if (sequenceStuff.data[0].channels[i]) {
+                            count = sequenceStuff.data[0].channels[i].count;
+                        } else {
+                            count = 0;
+                        }
+                    } else {
+                        count = data.data[i].count;
+                    }
+                } else {
+                    count = 0;
+                }
+                if (data.abbreviate == true) {
+                    if (data.data[i]) {
+                        count = abb(data.data[i].count);
+                    }
+                }
+                new Odometer({
+                    el: document.getElementById("count" + i),
+                    value: count,
+                    format: '(,ddd)',
+                    theme: 'default'
+                })
             }
-            new Odometer({
-                el: document.getElementById("count" + i),
-                value: count,
-                format: '(,ddd)',
-                theme: 'default'
-            })
         }
     } else {
         data.animation = false;
         for (let i = 0; i < data.max; i++) {
-            document.getElementsByClassName("card")[i].children[3].remove();
-            let div = document.createElement("div");
-            div.className = "count";
-            div.id = "count" + i;
-            if (data.data[i]) {
-                div.innerHTML = data.data[i].count.toLocaleString();
-            } else {
-                div.innerHTML = 0;
-            }
-            document.getElementsByClassName("card")[i].appendChild(div);
-            if (sequenceStuff.data) {
-                if (sequenceStuff.data[0].channels[i]) {
-                    new Odometer({
-                        el: document.getElementById("count" + i),
-                        value: sequenceStuff.data[0].channels[i].count,
-                        format: '(,ddd)',
-                        theme: 'default',
-                        animation: 'count'
-                    })
-                } else {
-                    new Odometer({
-                        el: document.getElementById("count" + i),
-                        value: 0,
-                        format: '(,ddd)',
-                        theme: 'default',
-                        animation: 'count'
-                    })
-                }
-            } else {
+            if (document.getElementsByClassName("card")[i]) {
+                document.getElementsByClassName("card")[i].children[3].remove();
+                let div = document.createElement("div");
+                div.className = "count";
+                div.id = "count" + i;
                 if (data.data[i]) {
-                    new Odometer({
-                        el: document.getElementById("count" + i),
-                        value: data.data[i].count,
-                        format: '(,ddd)',
-                        theme: 'default',
-                        animation: 'count'
-                    })
+                    div.innerHTML = data.data[i].count.toLocaleString();
                 } else {
-                    new Odometer({
-                        el: document.getElementById("count" + i),
-                        value: 0,
-                        format: '(,ddd)',
-                        theme: 'default',
-                        animation: 'count'
-                    })
+                    div.innerHTML = 0;
+                }
+                document.getElementsByClassName("card")[i].appendChild(div);
+                if (sequenceStuff.data) {
+                    if (sequenceStuff.data[0].channels[i]) {
+                        new Odometer({
+                            el: document.getElementById("count" + i),
+                            value: sequenceStuff.data[0].channels[i].count,
+                            format: '(,ddd)',
+                            theme: 'default',
+                            animation: 'count'
+                        })
+                    } else {
+                        new Odometer({
+                            el: document.getElementById("count" + i),
+                            value: 0,
+                            format: '(,ddd)',
+                            theme: 'default',
+                            animation: 'count'
+                        })
+                    }
+                } else {
+                    if (data.data[i]) {
+                        new Odometer({
+                            el: document.getElementById("count" + i),
+                            value: data.data[i].count,
+                            format: '(,ddd)',
+                            theme: 'default',
+                            animation: 'count'
+                        })
+                    } else {
+                        new Odometer({
+                            el: document.getElementById("count" + i),
+                            value: 0,
+                            format: '(,ddd)',
+                            theme: 'default',
+                            animation: 'count'
+                        })
+                    }
                 }
             }
         }
@@ -1394,6 +1397,12 @@ function themeChanger() {
             localStorage.setItem("data", JSON.stringify(data));
             location.reload()
         } else if (data.theme == 'top100') {
+            localStorage.setItem("data", JSON.stringify(data));
+            location.reload()
+        } else if (data.theme == 'top10') {
+            localStorage.setItem("data", JSON.stringify(data));
+            location.reload()
+        } else if (data.theme == 'line') {
             localStorage.setItem("data", JSON.stringify(data));
             location.reload()
         }
