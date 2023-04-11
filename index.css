@@ -1,36 +1,103 @@
+/* #f7f5fe */
 body {
-    background-color: #1a1a20;
-    font-family: Lato, Arial, Helvetica, sans-serif;
-    color: #FFF;
+    font-family: Arial;
+    transition: color 2s;
 }
 
-a {
-    color: #FFF;
-    text-decoration: none;
+.main {
+    width: 100%;
+    transition: color 2s;
 }
 
-h1 {
-    background-color: #141414;
-    border: solid #FFF;
+.num {
+    font-family: 'Roboto Medium';
+    float: left;
+    margin-right: 0.2vw;
+    margin-left: 0.2vw;
+    color: #000;
+}
+
+.card {
+    height: 4.25vw;
+    padding: 0.2vw;
+    margin: 0.2vw;
+    text-align: left;
+    background: #141414;
+    border: 0.1vw solid #ffffff;
+    transition: margin-top 500ms;
+    Border-radius: 8px
+}
+
+.image {
+    height: 4.25vw;
+    width: 4.25vw;
+    float: left;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.count {
+    transition: color 2s;
     font-size: 2vw;
+    font-family: 'Roboto', sans-serif;
+    padding-left: 0.2vw;
+    margin-top: calc(1vw - 2vh);
 }
 
-div {
-    border: dashed #FFF 0.1vw;
+.name {
+    font-family: 'Roboto', sans-serif;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-left: 0.1vw;
+    font-size: 1.5vw;
+}
+
+.other {
     width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border: solid 0.3vw #000;
+    transition: color 2s;
+    margin-top: 0vw;
 }
 
-.options {
+.selected {
+    background-color: #ccc;
+    transition: color 2s;
+    border: solid 1px red;
+}
+
+.slidecontainer {
     width: 100%;
-    text-align: center;
-    display: flex;
-}
-
-button {
-    font-size: 2vw;
+  }
+  
+  .slider {
     width: 100%;
-}
-
-.title {
-   font-size: 4vw; 
-}
+    height: 25px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+  }
+  
+  .slider:hover {
+    opacity: 1;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #04AA6D;
+    cursor: pointer;
+  }
