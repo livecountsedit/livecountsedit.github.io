@@ -11,10 +11,10 @@ body {
 
 .num {
     font-family: 'Roboto Medium';
-    float: left;
+    float: right;
     margin-right: 0.2vw;
     margin-left: 0.2vw;
-    color: #000;
+    color: #fff;
 }
 
 .card {
@@ -25,6 +25,7 @@ body {
     background: #141414;
     border: 0.1vw solid #ffffff;
     transition: margin-top 500ms;
+    border-radius: 8px;
 }
 
 .image {
@@ -33,12 +34,15 @@ body {
     float: left;
     border-radius: 50%;
     z-index: 10;
+    border: 1.5px solid #ffffff;
+    padding: 0.1px;
+    margin: 0.1px;
 }
 
 .count {
     transition: color 2s;
     font-size: 2vw;
-    font-family: 'Roboto', Roboto;
+    font-family: 'Roboto', sans-serif;
     padding-left: 0.2vw;
     margin-top: calc(1vw - 2vh);
 }
