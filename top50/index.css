@@ -1,6 +1,6 @@
 /* #f7f5fe */
 body {
-    font-family: Arial;
+    font-family: Roboto Medium;
     transition: color 2s;
 }
 
@@ -11,40 +11,42 @@ body {
 
 .num {
     font-family: 'Roboto Medium';
-    float: left;
+    float: right;
     margin-right: 0.2vw;
     margin-left: 0.2vw;
-    color: #000;
+    color: #ffffff;
 }
 
 .card {
-    height: 4.25vw;
+    height: 3.25vw;
     padding: 0.2vw;
     margin: 0.2vw;
     text-align: left;
     background: #141414;
-    border: 0.1vw solid #ffffff;
+    border: 0.9vw solid #ffffff;
     transition: margin-top 500ms;
+    border-radius: 8px;
 }
 
 .image {
-    height: 4.25vw;
-    width: 4.25vw;
+    height: 3vw;
+    width: 3vw;
     float: left;
     border-radius: 50%;
     z-index: 10;
+    border: 2px solid rgb(255, 255, 255)
 }
 
 .count {
     transition: color 2s;
-    font-size: 2vw;
-    font-family: 'Roboto', Roboto;
+    font-size: 1vw;
+    font-family: 'Roboto Medium', Roboto;
     padding-left: 0.2vw;
     margin-top: calc(1vw - 2vh);
 }
 
 .name {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto medium', sans-serif;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

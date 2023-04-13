@@ -592,16 +592,11 @@ function update() {
                             a.style.marginTop = "0px";
                             b.style.marginTop = "0px";
                         }, 500);
-                        //how do I make this animated?
+                        
 
                     }
                 }
             }
-            for (let i = 0; i < data.max; i++) {
-                if ((i + 1) < 10) {
-                    num = "0" + (i + 1);
-                } else {
-                    num = (i + 1);
                 }
                 if (document.getElementsByClassName("card")[i]) {
                     if (data.data[i]) {
