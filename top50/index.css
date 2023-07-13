@@ -1,4 +1,6 @@
 /* #f7f5fe */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
 body {
     font-family: Arial;
     transition: color 2s;
@@ -38,7 +40,7 @@ body {
 .count {
     transition: color 2s;
     font-size: 2vw;
-    font-family: 'Roboto', Roboto;
+    font-family: 'Roboto', sans-serif;
     padding-left: 0.2vw;
     margin-top: calc(1vw - 2vh);
 }
