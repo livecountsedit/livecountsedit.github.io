@@ -17,6 +17,7 @@ body {
     margin-right: 0.2vw;
     margin-left: 0.2vw;
     color: #000;
+    src: url(https://livecountsedit.github.io/fonts/Roboto-Medium.ttf) format('truetype');
 }
 
 .card {
@@ -43,6 +44,7 @@ body {
     font-family: 'Roboto', sans-serif;
     padding-left: 0.2vw;
     margin-top: calc(1vw - 2vh);
+    src: url(https://livecountsedit.github.io/fonts/Roboto-Regular.ttf) format('truetype');
 }
 
 .name {
@@ -52,6 +54,7 @@ body {
     text-overflow: ellipsis;
     padding-left: 0.1vw;
     font-size: 1.5vw;
+    src: url(https://livecountsedit.github.io/fonts/Roboto-Regular.ttf) format('truetype');
 }
 
 .other {
