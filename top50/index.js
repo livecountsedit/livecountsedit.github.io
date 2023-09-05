@@ -5,17 +5,32 @@ let makingSequence = false;
 let sequenceStuff = {}
 let chart;
 let nextUpdateAudit = false;
-function abb(num) {
-    data.abbreviate = false;
-    document.getElementById('abbreviate').checked = false;
-    return num
+function abb(subscriberCount) {
+    if (subscriberCount >= 1000000) {
+        return Math.floor(subscriberCount / 1000000) * 1000000;
+    } else if (subscriberCount >= 1000) {
+        return Math.floor(subscriberCount / 1000) * 1000;
+    } else {
+        return subscriberCount;
+    }
 }
-
 const uuidGen = function () {
     let a = function () {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
     };
     return a() + a() + '-' + a() + '-' + a() + '-' + a() + '-' + a() + a() + a();
+}
+function randomGen() {
+    var S4 = function () {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    };
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+}
+function avg(a, b) {
+    return (a + b) / 2
+}
+function random(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 let uuid = uuidGen()
 let data = {
@@ -45,234 +60,180 @@ let data = {
     'odometerSpeed': 2,
     'visulization': 'default',
     'audits': false,
-    'auditStats': [0, 0, 0, 0]
+    'auditStats': [0, 0, 0, 0],
+    'apiUpdates': {
+        'enabled': false,
+        'url': '',
+        'interval': 2000,
+        'method': 'GET',
+        'body': {},
+        'headers': {},
+        'maxChannelsPerFetch': 'one',
+        'response': {
+            'loop': 'data',
+            'name': {
+                'enabled': true,
+                'path': 'name',
+            },
+            'count': {
+                'enabled': true,
+                'path': 'count',
+            },
+            'image': {
+                'enabled': true,
+                'path': 'image',
+            },
+            'id': {
+                'enabled': true,
+                'path': 'id',
+            }
+        },
+    }
 };
 let updateInterval;
+let apiInterval;
 
 initLoad()
-function initLoad() {
-    if (localStorage.getItem("data") != null) {
-        data = JSON.parse(localStorage.getItem("data"));
-        if (!data.auditStats) {
-            data.auditStats = [0, 0, 0, 0]
+function initLoad(redo) {
+    if (!redo) {
+        data = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : data;
+    }
+    if (!data.apiUpdates) {
+        data.apiUpdates = {
+            'enabled': false,
+            'url': '',
+            'interval': 2000,
+            'method': 'GET',
+            'body': '',
+            'headers': '',
+            'maxChannelsPerFetch': 'one',
+            'response': {
+                'loop': 'data',
+                'name': {
+                    'enabled': true,
+                    'path': 'name',
+                },
+                'count': {
+                    'enabled': true,
+                    'path': 'count',
+                },
+                'image': {
+                    'enabled': true,
+                    'path': 'image',
+                },
+                'id': {
+                    'enabled': true,
+                    'path': 'id',
+                }
+            },
         }
-        if (!data.audits) {
-            data.audits = false
-        }
-        if (!data.theme) {
-            data.theme = 'top50';
-        }
-        if (data.theme == 'top25') {
-            data.max = 25;
-        } else if (data.theme == 'top50') {
-            data.max = 50;
-        } else if (data.theme == 'top100') {
-            data.max = 100;
-        }
-        if (!data.odometerDown || data.odometerDown == 'null') {
-            data.odometerDown = '#000';
-        }
-        if (!data.odometerUp || data.odometerUp == 'null') {
-            data.odometerUp = '#000';
-        }
-        if (!data.odometerSpeed) {
-            data.odometerSpeed = 2;
-        }
-        data.pause = false;
-        data.visulization = 'default';
-        if (data.lastOnline && data.offlineGains == true) {
-            for (let i = 0; i < data.data.length; i++) {
-                let interval = data.updateInterval / 1000;
-                let secondsPased = (new Date().getTime() - data.lastOnline) / 1000;
-                let gain = random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
-                let gained = gain * (secondsPased / interval);
+    }
+    if (data.apiUpdates.enabled) {
+        apiInterval = setInterval(function () {
+            apiUpdate(true);
+        }, parseFloat(data.apiUpdates.interval));
+    }
+    if (!data.auditStats) {
+        data.auditStats = [0, 0, 0, 0];
+    }
+    if (!data.audits) {
+        data.audits = false;
+    }
+    if (!data.theme) {
+        data.theme = 'top50';
+    }
+    if (data.theme == 'top10') {
+        data.max = 10;
+    } else if (data.theme == 'top25') {
+        data.max = 25;
+    } else if (data.theme == 'top50') {
+        data.max = 50;
+    } else if (data.theme == 'top100') {
+        data.max = 100;
+    }
+    if (!data.odometerDown || data.odometerDown == 'null') {
+        data.odometerDown = '#000';
+    }
+    if (!data.odometerUp || data.odometerUp == 'null') {
+        data.odometerUp = '#000';
+    }
+    if (!data.odometerSpeed) {
+        data.odometerSpeed = 2;
+    }
+    if (!data.autosave) {
+        data.autosave = false;
+    }
+    data.pause = false;
+    data.visulization = 'default';
+    if (data.lastOnline && data.offlineGains == true) {
+        data.lastOnline = new Date().getTime() - 1000 * 60 * 60 * 24;
+        const interval = data.updateInterval / 1000;
+        const secondsPassed = (new Date().getTime() - data.lastOnline) / 1000;
+        for (let i = 0; i < data.data.length; i++) {
+            if (parseFloat(data.mean_gain) > 0) {
+                const gain = randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain));
+                const gained = gain * (secondsPassed / interval);
+                data.data[i].count += gained;
+            } else {
+                const gain = random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
+                const gained = gain * (secondsPassed / interval);
                 data.data[i].count += gained;
             }
         }
-        if (!data.updateInterval) {
-            data.updateInterval = 2000;
-        }
-        let c = 1;
-        if (data.theme == 'top50') {
-            for (var l = 1; l <= 5; l++) {
-                var htmlcolumn = `<div class="column_${l} column"></div>`;
-                $('.main').append(htmlcolumn);
-                for (var t = 1; t <= 10; t++) {
-                    let cc = c;
-                    if (c < 10) {
-                        cc = "0" + c;
-                    }
-                    if (data.data[c - 1]) {
-                        var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                        if (data.abbreviate == true) {
-                            abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                        }
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-          <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-          <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-          ${abbTest}
-          </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    } else {
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    }
-                }
-            }
-        } else if (data.theme == 'top10') {
-            for (var l = 1; l <= 5; l++) {
-                var htmlcolumn = `<div class="column_${l} column"></div>`;
-                $('.main').append(htmlcolumn);
-                for (var t = 1; t <= 2; t++) {
-                    let cc = c;
-                    if (c < 10) {
-                        cc = "0" + c;
-                    }
-                    if (data.data[c - 1]) {
-                        var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                        if (data.abbreviate == true) {
-                            abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                        }
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-          <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-          <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-          ${abbTest}
-          </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    } else {
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    }
-                }
-            }
-        } else if (data.theme == 'top25') {
-            for (var l = 1; l <= 5; l++) {
-                var htmlcolumn = `<div class="column_${l} column"></div>`;
-                $('.main').append(htmlcolumn);
-                for (var t = 1; t <= 5; t++) {
-                    let cc = c;
-                    if (c < 10) {
-                        cc = "0" + c;
-                    }
-                    if (data.data[c - 1]) {
-                        var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                        if (data.abbreviate == true) {
-                            abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                        }
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-            <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-            <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-            ${abbTest}
-            </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    } else {
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    }
-                }
-            }
-        } else if (data.theme == 'top100') {
-            document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-            var style = document.createElement('style');
-            style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
-        .card { height: 2.15vw; }
-        .count { font-size: 1vw; }
-        .name { font-size: 0.75vw; }`;
-            document.getElementsByTagName('head')[0].appendChild(style);
-            for (var l = 1; l <= 10; l++) {
-                var htmlcolumn = `<div class="column_${l} column"></div>`;
-                $('.main').append(htmlcolumn);
-                for (var t = 1; t <= 10; t++) {
-                    let cc = c;
-                    if (c < 10) {
-                        cc = "0" + c;
-                    }
-                    if (data.data[c - 1]) {
-                        var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                        if (data.abbreviate == true) {
-                            abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                        }
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-            <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-            <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-            ${abbTest}
-            </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    } else {
-                        var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                        $('.column_' + l).append(htmlcard);
-                        c += 1;
-                    }
-                }
-            }
-        } else if (data.theme == 'line') {
-            line()
-        }
-        if (!data.uuid) {
-            data.uuid = uuidGen();
-        }
-        document.body.style.backgroundColor = data.bgColor;
-        document.body.style.color = data.textColor;
-        fix()
-        if (data.theme !== 'line') {
-            updateOdo()
-        }
-        updateInterval = setInterval(update, data.updateInterval);
-    } else {
-        let c = 1;
-        for (var l = 1; l <= 5; l++) {
-            var htmlcolumn = `<div class="column_${l} column"></div>`;
-            $('.main').append(htmlcolumn);
-            for (var t = 1; t <= 10; t++) {
-                let cc = c;
-                if (c < 10) {
-                    cc = "0" + c;
-                }
-                var htmlcard = `<div class="card card_${c - 1}" id="card_">
-            <div class="num" id="num_">${cc}</div>
-          <img src="../default.png" alt="" id="image_" class="image">
-          <div class="name" id="name_">Loading</div>
-          <div class="count odometer" id="count_">0</div>
-          </div>`;
-                $('.column_' + l).append(htmlcard);
-                c += 1;
-            }
-        }
-        updateInterval = setInterval(update, data.updateInterval);
-        fix()
-        updateOdo()
     }
+    if (!data.updateInterval) {
+        data.updateInterval = 2000;
+    }
+    let c = 1;
+    let columns = data.theme == 'top100' ? 10 : 5;
+    for (let l = 1; l <= columns; l++) {
+        const htmlcolumn = `<div class="column_${l} column"></div>`;
+        $('.main').append(htmlcolumn);
+        const maxCards = data.max / columns;
+        for (let t = 1; t <= maxCards; t++) {
+            const cc = (c < 10) ? "0" + c : c;
+            const dataIndex = c - 1;
+            let abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0)}</div>`;
+            if (data.abbreviate == true) {
+                abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${abb(Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0))}</div>`;
+            }
+            const htmlcard = `<div class="card card_${dataIndex}" id="card_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">
+                <div class="num" id="num_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${cc}</div>
+                <img src="${data.data[dataIndex] ? data.data[dataIndex].image : '../default.png'}" alt="" id="image_${data.data[dataIndex] ? data.data[dataIndex].id : ''}" class="image">
+                <div class="name" id="name_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${data.data[dataIndex] ? data.data[dataIndex].name : 'Loading'}</div>
+                ${abbTest}
+            </div>`;
+            $('.column_' + l).append(htmlcard);
+            c += 1;
+        }
+    }
+    if (data.theme == 'top100') {
+        const style = document.createElement('style');
+        style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
+            .card { height: 2.15vw; }
+            .count { font-size: 1vw; }
+            .name { font-size: 0.75vw; }`;
+        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+        document.getElementsByTagName('head')[0].appendChild(style);
+    } else {
+        const style = document.createElement('style');
+        style.innerHTML = `.image { height: 4.3vw; width: 4.3vw; }
+            .card { height: 4.3vw; }
+            .count { font-size: 2vw; }
+            .name { font-size: 1.5vw; }`;
+        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+        document.getElementsByTagName('head')[0].appendChild(style);
+    }
+    if (!data.uuid) {
+        data.uuid = uuidGen();
+    }
+    document.body.style.backgroundColor = data.bgColor;
+    document.body.style.color = data.textColor;
+    fix();
+    if (data.theme !== 'line') {
+        updateOdo();
+    }
+    updateInterval = setInterval(update, data.updateInterval);
 }
 
 function initLoad2() {
@@ -428,83 +389,77 @@ function initLoad2() {
     updateOdo();
     updateInterval = setInterval(update, data.updateInterval);
 }
-function randomGen() {
-    var S4 = function () {
-        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    };
-    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-}
-function random(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+
 function create() {
-    let image;
-    let min;
-    let mean;
-    let std;
-    let max;
-    if (document.getElementById('add_min_gain').value == "" || document.getElementById('add_max_gain').value == "") {
-        alert("Please fill the minimum and maximum gain.");
-        return;
-    } else {
-        min = parseFloat(document.getElementById('add_min_gain').value);
-        max = parseFloat(document.getElementById('add_max_gain').value);
-        if (document.getElementById('add_mean_gain').value !== "") {
-            mean = parseFloat(document.getElementById('add_mean_gain').value);
-        }
-        if (document.getElementById('add_std_gain').value !== "") {
-            std = parseFloat(document.getElementById('add_std_gain').value);
-        }
-    }
-    if (document.getElementById('add_count').value == "") {
-        alert("Please enter a count value");
-        return;
-    } else if (document.getElementById('add_name').value == "") {
-        alert("Please enter a name value");
+    const addMinGain = document.getElementById('add_min_gain').value;
+    const addMaxGain = document.getElementById('add_max_gain').value;
+    const addMeanGain = document.getElementById('add_mean_gain').value;
+    const addStdGain = document.getElementById('add_std_gain').value;
+    const addCount = document.getElementById('add_count').value;
+    const addName = document.getElementById('add_name').value;
+    const addImage1 = document.getElementById('add_image1').value;
+    const addImage2 = document.getElementById('add_image2');
+    if (addMinGain === '' || addMaxGain === '') {
+        alert('Please fill the minimum and maximum gain.');
         return;
     }
-    if (document.getElementById('add_image1').value == "") {
-        if (document.getElementById('add_image2').files.length == 0) {
-            image = "../default.png";
-            bruh()
+    const min = parseFloat(addMinGain);
+    const max = parseFloat(addMaxGain);
+    let mean = parseFloat(addMeanGain);
+    let std = parseFloat(addStdGain);
+    if (!addCount) {
+        alert('Please enter a count value');
+        return;
+    } else if (!addName) {
+        alert('Please enter a name value');
+        return;
+    }
+    let image = '';
+    if (!addImage1) {
+        if (addImage2.files.length === 0) {
+            image = '../default.png';
+            bruh();
             return;
         } else {
-            let file = document.getElementById('add_image2').files[0];
-            let reader = new FileReader();
+            const file = addImage2.files[0];
+            const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = function () {
                 image = reader.result;
-                bruh()
-            }
+                bruh();
+            };
         }
     } else {
-        image = document.getElementById('add_image1').value;
-        bruh()
+        image = addImage1;
+        bruh();
     }
     function bruh() {
-        let count = document.getElementById('add_count').value;
-        let name = document.getElementById('add_name').value;
-        let id = randomGen();
         if (!mean) {
             mean = (min + max) / 2;
         }
+        const count = parseFloat(addCount);
+        const name = addName;
+        let id = randomGen();
+        if (document.getElementById('add_id').value.length > 0) {
+            id = document.getElementById('add_id').value;
+        }
         data.data.push({
-            "name": name,
-            "count": parseFloat(count),
-            "image": image,
-            "min_gain": min,
-            "mean_gain": mean,
-            "std_gain": std,
-            "max_gain": max,
-            "id": id
+            name,
+            count,
+            image,
+            min_gain: min,
+            mean_gain: mean,
+            std_gain: std,
+            max_gain: max,
+            id,
         });
-        fix()
+        fix();
     }
 }
-let idOrder = [];
-let sequenceNum = 0;
 
+let sequenceNum = 0;
 function update() {
+    let start = new Date().getTime();
     if (data) {
         let fastest = ""
         let fastestCount = 0;
@@ -514,7 +469,8 @@ function update() {
         for (let i = 0; i < data.data.length; i++) {
             selections.push('<option value="' + data.data[i].id + '">' + data.data[i].name + '</option>')
             data.data[i].lastCount = data.data[i].count;
-            if (data.data[i].mean_gain && data.data[i].std_gain) {
+            if ((data.data[i].mean_gain && data.data[i].std_gain) && (data.data[i].mean_gain != 0) && (data.data[i].std_gain != 0)) {
+                alert('std')
                 data.data[i].count = parseFloat(data.data[i].count) + randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain))
             } else {
                 data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
@@ -534,69 +490,17 @@ function update() {
         }
         document.getElementById('quickSelect').innerHTML = selections.join("");
         document.getElementById('quickSelect').value = past;
+        let sort = `b.${document.getElementById('sort').value} - a.${document.getElementById('sort').value}`
+        if (document.getElementById('sort').value == "fastest") {
+            sort = `avg(b.min_gain, b.max_gain) - avg(a.min_gain, a.max_gain)`
+        }
+        if (!document.getElementById('sort').value) {
+            sort = `b.count - a.count`
+        }
+        data.data = data.data.sort(function (a, b) {
+            return eval(sort)
+        });
         if (data.visulization == 'default') {
-            if (document.getElementById('sort').value == "num") {
-                data.data = data.data.sort(function (a, b) {
-                    return b.count - a.count;
-                });
-                data.sort = "num";
-            } else if (document.getElementById('sort').value == "name") {
-                data.data = data.data.sort(function (a, b) {
-                    if (a.name < b.name) {
-                        return -1;
-                    }
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-                    return 0;
-                });
-                data.sort = "name";
-            } else if (document.getElementById('sort').value == "fastest") {
-                //avg of two values 
-                function avg(a, b) {
-                    return (a + b) / 2
-                }
-                data.data = data.data.sort(function (a, b) {
-                    return avg(b.min_gain, b.max_gain) - avg(a.min_gain, a.max_gain);
-                });
-                data.sort = "fastest";
-            } else {
-                data.data = data.data.sort(function (a, b) {
-                    return b.count - a.count;
-                });
-                data.sort = "num";
-            }
-            let newIDOrder = [];
-            for (let i = 0; i < data.data.length; i++) {
-                newIDOrder.push(data.data[i].id);
-            }
-            if (idOrder.toString() !== newIDOrder.toString()) {
-                //pass()
-            }
-            function pass() {
-                //find the differences in idOrder and newIDOrder
-                let diff = [];
-                for (let i = 0; i < idOrder.length; i++) {
-                    if (newIDOrder[i] == idOrder[i]) { } else {
-                        diff.push(idOrder[i]);
-                    }
-                }
-                for (let i = 0; i < diff.length; i += 2) {
-                    console.log(diff[i] + " and " + diff[i + 1] + " switched places");
-                    if (diff[i] && diff[i + 1]) {
-                        let a = document.getElementById('card_' + diff[i]);
-                        let b = document.getElementById('card_' + diff[i + 1]);
-                        a.style.marginTop = "200px";
-                        b.style.marginTop = "-200px";
-                        setTimeout(function () {
-                            a.style.marginTop = "0px";
-                            b.style.marginTop = "0px";
-                        }, 500);
-                        //how do I make this animated?
-
-                    }
-                }
-            }
             for (let i = 0; i < data.max; i++) {
                 if ((i + 1) < 10) {
                     num = "0" + (i + 1);
@@ -632,7 +536,6 @@ function update() {
                         }
                     }
                 }
-                idOrder = newIDOrder;
             }
         } else if (data.visulization == 'line') {
             data.data.forEach(function (item, index) {
@@ -668,6 +571,9 @@ function update() {
             }
         }
     }
+    let end = new Date().getTime();
+    let time = end - start;
+    console.log('Execution timeS: ' + time / 1000);
 }
 
 document.getElementById('sort').addEventListener('change', function () {
@@ -1383,22 +1289,10 @@ document.getElementById('theme').addEventListener('change', function () {
 
 function themeChanger() {
     if (confirm('Are you sure you want to change the theme?') == true) {
-        if (data.theme == 'top25') {
-            localStorage.setItem("data", JSON.stringify(data));
-            location.reload()
-        } else if (data.theme == 'top50') {
-            localStorage.setItem("data", JSON.stringify(data));
-            location.reload()
-        } else if (data.theme == 'top100') {
-            localStorage.setItem("data", JSON.stringify(data));
-            location.reload()
-        } else if (data.theme == 'top10') {
-            localStorage.setItem("data", JSON.stringify(data));
-            location.reload()
-        } else if (data.theme == 'line') {
-            localStorage.setItem("data", JSON.stringify(data));
-            location.reload()
-        }
+        clearInterval(updateInterval);
+        clearInterval(auditTimeout);
+        document.getElementById('main').innerHTML = "";
+        initLoad('redo');
     }
 }
 
@@ -1785,7 +1679,6 @@ function randomColor() {
 }
 
 function loadSequence() {
-    //read #loadSequence
     let file = document.getElementById('loadSequence').files[0];
     let reader = new FileReader();
     reader.readAsText(file);
@@ -1836,3 +1729,224 @@ function audit2() {
         document.getElementById('audit').innerHTML = "Enable Audits"
     }
 }
+
+function apiUpdate(interval) {
+    if (interval) {
+        if (data.apiUpdates.enabled == false) {
+            clearInterval(apiInterval)
+            document.getElementById('enableApiUpdate').innerHTML = "Enable API Updates"
+        }
+    }
+    let url = data.apiUpdates.url
+    let groups = []
+    let channels = ''
+    for (let i = 0; i < data.data.length; i++) {
+        channels += data.data[i].id + ','
+    }
+    channels = channels.slice(0, -1)
+    if ((data.apiUpdates.maxChannelsPerFetch == 'one')) {
+        groups = channels.split(',').map(function (item) {
+            return [item];
+        });
+    } else if ((data.apiUpdates.maxChannelsPerFetch == 'ten')) {
+        groups = channels.split(',').map(function (item, index) {
+            return index % 10 === 0 ? channels.slice(index, index + 10) : null;
+        }).filter(function (item) {
+            return item;
+        });
+    } else if ((data.apiUpdates.maxChannelsPerFetch == 'twentyfive')) {
+        groups = channels.split(',').map(function (item, index) {
+            return index % 25 === 0 ? channels.slice(index, index + 25) : null;
+        }).filter(function (item) {
+            return item;
+        });
+    } else if ((data.apiUpdates.maxChannelsPerFetch == 'fifty')) {
+        groups = channels.split(',').map(function (item, index) {
+            return index % 50 === 0 ? channels.slice(index, index + 50) : null;
+        }).filter(function (item) {
+            return item;
+        });
+    } else if ((data.apiUpdates.maxChannelsPerFetch == 'onehundred')) {
+        groups = channels.split(',').map(function (item, index) {
+            return index % 100 === 0 ? channels.slice(index, index + 100) : null;
+        }).filter(function (item) {
+            return item;
+        });
+    }
+    if (url.includes('{{channels}}')) {
+        for (let i = 0; i < groups.length; i++) {
+            let newUrl = url.replace('{{channels}}', groups[i])
+            fetchNext(newUrl)
+        }
+    } else {
+        for (let i = 0; i < groups.length; i++) {
+            let newUrl = url + groups[i]
+            fetchNext(newUrl)
+        }
+    }
+    function fetchNext(url) {
+        if (data.apiUpdates.method == 'GET') {
+            fetch(url, {
+                method: data.apiUpdates.method,
+                headers: data.apiUpdates.headers
+            }).then(response => response.json())
+                .then(json => {
+                    doStuff(json)
+                })
+        } else {
+            alert('b')
+            fetch(url, {
+                method: data.apiUpdates.method,
+                headers: data.apiUpdates.headers,
+                body: JSON.stringify(data.apiUpdates.body)
+            }).then(response => response.json())
+                .then(json => {
+                    doStuff(json)
+                })
+        }
+    }
+    function doStuff(json) {
+        let channels = json;
+        if (data.apiUpdates.response.loop != 'data') {
+            channels = channels[data.apiUpdates.response['loop'].split('data.')[1]]
+        }
+        for (let i = 0; i < channels.length; i++) {
+            let nameUpdate = undefined
+            let countUpdate = undefined
+            let imageUpdate = undefined
+            let idUpdate = undefined
+            if (data.apiUpdates.response.name.enabled == true) {
+                const propertyNames = data.apiUpdates.response.name.path.split('.')
+                let result = channels[i];
+                for (const propName of propertyNames) {
+                    result = result[propName];
+                }
+                nameUpdate = result
+            }
+            if (data.apiUpdates.response.count.enabled == true) {
+                const propertyNames = data.apiUpdates.response.count.path.split('.')
+                let result = channels[i];
+                for (const propName of propertyNames) {
+                    result = result[propName];
+                }
+                countUpdate = result
+            }
+            if (data.apiUpdates.response.image.enabled == true) {
+                const propertyNames = data.apiUpdates.response.image.path.split('.')
+                let result = channels[i];
+                for (const propName of propertyNames) {
+                    result = result[propName];
+                }
+                imageUpdate = result
+            }
+            if (data.apiUpdates.response.id.enabled == true) {
+                const propertyNames = data.apiUpdates.response.id.path.split('.')
+                let result = channels[i];
+                for (const propName of propertyNames) {
+                    result = result[propName];
+                }
+                idUpdate = result
+            }
+            for (let r = 0; r < data.data.length; r++) {
+                if (data.data[r].id == idUpdate) {
+                    if (nameUpdate != undefined) {
+                        data.data[r].name = nameUpdate
+                    }
+                    if (imageUpdate != undefined) {
+                        data.data[r].image = imageUpdate
+                    }
+                    if (countUpdate != undefined) {
+                        if (abb(countUpdate) != abb(data.data[r].count)) {
+                            data.data[r].count = countUpdate
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function enableApiUpdate() {
+    clearInterval(apiInterval)
+    if (data.apiUpdates.enabled == false) {
+        data.apiUpdates.enabled = true
+        document.getElementById('enableApiUpdate').innerHTML = "Disable API Updates"
+        apiInterval = setInterval(function () {
+            apiUpdate(true)
+        }, data.apiUpdates.interval)
+        apiUpdate(true)
+    } else {
+        data.apiUpdates.enabled = false
+        document.getElementById('enableApiUpdate').innerHTML = "Enable API Updates"
+    }
+}
+
+function saveAPIUpdates() {
+    data.apiUpdates.url = document.getElementById('apiLink').value
+    data.apiUpdates.maxChannelsPerFetch = (document.getElementById('apiType').value == 'none') ? 'one' : document.getElementById('apiType').value
+    data.apiUpdates.method = document.getElementById('apiMethod').value
+    let headers = document.getElementById('extraCred').value.toString().split(';&#10;').join(';\n').split(';\n')
+    let newHeaders = {}
+    for (let i = 0; i < headers.length; i++) {
+        let header = headers[i].split(': ')
+        newHeaders[header[0]] = header[1]
+    }
+    data.apiUpdates.headers = newHeaders
+    let body = document.getElementById('body').value.toString().split(';&#10;').join(';\n').split(';\n')
+    let newBody = {}
+    for (let i = 0; i < body.length; i++) {
+        let header = body[i].split(':')
+        newBody[header[0]] = header[1]
+    }
+    data.apiUpdates.body = newBody
+    data.apiUpdates.response = {
+        'loop': document.getElementById('apiLoop').value,
+        'name': {
+            'enabled': document.getElementById('updateName').checked,
+            'path': document.getElementById('pathName').value
+        },
+        'count': {
+            'enabled': document.getElementById('updateCount').checked,
+            'path': document.getElementById('pathCount').value
+        },
+        'image': {
+            'enabled': document.getElementById('updateImage').checked,
+            'path': document.getElementById('pathImage').value
+        },
+        'id': {
+            'enabled': document.getElementById('updateID').checked,
+            'path': document.getElementById('pathID').value
+        }
+    }
+    data.apiUpdates.interval = document.getElementById('apiUpdateInt').value
+    data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerHTML == 'Disable API Updates' ? true : false
+    alert('Saved!')
+}
+
+function loadAPIUpdates() {
+    document.getElementById('apiLink').value = data.apiUpdates.url
+    document.getElementById('apiType').value = data.apiUpdates.maxChannelsPerFetch
+    document.getElementById('apiMethod').value = data.apiUpdates.method
+    let headers = ''
+    for (let i = 0; i < Object.keys(data.apiUpdates.headers).length; i++) {
+        headers += Object.keys(data.apiUpdates.headers)[i] + ': ' + Object.values(data.apiUpdates.headers)[i] + ';\n'
+    }
+    document.getElementById('extraCred').value = headers
+    let body = ''
+    for (let i = 0; i < Object.keys(data.apiUpdates.body).length; i++) {
+        body += Object.keys(data.apiUpdates.body)[i] + ': ' + Object.values(data.apiUpdates.body)[i] + ';\n'
+    }
+    document.getElementById('body').value = body
+    document.getElementById('apiLoop').value = data.apiUpdates.response.loop
+    document.getElementById('updateName').checked = data.apiUpdates.response.name.enabled
+    document.getElementById('pathName').value = data.apiUpdates.response.name.path
+    document.getElementById('updateCount').checked = data.apiUpdates.response.count.enabled
+    document.getElementById('pathCount').value = data.apiUpdates.response.count.path
+    document.getElementById('updateImage').checked = data.apiUpdates.response.image.enabled
+    document.getElementById('pathImage').value = data.apiUpdates.response.image.path
+    document.getElementById('updateID').checked = data.apiUpdates.response.id.enabled
+    document.getElementById('pathID').value = data.apiUpdates.response.id.path
+    document.getElementById('apiUpdateInt').value = data.apiUpdates.interval
+    document.getElementById('enableApiUpdate').innerHTML = data.apiUpdates.enabled == true ? 'Disable API Updates' : 'Enable API Updates'
+}
+loadAPIUpdates()
