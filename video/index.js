@@ -36,35 +36,23 @@ class LivecountseditInterface {
                 }
             }
         this.setTitle = function () {
-            document.getElementById("counter-title").innerHTML = document.getElementById("options.counter.title").value
+            document.getElementById("yt_name").innerHTML = document.getElementById("options.counter.title").value
         }
         this.setValue1 = function () {
-            document.getElementById("counter").innerHTML = parseFloat(document.getElementById("options.counter.value").value)
+            document.getElementById("yt_subs").innerHTML = parseFloat(document.getElementById("options.counter.value").value)
             current1 = parseFloat(document.getElementById("options.counter.value").value)
         }
         this.setValue2 = function () {
-            document.getElementById("counter2").innerHTML = parseFloat(document.getElementById("options.counter.value2").value)
+            document.getElementById("yt_likes").innerHTML = parseFloat(document.getElementById("options.counter.value2").value)
             current2 = parseFloat(document.getElementById("options.counter.value2").value)
         }
         this.setValue3 = function () {
-            document.getElementById("counter3").innerHTML = parseFloat(document.getElementById("options.counter.value3").value)
+            document.getElementById("yt_dislikes").innerHTML = parseFloat(document.getElementById("options.counter.value3").value)
             current3 = parseFloat(document.getElementById("options.counter.value3").value)
         }
         this.setValue4 = function () {
-            document.getElementById("counter4").innerHTML = parseFloat(document.getElementById("options.counter.value4").value)
+            document.getElementById("yt_comments").innerHTML = parseFloat(document.getElementById("options.counter.value4").value)
             current4 = parseFloat(document.getElementById("options.counter.value4").value)
-        }
-        this.setFooter1 = function () {
-            document.getElementById("footer").innerHTML = document.getElementById("options.counter.footer").value
-        }
-        this.setFooter2 = function () {
-            document.getElementById("footer2").innerHTML = document.getElementById("options.counter.footer2").value
-        }
-        this.setFooter3 = function () {
-            document.getElementById("footer3").innerHTML = document.getElementById("options.counter.footer3").value
-        }
-        this.setFooter4 = function () {
-            document.getElementById("footer4").innerHTML = document.getElementById("options.counter.footer4").value
         }
         var rate1 = 0;
         var rate2 = 0;
@@ -216,7 +204,7 @@ class LivecountseditInterface {
             } else {
                 current1 = subs1
             }
-            document.getElementById("counter").innerHTML = Math.floor(subs1)
+            document.getElementById("yt_subs").innerHTML = Math.floor(subs1)
         }
 
         function updateManager2() {
@@ -243,7 +231,7 @@ class LivecountseditInterface {
             } else {
                 current2 = subs1
             }
-            document.getElementById("counter2").innerHTML = Math.floor(subs1)
+            document.getElementById("yt_likes").innerHTML = Math.floor(subs1)
         }
 
         function updateManager3() {
@@ -270,7 +258,7 @@ class LivecountseditInterface {
             } else {
                 current3 = subs1
             }
-            document.getElementById("counter3").innerHTML = Math.floor(subs1)
+            document.getElementById("yt_dislikes").innerHTML = Math.floor(subs1)
         }
 
         function updateManager4() {
@@ -297,25 +285,11 @@ class LivecountseditInterface {
             } else {
                 current4 = subs1
             }
-            document.getElementById("counter4").innerHTML = Math.floor(subs1)
+            document.getElementById("yt_comments").innerHTML = Math.floor(subs1)
         }
-
-
-
-        
     }
 }
 
-
-this.usernameColor = function () {
-    document.getElementById('counter-title').style.color = document.getElementById('username.color.settings').value
-}
-this.footerColor = function () {
-    document.getElementById('footer').style.color = document.getElementById('footer.color.settings').value
-}
-this.mainCounterColor = function () {
-    document.getElementById('counter').style.color = document.getElementById('counter.color.settings').value
-}
 const Interface = new LivecountseditInterface()
 window.onload = function () {
     if (document.getElementById('tabs.0')) document.getElementById('tabs.0').click();
@@ -335,11 +309,6 @@ function submit4() {
 document.getElementById("options.counter.avatar.file").addEventListener('input', Interface.setAvatar)
 document.getElementById("options.counter.avatar.url").addEventListener('input', Interface.setAvatar)
 document.getElementById("options.counter.title").addEventListener('input', Interface.setTitle)
-document.getElementById("options.counter.footer").addEventListener('input', Interface.setFooter1)
-document.getElementById("options.counter.footer2").addEventListener('input', Interface.setFooter2)
-document.getElementById("options.counter.footer3").addEventListener('input', Interface.setFooter3)
-document.getElementById("options.counter.footer4").addEventListener('input', Interface.setFooter4)
-
 
 document.getElementById("options.counter.rates.basicMinimum0").addEventListener('input', Interface.setMin0)
 document.getElementById("options.counter.rates.basicMaximum0").addEventListener('input', Interface.setMax0)
@@ -365,45 +334,14 @@ document.getElementById("options.counter.rates.mode.basic.units3").addEventListe
 document.getElementById("options.counter.rates.mode.basic.baseUnit3").addEventListener('change', Interface.setRate3)
 document.getElementById("options.counter.rates.mode.basic.baseUnit33").addEventListener('change', Interface.setRate3)
 
-
-document.getElementById("odometer.up.color.settings").addEventListener('input', Interface.odometerUpColor)
-document.getElementById("odometer.down.color.settings").addEventListener('input', Interface.odometerDownColor)
-document.getElementById("username.color.settings").addEventListener('input', function (e) {
-    document.getElementById('counter-title').style.color = document.getElementById('username.color.settings').value
-})
-document.getElementById("footer.color.settings").addEventListener('input', function (e) {
-    document.getElementById('footer').style.color = document.getElementById('footer.color.settings').value
-    document.getElementById('footer2').style.color = document.getElementById('footer.color.settings').value
-    document.getElementById('footer3').style.color = document.getElementById('footer.color.settings').value
-    document.getElementById('footer4').style.color = document.getElementById('footer.color.settings').value
-})
-document.getElementById("counter.color.settings").addEventListener('input', function (e) {
-    document.getElementById('counter').style.color = document.getElementById('counter.color.settings').value
-})
-document.getElementById("counter.color.settings2").addEventListener('input', function (e) {
-    document.getElementById('counter2').style.color = document.getElementById('counter.color.settings2').value
-    document.getElementById('counter3').style.color = document.getElementById('counter.color.settings2').value
-    document.getElementById('counter4').style.color = document.getElementById('counter.color.settings2').value
-})
-document.getElementById("odometer.up.color.settings").addEventListener('input', function (e) {
-    var newcolor = document.getElementById('odometer.up.color.settings').value
-    $('style').append(`.odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
-    color: ${newcolor};
-  }`)
-})
-
-document.getElementById("odometer.down.color.settings").addEventListener('input', function (e) {
-    var newcolor = document.getElementById('odometer.down.color.settings').value
-    $('style').append(`.odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
-            color: ${newcolor};
-          }`)
-})
-
-document.getElementById("box.color.settings").addEventListener('input', function (e) {
-    document.querySelector("body > div.container > div.counter-content > div").style.backgroundColor = document.getElementById('box.color.settings').value
-})
-
-
 function random(min, max) {
     return Math.random() * (max - min) + min
 }
+
+  function hidenav() {
+      if (document.querySelector("#main-wrapper > aside").style.visibility == "hidden") {
+        document.querySelector("#main-wrapper > aside").style.visibility = "visible"
+      } else {
+    document.querySelector("#main-wrapper > aside").style.visibility = "hidden"
+      }
+  }
