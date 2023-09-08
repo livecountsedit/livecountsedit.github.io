@@ -470,7 +470,6 @@ function update() {
             selections.push('<option value="' + data.data[i].id + '">' + data.data[i].name + '</option>')
             data.data[i].lastCount = data.data[i].count;
             if ((data.data[i].mean_gain && data.data[i].std_gain) && (data.data[i].mean_gain != 0) && (data.data[i].std_gain != 0)) {
-                alert('std')
                 data.data[i].count = parseFloat(data.data[i].count) + randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain))
             } else {
                 data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
@@ -1794,7 +1793,6 @@ function apiUpdate(interval) {
                     doStuff(json)
                 })
         } else {
-            alert('b')
             fetch(url, {
                 method: data.apiUpdates.method,
                 headers: data.apiUpdates.headers,
@@ -1918,7 +1916,7 @@ function saveAPIUpdates() {
             'path': document.getElementById('pathID').value
         }
     }
-    data.apiUpdates.interval = document.getElementById('apiUpdateInt').value
+    data.apiUpdates.interval = parseFloat(document.getElementById('apiUpdateInt').value) * 1000
     data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerHTML == 'Disable API Updates' ? true : false
     alert('Saved!')
 }
