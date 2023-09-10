@@ -5,14 +5,8 @@ let makingSequence = false;
 let sequenceStuff = {}
 let chart;
 let nextUpdateAudit = false;
-function abb(subscriberCount) {
-    if (subscriberCount >= 1000000) {
-        return Math.floor(subscriberCount / 1000000) * 1000000;
-    } else if (subscriberCount >= 1000) {
-        return Math.floor(subscriberCount / 1000) * 1000;
-    } else {
-        return subscriberCount;
-    }
+function abb(n) {
+    return Math.floor(parseFloat(n.toPrecision(3)))
 }
 const uuidGen = function () {
     let a = function () {
