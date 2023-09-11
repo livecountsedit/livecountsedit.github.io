@@ -48,7 +48,10 @@ body {
 #odo6a,
 #odo7a,
 #odo8a,
-#odo9a {
+#odo9a,
+#odo10a,
+#odo11a,
+#odo12a{
   font-family: Roboto;
   font-size: 72px;
   display: block;
@@ -59,7 +62,8 @@ body {
 }
 
 #comma1a,
-#comma2a {
+#comma2a,
+#comma3a {
   font-family: Roboto;
   font-size: 72px;
   display: inline-block;
