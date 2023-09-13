@@ -160,7 +160,7 @@ function initLoad(redo) {
     data.pause = false;
     data.visulization = 'default';
     if (data.lastOnline && data.offlineGains == true) {
-        data.lastOnline = new Date().getTime() - 1000 * 60 * 60 * 24;
+        data.lastOnline = new Date().getTime();
         const interval = data.updateInterval / 1000;
         const secondsPassed = (new Date().getTime() - data.lastOnline) / 1000;
         for (let i = 0; i < data.data.length; i++) {
