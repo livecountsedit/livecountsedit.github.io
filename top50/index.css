@@ -16,7 +16,7 @@ body {
 }
 
 .num {
-    font-family: 'Roboto', roboto;
+    font-family: 'Roboto-bold', Roboto-bold;
     float: left;
     font-weight: 900;
     margin-right: 0.2vw;
