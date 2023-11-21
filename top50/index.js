@@ -40,8 +40,9 @@ let data = {
     "updateInterval": 2000,
     "uuid": uuid,
     "animation": true,
-    "abbreviate": true,
+    "abbreviate": false,
     "fastest": true,
+    "slowest": true,
     "hideSettings": 'q',
     'offlineGains': false,
     'lastOnline': new Date().getTime(),
@@ -144,6 +145,8 @@ function initLoad(redo) {
         data.max = 50;
     } else if (data.theme == 'top100') {
         data.max = 100;
+    } else if (data.theme == 'top150') {
+        data.max = 150;
     }
     if (!data.odometerDown || data.odometerDown == 'null') {
         data.odometerDown = '#000';
@@ -180,6 +183,7 @@ function initLoad(redo) {
     }
     let c = 1;
     let columns = data.theme == 'top100' ? 10 : 5;
+    columns = data.theme == 'top150' ? 10 : columns;
     for (let l = 1; l <= columns; l++) {
         const htmlcolumn = `<div class="column_${l} column"></div>`;
         $('.main').append(htmlcolumn);
@@ -202,6 +206,14 @@ function initLoad(redo) {
         }
     }
     if (data.theme == 'top100') {
+        const style = document.createElement('style');
+        style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
+            .card { height: 2.15vw; }
+            .count { font-size: 1vw; }
+            .name { font-size: 0.75vw; }`;
+        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+        document.getElementsByTagName('head')[0].appendChild(style);
+    } else if (data.theme == 'top150') {
         const style = document.createElement('style');
         style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
             .card { height: 2.15vw; }
@@ -376,6 +388,47 @@ function initLoad2() {
                 }
             }
         }
+    } else if (data.theme == 'top150') {
+        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+        var style = document.createElement('style');
+        style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
+        .card { height: 2.15vw; }
+        .count { font-size: 1vw; }
+        .name { font-size: 0.75vw; }`;
+        document.getElementsByTagName('head')[0].appendChild(style);
+        for (var l = 1; l <= 10; l++) {
+            var htmlcolumn = `<div class="column_${l} column"></div>`;
+            $('.main').append(htmlcolumn);
+            for (var t = 1; t <= 10; t++) {
+                let cc = c;
+                if (c < 10) {
+                    cc = "0" + c;
+                }
+                if (data.data[c - 1]) {
+                    var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
+                    if (data.abbreviate == true) {
+                        abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
+                    }
+                    var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
+            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
+            <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
+            <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
+            ${abbTest}
+            </div>`;
+                    $('.column_' + l).append(htmlcard);
+                    c += 1;
+                } else {
+                    var htmlcard = `<div class="card card_${c - 1}" id="card_">
+                <div class="num" id="num_">${cc}</div>
+                <img src="../default.png" alt="" id="image_" class="image">
+                <div class="name" id="name_">Loading</div>
+                <div class="count odometer" id="count_">0</div>
+                </div>`;
+                    $('.column_' + l).append(htmlcard);
+                    c += 1;
+                }
+            }
+        }
     } else {
         alert('err')
     }
@@ -457,6 +510,8 @@ function update() {
     if (data) {
         let fastest = ""
         let fastestCount = 0;
+        let slowest = ""
+        let slowestCount = 0;
         let past = document.getElementById('quickSelect').value;
         document.getElementById('quickSelect').innerHTML = "";
         let selections = ['<option value="select">Select</option>'];
@@ -471,7 +526,10 @@ function update() {
             if (data.data[i].count - data.data[i].lastCount > fastestCount) {
                 fastestCount = data.data[i].count - data.data[i].lastCount;
                 fastest = data.data[i].id;
-                fastestName = data.data[i].name;
+            }
+            if (data.data[i].count - data.data[i].lastCount < slowestCount) {
+                slowestCount = data.data[i].count - data.data[i].lastCount;
+                slowest = data.data[i].id;
             }
             if (nextUpdateAudit == true) {
                 let update = random(data.auditStats[0], data.auditStats[1])
@@ -486,6 +544,9 @@ function update() {
         let sort = `b.${document.getElementById('sort').value} - a.${document.getElementById('sort').value}`
         if (document.getElementById('sort').value == "fastest") {
             sort = `avg(b.min_gain, b.max_gain) - avg(a.min_gain, a.max_gain)`
+        }
+        if (document.getElementById('sort').value == "slowest") {
+            sort = `avg(a.min_gain, a.max_gain) - avg(b.min_gain, b.max_gain)`
         }
         if (!document.getElementById('sort').value) {
             sort = `b.count - a.count`
@@ -525,6 +586,11 @@ function update() {
                         if (fastest == data.data[i].id) {
                             if (data.fastest == true) {
                                 document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
+                            }
+                        }
+                        if (slowest == data.data[i].id) {
+                            if (data.slowest == true) {
+                                document.getElementById("card_" + slowest).children[2].innerHTML = "⌛️" + data.data[i].name
                             }
                         }
                     }
@@ -883,6 +949,9 @@ function fix() {
     if (!data.fastest) {
         data.fastest = true;
     }
+    if (!data.slowest) {
+        data.slowest = true;
+    }
     if (!data.hideSettings) {
         data.hideSettings = 'q';
     }
@@ -895,6 +964,11 @@ function fix() {
         document.getElementById('fastest').checked = true;
     } else {
         document.getElementById('fastest').checked = false;
+    }
+    if (data.slowest == true) {
+        document.getElementById('slowest').checked = true;
+    } else {
+        document.getElementById('slowest').checked = false;
     }
     if (data.abbreviate == true) {
         document.getElementById('abbreviate').checked = true;
@@ -1150,7 +1224,7 @@ function custom() {
 
 document.getElementById('connect').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)/$(query))';
 document.getElementById('connect3').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)/$(query)?value=edit)';
-document.getElementById('connect2').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)?values=10,20';
+document.getElementById('connect2').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)?values=10,20)';
 
 document.getElementById('animation').addEventListener('click', function () {
     updateOdo()
@@ -1294,6 +1368,14 @@ document.getElementById('fastest').addEventListener('click', function () {
         data.fastest = true;
     } else {
         data.fastest = false;
+    }
+})
+
+document.getElementById('slowest').addEventListener('click', function () {
+    if (document.getElementById('slowest').checked == true) {
+        data.slowest = true;
+    } else {
+        data.slowest = false;
     }
 })
 

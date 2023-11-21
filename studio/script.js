@@ -26,7 +26,7 @@ if (user.graphType == "1") {
 } else if (user.graphType == "2") {
 	let chartData = []
 	for (let i = 0; i < user.graphDates.length; i++) {
-		chartData.push([user.graphDates[i], new Date(user.graphValues[i])])
+		chartData.push([new Date(user.graphDates[i]).getTime(), user.graphValues[i]])
 	}
 	graphData = chartData
 }
@@ -509,7 +509,7 @@ function update() {
 			chart.series[0].data[0].remove()
 			user.liveGraph.shift()
 		}
-		chart.series[0].addPoint([new Date().getTime(), user.subscribers], true, true);
+		chart.series[0].addPoint([new Date().getTime(), user.subscribers], true, true)
 		user.liveGraph.push([new Date().getTime(), user.subscribers])
 	}
 }
@@ -562,7 +562,7 @@ function submit2() {
 		let graphDates = []
 		for (let i = 0; i < user.graphDates.length; i++) {
 			user.graphDates[i] = user.graphDates[i]
-			graphData[i] = new Date(user.graphDates[i]).getTime()
+			graphDates[i] = new Date(user.graphDates[i]).getTime()
 		}
 		for (let i = 0; i < user.graphValues.length; i++) {
 			user.graphValues[i] = parseFloat(user.graphValues[i]);

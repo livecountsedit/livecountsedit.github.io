@@ -173,7 +173,7 @@ body {
 
 #name {
   position: absolute;
-  width: 100%;
+  width: 50%;
   height: 24px;
   left: 50%;
   top: 183px;
@@ -361,4 +361,8 @@ hr {
 
 textarea {
   width: 75%;
+}
+
+.svg2,.svg3 {
+  cursor: pointer;
 }
