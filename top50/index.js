@@ -131,7 +131,7 @@ function initLoad(redo) {
     if (!data.auditStats) {
         data.auditStats = [0, 0, 0, 0];
     }
-    if (!data.audits) {
+    if ((!data.audits) && (data.audits !== false)) {
         data.audits = false;
     }
     if (!data.theme) {
@@ -157,7 +157,7 @@ function initLoad(redo) {
     if (!data.odometerSpeed) {
         data.odometerSpeed = 2;
     }
-    if (!data.autosave) {
+    if ((!data.autosave) && (data.autosave !== false)) {
         data.autosave = false;
     }
     data.pause = false;
@@ -523,11 +523,11 @@ function update() {
             } else {
                 data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
             }
-            if (data.data[i].count - data.data[i].lastCount > fastestCount) {
+            if ((data.data[i].count - data.data[i].lastCount > fastestCount) || (fastestCount == 0)) {
                 fastestCount = data.data[i].count - data.data[i].lastCount;
                 fastest = data.data[i].id;
             }
-            if (data.data[i].count - data.data[i].lastCount < slowestCount) {
+            if ((data.data[i].count - data.data[i].lastCount < slowestCount) || (slowestCount == 0)) {
                 slowestCount = data.data[i].count - data.data[i].lastCount;
                 slowest = data.data[i].id;
             }
@@ -946,10 +946,10 @@ function fix() {
     document.getElementById('auditTimeMin').value = data.auditStats[2]
     document.getElementById('auditTimeMax').value = data.auditStats[3]
 
-    if (!data.fastest) {
+    if ((!data.fastest) && (data.fastest !== false)) {
         data.fastest = true;
     }
-    if (!data.slowest) {
+    if ((!data.slowest) && (data.slowest !== false)) {
         data.slowest = true;
     }
     if (!data.hideSettings) {
