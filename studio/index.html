@@ -4,7 +4,6 @@
 <head>
     <title>Livecountsedit - Fake YouTube Studio</title>
     <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css" rel="stylesheet" type="text/css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -25,8 +24,8 @@
     <meta property="og:image" content="https://lcedit.com/images/studio.png" />
     <script src="./odometer.js"></script>
     <link href="./odometer.css" rel="stylesheet" />
-    <link rel="stylesheet" href="./style.css">
-    <script src="https://code.highcharts.com/10.3.3/highcharts.js"></script>
+    <link rel="stylesheet" id="themeStylesheet" href="./style.css">
+    <script src="../highstock.js"></script>
 </head>
 
 <body>
@@ -64,7 +63,7 @@
             </div>
             <div>
                 <div class="icon-container2">
-                    <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg3">
+                    <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg3" onclick="window.location.href = 'https://lcedit.com'">
                         <g>
                             <path
                                 d="M12.7,12l6.6,6.6l-0.7,0.7L12,12.7l-6.6,6.6l-0.7-0.7l6.6-6.6L4.6,5.4l0.7-0.7l6.6,6.6l6.6-6.6l0.7,0.7L12.7,12z">
@@ -91,6 +90,10 @@
                 <div id="odo7a" class="odometer">0</div>
                 <div id="odo8a" class="odometer">0</div>
                 <div id="odo9a" class="odometer">0</div>
+                <div id="comma3a">,</div>
+                <div id="odo10a" class="odometer">0</div>
+                <div id="odo11a" class="odometer">0</div>
+                <div id="odo12a" class="odometer">0</div>
             </div>
             <p class="label">Subscribers</p>
         </div>
@@ -223,6 +226,7 @@
                 <div style="display: grid; grid-template-columns: repeat(3,1fr);">
                     <button onclick="saveData()">Save Data</button>
                     <button onclick="exportData()">Export Data</button>
+                    <button onclick="toggleTheme()">Switch theme</button>
                     <div>
                         <input type="file" id="file_input2" accept=".json">
                         <button onclick="importData()">Import Data</button>
