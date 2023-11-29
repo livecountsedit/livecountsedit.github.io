@@ -1,6 +1,6 @@
 let cmm = 0;
 let raw = 0;
-let m = "100m";
+let m = "100b";
 let saveInterval;
 let graphData = [];
 let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {
@@ -26,7 +26,7 @@ if (user.graphType == "1") {
 } else if (user.graphType == "2") {
 	let chartData = []
 	for (let i = 0; i < user.graphDates.length; i++) {
-		chartData.push([user.graphDates[i], new Date(user.graphValues[i])])
+		chartData.push([new Date(user.graphDates[i]).getTime(), user.graphValues[i]])
 	}
 	graphData = chartData
 }
@@ -34,7 +34,7 @@ if (user.graphType == "1") {
 
 function spl(n) {
 	n = '' + n + ''
-	return n.split('', 9)
+	return n.split('', 12)
 }
 
 const chart = new Highcharts.chart({
@@ -134,8 +134,8 @@ function abb(count) {
 }
 
 function settype(n) {
-	if (n < 1000000000) {
-		m = '100m'
+	if (n < 1000000000000) {
+		m = '100b'
 		document.querySelector("#odo1a").style.display = "inline-block"
 		document.querySelector("#odo2a").style.display = "inline-block"
 		document.querySelector("#odo3a").style.display = "inline-block"
@@ -145,11 +145,15 @@ function settype(n) {
 		document.querySelector("#odo7a").style.display = "inline-block"
 		document.querySelector("#odo8a").style.display = "inline-block"
 		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "inline-block"
 		document.querySelector("#comma2a").style.display = "inline-block"
+		document.querySelector("#comma3a").style.display = "inline-block"
 	}
-	if (n < 100000000) {
-		m = '10m'
+	if (n < 100000000000) {
+		m = '10b'
 		document.querySelector("#odo1a").style.display = "none"
 		document.querySelector("#odo2a").style.display = "inline-block"
 		document.querySelector("#odo3a").style.display = "inline-block"
@@ -159,11 +163,15 @@ function settype(n) {
 		document.querySelector("#odo7a").style.display = "inline-block"
 		document.querySelector("#odo8a").style.display = "inline-block"
 		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "inline-block"
 		document.querySelector("#comma2a").style.display = "inline-block"
+		document.querySelector("#comma3a").style.display = "inline-block"
 	}
-	if (n < 10000000) {
-		m = '1m'
+	if (n < 10000000000) {
+		m = '1b'
 		document.querySelector("#odo1a").style.display = "none"
 		document.querySelector("#odo2a").style.display = "none"
 		document.querySelector("#odo3a").style.display = "inline-block"
@@ -173,11 +181,15 @@ function settype(n) {
 		document.querySelector("#odo7a").style.display = "inline-block"
 		document.querySelector("#odo8a").style.display = "inline-block"
 		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "inline-block"
 		document.querySelector("#comma2a").style.display = "inline-block"
+		document.querySelector("#comma3a").style.display = "inline-block"
 	}
-	if (n < 1000000) {
-		m = '100k'
+	if (n < 1000000000) {
+		m = '100m'
 		document.querySelector("#odo1a").style.display = "none"
 		document.querySelector("#odo2a").style.display = "none"
 		document.querySelector("#odo3a").style.display = "none"
@@ -187,11 +199,15 @@ function settype(n) {
 		document.querySelector("#odo7a").style.display = "inline-block"
 		document.querySelector("#odo8a").style.display = "inline-block"
 		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "none"
 		document.querySelector("#comma2a").style.display = "inline-block"
+		document.querySelector("#comma3a").style.display = "inline-block"
 	}
-	if (n < 100000) {
-		m = '10k'
+	if (n < 100000000) {
+		m = '10m'
 		document.querySelector("#odo1a").style.display = "none"
 		document.querySelector("#odo2a").style.display = "none"
 		document.querySelector("#odo3a").style.display = "none"
@@ -201,11 +217,15 @@ function settype(n) {
 		document.querySelector("#odo7a").style.display = "inline-block"
 		document.querySelector("#odo8a").style.display = "inline-block"
 		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "none"
 		document.querySelector("#comma2a").style.display = "inline-block"
+		document.querySelector("#comma3a").style.display = "inline-block"
 	}
-	if (n < 10000) {
-		m = '1k'
+	if (n < 10000000) {
+		m = '1m'
 		document.querySelector("#odo1a").style.display = "none"
 		document.querySelector("#odo2a").style.display = "none"
 		document.querySelector("#odo3a").style.display = "none"
@@ -215,11 +235,15 @@ function settype(n) {
 		document.querySelector("#odo7a").style.display = "inline-block"
 		document.querySelector("#odo8a").style.display = "inline-block"
 		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "none"
 		document.querySelector("#comma2a").style.display = "inline-block"
+		document.querySelector("#comma3a").style.display = "inline-block"
 	}
-	if (n < 1000) {
-		m = '100'
+	if (n < 1000000) {
+		m = '100k'
 		document.querySelector("#odo1a").style.display = "none"
 		document.querySelector("#odo2a").style.display = "none"
 		document.querySelector("#odo3a").style.display = "none"
@@ -229,8 +253,66 @@ function settype(n) {
 		document.querySelector("#odo7a").style.display = "inline-block"
 		document.querySelector("#odo8a").style.display = "inline-block"
 		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "none"
 		document.querySelector("#comma2a").style.display = "none"
+		document.querySelector("#comma3a").style.display = "inline-block"
+	}
+	if (n < 100000) {
+		m = '10k'
+		document.querySelector("#odo1a").style.display = "none"
+		document.querySelector("#odo2a").style.display = "none"
+		document.querySelector("#odo3a").style.display = "none"
+		document.querySelector("#odo4a").style.display = "none"
+		document.querySelector("#odo5a").style.display = "none"
+		document.querySelector("#odo6a").style.display = "none"
+		document.querySelector("#odo7a").style.display = "none"
+		document.querySelector("#odo8a").style.display = "inline-block"
+		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
+		document.querySelector("#comma1a").style.display = "none"
+		document.querySelector("#comma2a").style.display = "none"
+		document.querySelector("#comma3a").style.display = "inline-block"
+	}
+	if (n < 10000) {
+		m = '1k'
+		document.querySelector("#odo1a").style.display = "none"
+		document.querySelector("#odo2a").style.display = "none"
+		document.querySelector("#odo3a").style.display = "none"
+		document.querySelector("#odo4a").style.display = "none"
+		document.querySelector("#odo5a").style.display = "none"
+		document.querySelector("#odo6a").style.display = "none"
+		document.querySelector("#odo7a").style.display = "none"
+		document.querySelector("#odo8a").style.display = "none"
+		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
+		document.querySelector("#comma1a").style.display = "none"
+		document.querySelector("#comma2a").style.display = "none"
+		document.querySelector("#comma3a").style.display = "inline-block"
+	}
+	if (n < 1000) {
+		m = '100'
+		document.querySelector("#odo1a").style.display = "none"
+		document.querySelector("#odo2a").style.display = "none"
+		document.querySelector("#odo3a").style.display = "none"
+		document.querySelector("#odo4a").style.display = "none"
+		document.querySelector("#odo5a").style.display = "none"
+		document.querySelector("#odo6a").style.display = "none"
+		document.querySelector("#odo7a").style.display = "none"
+		document.querySelector("#odo8a").style.display = "none"
+		document.querySelector("#odo9a").style.display = "none"
+		document.querySelector("#odo10a").style.display = "inline-block"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
+		document.querySelector("#comma1a").style.display = "none"
+		document.querySelector("#comma2a").style.display = "none"
+		document.querySelector("#comma3a").style.display = "none"
 	}
 	if (n < 100) {
 		m = '10'
@@ -241,10 +323,14 @@ function settype(n) {
 		document.querySelector("#odo5a").style.display = "none"
 		document.querySelector("#odo6a").style.display = "none"
 		document.querySelector("#odo7a").style.display = "none"
-		document.querySelector("#odo8a").style.display = "inline-block"
-		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo8a").style.display = "none"
+		document.querySelector("#odo9a").style.display = "none"
+		document.querySelector("#odo10a").style.display = "none"
+		document.querySelector("#odo11a").style.display = "inline-block"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "none"
 		document.querySelector("#comma2a").style.display = "none"
+		document.querySelector("#comma3a").style.display = "none"
 	}
 	if (n < 10) {
 		m = '1'
@@ -256,16 +342,20 @@ function settype(n) {
 		document.querySelector("#odo6a").style.display = "none"
 		document.querySelector("#odo7a").style.display = "none"
 		document.querySelector("#odo8a").style.display = "none"
-		document.querySelector("#odo9a").style.display = "inline-block"
+		document.querySelector("#odo9a").style.display = "none"
+		document.querySelector("#odo10a").style.display = "none"
+		document.querySelector("#odo11a").style.display = "none"
+		document.querySelector("#odo12a").style.display = "inline-block"
 		document.querySelector("#comma1a").style.display = "none"
 		document.querySelector("#comma2a").style.display = "none"
+		document.querySelector("#comma3a").style.display = "none"
 	}
 	return m
 }
 
 function render() {
 	settype(raw)
-	if (m == '100m') {
+	if (m == '100b') {
 		odo1a.innerHTML = cmm[0]
 		odo2a.innerHTML = cmm[1]
 		odo3a.innerHTML = cmm[2]
@@ -275,8 +365,11 @@ function render() {
 		odo7a.innerHTML = cmm[6]
 		odo8a.innerHTML = cmm[7]
 		odo9a.innerHTML = cmm[8]
+		odo10a.innerHTML = cmm[9]
+		odo11a.innerHTML = cmm[10]
+		odo12a.innerHTML = cmm[11]
 	}
-	if (m == '10m') {
+	if (m == '10b') {
 		odo2a.innerHTML = cmm[0]
 		odo3a.innerHTML = cmm[1]
 		odo4a.innerHTML = cmm[2]
@@ -285,8 +378,11 @@ function render() {
 		odo7a.innerHTML = cmm[5]
 		odo8a.innerHTML = cmm[6]
 		odo9a.innerHTML = cmm[7]
+		odo10a.innerHTML = cmm[8]
+		odo11a.innerHTML = cmm[9]
+		odo12a.innerHTML = cmm[10]
 	}
-	if (m == '1m') {
+	if (m == '1b') {
 		odo3a.innerHTML = cmm[0]
 		odo4a.innerHTML = cmm[1]
 		odo5a.innerHTML = cmm[2]
@@ -294,39 +390,72 @@ function render() {
 		odo7a.innerHTML = cmm[4]
 		odo8a.innerHTML = cmm[5]
 		odo9a.innerHTML = cmm[6]
+		odo10a.innerHTML = cmm[7]
+		odo11a.innerHTML = cmm[8]
+		odo12a.innerHTML = cmm[9]
 	}
-	if (m == '100k') {
+	if (m == '100m') {
 		odo4a.innerHTML = cmm[0]
 		odo5a.innerHTML = cmm[1]
 		odo6a.innerHTML = cmm[2]
 		odo7a.innerHTML = cmm[3]
 		odo8a.innerHTML = cmm[4]
 		odo9a.innerHTML = cmm[5]
+		odo10a.innerHTML = cmm[6]
+		odo11a.innerHTML = cmm[7]
+		odo12a.innerHTML = cmm[8]
 	}
-	if (m == '10k') {
+	if (m == '10m') {
 		odo5a.innerHTML = cmm[0]
 		odo6a.innerHTML = cmm[1]
 		odo7a.innerHTML = cmm[2]
 		odo8a.innerHTML = cmm[3]
 		odo9a.innerHTML = cmm[4]
+		odo10a.innerHTML = cmm[5]
+		odo11a.innerHTML = cmm[6]
+		odo12a.innerHTML = cmm[7]
 	}
-	if (m == '1k') {
+	if (m == '1m') {
 		odo6a.innerHTML = cmm[0]
 		odo7a.innerHTML = cmm[1]
 		odo8a.innerHTML = cmm[2]
 		odo9a.innerHTML = cmm[3]
+		odo10a.innerHTML = cmm[4]
+		odo11a.innerHTML = cmm[5]
+		odo12a.innerHTML = cmm[6]
 	}
-	if (m == '100') {
+	if (m == '100k') {
 		odo7a.innerHTML = cmm[0]
 		odo8a.innerHTML = cmm[1]
 		odo9a.innerHTML = cmm[2]
+		odo10a.innerHTML = cmm[3]
+		odo11a.innerHTML = cmm[4]
+		odo12a.innerHTML = cmm[5]
 	}
-	if (m == '10') {
+	if (m == '10k') {
 		odo8a.innerHTML = cmm[0]
 		odo9a.innerHTML = cmm[1]
+		odo10a.innerHTML = cmm[2]
+		odo11a.innerHTML = cmm[3]
+		odo12a.innerHTML = cmm[4]
+	}
+	if (m == '1k') {
+		odo9a.innerHTML = cmm[0]
+		odo10a.innerHTML = cmm[1]
+		odo11a.innerHTML = cmm[2]
+		odo12a.innerHTML = cmm[3]
+	}
+	if (m == '100') {
+		odo10a.innerHTML = cmm[0]
+		odo11a.innerHTML = cmm[1]
+		odo12a.innerHTML = cmm[2]
+	}
+	if (m == '10') {
+		odo11a.innerHTML = cmm[0]
+		odo12a.innerHTML = cmm[1]
 	}
 	if (m == '1') {
-		odo9a.innerHTML = cmm[0]
+		odo12a.innerHTML = cmm[0]
 	}
 }
 
@@ -380,7 +509,7 @@ function update() {
 			chart.series[0].data[0].remove()
 			user.liveGraph.shift()
 		}
-		chart.series[0].addPoint([new Date().getTime(), user.subscribers], true, true);
+		chart.series[0].addPoint([new Date().getTime(), user.subscribers], true, true)
 		user.liveGraph.push([new Date().getTime(), user.subscribers])
 	}
 }
@@ -433,7 +562,7 @@ function submit2() {
 		let graphDates = []
 		for (let i = 0; i < user.graphDates.length; i++) {
 			user.graphDates[i] = user.graphDates[i]
-			graphData[i] = new Date(user.graphDates[i]).getTime()
+			graphDates[i] = new Date(user.graphDates[i]).getTime()
 		}
 		for (let i = 0; i < user.graphValues.length; i++) {
 			user.graphValues[i] = parseFloat(user.graphValues[i]);
@@ -467,6 +596,15 @@ function exportData() {
 	dlAnchorElem.setAttribute("href", dataStr);
 	dlAnchorElem.setAttribute("download", "data.json");
 	dlAnchorElem.click();
+}
+
+function toggleTheme() {
+	const stylesheet = document.getElementById("themeStylesheet");
+	if (stylesheet.getAttribute("href") === "./style.css") {
+		stylesheet.setAttribute("href", "./dark.css");
+	} else {
+		stylesheet.setAttribute("href", "./style.css");
+	}
 }
 
 function clearChart() {
