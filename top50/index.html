@@ -50,7 +50,9 @@
                     <option value="top25">Top 25</option>
                     <option value="top50">Top 50</option>
                     <option value="top100">Top 100</option>
+                    <option value="top150">Top 150</option>
                     <option value="line">Line</option>
+                    <option value="bar">Bar</option>
                 </select>
                 <button id="pauseB" onclick="pause()">Pause</button>
                 <button id="newS" onclick="newSequence()">New Sequence</button>
@@ -171,7 +173,7 @@
             <div style="margin-top: 0px; text-align: center;">
                 <br>
                 <input type="button" id="hideSettings" onclick="hideSettings()"
-                    value="Change Hotkey To Hide Settings"><label id="setting">Current: q</label>
+                    value="Change Hotkey To Hide Settings"><br><label id="setting">Current: q</label>
             </div>
             <div style="margin-top: 0px; text-align: center;">
                 <br>
@@ -179,7 +181,11 @@
             </div>
             <div style="margin-top: 0px; text-align: center;">
                 <br>
-                <input type="checkbox" id="fastest" checked><label>Show Fastest Channel</label>
+                <input type="checkbox" id="fastest"><label>Show Fastest Channel</label>
+            </div>
+            <div style="margin-top: 0px; text-align: center;">
+                <br>
+                <input type="checkbox" id="slowest"><label>Show Slowest Channel</label>
             </div>
             <div style="margin-top: 0px; text-align: center;">
                 <br>
