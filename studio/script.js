@@ -598,6 +598,15 @@ function exportData() {
 	dlAnchorElem.click();
 }
 
+function toggleTheme() {
+	const stylesheet = document.getElementById("themeStylesheet");
+	if (stylesheet.getAttribute("href") === "./style.css") {
+		stylesheet.setAttribute("href", "./dark.css");
+	} else {
+		stylesheet.setAttribute("href", "./style.css");
+	}
+}
+
 function clearChart() {
 	chart.series[0].setData([])
 }
