@@ -4,7 +4,6 @@
 <head>
     <title>Livecountsedit - Fake YouTube Studio</title>
     <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css" rel="stylesheet" type="text/css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -25,7 +24,7 @@
     <meta property="og:image" content="https://lcedit.com/images/studio.png" />
     <script src="./odometer.js"></script>
     <link href="./odometer.css" rel="stylesheet" />
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" id="themeStylesheet" href="./style.css">
     <script src="../highstock.js"></script>
 </head>
 
@@ -227,6 +226,7 @@
                 <div style="display: grid; grid-template-columns: repeat(3,1fr);">
                     <button onclick="saveData()">Save Data</button>
                     <button onclick="exportData()">Export Data</button>
+                    <button onclick="toggleTheme()">Switch theme</button>
                     <div>
                         <input type="file" id="file_input2" accept=".json">
                         <button onclick="importData()">Import Data</button>
