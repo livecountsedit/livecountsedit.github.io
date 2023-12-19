@@ -1,8 +1,6 @@
 let currentIndex = 0;
 let auditTimeout;
 let saveInterval;
-let makingSequence = false;
-let sequenceStuff = {}
 let chart;
 let nextUpdateAudit = false;
 function abb(n) {
@@ -29,11 +27,16 @@ function random(min, max) {
 let uuid = uuidGen()
 let data = {
     "data": [],
+    "showImages": true,
+    "showNames": true,
+    "showCounts": true,
+    "showRankings": true,
     "bgColor": "#FFF",
     "textColor": "#000",
     "boxColor": "#f7f5fe",
     "boxBorder": "#FFF",
     "imageBorder": "0",
+    "imageBorderColor": "#000",
     "sort": "",
     "gain_min": -10000,
     "gain_max": 10000,
@@ -160,6 +163,21 @@ function initLoad(redo) {
     if ((!data.autosave) && (data.autosave !== false)) {
         data.autosave = false;
     }
+    if(!data.showImages) {
+        data.showImages = true;
+    }
+    if(!data.showNames) {
+        data.showNames = true;
+    }
+    if(!data.showCounts) {
+        data.showCounts = true;
+    }
+    if(!data.showRankings) {
+        data.showRankings = true;
+    }
+    if (!data.imageBorderColor) {
+        data.imageBorderColor = '#000';
+    }
     data.pause = false;
     data.visulization = 'default';
     if (data.lastOnline && data.offlineGains == true) {
@@ -171,8 +189,9 @@ function initLoad(redo) {
                 const gained = gain * (secondsPassed / interval);
                 data.data[i].count += gained;
             } else {
-                const gain = random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
-                const gained = gain * (secondsPassed / interval);
+                const gain = average(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
+                let gained = gain * (secondsPassed / interval);
+                gained += (data.data[i].max_gain / data.data[i].min_gain) / 100
                 data.data[i].count += gained;
             }
         }
@@ -236,203 +255,6 @@ function initLoad(redo) {
     document.body.style.backgroundColor = data.bgColor;
     document.body.style.color = data.textColor;
     fix();
-    if (data.theme !== 'line') {
-        updateOdo();
-    }
-    updateInterval = setInterval(update, data.updateInterval);
-}
-
-function initLoad2() {
-    let c = 1;
-    clearInterval(updateInterval);
-    if (data.theme == 'top50') {
-        for (var l = 1; l <= 5; l++) {
-            var htmlcolumn = `<div class="column_${l} column"></div>`;
-            $('.main').append(htmlcolumn);
-            for (var t = 1; t <= 10; t++) {
-                let cc = c;
-                if (c < 10) {
-                    cc = "0" + c;
-                }
-                if (sequenceStuff.data[0].channels[c - 1]) {
-                    var abbTest = `<div class="count odometer" id="count_${sequenceStuff.data[0].channels[c - 1].id}">${Math.floor(sequenceStuff.data[0].channels[c - 1].count)}</div>`;
-                    if (data.abbreviate == true) {
-                        abbTest = `<div class="count odometer" id="count_${sequenceStuff.data[0].channels[c - 1].id}">${abb(Math.floor(sequenceStuff.data[0].channels[c - 1].count))}</div>`;
-                    }
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_${sequenceStuff.data[c - 1].id}">
-            <div class="num" id="num_${sequenceStuff.data[0].channels[c - 1].id}">${cc}</div>
-          <img src="${sequenceStuff.data[0].channels[c - 1].image}" alt="" id="image_${sequenceStuff.data[0].channels[c - 1].id}" class="image">
-          <div class="name" id="name_${sequenceStuff.data[0].channels[c - 1].id}">${sequenceStuff.data[0].channels[c - 1].name}</div>
-          ${abbTest}
-          </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                } else {
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                }
-            }
-        }
-    } else if (data.theme == 'top10') {
-        for (var l = 1; l <= 5; l++) {
-            var htmlcolumn = `<div class="column_${l} column"></div>`;
-            $('.main').append(htmlcolumn);
-            for (var t = 1; t <= 2; t++) {
-                let cc = c;
-                if (c < 10) {
-                    cc = "0" + c;
-                }
-                if (data.data[c - 1]) {
-                    var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                    if (data.abbreviate == true) {
-                        abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                    }
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-          <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-          <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-          ${abbTest}
-          </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                } else {
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                }
-            }
-        }
-    } else if (data.theme == 'top25') {
-        for (var l = 1; l <= 5; l++) {
-            var htmlcolumn = `<div class="column_${l} column"></div>`;
-            $('.main').append(htmlcolumn);
-            for (var t = 1; t <= 5; t++) {
-                let cc = c;
-                if (c < 10) {
-                    cc = "0" + c;
-                }
-                if (data.data[c - 1]) {
-                    var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                    if (data.abbreviate == true) {
-                        abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                    }
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-            <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-            <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-            ${abbTest}
-            </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                } else {
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                }
-            }
-        }
-    } else if (data.theme == 'top100') {
-        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        var style = document.createElement('style');
-        style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
-        .card { height: 2.15vw; }
-        .count { font-size: 1vw; }
-        .name { font-size: 0.75vw; }`;
-        document.getElementsByTagName('head')[0].appendChild(style);
-        for (var l = 1; l <= 10; l++) {
-            var htmlcolumn = `<div class="column_${l} column"></div>`;
-            $('.main').append(htmlcolumn);
-            for (var t = 1; t <= 10; t++) {
-                let cc = c;
-                if (c < 10) {
-                    cc = "0" + c;
-                }
-                if (data.data[c - 1]) {
-                    var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                    if (data.abbreviate == true) {
-                        abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                    }
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-            <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-            <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-            ${abbTest}
-            </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                } else {
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                }
-            }
-        }
-    } else if (data.theme == 'top150') {
-        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        var style = document.createElement('style');
-        style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
-        .card { height: 2.15vw; }
-        .count { font-size: 1vw; }
-        .name { font-size: 0.75vw; }`;
-        document.getElementsByTagName('head')[0].appendChild(style);
-        for (var l = 1; l <= 10; l++) {
-            var htmlcolumn = `<div class="column_${l} column"></div>`;
-            $('.main').append(htmlcolumn);
-            for (var t = 1; t <= 10; t++) {
-                let cc = c;
-                if (c < 10) {
-                    cc = "0" + c;
-                }
-                if (data.data[c - 1]) {
-                    var abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${Math.floor(data.data[c - 1].count)}</div>`;
-                    if (data.abbreviate == true) {
-                        abbTest = `<div class="count odometer" id="count_${data.data[c - 1].id}">${abb(Math.floor(data.data[c - 1].count))}</div>`;
-                    }
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_${data.data[c - 1].id}">
-            <div class="num" id="num_${data.data[c - 1].id}">${cc}</div>
-            <img src="${data.data[c - 1].image}" alt="" id="image_${data.data[c - 1].id}" class="image">
-            <div class="name" id="name_${data.data[c - 1].id}">${data.data[c - 1].name}</div>
-            ${abbTest}
-            </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                } else {
-                    var htmlcard = `<div class="card card_${c - 1}" id="card_">
-                <div class="num" id="num_">${cc}</div>
-                <img src="../default.png" alt="" id="image_" class="image">
-                <div class="name" id="name_">Loading</div>
-                <div class="count odometer" id="count_">0</div>
-                </div>`;
-                    $('.column_' + l).append(htmlcard);
-                    c += 1;
-                }
-            }
-        }
-    } else {
-        alert('err')
-    }
-    fix()
     updateOdo();
     updateInterval = setInterval(update, data.updateInterval);
 }
@@ -504,7 +326,6 @@ function create() {
     }
 }
 
-let sequenceNum = 0;
 function update() {
     let start = new Date().getTime();
     if (data) {
@@ -541,14 +362,14 @@ function update() {
         }
         document.getElementById('quickSelect').innerHTML = selections.join("");
         document.getElementById('quickSelect').value = past;
-        let sort = `b.${document.getElementById('sort').value} - a.${document.getElementById('sort').value}`
-        if (document.getElementById('sort').value == "fastest") {
+        let sort = `b.${document.getElementById('sorter').value} - a.${document.getElementById('sorter').value}`
+        if (document.getElementById('sorter').value == "fastest") {
             sort = `avg(b.min_gain, b.max_gain) - avg(a.min_gain, a.max_gain)`
         }
-        if (document.getElementById('sort').value == "slowest") {
+        if (document.getElementById('sorter').value == "slowest") {
             sort = `avg(a.min_gain, a.max_gain) - avg(b.min_gain, b.max_gain)`
         }
-        if (!document.getElementById('sort').value) {
+        if (!document.getElementById('sorter').value) {
             sort = `b.count - a.count`
         }
         data.data = data.data.sort(function (a, b) {
@@ -579,9 +400,9 @@ function update() {
                             document.getElementsByClassName("card")[i].children[3].innerHTML = Math.floor(data.data[i].count)
                         }
                         if (selected == data.data[i].id) {
-                            document.getElementById("card_" + selected).style.border = "1px solid red";
+                            document.getElementById("card_" + selected).style.border = "0.1em solid red";
                         } else {
-                            document.getElementById("card_" + data.data[i].id).style.border = "1px solid " + data.boxBorder + "";
+                            document.getElementById("card_" + data.data[i].id).style.border = "0.1em solid " + data.boxBorder + "";
                         }
                         if (fastest == data.data[i].id) {
                             if (data.fastest == true) {
@@ -596,38 +417,6 @@ function update() {
                     }
                 }
             }
-        } else if (data.visulization == 'line') {
-            data.data.forEach(function (item, index) {
-                chart.data.datasets[index].data.push(item.count);
-
-            });
-            chart.data.labels.push(new Date().toLocaleTimeString());
-            if (chart.data.labels.length > 50) {
-                chart.data.labels.shift();
-                chart.data.datasets.forEach(function (dataset) {
-                    dataset.data.shift();
-                });
-            }
-            chart.update();
-        } else if (data.visulization == 'sequence') {
-            if (sequenceNum < sequenceStuff.data.length) {
-                sequenceStuff.data[sequenceNum].channels.forEach(function (item, i) {
-                    if (item.image) {
-                        item.image = item.image;
-                    } else {
-                        item.image = "../default.png";
-                    }
-                    document.getElementsByClassName("card")[i].children[1].src = item.image
-                    document.getElementsByClassName("card")[i].children[2].innerHTML = item.name
-                    document.getElementsByClassName("card")[i].children[1].id = "image_" + item.id
-                    document.getElementsByClassName("card")[i].children[2].id = "name_" + item.id
-                    document.getElementsByClassName("card")[i].children[0].id = "num_" + item.id
-                    document.getElementsByClassName("card")[i].id = "card_" + item.id
-                    document.getElementsByClassName("card")[i].children[3].id = "count_" + item.id
-                    document.getElementsByClassName("card")[i].children[3].innerHTML = Math.floor(item.count)
-                })
-                sequenceNum++;
-            }
         }
     }
     let end = new Date().getTime();
@@ -635,7 +424,7 @@ function update() {
     console.log('Execution timeS: ' + time / 1000);
 }
 
-document.getElementById('sort').addEventListener('change', function () {
+document.getElementById('sorter').addEventListener('change', function () {
     update();
 });
 
@@ -652,66 +441,6 @@ document.getElementById('quickSelect').addEventListener('change', function (e) {
         selecterFunction(newForm)
     }
 })
-
-function selecterFunction(e) {
-    if (makingSequence == false) {
-        let id = e.target.id.split("_")[1];
-        if (e.target.id.split("_").length > 2) {
-            for (let i = 2; i < e.target.id.split("_").length; i++) {
-                id = id + "_" + e.target.id.split("_")[i];
-            }
-        }
-        if (selected != null) {
-            document.getElementById('card_' + selected + '').classList.remove('selected');
-            document.getElementById('card_' + selected + '').style.border = "solid 1px " + data.boxBorder + "";
-        }
-        if (id == selected) {
-            if (selected != null) {
-                document.getElementById('card_' + id + '').classList.remove('selected');
-                document.getElementById('card_' + id + '').style.border = "solid 1px " + data.boxBorder + "";
-                selected = null;
-                document.getElementById('edit_min_gain').value = "";
-                document.getElementById('edit_mean_gain').value = "";
-                document.getElementById('edit_std_gain').value = "";
-                document.getElementById('edit_max_gain').value = "";
-                document.getElementById('edit_name').value = "";
-                document.getElementById('edit_count').value = "";
-                document.getElementById('edit_image1').value = "";
-            }
-        } else {
-            if (document.getElementById('card_' + id + '')) {
-                document.getElementById('card_' + id + '').classList.add('selected');
-                document.getElementById('card_' + id + '').style.border = "solid 1px red"
-                selected = id;
-                for (let q = 0; q < data.data.length; q++) {
-                    if (data.data[q].id == id) {
-                        if (data.data[q].mean_gain) {
-                            document.getElementById('edit_mean_gain').value = data.data[q].mean_gain;
-                            document.getElementById('edit_mean_gain_check').checked = true;
-                        } else {
-                            document.getElementById('edit_mean_gain').value = "";
-                            document.getElementById('edit_mean_gain_check').checked = false;
-                        }
-                        if (data.data[q].std_gain) {
-                            document.getElementById('edit_std_gain').value = data.data[q].mean_gain;
-                            document.getElementById('edit_std_gain_check').checked = true;
-                        } else {
-                            document.getElementById('edit_std_gain').value = "";
-                            document.getElementById('edit_std_gain_check').checked = false;
-                        }
-                        document.getElementById('edit_min_gain').value = data.data[q].min_gain;
-                        document.getElementById('edit_max_gain').value = data.data[q].max_gain;
-                        document.getElementById('edit_name').value = data.data[q].name;
-                        document.getElementById('edit_count').value = data.data[q].count;
-                        document.getElementById('edit_image1').value = data.data[q].image;
-                    }
-                }
-            }
-        }
-    } else {
-        selecterFunction2(e)
-    }
-}
 
 function edit() {
     if (selected !== null) {
@@ -807,8 +536,12 @@ function saveData2() {
     localStorage.setItem("data", JSON.stringify(data));
 }
 
+document.getElementById('loadData').addEventListener('change', function () {
+    load();
+});
+
 function load() {
-    data3 = {};
+    var data3 = {};
     document.getElementById('main').innerHTML = "";
     if (document.getElementById('loadData').files[0]) {
         document.getElementById('loadData').files[0].text().then(function (data2) {
@@ -861,7 +594,7 @@ function load() {
                 }
                 document.body.style.backgroundColor = data.bgColor;
                 document.body.style.color = data.textColor;
-                document.getElementById('sort').value = data.sort;
+                document.getElementById('sorter').value = data.sort;
                 if (!data.uuid) {
                     data.uuid = uuidGen();
                 }
@@ -937,6 +670,45 @@ document.getElementById('imageBorder').addEventListener('change', function () {
     fix()
 });
 
+document.getElementById('imageBorder').addEventListener('change', function () {
+    let color = this.value;
+    data.imageBorderColor = color;
+    fix()
+});
+
+document.getElementById('showRankings').addEventListener('change', function () {
+    if (document.getElementById('showRankings').checked) {
+        data.showRankings = true;
+    } else {
+        data.showRankings = false;
+    }
+    fix()
+});
+document.getElementById('showNames').addEventListener('change', function () {
+    if (document.getElementById('showNames').checked) {
+        data.showNames = true;
+    } else {
+        data.showNames = false;
+    }
+    fix()
+});
+document.getElementById('showImages').addEventListener('change', function () {
+    if (document.getElementById('showImages').checked) {
+        data.showImages = true;
+    } else {
+        data.showImages = false;
+    }
+    fix()
+});
+document.getElementById('showCounts').addEventListener('change', function () {
+    if (document.getElementById('showCounts').checked) {
+        data.showCounts = true;
+    } else {
+        data.showCounts = false;
+    }
+    fix()
+});
+
 function fix() {
     if (data.audits == true) {
         auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
@@ -986,16 +758,62 @@ function fix() {
     } else {
         document.getElementById('autosave').checked = false;
     }
+    if (data.showRankings == true) {
+        document.getElementById('showRankings').checked = true;
+        document.querySelectorAll('.num').forEach(function (card) {
+            card.style.display = "";
+        })
+    } else {
+        document.getElementById('showRankings').checked = false;
+        document.querySelectorAll('.num').forEach(function (card) {
+            card.style.display = "none";
+        })
+    }
+    if (data.showNames == true) {
+        document.getElementById('showNames').checked = true;
+        document.querySelectorAll('.name').forEach(function (card) {
+            card.style.display = "";
+        })
+    } else {
+        document.getElementById('showNames').checked = false;
+        document.querySelectorAll('.name').forEach(function (card) {
+            card.style.display = "none";
+        })
+    }
+    if (data.showImages == true) {
+        document.getElementById('showImages').checked = true;
+        document.querySelectorAll('.image').forEach(function (card) {
+            card.style.display = "";
+        })
+    } else {
+        document.getElementById('showImages').checked = false;
+        document.querySelectorAll('.image').forEach(function (card) {
+            card.style.display = "none";
+        })
+    }
+    if (data.showCounts == true) {
+        document.getElementById('showCounts').checked = true;
+        document.querySelectorAll('.count').forEach(function (card) {
+            card.style.display = "";
+        })
+    } else {
+        document.getElementById('showCounts').checked = false;
+        document.querySelectorAll('.count').forEach(function (card) {
+            card.style.display = "none";
+        })
+    }
+
     document.getElementById('theme').value = data.theme;
     document.getElementById('setting').innerHTML = "Current: " + data.hideSettings + ""
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
         if (card.className.split(' ').includes("selected") == false) {
-            card.style.border = "solid 1px " + data.boxBorder;
+            card.style.border = "solid 0.1em " + data.boxBorder;
         }
     });
     document.querySelectorAll('.image').forEach(function (card) {
         card.style.borderRadius = data.imageBorder + "%";
+        card.style.borderColor = data.imageBorderColor;
     });
     document.getElementById('backPicker').value = convert3letterhexto6letters(data.bgColor);
     document.getElementById('textPicker').value = convert3letterhexto6letters(data.textColor);
@@ -1004,11 +822,12 @@ function fix() {
     document.getElementById('odometerUp').value = data.odometerUp;
     document.getElementById('odometerDown').value = data.odometerDown;
     document.getElementById('odometerSpeed').value = data.odometerSpeed;
-    document.getElementById('imageBorder').value = data.imageBorder
+    document.getElementById('imageBorder').value = data.imageBorder;
+    document.getElementById('imageBorderColor').value = data.imageBorder;
     if (data.updateInterval) {
         document.getElementById('updateint').value = (data.updateInterval / 1000).toString()
     }
-    document.getElementById('sort').value = data.sort;
+    document.getElementById('sorter').value = data.sort;
     $('style').append(`.odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-up.odometer-animating .odometer-ribbon-inner {
         color: ${data.odometerUp};
         }`)
@@ -1240,18 +1059,10 @@ function updateOdo() {
                 div.className = "count";
                 div.id = "count" + i;
                 if (data.data[i]) {
-                    if (sequenceStuff.data) {
-                        if (sequenceStuff.data[0].channels[i]) {
-                            div.innerHTML = sequenceStuff.data[0].channels[i].count.toLocaleString();
-                        } else {
-                            div.innerHTML = data.data[i].count.toLocaleString();
-                        }
+                    if (data.data[i]) {
+                        div.innerHTML = data.data[i].count.toLocaleString();
                     } else {
-                        if (data.data[i]) {
-                            div.innerHTML = data.data[i].count.toLocaleString();
-                        } else {
-                            div.innerHTML = 0;
-                        }
+                        div.innerHTML = 0;
                     }
                 } else {
                     div.innerHTML = 0;
@@ -1259,15 +1070,7 @@ function updateOdo() {
                 document.getElementsByClassName("card")[i].appendChild(div);
                 let count = 0;
                 if (data.data[i]) {
-                    if (sequenceStuff.data) {
-                        if (sequenceStuff.data[0].channels[i]) {
-                            count = sequenceStuff.data[0].channels[i].count;
-                        } else {
-                            count = 0;
-                        }
-                    } else {
-                        count = data.data[i].count;
-                    }
+                    count = data.data[i].count;
                 } else {
                     count = 0;
                 }
@@ -1298,46 +1101,78 @@ function updateOdo() {
                     div.innerHTML = 0;
                 }
                 document.getElementsByClassName("card")[i].appendChild(div);
-                if (sequenceStuff.data) {
-                    if (sequenceStuff.data[0].channels[i]) {
-                        new Odometer({
-                            el: document.getElementById("count" + i),
-                            value: sequenceStuff.data[0].channels[i].count,
-                            format: '(,ddd)',
-                            theme: 'default',
-                            animation: 'count'
-                        })
-                    } else {
-                        new Odometer({
-                            el: document.getElementById("count" + i),
-                            value: 0,
-                            format: '(,ddd)',
-                            theme: 'default',
-                            animation: 'count'
-                        })
-                    }
+                if (data.data[i]) {
+                    new Odometer({
+                        el: document.getElementById("count" + i),
+                        value: data.data[i].count,
+                        format: '(,ddd)',
+                        theme: 'default',
+                        animation: 'count'
+                    })
                 } else {
-                    if (data.data[i]) {
-                        new Odometer({
-                            el: document.getElementById("count" + i),
-                            value: data.data[i].count,
-                            format: '(,ddd)',
-                            theme: 'default',
-                            animation: 'count'
-                        })
-                    } else {
-                        new Odometer({
-                            el: document.getElementById("count" + i),
-                            value: 0,
-                            format: '(,ddd)',
-                            theme: 'default',
-                            animation: 'count'
-                        })
-                    }
+                    new Odometer({
+                        el: document.getElementById("count" + i),
+                        value: 0,
+                        format: '(,ddd)',
+                        theme: 'default',
+                        animation: 'count'
+                    })
                 }
             }
         }
     }
+}
+
+function selecterFunction(e) {
+        let id = e.target.id.split("_")[1];
+        if (e.target.id.split("_").length > 2) {
+            for (let i = 2; i < e.target.id.split("_").length; i++) {
+                id = id + "_" + e.target.id.split("_")[i];
+            }
+        }
+        if (selected != null) {
+            document.getElementById('card_' + selected + '').classList.remove('selected');
+            document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
+        }
+        if (id == selected) {
+            if (selected != null) {
+                document.getElementById('card_' + id + '').classList.remove('selected');
+                document.getElementById('card_' + id + '').style.border = "solid 0.1em " + data.boxBorder + "";
+                selected = null;
+                document.getElementById('edit_min_gain').value = "";
+                document.getElementById('edit_mean_gain').value = "";
+                document.getElementById('edit_std_gain').value = "";
+                document.getElementById('edit_max_gain').value = "";
+                document.getElementById('edit_name').value = "";
+                document.getElementById('edit_count').value = "";
+                document.getElementById('edit_image1').value = "";
+            }
+        } else {
+            if (document.getElementById('card_' + id + '')) {
+                document.getElementById('card_' + id + '').classList.add('selected');
+                document.getElementById('card_' + id + '').style.border = "solid 0.1em red"
+                selected = id;
+                for (let q = 0; q < data.data.length; q++) {
+                    if (data.data[q].id == id) {
+                        if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
+                            document.getElementById('edit_mean_gain').value = data.data[q].mean_gain;
+                            document.getElementById('edit_mean_gain_check').checked = true;
+                            document.getElementById('edit_std_gain').value = data.data[q].mean_gain;
+                            document.getElementById('edit_std_gain_check').checked = true;
+                        } else {
+                            document.getElementById('edit_mean_gain').value = "";
+                            document.getElementById('edit_mean_gain_check').checked = false;
+                            document.getElementById('edit_std_gain_check').checked = false;
+                        }
+                        document.getElementById('edit_min_gain').value = data.data[q].min_gain;
+                        document.getElementById('edit_max_gain').value = data.data[q].max_gain;
+                        document.getElementById('edit_name').value = data.data[q].name;
+                        document.getElementById('edit_count').value = data.data[q].count;
+                        document.getElementById('edit_image1').value = data.data[q].image;
+                    }
+                }
+            }
+        }
 }
 
 document.getElementById('abbreviate').addEventListener('click', function () {
@@ -1459,6 +1294,10 @@ function randomGaussian(mean, stdev) {
     return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b) * stdev + mean;
 }
 
+function average(num1, num2) {
+    return (num1 + num2) / 2
+}
+
 function create50dummychannels() {
     for (let i = 0; i < 50; i++) {
         data.data[i] = {
@@ -1468,193 +1307,6 @@ function create50dummychannels() {
             max_gain: 2,
             image: '../default.png',
             id: uuidGen()
-        }
-    }
-}
-let selectedChannels = [];
-let sequence = { data: [] }
-function newSequence() {
-    pause();
-    selectedChannels = [];
-    sequence.name = prompt("Enter the name of the sequence")
-    sequence.length = prompt("Enter the length of the sequence (in seconds)")
-    if (!sequence.name) {
-        sequence.name = "Untitled"
-    }
-    if (!sequence.length) {
-        sequence.length = 30
-    }
-    makingSequence = true;
-    alert('Select the channels you would like to be added to the sequence.\nPress enter when you are done.')
-    document.addEventListener('keydown', function (e) {
-        if (e.key == "Enter") {
-            localStorage.setItem("data", JSON.stringify(data));
-            document.getElementById('main').innerHTML = "";
-            for (let q = 0; q < parseFloat(sequence.length); q++) {
-                sequence.data[q] = {
-                    channels: [],
-                    time: q
-                }
-                for (let i = 0; i < selectedChannels.length; i++) {
-                    if (q == 0) {
-                        sequence.data[q].channels[i] = {
-                            id: selectedChannels[i].split('_')[1],
-                            count: getSubs(selectedChannels[i].split('_')[1]),
-                            min_gain: getMinGain(selectedChannels[i].split('_')[1]),
-                            max_gain: getMaxGain(selectedChannels[i].split('_')[1]),
-                            manual: true,
-                            name: getName(selectedChannels[i].split('_')[1]),
-                            image: getImage(selectedChannels[i].split('_')[1])
-                        }
-                    } else {
-                        sequence.data[q].channels[i] = {
-                            id: selectedChannels[i].split('_')[1],
-                            count: 0,
-                            min_gain: getMinGain(selectedChannels[i].split('_')[1]),
-                            max_gain: getMaxGain(selectedChannels[i].split('_')[1]),
-                            manual: false,
-                            name: getName(selectedChannels[i].split('_')[1]),
-                            image: getImage(selectedChannels[i].split('_')[1])
-                        }
-                    }
-                }
-            }
-            let newChannels = [];
-            for (let mm = 0; mm < selectedChannels.length; mm++) {
-                if (newChannels.includes("a_" + selectedChannels[mm].split('_')[1]) == false) {
-                    newChannels.push("a_" + selectedChannels[mm].split('_')[1])
-                }
-            }
-            selectedChannels = newChannels;
-            for (let q = 0; q < data.data.length; q++) {
-                for (let i = 0; i < selectedChannels.length; i++) {
-                    if (selectedChannels[i].split('_')[1] == data.data[q].id) {
-                        document.getElementById('main').innerHTML += `
-                <div class="channel" id="channel_${data.data[q].id}" style="border: solid 1px #000; text-align: center;">
-                    <div class="channelImage">
-                        <img src="${data.data[q].image}" alt="Channel Image">
-                    </div>
-                    <div class="channelName">
-                        <h1>${data.data[q].name}</h1>
-                    </div>
-                    <div class="channelCount">
-                        <h1 id="count"><input id="count_${data.data[q].id}" style="font-size: 1vw;" value="${data.data[q].count}"></h1>
-                    </div>
-                    <div class="channelGain">
-                        <h1 id="gain">Min Gain For Next Count: <input id="min_${data.data[q].id}" style="font-size: 1vw;" value="${data.data[q].min_gain}"></h1>
-                        <h1 id="gain">Max Gain For Next Count: <input id="max_${data.data[q].id}" style="font-size: 1vw;" value="${data.data[q].max_gain}"></h1>
-                    </div>
-                </div>`
-                    }
-                }
-            }
-            for (let i = 0; i < selectedChannels.length; i++) {
-                let id = selectedChannels[i].split('_')[1]
-                document.getElementById(`count_${id}`).addEventListener('change', function () {
-                    let time = parseFloat(document.getElementById("demo").innerHTML)
-                    sequence.data[time].channels.forEach(item => {
-                        if (item.id == id) {
-                            item.count = parseFloat(document.getElementById(`count_${id}`).value)
-                            return;
-                        }
-                    })
-                })
-                document.getElementById(`min_${id}`).addEventListener('change', function () {
-                    let time = parseFloat(document.getElementById("demo").innerHTML - 1)
-                    sequence.data[time].channels.forEach(item => {
-                        if (item.id == id) {
-                            item.min_gain = parseFloat(document.getElementById(`min_${id}`).value)
-                            reloadSequenceValues(time)
-                            return;
-                        }
-                    })
-                })
-                document.getElementById(`max_${id}`).addEventListener('change', function () {
-                    let time = parseFloat(document.getElementById("demo").innerHTML - 1)
-                    sequence.data[time].channels.forEach(item => {
-                        if (item) {
-                            if (item.id == id) {
-                                item.max_gain = parseFloat(document.getElementById(`max_${id}`).value)
-                                reloadSequenceValues(time)
-                                return;
-                            }
-                        }
-                    })
-                })
-            }
-            document.getElementById('settings').innerHTML = `
-                    <div class="slidecontainer">
-                        <input type="range" min="1" max="${sequence.length}" value="0" class="slider" id="myRange">
-                            <p>Value: <span id="demo"></span></p>
-                        </div>
-                        <br>
-                        <button onclick="reloadSequenceValues2()">Reload counts/rates</button>
-                        <button onclick="saveSeqeunce()">Save Seqeunce (will save in file)</button>
-                    </div>
-                `;
-            var slider = document.getElementById("myRange");
-            var output = document.getElementById("demo");
-            output.innerHTML = slider.value;
-            slider.oninput = function () {
-                var time = parseFloat(this.value) - 1
-                output.innerHTML = this.value;
-                for (let i = 0; i < selectedChannels.length; i++) {
-                    let id = selectedChannels[i].split('_')[1]
-                    if (sequence.data[time]) {
-                        if (sequence.data[time].channels[i].manual == false) {
-                            if (sequence.data[time - 1].channels[i]) {
-                                sequence.data[time - 1].channels[i].min_gain = parseFloat(document.getElementById(`min_${id}`).value)
-                                sequence.data[time - 1].channels[i].max_gain = parseFloat(document.getElementById(`max_${id}`).value)
-                                let newTotal = sequence.data[0].channels[i].count + mean(sequence.data[time - 1].channels[i].min_gain, sequence.data[time - 1].channels[i].max_gain) * time
-                                document.getElementById(`count_${id}`).value = newTotal
-                                sequence.data[time].channels[i].count = newTotal
-                                sequence.data[time].channels[i].manual = true
-                            } else {
-                                alert('glitch lol')
-                            }
-                        } else {
-                            document.getElementById(`count_${id}`).value = sequence.data[time].channels[i].count
-                        }
-                    }
-                    document.getElementById(`min_${id}`).value = sequence.data[time].channels[i].min_gain
-                    document.getElementById(`max_${id}`).value = sequence.data[time].channels[i].max_gain
-                }
-            }
-        }
-    })
-}
-
-async function reloadSequenceValues2() {
-    let time = parseFloat(document.getElementById("demo").innerHTML)
-    return await reloadSequenceValues(time)
-}
-
-function reloadSequenceValues(time) {
-    console.log('reloaded')
-    let max = parseFloat(document.getElementById("myRange").max)
-    for (let i = 0; i < max; i++) {
-        document.getElementById("myRange").value = i
-    }
-    document.getElementById("myRange").value = time + 1
-    return 'done'
-}
-
-function selecterFunction2(e) {
-    if (makingSequence == true) {
-        if (e.target.id.includes("_")) {
-            if (selectedChannels.includes(e.target.id)) {
-                selectedChannels.splice(selectedChannels.indexOf(e.target.id), 1)
-                document.getElementById('card_' + e.target.id.split("_")[1] + '').style.border = "solid 1px " + data.boxBorder + "";
-            } else {
-                selectedChannels.push(e.target.id)
-                let id = e.target.id.split("_")[1];
-                if (e.target.id.split("_").length > 2) {
-                    for (let i = 2; i < e.target.id.split("_").length; i++) {
-                        id = id + "_" + e.target.id.split("_")[i];
-                    }
-                }
-                document.getElementById('card_' + id + '').style.border = "solid 1px blue";
-            }
         }
     }
 }
@@ -1704,68 +1356,12 @@ function getMaxGain(id) {
     return 0;
 }
 
-async function saveSeqeunce() {
-    await reloadSequenceValues2()
-    let data2 = JSON.stringify(sequence);
-    let a = document.createElement('a');
-    let file = new Blob([data2], { type: 'text/json' });
-    a.href = URL.createObjectURL(file);
-    a.download = 'sequenceData.json';
-    a.click();
-}
-
-function line() {
-    document.getElementById('main').innerHTML = ''
-    document.getElementById('chart').style.height = '100vh'
-    document.getElementById('chart').style.display = ''
-    let names = []
-    let datasets = []
-    for (let i = 0; i < data.data.length; i++) {
-        let color = randomColor()
-        names.push(data.data[i].name)
-        let dataset = {
-            label: data.data[i].name,
-            data: [data.data[i].count],
-            fill: false,
-            borderColor: color,
-            tension: 0.1
-        }
-        datasets.push(dataset)
-    }
-    const ctx = document.getElementById('chart')
-    const add = {
-        labels: [new Date().toLocaleTimeString()],
-        datasets: datasets
-    };
-    const config = {
-        type: 'line',
-        data: add,
-    };
-    chart = new Chart(ctx, config);
-    data.visulization = 'line'
-}
-
 function randomColor() {
     let color = '#'
     for (let i = 0; i < 6; i++) {
         color += Math.floor(Math.random() * 16).toString(16)
     }
     return color
-}
-
-function loadSequence() {
-    let file = document.getElementById('loadSequence').files[0];
-    let reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = function () {
-        data.visulization = 'sequence'
-        sequenceStuff = JSON.parse(reader.result)
-        document.getElementById('main').innerHTML = ''
-        initLoad2()
-    }
-    reader.onerror = function () {
-        alert('error')
-    }
 }
 
 function mean(a, b) {

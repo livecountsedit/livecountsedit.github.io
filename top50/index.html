@@ -26,46 +26,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="../jquery.js"></script>
     <script src="../odometer.js"></script>
-    <script src="../chart.js"></script>
-    <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
+    <script src="../highstock.js"></script>
+    <!--<script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>-->
 </head>
 
 <body>
-    <div class="main" id="main" style="margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);"></div>
-    <canvas class="main" id="chart" style="margin-top: 0px; display: none;"></canvas>
+    <div class="main" id="main" style="display: grid; grid-template-columns: repeat(5, 1fr);"></div>
     <hr>
     <div class="other" id="settings">
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); margin-top: 0px;">
-            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
-                <label>Sort By:</label>
-                <select id="sort" autocomplete="off">
-                    <option value="">Select</option>
-                    <option value="num">Number</option>
-                    <option value="name">Name</option>
-                    <option value="fastest">Fastest</option>
-                </select>
-                <label>Theme:</label>
-                <select id="theme" autocomplete="off">
-                    <option value="top10">Top 10</option>
-                    <option value="top25">Top 25</option>
-                    <option value="top50">Top 50</option>
-                    <option value="top100">Top 100</option>
-                    <option value="top150">Top 150</option>
-                    <option value="line">Line</option>
-                    <option value="bar">Bar</option>
-                </select>
-                <button id="pauseB" onclick="pause()">Pause</button>
-                <button id="newS" onclick="newSequence()">New Sequence</button>
-                <button onclick="loadSequence()">Load Sequence (From File =>)</button>
-                <input type="file" id="loadSequence" autocomplete="off">
-            </div>
-            <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
-                <button onclick="reset()">Reset</button>
-                <button onclick="save()">Save (In Browser)</button>
-                <button onclick="save2()">Save (In File)</button>
-                <button onclick="load()">Load Save (From File =>)</button>
-                <input type="file" id="loadData" autocomplete="off">
-                <input type="checkbox" id="autosave" autocomplete="off"><label>Autosave (15s)</label>
+        <div style="overflow-x: scroll;">
+            <div style="margin-top: 0px; border: 1px dashed #000; border-bottom: none; display: flex; gap: 0.5em;">
+                <div>
+                    <label>Sort By:</label>
+                    <select id="sorter" autocomplete="off">
+                        <option value="">Select</option>
+                        <option value="num">Number</option>
+                        <option value="name">Name</option>
+                        <option value="fastest">Fastest</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Theme:</label>
+                    <select id="theme" autocomplete="off">
+                        <option value="top10">Top 10</option>
+                        <option value="top25">Top 25</option>
+                        <option value="top50">Top 50</option>
+                        <option value="top100">Top 100</option>
+                        <option value="top150">Top 150</option>
+                    </select>
+                </div>
+                <div>
+                    <button id="pauseB" onclick="pause()">Pause</button>
+                </div>
+                <div>
+                    <button onclick="reset()">Reset</button>
+                </div>
+                <div>
+                    <button onclick="save()">Save (In Browser)</button>
+                </div>
+                <div>
+                    <button onclick="save2()">Save (In File)</button>
+                </div>
+                <div>
+                    <input type="checkbox" id="autosave" autocomplete="off"><label>Autosave (15s)</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="offline" autocomplete="off"><label>Offline Gains</label>
+                </div>
+            </div><br>
+            <div style="margin-top: 0px; border: 1px dashed #000; display: flex; border-top: none;">
+                <div>
+                    <label>Load Save (From File) =></label>
+                    <input type="file" id="loadData" autocomplete="off">
+                </div>
+                <div>
+                    <button id="newS" onclick="newSequence()">New Sequence</button>
+                    <label><b>or</b> Load Sequence (From File) =></label>
+                    <input type="file" id="loadSequence" autocomplete="off">
+                </div>
             </div>
         </div>
         <br>
@@ -79,136 +97,153 @@
                 <input placeholder="Image" type="file" id="add_image2"><br>
                 <input placeholder="Count" id="add_count"><br>
                 <input placeholder="Min Gain" id="add_min_gain"><br>
-                <input placeholder="Max Gain" id="add_max_gain">
-                <hr>
-                <label>What is <a href="https://en.wikipedia.org/wiki/Standard_deviation">Standard Deviation
-                        (STD)</a>?</label><br><br>
-                <label>If filled in then min/max is ignored. The "std" is the range from the mean.</label><br>
+                <input placeholder="Max Gain" id="add_max_gain"><br>
+                <br>
+                <label>If filled in then min/max is ignored.</label><br>
                 <input placeholder="Mean Gain" id="add_mean_gain"><br>
-                <input placeholder="STD" id="add_std_gain"><br>
+                <input placeholder="Range From Mean (Standard Deviation)" id="add_std_gain"><br>
+                <br>
                 <button onclick="create()">Create</button>
             </div>
             <div style="margin-top: 0px; border: 1px dashed #000;" class="dashed">
-                <div style="display: flex; gap: 2vw; text-align: left;">
-                    <h2 style="margin-top: 0px; text-align: left; margin-bottom: 0px;">Edit Channel</h2>
-                    <div>
-                        <select id="quickSelect">
-                            <option value="select">Select</option>
-                        </select>
-                        <label> Quick Select</label>
-                    </div>
-                </div>
+                <h2 style="margin-top: 0px; margin-bottom: 0px;">Edit Channel</h2>
                 <br>
-                <input placeholder="Name" id="edit_name" value="">
-                <input type="checkbox" id="edit_name_check" checked>
+                <select id="quickSelect">
+                    <option value="select">Select</option>
+                </select>
+                <label style="font-size: 0.9em;"> Quick Select</label>
                 <br>
-                <input placeholder="Image" id="edit_image1" value="">
-                <label>or</label>
-                <input placeholder="Image" type="file" id="edit_image2" value="">
-                <input type="checkbox" id="edit_image_check" checked>
+                <input placeholder="Name" id="edit_name" value=""><input type="checkbox" id="edit_name_check"
+                    checked><br>
+                <input placeholder="Image" id="edit_image1" value=""><label>or</label>
+                <input placeholder="Image" type="file" id="edit_image2" value=""><input type="checkbox"
+                    id="edit_image_check" checked><br>
+                <input placeholder="Count" id="edit_count" value=""><input id="edit_count_check" type="checkbox"
+                    checked><br>
+                <input placeholder="Min Gain" id="edit_min_gain" value=""><input id="edit_min_gain_check"
+                    type="checkbox" checked><br>
+                <input placeholder="Max Gain" id="edit_max_gain" value=""><input id="edit_max_gain_check"
+                    type="checkbox" checked><br>
                 <br>
-                <input placeholder="Count" id="edit_count" value="">
-                <input id="edit_count_check" type="checkbox" checked>
-                <br>
-                <input placeholder="Min Gain" id="edit_min_gain" value="">
-                <input id="edit_min_gain_check" type="checkbox" checked>
-                <br>
-                <input placeholder="Max Gain" id="edit_max_gain" value="">
-                <input id="edit_max_gain_check" type="checkbox" checked>
-                <hr>
-                <label>What is <a href="https://en.wikipedia.org/wiki/Standard_deviation">Standard Deviation
-                        (STD)</a>?</label><br><br>
-                <label>If filled in then min/max is ignored. The "std" is the range from the mean.</label><br>
+                <label>If filled in then min/max is ignored.</label><br>
                 <input placeholder="Mean Gain" id="edit_mean_gain" value="">
                 <input id="edit_mean_gain_check" type="checkbox" checked><br>
-                <input placeholder="STD" id="edit_std_gain">
+                <input placeholder="Range From Mean (Standard Deviation)" id="edit_std_gain">
                 <input id="edit_std_gain_check" type="checkbox" checked><br>
                 <br>
-                <button onclick="edit()">Edit</button>
-                <button onclick="deleteChannel()">Delete</button>
+                <div style="margin-top: 0.1em;">
+                    <button onclick="edit()">Edit</button>
+                    <button onclick="deleteChannel()">Delete</button>
+                </div>
             </div>
         </div>
-        <label>Global Settings:</label>
-        <div style="display: flex; gap: 2vw; flex-wrap: wrap; overflow-x: scroll;">
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Background Color</label><br>
-                <input type="color" value="#000000" id="backPicker" autocomplete="off">
+        <div style="display:grid; grid-template-columns: 1fr 1fr;">
+            <div>
+                <label>Design Settings:</label>
+                <div style="display: flex; gap: 2vw; flex-wrap: wrap; overflow-x: scroll;">
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Background Color</label><br>
+                        <input type="color" value="#000000" id="backPicker" autocomplete="off">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Text Color</label><br>
+                        <input type="color" value="#000000" id="textPicker" autocomplete="off">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Box Background Color</label><br>
+                        <input type="color" value="#000000" id="boxPicker" autocomplete="off">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Box Border Color</label><br>
+                        <input type="color" value="#000000" id="borderPicker" autocomplete="off">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Image Border Color</label><br>
+                        <input type="color" value="#000000" id="imageBorderColor" autocomplete="off">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Odometer Up Color</label><br>
+                        <input type="color" value="#000000" id="odometerUp">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Odometer Down Color</label><br>
+                        <input type="color" value="#000000" id="odometerDown">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="animation" checked><label>Number Animation</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="fastest"><label>Icon For Fastest Channel</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="slowest"><label>Icon For Slowest Channel</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="showRankings" checked><label>Show Rankings</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="showImages" checked><label>Show Images</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="showNames" checked><label>Show Names</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="showCounts" checked><label>Show Counts</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Image Border Radius</label><br>
+                        <input value="50" id="imageBorder" autocomplete="off"><label>%</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Odometer Speed</label><br>
+                        <input value="2" id="odometerSpeed" autocomplete="off"><label>(in seconds)</label>
+                    </div>
+                </div>
             </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Text Color</label><br>
-                <input type="color" value="#000000" id="textPicker" autocomplete="off">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Box Background Color</label><br>
-                <input type="color" value="#000000" id="boxPicker" autocomplete="off">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Box Border Color</label><br>
-                <input type="color" value="#000000" id="borderPicker" autocomplete="off">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Image Border Radius</label><br>
-                <input value="50" id="imageBorder" autocomplete="off"><label>%</label>
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Min Gain (only used for streams)</label><br>
-                <input value="-10000" id="min_gain_global" autocomplete="off">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Max Gain (only used for streams)</label><br>
-                <input value="10000" id="max_gain_global" autocomplete="off">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Update Interval (in seconds)</label><br>
-                <input value="2" id="updateint" autocomplete="off">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <input type="button" id="hideSettings" onclick="hideSettings()"
-                    value="Change Hotkey To Hide Settings"><br><label id="setting">Current: q</label>
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <input type="checkbox" id="animation" checked><label>Number Animation</label>
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <input type="checkbox" id="fastest"><label>Show Fastest Channel</label>
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <input type="checkbox" id="slowest"><label>Show Slowest Channel</label>
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <input type="checkbox" id="abbreviate"><label>Abbreviate Counts</label>
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <input type="checkbox" id="offline"><label>Offline Gains</label>
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Odometer Up Color</label><br>
-                <input type="color" value="#000000" id="odometerUp">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Odometer Down Color</label><br>
-                <input type="color" value="#000000" id="odometerDown">
-            </div>
-            <div style="margin-top: 0px; text-align: center;">
-                <br>
-                <label>Odometer Speed (in seconds)</label><br>
-                <input value="2" id="odometerSpeed">
+            <div>
+                <label>Technical Settings:</label>
+                <div style="display: flex; gap: 2vw; flex-wrap: wrap; overflow-x: scroll;">
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Update Interval (in seconds)</label><br>
+                        <input value="2" id="updateint" autocomplete="off">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="button" id="hideSettings" onclick="hideSettings()"
+                            value="Change Hotkey To Hide Settings"><br><label id="setting">Current: q</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <input type="checkbox" id="abbreviate"><label>Abbreviate Counts</label>
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Min Gain (only for streams)</label><br>
+                        <input value="-10000" id="min_gain_global" autocomplete="off">
+                    </div>
+                    <div style="margin-top: 0px; text-align: center;">
+                        <br>
+                        <label>Max Gain (only for streams)</label><br>
+                        <input value="10000" id="max_gain_global" autocomplete="off">
+                    </div>
+                </div>
             </div>
         </div>
         <hr>
@@ -265,14 +300,13 @@
                             id="pathImage" placeholder="snippet.thumbnails.default.url" autocomplete="off"><br>
                         <input type="checkbox" id="updateCount" autocomplete="off"><label>Count </label><input
                             id="pathCount" placeholder="statistics.subscriberCount" autocomplete="off"><br>
-                            <input type="checkbox" id="updateID" autocomplete="off"><label>ID </label><input
-                                id="pathID" placeholder="id" autocomplete="off"><br>
+                        <input type="checkbox" id="updateID" autocomplete="off"><label>ID </label><input id="pathID"
+                            placeholder="id" autocomplete="off"><br>
                     </div>
                 </div>
                 <hr>
                 <button onclick="apiUpdate()">Update Now</button>
-                <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)"
-                    autocomplete="off">
+                <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)" autocomplete="off">
                 <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
                 <button onclick="saveAPIUpdates()" id="saveapi">Save API Update Settings</button><br>
                 <strong>MAKE SURE TO SAVE BEFORE ENABLING</strong>

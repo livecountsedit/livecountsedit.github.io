@@ -6,107 +6,115 @@
 }
 
 body {
-    font-family: Arial;
-    transition: color 2s;
+  font-family: Arial;
+  transition: color 2s;
+}
+
+label,h1,h2,h3,h4,h5,h6,p {
+  color: #000;
 }
 
 .main {
-    width: 100%;
-    transition: color 2s;
+  width: 100%;
+  transition: color 2s;
 }
 
 .num {
-    font-family: 'Roboto', roboto;
-    float: left;
-    font-weight: 900;
-    margin-right: 0.2vw;
-    margin-left: 0.2vw;
-    color: #000;
-    src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
+  font-family: 'Roboto', roboto;
+  float: left;
+  font-weight: 900;
+  margin-right: 0.2vw;
+  margin-left: 0.2vw;
+  src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
 }
 
 .card {
-    height: 4.25vw;
-    padding: 0.2vw;
-    margin: 0.2vw;
-    text-align: left;
-    background: #141414;
-    border: 0.1vw solid #ffffff;
-    transition: margin-top 500ms;
+  height: 4.25vw;
+  padding: 0.1vw;
+  margin: 0.2vw;
+  text-align: left;
+  background: #141414;
+  border: 0.1em solid #ffffff;
+  transition: margin-top 500ms;
 }
 
 .image {
-    height: 4.25vw;
-    width: 4.25vw;
-    float: left;
-    border-radius: 50%;
-    z-index: 10;
+  height: 4.25vw;
+  width: 4.25vw;
+  float: left;
+  border-radius: 50%;
+  z-index: 10;
+  border: solid 0.1em #000;
 }
 
 .count {
-    transition: color 2s;
-    font-size: 2vw;
-    font-family: 'Roboto', sans-serif;
-    padding-left: 0.2vw;
-    margin-top: calc(1vw - 2vh);
-    src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
+  transition: color 2s;
+  font-size: 2vw;
+  font-family: 'Roboto', sans-serif;
+  padding-left: 0.2vw;
+  margin-top: calc(1vw - 2vh);
+  src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
 }
 
 .name {
-    font-family: 'Roboto', sans-serif;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-left: 0.1vw;
-    font-size: 1.5vw;
-    src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
+  font-family: 'Roboto', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 0.1vw;
+  font-size: 1.5vw;
+  src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
 }
 
 .other {
-    width: 100%;
-    overflow-y: scroll;
-    overflow-x: hidden;
-    border: solid 0.3vw #000;
-    transition: color 2s;
-    margin-top: 0vw;
+  width: 100%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border: solid 0.3vw #000;
+  transition: color 2s;
+  margin-top: 0vw;
 }
 
 .selected {
-    background-color: #ccc;
-    transition: color 2s;
-    border: solid 1px red;
+  background-color: #ccc;
+  transition: color 2s;
+  border: solid 1px red;
 }
 
 .slidecontainer {
-    width: 100%;
-  }
-  
-  .slider {
-    width: 100%;
-    height: 25px;
-    background: #d3d3d3;
-    outline: none;
-    opacity: 0.7;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
-  }
-  
-  .slider:hover {
-    opacity: 1;
-  }
-  
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 25px;
-    height: 25px;
-    background: #04AA6D;
-    cursor: pointer;
-  }
-  
-  .slider::-moz-range-thumb {
-    width: 25px;
-    height: 25px;
-    background: #04AA6D;
-    cursor: pointer;
-  }
+  width: 100%;
+}
+
+.slider {
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #04AA6D;
+  cursor: pointer;
+}
+
+input[type=checkbox] {
+  margin: 0.1em;
+}
