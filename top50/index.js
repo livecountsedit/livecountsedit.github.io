@@ -205,10 +205,24 @@ function initLoad(redo) {
     updateInterval = setInterval(update, data.updateInterval);
 }
 
-function setupDesign() {
+function setupDesign(list, sort, order) {
     let c = 1;
     let toReturn = ["", "", ""]
     let main = document.createElement('div');
+    let channels = data.data;
+    if (list) {
+        channels = list;
+    }
+    if (sort) {
+        channels = channels.sort(function (a, b) {
+            return b[sort] - a[sort]
+        });
+    }
+    if (order) {
+        if (order == 'asc') {
+            channels = channels.reverse();
+        }
+    }
     if (data.theme.includes('H')) {
         let cards = parseInt(data.theme.split('H')[0].split('top')[1]);
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
@@ -228,14 +242,14 @@ function setupDesign() {
         for (let l = 1; l <= cards; l++) {
             const cc = (c < 10) ? "0" + c : c;
             const dataIndex = c - 1;
-            let abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0)}</div>`;
+            let abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0)}</div>`;
             if (data.abbreviate == true) {
-                abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${abb(Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0))}</div>`;
+                abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${abb(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>`;
             }
-            const htmlcard = `<div class="card card_${dataIndex}" id="card_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">
-                <div class="num" id="num_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${cc}</div>
-                <img src="${data.data[dataIndex] ? data.data[dataIndex].image : '../default.png'}" alt="" id="image_${data.data[dataIndex] ? data.data[dataIndex].id : ''}" class="image">
-                <div class="name" id="name_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${data.data[dataIndex] ? data.data[dataIndex].name : 'Loading'}</div>
+            const htmlcard = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
+                <div class="num" id="num_${channels[dataIndex] ? channels[dataIndex].id : ''}">${cc}</div>
+                <img src="${channels[dataIndex] ? channels[dataIndex].image : '../default.png'}" alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
+                <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">${channels[dataIndex] ? channels[dataIndex].name : 'Loading'}</div>
                 ${abbTest}
             </div>`;
             c += 1;
@@ -251,14 +265,14 @@ function setupDesign() {
             for (let t = 1; t <= maxCards; t++) {
                 const cc = (c < 10) ? "0" + c : c;
                 const dataIndex = c - 1;
-                let abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0)}</div>`;
+                let abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0)}</div>`;
                 if (data.abbreviate == true) {
-                    abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${abb(Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0))}</div>`;
+                    abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${abb(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>`;
                 }
-                const htmlcard = `<div class="card card_${dataIndex}" id="card_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">
-                    <div class="num" id="num_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${cc}</div>
-                    <img src="${data.data[dataIndex] ? data.data[dataIndex].image : '../default.png'}" alt="" id="image_${data.data[dataIndex] ? data.data[dataIndex].id : ''}" class="image">
-                    <div class="name" id="name_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${data.data[dataIndex] ? data.data[dataIndex].name : 'Loading'}</div>
+                const htmlcard = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
+                    <div class="num" id="num_${channels[dataIndex] ? channels[dataIndex].id : ''}">${cc}</div>
+                    <img src="${channels[dataIndex] ? channels[dataIndex].image : '../default.png'}" alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
+                    <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">${channels[dataIndex] ? channels[dataIndex].name : 'Loading'}</div>
                     ${abbTest}
                 </div>`;
                 htmlcolumn.innerHTML += htmlcard;
@@ -473,7 +487,23 @@ function update() {
             }
         }
         for (let q = 0; q < popups.length; q++) {
-            popups[q].popup.document.write('<data id="channels" style="display: none;">' + JSON.stringify(data.data) + '</data>')
+            if ((!popups[q].popup) || (!popups[q].popup.document)) {
+                popups.splice(q, 1);
+            } else {
+                if (popups[q].specificChannels == true) {
+                    let data2 = [];
+                    for (let i = 0; i < data.data.length; i++) {
+                        for (let a = 0; a < popups[q].channels.length; a++) {
+                            if (popups[q].channels[a].id == data.data[i].id) {
+                                data2.push(data.data[i])
+                            }
+                        }
+                    }
+                    popups[q].popup.document.write('<data id="channels" style="display: none;">' + JSON.stringify(data2) + '</data>')
+                } else {
+                    popups[q].popup.document.write('<data id="channels" style="display: none;">' + JSON.stringify(data.data) + '</data>')
+                }
+            }
         }
     }
     let end = new Date().getTime();
@@ -725,7 +755,7 @@ function downloadChannel() {
                 let a = document.createElement('a');
                 let file = new Blob([data2], { type: 'text/json' });
                 a.href = URL.createObjectURL(file);
-                a.download = data.data[i].id+'.json';
+                a.download = data.data[i].id + '.json';
                 a.click();
             }
         }
@@ -1723,20 +1753,22 @@ function popupList() {
         channels = [];
         for (let i = 0; i < data.data.length; i++) {
             if (specificChannels.includes(data.data[i].id)) {
-                channels.push(data.data[i])
+                channels.push(data.data[i]);
             }
         }
     }
     let popup = window.open('http://localhost/top50/popup.html', 'FYSC', 'width=1000,height=500');
+    console.log(channels)
     popups.push({
         'sort': sort,
         'order': order,
         'theme': theme,
         'channels': channels,
         'id': id,
-        'popup': popup
+        'popup': popup,
+        'specificChannels': true
     })
-    let design = setupDesign();
+    let design = setupDesign(channels, sort, order);
     let designStuff = {
         "showImages": data.showImages,
         "showNames": data.showNames,
