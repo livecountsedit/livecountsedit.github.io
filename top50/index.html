@@ -27,7 +27,7 @@
     <script src="../jquery.js"></script>
     <script src="./odometer.js"></script>
     <script src="../highstock.js"></script>
-    <!--<script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>-->
+    <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
 </head>
 
 <body>
@@ -388,27 +388,19 @@
                 Support</a>
         </center>
         <div id="disqus_thread"></div>
-        <script>
-            /*var disqus_config = function () {
-                this.page.url = "https://lcedit.com/top50";
-                this.page.identifier = "https://lcedit.com/top50";
-            };
-            (function () {
-                var d = document, s = d.createElement('script');
-                s.src = 'https://livecountsedit.disqus.com/embed.js';
-                s.setAttribute('data-timestamp', +new Date());
-                (d.head || d.body).appendChild(s);
-            })();
-            setInterval(() => {
-                const iframes = document.querySelectorAll('iframe');
-                iframes.forEach(iframe => {
-                    const src = iframe.getAttribute('src');
-                    if (src && src.match(/(ads-iframe)|(disqusads)/gi)) {
-                        iframe.remove();
-                    }
-                });
-            }, 300);*/
-        </script>
+    </div>
+    <script>
+        var disqus_config = function () {
+            this.page.url = "https://lcedit.com/top50";
+            this.page.identifier = "https://lcedit.com/top50";
+        };
+        (function () {
+            var d = document, s = d.createElement('script');
+            s.src = 'https://livecountsedit.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
 
 </body>
 
