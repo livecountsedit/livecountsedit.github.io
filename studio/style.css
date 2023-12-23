@@ -349,10 +349,11 @@ hr {
   border: solid #000000;
   width: 25%;
   height: 100%;
-  margin-top: -48%;
+  margin-top: -100vh;
   background-color: #cccccc;
   color: #000;
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 #close {

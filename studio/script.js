@@ -3,34 +3,56 @@ let raw = 0;
 let m = "100b";
 let saveInterval;
 let graphData = [];
+const uuidGen = function () {
+	let a = function () {
+		return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+	};
+	return a() + a() + '-' + a() + '-' + a() + '-' + a() + '-' + a() + a() + a();
+}
+
 let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {
-	name: "",
-	image: "",
-	subscribers: 0,
+	name: "Loading",
+	image: "../default.png",
+	footer: "Subscribers",
+	count: 0,
 	min_gain: 0,
 	max_gain: 0,
-	per_every: 0,
-	per_every_type: "1",
-	gain_rate: "1",
-	graphType: "1",
+	updateInterval: 2000,
+	graphType: "live",
 	graphDates: [],
 	graphValues: [],
 	liveGraph: [],
 	maxPoints: 100,
 	dropdownTopText: "All Time",
-	dropdownBottomText: "Live Data"
+	dropdownBottomText: "Live Data",
+	id: uuidGen(),
+	autosave: true,
+	//unsed by studio
+	banner: "",
+	textColor: "#000",
+	odometerUp: "#000",
+	odometerDown: "#000",
+	odometerSpeed: 2,
+	graphColor: "#000",
+	boxColor: "#000",
+	bgColor: "#1a1a20",
+	mean_gain: 0,
+	std_gain: 0,
+	abbreviate: false,
 };
+if (!user.count) {
+	user.count = user.subscribers;
+}
 
-if (user.graphType == "1") {
+if (user.graphType == "live") {
 	graphData = user.liveGraph
-} else if (user.graphType == "2") {
+} else if (user.graphType == "set") {
 	let chartData = []
 	for (let i = 0; i < user.graphDates.length; i++) {
 		chartData.push([new Date(user.graphDates[i]).getTime(), user.graphValues[i]])
 	}
 	graphData = chartData
 }
-
 
 function spl(n) {
 	n = '' + n + ''
@@ -474,9 +496,9 @@ document.getElementById('close').onclick = function () {
 function submit() {
 	if (document.getElementById('enabled').checked) {
 		if (!(document.getElementById('subscribers_input').value == "")) {
-			user.subscribers = parseFloat(document.getElementById('subscribers_input').value)
-			cmm = spl(user.subscribers)
-			raw = user.subscribers
+			user.count = parseFloat(document.getElementById('subscribers_input').value)
+			cmm = spl(user.count)
+			raw = user.count
 			render()
 		}
 	}
@@ -494,67 +516,41 @@ function submit() {
 	}
 	user.name = document.getElementById('name_input').value
 	document.getElementById('name').innerHTML = user.name
+	user.footer = document.getElementById('footer_input').value
+	document.getElementById('footer').innerHTML = user.footer
 }
 
 let interval;
 
 function update() {
 	let gain = random(user.min_gain, user.max_gain)
-	user.subscribers += gain
-	cmm = spl(user.subscribers)
-	raw = user.subscribers
-	render()
-	if (user.graphType == "1") {
+	user.count += gain
+	cmm = spl(user.count)
+	raw = user.count
+	if (user.graphType == "live") {
 		if (chart.series[0].data.length > user.maxPoints) {
 			chart.series[0].data[0].remove()
 			user.liveGraph.shift()
 		}
-		chart.series[0].addPoint([new Date().getTime(), user.subscribers], true, true)
-		user.liveGraph.push([new Date().getTime(), user.subscribers])
+		chart.series[0].addPoint([new Date().getTime(), user.count])
+		user.liveGraph.push([new Date().getTime(), user.count])
 	}
+	render()
 }
 
 function submit1() {
-	let gainIn = document.getElementById('gain_rate_in').value
-	if (gainIn == "1") {
-		user.min_gain = parseFloat(document.getElementById('min_subs').value)
-	} else if (gainIn == "60") {
-		user.min_gain = parseFloat(document.getElementById('min_subs').value) / 60
-	} else if (gainIn == "3600") {
-		user.min_gain = parseFloat(document.getElementById('min_subs').value) / 3600
-	} else if (gainIn == "86400") {
-		user.min_gain = parseFloat(document.getElementById('min_subs').value) / 86400
-	}
-	if (gainIn == "1") {
-		user.max_gain = parseFloat(document.getElementById('max_subs').value)
-	} else if (gainIn == "60") {
-		user.max_gain = parseFloat(document.getElementById('max_subs').value) / 60
-	} else if (gainIn == "3600") {
-		user.max_gain = parseFloat(document.getElementById('max_subs').value) / 3600
-	} else if (gainIn == "86400") {
-		user.max_gain = parseFloat(document.getElementById('max_subs').value) / 86400
-	}
-	user.gain_rate = document.getElementById('gain_rate_in').value
+	user.updateInterval = document.getElementById('updateInterval').value * 1000
+	user.min_gain = parseFloat(document.getElementById('min_subs').value)
+	user.max_gain = parseFloat(document.getElementById('max_subs').value)
 	clearInterval(interval)
-	let time = document.getElementById('gain_every').value
-	user.per_every_type = document.getElementById('gain_rate').value
-	if (document.getElementById('gain_rate').value == "1") {
-		user.per_every = time
-	} else if (document.getElementById('gain_rate').value == "60") {
-		user.per_every = time * 60
-	} else if (document.getElementById('gain_rate').value == "3600") {
-		user.per_every = time * 3600
-	} else if (document.getElementById('gain_rate').value == "86400") {
-		user.per_every = time * 86400
-	}
-	interval = setInterval(update, user.per_every * 1000)
+	interval = setInterval(update, user.updateInterval)
 }
 
 function submit2() {
-	if (document.getElementById('graph_type').value == "1") {
-		user.graphType = "1"
-	} else if (document.getElementById('graph_type').value == "2") {
-		user.graphType = "2"
+	if (document.getElementById('graph_type').value == "live") {
+		user.graphType = "live"
+	} else if (document.getElementById('graph_type').value == "set") {
+		user.graphType = "set"
 		let dates = document.getElementById('graph_dates').value
 		let values = document.getElementById('graph_values').value
 		user.graphDates = dates.split(',')
@@ -608,16 +604,28 @@ function toggleTheme() {
 }
 
 function clearChart() {
-	chart.series[0].setData([])
+	chart.series[0].setData([]);
 }
 
+document.getElementById('file_input2').addEventListener('change', function (e) {
+	importData();
+});
+
+let importedChannels = [];
 function importData() {
 	let file = document.getElementById('file_input2').files[0]
 	if (file) {
 		let reader = new FileReader();
 		reader.readAsText(file, "UTF-8");
 		reader.onload = function (evt) {
-			user = JSON.parse(evt.target.result)
+			let res = JSON.parse(evt.target.result)
+			if (res.data) {
+				importedChannels = res;
+				pickChannel(res);
+				return;
+			} else {
+				user = res;
+			}
 			localStorage.setItem("user", JSON.stringify(user))
 			location.reload()
 		}
@@ -629,16 +637,71 @@ function importData() {
 	}
 }
 
+function pickChannel(channels) {
+	document.getElementById('settingsMenu').innerHTML = "";
+	for (let q = 0; q < channels.data.length; q++) {
+		let channel = channels.data[q];
+		document.getElementById('settingsMenu').innerHTML += `
+		<div>
+		<img src="${channel.image}">
+		<h1>${channel.name}</h1>
+		<h2>${channel.count.toLocaleString()}</h2>
+		<p>${channel.id}</p>
+		<button onclick="selectThing('${channel.id}')">Select</button>
+		<hr>
+		</div><br>`
+	}
+	document.body.appendChild(div);
+}
+
+function selectThing(id) {
+	for (let q = 0; q < importedChannels.data.length; q++) {
+		if (id == importedChannels.data[q].id) {
+			let thing = importedChannels.data[q];
+			let channel = {
+				name: thing.name,
+				count: thing.count,
+				image: thing.image,
+				min_gain: thing.min_gain,
+				max_gain: thing.max_gain,
+				mean_gain: thing.mean_gain ? thing.mean_gain : 0,
+				std_gain: thing.std_gain ? thing.std_gain : 0,
+				abbreviate: thing.abbreviate ? thing.abbreviate : false,
+				id: thing.id ? thing.id : uuidGen(),
+				footer: thing.footer ? thing.footer : "Subscribers",
+				updateInterval: thing.updateInterval ? thing.updateInterval : 2000,
+				graphType: thing.graphType ? thing.graphType : "live",
+				graphDates: thing.graphDates ? thing.graphDates : [],
+				graphValues: thing.graphValues ? thing.graphValues : [],
+				liveGraph: thing.liveGraph ? thing.liveGraph : [],
+				maxPoints: thing.maxPoints ? thing.maxPoints : 1000,
+				dropdownTopText: thing.dropdownTopText ? thing.dropdownTopText : "All Time",
+				dropdownBottomText: thing.dropdownBottomText ? thing.dropdownBottomText : "Live Data",
+				banner: thing.banner ? thing.banner : "",
+				textColor: thing.textColor ? thing.textColor : "#000",
+				odometerUp: thing.odometerUp ? thing.odometerUp : "#000",
+				odometerDown: thing.odometerDown ? thing.odometerDown : "#000",
+				odometerSpeed: thing.odometerSpeed ? thing.odometerSpeed : 2,
+				graphColor: thing.graphColor ? thing.graphColor : "#000",
+				boxColor: thing.boxColor ? thing.boxColor : "#000",
+				bgColor: thing.bgColor ? thing.bgColor : "#000",
+			}
+			localStorage.setItem("user", JSON.stringify(channel))
+			location.reload()
+		}
+	}
+}
+
 if (localStorage.getItem("user")) {
-	document.getElementById('subscribers_input').value = user.subscribers
+	console.log(user)
+	document.getElementById('subscribers_input').value = user.count
 	document.getElementById('name_input').value = user.name
+	document.getElementById('footer_input').value = user.footer
 	document.getElementById('image_input').value = user.image
 	document.getElementById('image').src = user.image
 	document.getElementById('min_subs').value = user.min_gain
 	document.getElementById('max_subs').value = user.max_gain
-	document.getElementById('gain_rate_in').value = user.gain_rate
-	document.getElementById('gain_every').value = user.per_every
-	document.getElementById('gain_rate').value = user.per_every_type
+	document.getElementById('updateInterval').value = user.updateInterval / 1000
 	document.getElementById('graph_type').value = user.graphType
 	document.getElementById('graph_dates').innerHTML = user.graphDates
 	document.getElementById('graph_values').innerHTML = user.graphValues
@@ -656,10 +719,19 @@ document.getElementById('autosave').onclick = function () {
 	if (document.getElementById('autosave').checked) {
 		saveInterval = setInterval(function () {
 			localStorage.setItem("user", JSON.stringify(user))
-		}, 1000)
+		}, 15000)
+		user.autosave = true;
 	} else {
 		clearInterval(saveInterval)
+		user.autosave = false;
 	}
+}
+
+if (user.autosave == true) {
+	saveInterval = setInterval(function () {
+		localStorage.setItem("user", JSON.stringify(user))
+	}, 15000)
+	document.getElementById('autosave').checked = true;
 }
 
 function resetData() {

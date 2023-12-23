@@ -3,6 +3,9 @@ let auditTimeout;
 let saveInterval;
 let chart;
 let nextUpdateAudit = false;
+let popups = [];
+let specificChannels = [];
+let pickingChannels = false;
 function abb(n) {
     return Math.floor(parseFloat(n.toPrecision(3)))
 }
@@ -26,7 +29,6 @@ function random(min, max) {
 }
 let uuid = uuidGen()
 let data = {
-    "data": [],
     "showImages": true,
     "showNames": true,
     "showCounts": true,
@@ -37,28 +39,34 @@ let data = {
     "boxBorder": "#FFF",
     "imageBorder": "0",
     "imageBorderColor": "#000",
-    "sort": "",
-    "gain_min": -10000,
-    "gain_max": 10000,
-    "updateInterval": 2000,
-    "uuid": uuid,
+    "prependZeros": false,
     "animation": true,
     "abbreviate": false,
     "fastest": true,
     "slowest": true,
-    "hideSettings": 'q',
-    'offlineGains': false,
-    'lastOnline': new Date().getTime(),
-    'theme': 'top50',
-    'max': 50,
-    'autosave': true,
-    'pause': false,
     'odometerUp': 'null',
     'odometerDown': 'null',
     'odometerSpeed': 2,
+
+    'theme': 'top50',
+    "sort": "num",
+    "order": "desc",
+    "data": [],
+    "gain_min": -10000,
+    "gain_max": 10000,
+    "updateInterval": 2000,
+    "uuid": uuid,
+    "hideSettings": 'q',
+    'offlineGains': false,
+    'lastOnline': new Date().getTime(),
     'visulization': 'default',
+    'max': 50,
+    'autosave': true,
+    'pause': false,
     'audits': false,
     'auditStats': [0, 0, 0, 0],
+    "hideSettings": 'q',
+    "allowNegative": false,
     'apiUpdates': {
         'enabled': false,
         'url': '',
@@ -131,52 +139,37 @@ function initLoad(redo) {
             apiUpdate(true);
         }, parseFloat(data.apiUpdates.interval));
     }
-    if (!data.auditStats) {
-        data.auditStats = [0, 0, 0, 0];
-    }
-    if ((!data.audits) && (data.audits !== false)) {
-        data.audits = false;
-    }
     if (!data.theme) {
         data.theme = 'top50';
     }
-    if (data.theme == 'top10') {
-        data.max = 10;
-    } else if (data.theme == 'top25') {
-        data.max = 25;
-    } else if (data.theme == 'top50') {
-        data.max = 50;
-    } else if (data.theme == 'top100') {
+    if (data.theme.includes('top100')) {
         data.max = 100;
-    } else if (data.theme == 'top150') {
+    } else if (data.theme.includes('top25')) {
+        data.max = 25;
+    } else if (data.theme.includes('top50')) {
+        data.max = 50;
+    } else if (data.theme.includes('top10')) {
+        data.max = 10;
+    } else if (data.theme.includes('top150')) {
         data.max = 150;
     }
-    if (!data.odometerDown || data.odometerDown == 'null') {
-        data.odometerDown = '#000';
-    }
-    if (!data.odometerUp || data.odometerUp == 'null') {
-        data.odometerUp = '#000';
-    }
-    if (!data.odometerSpeed) {
-        data.odometerSpeed = 2;
-    }
-    if ((!data.autosave) && (data.autosave !== false)) {
-        data.autosave = false;
-    }
-    if(!data.showImages) {
+    if ((!data.showImages) && (data.showImages !== false)) {
         data.showImages = true;
     }
-    if(!data.showNames) {
+    if ((!data.showNames) && (data.showNames !== false)) {
         data.showNames = true;
     }
-    if(!data.showCounts) {
+    if ((!data.showCounts) && (data.showCounts !== false)) {
         data.showCounts = true;
     }
-    if(!data.showRankings) {
+    if ((!data.showRankings) && (data.showRankings !== false)) {
         data.showRankings = true;
     }
     if (!data.imageBorderColor) {
         data.imageBorderColor = '#000';
+    }
+    if (!data.order) {
+        data.order = 'desc';
     }
     data.pause = false;
     data.visulization = 'default';
@@ -191,23 +184,48 @@ function initLoad(redo) {
             } else {
                 const gain = average(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
                 let gained = gain * (secondsPassed / interval);
-                gained += (data.data[i].max_gain / data.data[i].min_gain) / 100
                 data.data[i].count += gained;
             }
         }
         data.lastOnline = new Date().getTime();
     }
-    if (!data.updateInterval) {
-        data.updateInterval = 2000;
+    let design = setupDesign();
+    document.getElementById('main').innerHTML = design[0].innerHTML;
+    document.getElementById('main').style = design[1];
+    const style = document.createElement('style');
+    style.innerHTML = design[2];
+    document.getElementsByTagName('head')[0].appendChild(style);
+    if (!data.uuid) {
+        data.uuid = uuidGen();
     }
+    document.body.style.backgroundColor = data.bgColor;
+    document.body.style.color = data.textColor;
+    fix();
+    updateOdo();
+    updateInterval = setInterval(update, data.updateInterval);
+}
+
+function setupDesign() {
     let c = 1;
-    let columns = data.theme == 'top100' ? 10 : 5;
-    columns = data.theme == 'top150' ? 10 : columns;
-    for (let l = 1; l <= columns; l++) {
-        const htmlcolumn = `<div class="column_${l} column"></div>`;
-        $('.main').append(htmlcolumn);
-        const maxCards = data.max / columns;
-        for (let t = 1; t <= maxCards; t++) {
+    let toReturn = ["", "", ""]
+    let main = document.createElement('div');
+    if (data.theme.includes('H')) {
+        let cards = parseInt(data.theme.split('H')[0].split('top')[1]);
+        toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+        if (cards == 100) {
+            toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
+            .card { height: 2.15vw; }
+            .count { font-size: 1vw; }
+            .name { font-size: 0.75vw; }`;
+        } else if (cards == 150) {
+            toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
+            .card { height: 2.15vw; }
+            .count { font-size: 1vw; }
+            .name { font-size: 0.75vw; }`;
+        } else {
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+        }
+        for (let l = 1; l <= cards; l++) {
             const cc = (c < 10) ? "0" + c : c;
             const dataIndex = c - 1;
             let abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0)}</div>`;
@@ -220,43 +238,57 @@ function initLoad(redo) {
                 <div class="name" id="name_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${data.data[dataIndex] ? data.data[dataIndex].name : 'Loading'}</div>
                 ${abbTest}
             </div>`;
-            $('.column_' + l).append(htmlcard);
             c += 1;
+            main.innerHTML += htmlcard
         }
-    }
-    if (data.theme == 'top100') {
-        const style = document.createElement('style');
-        style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
-            .card { height: 2.15vw; }
-            .count { font-size: 1vw; }
-            .name { font-size: 0.75vw; }`;
-        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        document.getElementsByTagName('head')[0].appendChild(style);
-    } else if (data.theme == 'top150') {
-        const style = document.createElement('style');
-        style.innerHTML = `.image { height: 2.15vw; width: 2.15vw; }
-            .card { height: 2.15vw; }
-            .count { font-size: 1vw; }
-            .name { font-size: 0.75vw; }`;
-        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        document.getElementsByTagName('head')[0].appendChild(style);
     } else {
-        const style = document.createElement('style');
-        style.innerHTML = `.image { height: 4.3vw; width: 4.3vw; }
+        let columns = data.theme == 'top100' ? 10 : 5;
+        columns = data.theme == 'top150' ? 10 : columns;
+        for (let l = 1; l <= columns; l++) {
+            const htmlcolumn = document.createElement('div');
+            htmlcolumn.classList = `column_${l} column`;
+            const maxCards = data.max / columns;
+            for (let t = 1; t <= maxCards; t++) {
+                const cc = (c < 10) ? "0" + c : c;
+                const dataIndex = c - 1;
+                let abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0)}</div>`;
+                if (data.abbreviate == true) {
+                    abbTest = `<div class="count odometer" id="count_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${abb(Math.floor(data.data[dataIndex] ? data.data[dataIndex].count : 0))}</div>`;
+                }
+                const htmlcard = `<div class="card card_${dataIndex}" id="card_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">
+                    <div class="num" id="num_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${cc}</div>
+                    <img src="${data.data[dataIndex] ? data.data[dataIndex].image : '../default.png'}" alt="" id="image_${data.data[dataIndex] ? data.data[dataIndex].id : ''}" class="image">
+                    <div class="name" id="name_${data.data[dataIndex] ? data.data[dataIndex].id : ''}">${data.data[dataIndex] ? data.data[dataIndex].name : 'Loading'}</div>
+                    ${abbTest}
+                </div>`;
+                htmlcolumn.innerHTML += htmlcard;
+                c += 1;
+            }
+            main.appendChild(htmlcolumn);
+        }
+        if (data.theme == 'top100') {
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+            toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
+            .card { height: 2.15vw; }
+            .count { font-size: 1vw; }
+            .name { font-size: 0.75vw; }`;
+        } else if (data.theme == 'top150') {
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+            toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
+            .card { height: 2.15vw; }
+            .count { font-size: 1vw; }
+            .name { font-size: 0.75vw; }`;
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+        } else {
+            toReturn[2] = `.image { height: 4.3vw; width: 4.3vw; }
             .card { height: 4.3vw; }
             .count { font-size: 2vw; }
             .name { font-size: 1.5vw; }`;
-        document.getElementById('main').style = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
-        document.getElementsByTagName('head')[0].appendChild(style);
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+        }
     }
-    if (!data.uuid) {
-        data.uuid = uuidGen();
-    }
-    document.body.style.backgroundColor = data.bgColor;
-    document.body.style.color = data.textColor;
-    fix();
-    updateOdo();
-    updateInterval = setInterval(update, data.updateInterval);
+    toReturn[0] = main;
+    return toReturn;
 }
 
 function create() {
@@ -338,7 +370,11 @@ function update() {
         let selections = ['<option value="select">Select</option>'];
         for (let i = 0; i < data.data.length; i++) {
             selections.push('<option value="' + data.data[i].id + '">' + data.data[i].name + '</option>')
-            data.data[i].lastCount = data.data[i].count;
+            data.data[i].lastCount = parseFloat(data.data[i].count);
+            data.data[i].min_gain = parseFloat(data.data[i].min_gain);
+            data.data[i].max_gain = parseFloat(data.data[i].max_gain);
+            data.data[i].mean_gain = parseFloat(data.data[i].mean_gain);
+            data.data[i].std_gain = parseFloat(data.data[i].std_gain);
             if ((data.data[i].mean_gain && data.data[i].std_gain) && (data.data[i].mean_gain != 0) && (data.data[i].std_gain != 0)) {
                 data.data[i].count = parseFloat(data.data[i].count) + randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain))
             } else {
@@ -359,22 +395,40 @@ function update() {
             if (i == data.data.length - 1) {
                 nextUpdateAudit = false
             }
+            if (data.data[i].count < 0) {
+                if (data.allowNegative == false) {
+                    data.data[i].count = 0;
+                }
+            }
+            if (isNaN(data.data[i].count)) {
+                data.data[i].count == 0;
+            }
+            if (data.data[i].count == Infinity) {
+                data.data[i].count == 0;
+            }
         }
         document.getElementById('quickSelect').innerHTML = selections.join("");
         document.getElementById('quickSelect').value = past;
-        let sort = `b.${document.getElementById('sorter').value} - a.${document.getElementById('sorter').value}`
         if (document.getElementById('sorter').value == "fastest") {
-            sort = `avg(b.min_gain, b.max_gain) - avg(a.min_gain, a.max_gain)`
+            data.data = data.data.sort(function (a, b) {
+                return avg(b.min_gain, b.max_gain) - avg(a.min_gain, a.max_gain)
+            });
+        } else if (document.getElementById('sorter').value == "name") {
+            data.data = data.data.sort(function (a, b) {
+                return a.name.localeCompare(b.name)
+            });
+        } else if ((!document.getElementById('sorter').value) || (document.getElementById('sorter').value == "num")) {
+            data.data = data.data.sort(function (a, b) {
+                return b.count - a.count
+            });
+        } else {
+            data.data = data.data.sort(function (a, b) {
+                return b.count - a.count
+            });
         }
-        if (document.getElementById('sorter').value == "slowest") {
-            sort = `avg(a.min_gain, a.max_gain) - avg(b.min_gain, b.max_gain)`
+        if (document.getElementById('order').value == "asc") {
+            data.data = data.data.reverse();
         }
-        if (!document.getElementById('sorter').value) {
-            sort = `b.count - a.count`
-        }
-        data.data = data.data.sort(function (a, b) {
-            return eval(sort)
-        });
         if (data.visulization == 'default') {
             for (let i = 0; i < data.max; i++) {
                 if ((i + 1) < 10) {
@@ -418,19 +472,28 @@ function update() {
                 }
             }
         }
+        for (let q = 0; q < popups.length; q++) {
+            popups[q].popup.document.write('<data id="channels" style="display: none;">' + JSON.stringify(data.data) + '</data>')
+        }
     }
     let end = new Date().getTime();
     let time = end - start;
     console.log('Execution timeS: ' + time / 1000);
 }
 
-document.getElementById('sorter').addEventListener('change', function () {
-    update();
-});
-
 let selected = null;
 document.getElementById('main').addEventListener('click', function (e) {
     selecterFunction(e)
+})
+
+document.getElementById('order').addEventListener('change', function (e) {
+    data.order = document.getElementById('order').value
+    fix();
+})
+
+document.getElementById('sorter').addEventListener('change', function (e) {
+    data.sort = document.getElementById('sorter').value
+    fix();
 })
 
 document.getElementById('quickSelect').addEventListener('change', function (e) {
@@ -536,15 +599,27 @@ function saveData2() {
     localStorage.setItem("data", JSON.stringify(data));
 }
 
-document.getElementById('loadData').addEventListener('change', function () {
+document.getElementById('loadData1').addEventListener('change', function () {
     load();
 });
+
+document.getElementById('loadData2').addEventListener('change', function () {
+    load1();
+});
+
+function load1() {
+    if (document.getElementById('loadData2').files[0]) {
+        document.getElementById('loadData2').files[0].text().then(function (data2) {
+            data.data.push(JSON.parse(data2))
+        })
+    }
+}
 
 function load() {
     var data3 = {};
     document.getElementById('main').innerHTML = "";
-    if (document.getElementById('loadData').files[0]) {
-        document.getElementById('loadData').files[0].text().then(function (data2) {
+    if (document.getElementById('loadData1').files[0]) {
+        document.getElementById('loadData1').files[0].text().then(function (data2) {
             data3 = JSON.parse(data2);
             if (data3.data) {
                 data = JSON.parse(data2);
@@ -594,7 +669,6 @@ function load() {
                 }
                 document.body.style.backgroundColor = data.bgColor;
                 document.body.style.color = data.textColor;
-                document.getElementById('sorter').value = data.sort;
                 if (!data.uuid) {
                     data.uuid = uuidGen();
                 }
@@ -642,6 +716,24 @@ function deleteChannel() {
     }
 }
 
+function downloadChannel() {
+    if (selected !== null) {
+        let id = selected;
+        for (let i = 0; i < data.data.length; i++) {
+            if (data.data[i].id == id) {
+                let data2 = JSON.stringify(data.data[i]);
+                let a = document.createElement('a');
+                let file = new Blob([data2], { type: 'text/json' });
+                a.href = URL.createObjectURL(file);
+                a.download = data.data[i].id+'.json';
+                a.click();
+            }
+        }
+    } else {
+        alert("Please select a card by clicking it.");
+    }
+}
+
 document.getElementById('backPicker').addEventListener('change', function () {
     document.body.style.backgroundColor = this.value;
     data.bgColor = this.value;
@@ -664,6 +756,14 @@ document.getElementById('borderPicker').addEventListener('change', function () {
     fix()
 });
 
+document.getElementById('allowNegative').addEventListener('change', function () {
+    if (this.checked) {
+        data.allowNegative = true;
+    } else {
+        data.allowNegative = false;
+    }
+});
+
 document.getElementById('imageBorder').addEventListener('change', function () {
     let num = this.value;
     data.imageBorder = num;
@@ -673,6 +773,15 @@ document.getElementById('imageBorder').addEventListener('change', function () {
 document.getElementById('imageBorder').addEventListener('change', function () {
     let color = this.value;
     data.imageBorderColor = color;
+    fix()
+});
+
+document.getElementById('prependZeros').addEventListener('change', function () {
+    if (this.checked) {
+        data.prependZeros = true;
+    } else {
+        data.prependZeros = false;
+    }
     fix()
 });
 
@@ -717,7 +826,8 @@ function fix() {
     document.getElementById('auditMax').value = data.auditStats[1]
     document.getElementById('auditTimeMin').value = data.auditStats[2]
     document.getElementById('auditTimeMax').value = data.auditStats[3]
-
+    document.getElementById('sorter').value = data.sort;
+    document.getElementById('order').value = data.order;
     if ((!data.fastest) && (data.fastest !== false)) {
         data.fastest = true;
     }
@@ -731,6 +841,11 @@ function fix() {
         document.getElementById('animation').checked = true;
     } else {
         document.getElementById('animation').checked = false;
+    }
+    if (data.allowNegative == true) {
+        document.getElementById('allowNegative').checked = true;
+    } else {
+        document.getElementById('allowNegative').checked = false;
     }
     if (data.fastest == true) {
         document.getElementById('fastest').checked = true;
@@ -767,6 +882,35 @@ function fix() {
         document.getElementById('showRankings').checked = false;
         document.querySelectorAll('.num').forEach(function (card) {
             card.style.display = "none";
+        })
+    }
+    if (data.prependZeros == true) {
+        document.getElementById('prependZeros').checked = true;
+        let index = 1;
+        let totalNums = document.querySelectorAll('.num').length;
+        if (totalNums < 100) {
+            document.querySelectorAll('.num').forEach(function (card) {
+                if (index < 10) {
+                    card.innerHTML = "0" + index
+                }
+                index += 1;
+            })
+        } else {
+            document.querySelectorAll('.num').forEach(function (card) {
+                if (index < 10) {
+                    card.innerHTML = "00" + index
+                } else if (index < 100) {
+                    card.innerHTML = "0" + index
+                }
+                index += 1;
+            })
+        }
+    } else {
+        document.getElementById('prependZeros').checked = false;
+        let index = 1;
+        document.querySelectorAll('.num').forEach(function (card) {
+            card.innerHTML = index
+            index += 1;
         })
     }
     if (data.showNames == true) {
@@ -823,11 +967,10 @@ function fix() {
     document.getElementById('odometerDown').value = data.odometerDown;
     document.getElementById('odometerSpeed').value = data.odometerSpeed;
     document.getElementById('imageBorder').value = data.imageBorder;
-    document.getElementById('imageBorderColor').value = data.imageBorder;
+    document.getElementById('imageBorderColor').value = data.imageBorderColor;
     if (data.updateInterval) {
         document.getElementById('updateint').value = (data.updateInterval / 1000).toString()
     }
-    document.getElementById('sorter').value = data.sort;
     $('style').append(`.odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-up.odometer-animating .odometer-ribbon-inner {
         color: ${data.odometerUp};
         }`)
@@ -854,7 +997,6 @@ function fix() {
     }`)
 }
 
-window.Odometer
 function convert3letterhexto6letters(hex) {
     hex = hex.replace('#', '');
     if (hex.length == 3) {
@@ -986,6 +1128,7 @@ function update2() {
             }
         });
 }
+
 document.getElementById('autosave').addEventListener('change', function () {
     if (document.getElementById('autosave').checked == true) {
         saveInterval = setInterval(saveData2, 15000);
@@ -1027,7 +1170,7 @@ document.getElementById('max_gain_global').addEventListener('change', function (
 });
 
 function custom() {
-    let name = prompt("What is the command name?")
+    prompt("What is the command name?")
     let min = prompt("What is the minimum amount of subscribers the channel can gain?")
     if (isNaN(min)) {
         alert("Please enter a number.")
@@ -1047,10 +1190,11 @@ document.getElementById('connect2').value = '$(urlfetch https://Fake-Sub-Count.s
 
 document.getElementById('animation').addEventListener('click', function () {
     updateOdo()
+    data.animation = true;
 })
 
 function updateOdo() {
-    if (document.getElementById('animation').checked == true) {
+    if (data.animation == true) {
         data.animation = true;
         for (let i = 0; i < data.max; i++) {
             if (document.getElementsByClassName("card")[i]) {
@@ -1121,58 +1265,6 @@ function updateOdo() {
             }
         }
     }
-}
-
-function selecterFunction(e) {
-        let id = e.target.id.split("_")[1];
-        if (e.target.id.split("_").length > 2) {
-            for (let i = 2; i < e.target.id.split("_").length; i++) {
-                id = id + "_" + e.target.id.split("_")[i];
-            }
-        }
-        if (selected != null) {
-            document.getElementById('card_' + selected + '').classList.remove('selected');
-            document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
-        }
-        if (id == selected) {
-            if (selected != null) {
-                document.getElementById('card_' + id + '').classList.remove('selected');
-                document.getElementById('card_' + id + '').style.border = "solid 0.1em " + data.boxBorder + "";
-                selected = null;
-                document.getElementById('edit_min_gain').value = "";
-                document.getElementById('edit_mean_gain').value = "";
-                document.getElementById('edit_std_gain').value = "";
-                document.getElementById('edit_max_gain').value = "";
-                document.getElementById('edit_name').value = "";
-                document.getElementById('edit_count').value = "";
-                document.getElementById('edit_image1').value = "";
-            }
-        } else {
-            if (document.getElementById('card_' + id + '')) {
-                document.getElementById('card_' + id + '').classList.add('selected');
-                document.getElementById('card_' + id + '').style.border = "solid 0.1em red"
-                selected = id;
-                for (let q = 0; q < data.data.length; q++) {
-                    if (data.data[q].id == id) {
-                        if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
-                            document.getElementById('edit_mean_gain').value = data.data[q].mean_gain;
-                            document.getElementById('edit_mean_gain_check').checked = true;
-                            document.getElementById('edit_std_gain').value = data.data[q].mean_gain;
-                            document.getElementById('edit_std_gain_check').checked = true;
-                        } else {
-                            document.getElementById('edit_mean_gain').value = "";
-                            document.getElementById('edit_mean_gain_check').checked = false;
-                            document.getElementById('edit_std_gain_check').checked = false;
-                        }
-                        document.getElementById('edit_min_gain').value = data.data[q].min_gain;
-                        document.getElementById('edit_max_gain').value = data.data[q].max_gain;
-                        document.getElementById('edit_name').value = data.data[q].name;
-                        document.getElementById('edit_count').value = data.data[q].count;
-                        document.getElementById('edit_image1').value = data.data[q].image;
-                    }
-                }
-            }
-        }
 }
 
 document.getElementById('abbreviate').addEventListener('click', function () {
@@ -1620,3 +1712,152 @@ function loadAPIUpdates() {
     document.getElementById('enableApiUpdate').innerHTML = data.apiUpdates.enabled == true ? 'Disable API Updates' : 'Enable API Updates'
 }
 loadAPIUpdates()
+
+function popupList() {
+    let sort = data.sort;
+    let order = data.order;
+    let theme = data.theme;
+    let id = uuidGen();
+    let channels = data.data;
+    if (specificChannels.length > 0) {
+        channels = [];
+        for (let i = 0; i < data.data.length; i++) {
+            if (specificChannels.includes(data.data[i].id)) {
+                channels.push(data.data[i])
+            }
+        }
+    }
+    let popup = window.open('http://localhost/top50/popup.html', 'FYSC', 'width=1000,height=500');
+    popups.push({
+        'sort': sort,
+        'order': order,
+        'theme': theme,
+        'channels': channels,
+        'id': id,
+        'popup': popup
+    })
+    let design = setupDesign();
+    let designStuff = {
+        "showImages": data.showImages,
+        "showNames": data.showNames,
+        "showCounts": data.showCounts,
+        "showRankings": data.showRankings,
+        "bgColor": data.bgColor,
+        "textColor": data.textColor,
+        "boxColor": data.boxColor,
+        "boxBorder": data.boxBorder,
+        "imageBorder": data.imageBorder,
+        "imageBorderColor": data.imageBorderColor,
+        "prependZeros": data.prependZeros,
+        "animation": data.animation,
+        "abbreviate": data.abbreviate,
+        "fastest": data.fastest,
+        "slowest": data.slowest,
+        'odometerUp': data.odometerUp,
+        'odometerDown': data.odometerDown,
+        'odometerSpeed': data.odometerSpeed,
+        'theme': data.theme,
+        'sort': data.sort,
+        'order': data.order,
+        'max': data.max,
+        'data': data.data,
+        'visulization': data.visulization
+    }
+    popup.document.write('<link href="./index.css" rel="stylesheet" type="text/css">')
+    popup.document.write('<link href="./odometer.css" rel="stylesheet" type="text/css">')
+    popup.document.write('<script src="./odometer.js"></script>')
+    popup.document.write(`<style>${design[2]}</style>`)
+    popup.document.write(`<div id="main" class="main" style="${design[1]}">${design[0].innerHTML}</div>`)
+    popup.document.write(`<script>
+    let data = ${JSON.stringify(designStuff)};
+    let observer = new MutationObserver(mutationRecords => {
+        if (document.getElementById('channels')) {
+            data.data = JSON.parse(document.getElementById('channels').innerHTML);
+            document.getElementById('channels').remove();
+            update();
+        }
+      });
+      const abb = ${abb}
+      const updateOdo = ${updateOdo}</script>`)
+    popup.document.write(`<script src="./popup.js"></script>`);
+}
+
+function selectSpecificChannels() {
+    if (pickingChannels == true) {
+        pause()
+        document.getElementById('selectSpecific').innerHTML = 'Select Specific Channels'
+        pickingChannels = false;
+        alert("Saved")
+    } else {
+        if (confirm('This will reset the previous list of SELECTED channels.')) {
+            specificChannels = [];
+            alert('Click on the channels you want to add to the list. Click the button again to stop.')
+            document.getElementById('selectSpecific').innerHTML = 'Stop Selecting Channels'
+            pause()
+            pickingChannels = true;
+        }
+    }
+}
+
+function selecterFunction(e) {
+    if (pickingChannels == true) {
+        let id = e.target.id.split('_')[1]
+        if (specificChannels.includes(id)) {
+            specificChannels.splice(specificChannels.indexOf(id), 1)
+            document.getElementById('card_' + id).style.border = 'solid 0.1em ' + data.boxBorder
+        } else {
+            specificChannels.push(id)
+            document.getElementById('card_' + id).style.border = 'solid 0.1em blue'
+        }
+    } else {
+        let id = e.target.id.split("_")[1];
+        if (e.target.id.split("_").length > 2) {
+            for (let i = 2; i < e.target.id.split("_").length; i++) {
+                id = id + "_" + e.target.id.split("_")[i];
+            }
+        }
+        if (selected != null) {
+            document.getElementById('card_' + selected + '').classList.remove('selected');
+            document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
+        }
+        if (id == selected) {
+            if (selected != null) {
+                document.getElementById('card_' + id + '').classList.remove('selected');
+                document.getElementById('card_' + id + '').style.border = "solid 0.1em " + data.boxBorder + "";
+                selected = null;
+                document.getElementById('edit_min_gain').value = "";
+                document.getElementById('edit_mean_gain').value = "";
+                document.getElementById('edit_std_gain').value = "";
+                document.getElementById('edit_max_gain').value = "";
+                document.getElementById('edit_name').value = "";
+                document.getElementById('edit_count').value = "";
+                document.getElementById('edit_image1').value = "";
+            }
+        } else {
+            if (document.getElementById('card_' + id + '')) {
+                document.getElementById('card_' + id + '').classList.add('selected');
+                document.getElementById('card_' + id + '').style.border = "solid 0.1em red"
+                selected = id;
+                for (let q = 0; q < data.data.length; q++) {
+                    if (data.data[q].id == id) {
+                        if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
+                            document.getElementById('edit_mean_gain').value = data.data[q].mean_gain;
+                            document.getElementById('edit_mean_gain_check').checked = true;
+                            document.getElementById('edit_std_gain').value = data.data[q].mean_gain;
+                            document.getElementById('edit_std_gain_check').checked = true;
+                        } else {
+                            document.getElementById('edit_mean_gain').value = "";
+                            document.getElementById('edit_mean_gain_check').checked = false;
+                            document.getElementById('edit_std_gain_check').checked = false;
+                        }
+                        document.getElementById('edit_min_gain').value = data.data[q].min_gain;
+                        document.getElementById('edit_max_gain').value = data.data[q].max_gain;
+                        document.getElementById('edit_name').value = data.data[q].name;
+                        document.getElementById('edit_count').value = data.data[q].count;
+                        document.getElementById('edit_image1').value = data.data[q].image;
+                    }
+                }
+            }
+        }
+    }
+}
