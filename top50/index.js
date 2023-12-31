@@ -1613,13 +1613,22 @@ function apiUpdate(interval) {
     }
     function fetchNext(url) {
         if (data.apiUpdates.method == 'GET') {
-            fetch(url, {
-                method: data.apiUpdates.method,
-                headers: data.apiUpdates.headers
-            }).then(response => response.json())
+            if (Object.keys(data.apiUpdates.headers).filter(x=>x).length) {
+                fetch(url, {
+                    method: data.apiUpdates.method,
+                    headers: data.apiUpdates.headers,
+                }).then(response => response.json())
                 .then(json => {
                     doStuff(json)
                 })
+            } else {
+                fetch(url, {
+                    method: data.apiUpdates.method
+                }).then(response => response.json())
+                .then(json => {
+                    doStuff(json)
+                })
+            }
         } else {
             fetch(url, {
                 method: data.apiUpdates.method,
@@ -1715,7 +1724,9 @@ function saveAPIUpdates() {
     let newHeaders = {}
     for (let i = 0; i < headers.length; i++) {
         let header = headers[i].split(': ')
-        newHeaders[header[0]] = header[1]
+        if (header[1]) {
+            newHeaders[header[0]] = header[1]
+        }
     }
     data.apiUpdates.headers = newHeaders
     let body = document.getElementById('body').value.toString().split(';&#10;').join(';\n').split(';\n')
@@ -1772,7 +1783,7 @@ function loadAPIUpdates() {
     document.getElementById('pathImage').value = data.apiUpdates.response.image.path
     document.getElementById('updateID').checked = data.apiUpdates.response.id.enabled
     document.getElementById('pathID').value = data.apiUpdates.response.id.path
-    document.getElementById('apiUpdateInt').value = data.apiUpdates.interval
+    document.getElementById('apiUpdateInt').value = data.apiUpdates.interval / 1000;
     document.getElementById('enableApiUpdate').innerHTML = data.apiUpdates.enabled == true ? 'Disable API Updates' : 'Enable API Updates'
 }
 loadAPIUpdates()
