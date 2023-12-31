@@ -1252,14 +1252,17 @@ document.getElementById('connect').value = '$(urlfetch https://Fake-Sub-Count.sf
 document.getElementById('connect3').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)/$(query)?value=edit)';
 document.getElementById('connect2').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)?values=10,20)';
 
-document.getElementById('animation').addEventListener('click', function () {
-    updateOdo()
-    data.animation = true;
+document.getElementById('animation').addEventListener('click', function (event) {
+    if (event.target.checked) {
+        data.animation = true;
+    } else {
+        data.animation = false;
+    }
+    updateOdo();
 })
 
 function updateOdo() {
     if (data.animation == true) {
-        data.animation = true;
         for (let i = 0; i < data.max; i++) {
             if (document.getElementsByClassName("card")[i]) {
                 document.getElementsByClassName("card")[i].children[3].remove();
@@ -1296,7 +1299,6 @@ function updateOdo() {
             }
         }
     } else {
-        data.animation = false;
         for (let i = 0; i < data.max; i++) {
             if (document.getElementsByClassName("card")[i]) {
                 document.getElementsByClassName("card")[i].children[3].remove();
