@@ -1100,7 +1100,7 @@ function update2() {
     if (!data.gain_max) {
         data.gain_max = 10000;
     }
-    fetch('https://fake-sub-count.sfmg.repl.co/' + code + '')
+    fetch('https://api.lcedit.com/' + code + '')
         .then(response => response.json())
         .then(json => {
             if (json.users) {
@@ -1179,7 +1179,7 @@ function update2() {
                 alert("You are no longer connected.");
                 clearInterval(update2Hold);
                 document.getElementById('isconnected').innerHTML = "No";
-                fetch('https://fake-sub-count.sfmg.repl.co/create?code=' + code + '', {
+                fetch('https://api.lcedit.com/create?code=' + code + '', {
                     method: 'POST'
                 })
                     .then(response => response.text())
@@ -1245,12 +1245,12 @@ function custom() {
         alert("Please enter a number.")
         return;
     }
-    alert('$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)?values=' + min + ',' + max + ')')
+    alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + ')')
 }
 
-document.getElementById('connect').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)/$(query))';
-document.getElementById('connect3').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)/$(query)?value=edit)';
-document.getElementById('connect2').value = '$(urlfetch https://Fake-Sub-Count.sfmg.repl.co/' + code + '/$(userid)?values=10,20)';
+document.getElementById('connect').value = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query))';
+document.getElementById('connect3').value = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?value=edit)';
+document.getElementById('connect2').value = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=10,20)';
 
 document.getElementById('animation').addEventListener('click', function (event) {
     if (event.target.checked) {
