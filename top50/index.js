@@ -7,7 +7,10 @@ let popups = [];
 let specificChannels = [];
 let pickingChannels = false;
 function abb(n) {
-    return Math.floor(parseFloat(n.toPrecision(3)))
+    let s = Math.sign(n);
+    n = Math.abs(n);
+    if (n < 1) return 0;
+    else return s*Math.floor(n/(10**(Math.floor(Math.log10(n))-2)))*(10**(Math.floor(Math.log10(n))-2))
 }
 const uuidGen = function () {
     let a = function () {
@@ -26,6 +29,35 @@ function avg(a, b) {
 }
 function random(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function adjustColors() {
+    let c = document.body.style.backgroundColor;
+    if (!c) return;
+    let r,g,b;
+    if (c.startsWith('#')) {
+        c = c.replace('#','');
+        const color = parseInt(c, 16);
+        r = (color >> 16);
+        g = (color >> 8) & 0xff;
+        b = color & 0xff;
+    } else {
+        c = c.replace('rgb(', '');
+        const color = c.split(',').map(x => parseInt(x, 10));
+        r = color[0];
+        g = color[1];
+        b = color[2];
+    }
+    const brightness = (0.2126*r+0.7152*g+0.0722*b)/255;
+    const textLabels = document.querySelectorAll("label,h1,h2,h3,h4,h5,h6,p,strong,input[type=file]");
+    if (brightness < 0.5) {
+        for (i = 0; i < textLabels.length; i++) {
+            textLabels[i].style.color = '#fff';
+        }
+    } else {
+        for (i = 0; i < textLabels.length; i++) {
+            textLabels[i].style.color = '#000';
+        }
+    }
 }
 let uuid = uuidGen()
 let data = {
@@ -47,7 +79,6 @@ let data = {
     'odometerUp': 'null',
     'odometerDown': 'null',
     'odometerSpeed': 2,
-
     'theme': 'top50',
     "sort": "num",
     "order": "desc",
@@ -200,6 +231,7 @@ function initLoad(redo) {
     }
     document.body.style.backgroundColor = data.bgColor;
     document.body.style.color = data.textColor;
+    adjustColors();
     fix();
     updateOdo();
     updateInterval = setInterval(update, data.updateInterval);
@@ -699,6 +731,7 @@ function load() {
                 }
                 document.body.style.backgroundColor = data.bgColor;
                 document.body.style.color = data.textColor;
+                adjustColors();
                 if (!data.uuid) {
                     data.uuid = uuidGen();
                 }
@@ -767,6 +800,7 @@ function downloadChannel() {
 document.getElementById('backPicker').addEventListener('change', function () {
     document.body.style.backgroundColor = this.value;
     data.bgColor = this.value;
+    adjustColors();
 });
 
 document.getElementById('textPicker').addEventListener('change', function () {
