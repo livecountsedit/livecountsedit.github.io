@@ -40,51 +40,13 @@ body {
   overflow-y: hidden;
 }
 
-#odo1a,
-#odo2a,
-#odo3a,
-#odo4a,
-#odo5a,
-#odo6a,
-#odo7a,
-#odo8a,
-#odo9a,
-#odo10a,
-#odo11a,
-#odo12a{
+#count {
   font-family: Roboto;
   font-size: 72px;
   display: block;
-  width: 38px;
   height: 74px;
   line-height: 100%;
   font-weight: 700;
-}
-
-#comma1a,
-#comma2a,
-#comma3a {
-  font-family: Roboto;
-  font-size: 72px;
-  display: inline-block;
-  vertical-align: middle;
-  width: 12px;
-  height: 74px;
-  line-height: 100%;
-  font-weight: 700;
-}
-
-#comma1a,
-#comma2a,
-#odo2a,
-#odo3a,
-#odo4a,
-#odo5a,
-#odo6a,
-#odo7a,
-#odo8a,
-#odo9a {
-  display: none;
 }
 
 .header {

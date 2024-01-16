@@ -1,4 +1,3 @@
-let cmm = 0;
 let raw = 0;
 let m = "100b";
 let saveInterval;
@@ -52,11 +51,6 @@ if (user.graphType == "live") {
 		chartData.push([new Date(user.graphDates[i]).getTime(), user.graphValues[i]])
 	}
 	graphData = chartData
-}
-
-function spl(n) {
-	n = '' + n + ''
-	return n.split('', 12)
 }
 
 const chart = new Highcharts.chart({
@@ -376,109 +370,7 @@ function settype(n) {
 }
 
 function render() {
-	settype(raw)
-	if (m == '100b') {
-		odo1a.innerHTML = cmm[0]
-		odo2a.innerHTML = cmm[1]
-		odo3a.innerHTML = cmm[2]
-		odo4a.innerHTML = cmm[3]
-		odo5a.innerHTML = cmm[4]
-		odo6a.innerHTML = cmm[5]
-		odo7a.innerHTML = cmm[6]
-		odo8a.innerHTML = cmm[7]
-		odo9a.innerHTML = cmm[8]
-		odo10a.innerHTML = cmm[9]
-		odo11a.innerHTML = cmm[10]
-		odo12a.innerHTML = cmm[11]
-	}
-	if (m == '10b') {
-		odo2a.innerHTML = cmm[0]
-		odo3a.innerHTML = cmm[1]
-		odo4a.innerHTML = cmm[2]
-		odo5a.innerHTML = cmm[3]
-		odo6a.innerHTML = cmm[4]
-		odo7a.innerHTML = cmm[5]
-		odo8a.innerHTML = cmm[6]
-		odo9a.innerHTML = cmm[7]
-		odo10a.innerHTML = cmm[8]
-		odo11a.innerHTML = cmm[9]
-		odo12a.innerHTML = cmm[10]
-	}
-	if (m == '1b') {
-		odo3a.innerHTML = cmm[0]
-		odo4a.innerHTML = cmm[1]
-		odo5a.innerHTML = cmm[2]
-		odo6a.innerHTML = cmm[3]
-		odo7a.innerHTML = cmm[4]
-		odo8a.innerHTML = cmm[5]
-		odo9a.innerHTML = cmm[6]
-		odo10a.innerHTML = cmm[7]
-		odo11a.innerHTML = cmm[8]
-		odo12a.innerHTML = cmm[9]
-	}
-	if (m == '100m') {
-		odo4a.innerHTML = cmm[0]
-		odo5a.innerHTML = cmm[1]
-		odo6a.innerHTML = cmm[2]
-		odo7a.innerHTML = cmm[3]
-		odo8a.innerHTML = cmm[4]
-		odo9a.innerHTML = cmm[5]
-		odo10a.innerHTML = cmm[6]
-		odo11a.innerHTML = cmm[7]
-		odo12a.innerHTML = cmm[8]
-	}
-	if (m == '10m') {
-		odo5a.innerHTML = cmm[0]
-		odo6a.innerHTML = cmm[1]
-		odo7a.innerHTML = cmm[2]
-		odo8a.innerHTML = cmm[3]
-		odo9a.innerHTML = cmm[4]
-		odo10a.innerHTML = cmm[5]
-		odo11a.innerHTML = cmm[6]
-		odo12a.innerHTML = cmm[7]
-	}
-	if (m == '1m') {
-		odo6a.innerHTML = cmm[0]
-		odo7a.innerHTML = cmm[1]
-		odo8a.innerHTML = cmm[2]
-		odo9a.innerHTML = cmm[3]
-		odo10a.innerHTML = cmm[4]
-		odo11a.innerHTML = cmm[5]
-		odo12a.innerHTML = cmm[6]
-	}
-	if (m == '100k') {
-		odo7a.innerHTML = cmm[0]
-		odo8a.innerHTML = cmm[1]
-		odo9a.innerHTML = cmm[2]
-		odo10a.innerHTML = cmm[3]
-		odo11a.innerHTML = cmm[4]
-		odo12a.innerHTML = cmm[5]
-	}
-	if (m == '10k') {
-		odo8a.innerHTML = cmm[0]
-		odo9a.innerHTML = cmm[1]
-		odo10a.innerHTML = cmm[2]
-		odo11a.innerHTML = cmm[3]
-		odo12a.innerHTML = cmm[4]
-	}
-	if (m == '1k') {
-		odo9a.innerHTML = cmm[0]
-		odo10a.innerHTML = cmm[1]
-		odo11a.innerHTML = cmm[2]
-		odo12a.innerHTML = cmm[3]
-	}
-	if (m == '100') {
-		odo10a.innerHTML = cmm[0]
-		odo11a.innerHTML = cmm[1]
-		odo12a.innerHTML = cmm[2]
-	}
-	if (m == '10') {
-		odo11a.innerHTML = cmm[0]
-		odo12a.innerHTML = cmm[1]
-	}
-	if (m == '1') {
-		odo12a.innerHTML = cmm[0]
-	}
+	document.getElementById('count').innerText = Math.round(user.count);
 }
 
 function openmenu() {
@@ -497,7 +389,6 @@ function submit() {
 	if (document.getElementById('enabled').checked) {
 		if (!(document.getElementById('subscribers_input').value == "")) {
 			user.count = parseFloat(document.getElementById('subscribers_input').value)
-			cmm = spl(user.count)
 			raw = user.count
 			render()
 		}
@@ -525,7 +416,6 @@ let interval;
 function update() {
 	let gain = random(user.min_gain, user.max_gain)
 	user.count += gain
-	cmm = spl(user.count)
 	raw = user.count
 	if (user.graphType == "live") {
 		if (chart.series[0].data.length > user.maxPoints) {
