@@ -738,7 +738,7 @@ if (user.autosave == true) {
 
 function resetData() {
 	if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
-		localStorage.clear()
+		localStorage.delete("user")
 		location.reload()
 	}
 }
