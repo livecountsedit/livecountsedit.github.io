@@ -1,3 +1,4 @@
+let gain = 0;
 (function() {
   var COUNT_FRAMERATE, COUNT_MS_PER_FRAME, DIGIT_FORMAT, DIGIT_HTML, DIGIT_SPEEDBOOST, DURATION, FORMAT_MARK_HTML, FORMAT_PARSER, FRAMERATE, FRAMES_PER_VALUE, MS_PER_FRAME, MutationObserver, Odometer, RIBBON_HTML, TRANSITION_END_EVENTS, TRANSITION_SUPPORT, VALUE_HTML, addClass, createFromHTML, fractionalPart, now, removeClass, requestAnimationFrame, round, transitionCheckStyles, trigger, truncate, wrapJQuery, _jQueryWrapped, _old, _ref, _ref1,
     __slice = [].slice;
@@ -355,7 +356,7 @@
         return;
       }
       removeClass(this.el, 'odometer-animating-up odometer-animating-down odometer-animating');
-      if (diff > 0) {
+      if (gain > 0) {
         addClass(this.el, 'odometer-animating-up');
       } else {
         addClass(this.el, 'odometer-animating-down');
@@ -559,7 +560,20 @@
           _base[i] = this.digits[i].querySelector('.odometer-ribbon-inner');
         }
         this.ribbons[i].innerHTML = '';
-        if (diff < 0) {
+        if (gain > 0 && newValue < oldValue) {
+          frames = [];
+          for (d = oldValue; d < newValue+11; d++) {
+            frames.push(d % 10);
+          }
+          //frames = frames.reverse();
+        }
+        if (gain < 0 && newValue > oldValue) {
+          frames = [];
+          for (d = oldValue+10; d > newValue-1; d--) {
+            frames.push(d % 10);
+          }
+        }
+        if (gain < 0) {
           frames = frames.reverse();
         }
         for (j = _m = 0, _len2 = frames.length; _m < _len2; j = ++_m) {

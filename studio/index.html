@@ -14,14 +14,14 @@
         content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
     <meta name="twitter:description"
         content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
-    <meta name="twitter:image" content="https://lcedit.com/images/studio.png" />
+    <meta name="twitter:image" content="../images/studio.png" />
     <meta property="og:title"
         content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
     <meta property="og:description"
         content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://lcedit.com" />
-    <meta property="og:image" content="https://lcedit.com/images/studio.png" />
+    <meta property="og:image" content="../images/studio.png" />
     <script src="./odometer.js"></script>
     <link href="./odometer.css" rel="stylesheet" />
     <link rel="stylesheet" id="themeStylesheet" href="./style.css">
@@ -63,7 +63,8 @@
             </div>
             <div>
                 <div class="icon-container2">
-                    <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg3" onclick="window.location.href = 'https://lcedit.com'">
+                    <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg3"
+                        onclick="window.location.href = 'https://lcedit.com'">
                         <g>
                             <path
                                 d="M12.7,12l6.6,6.6l-0.7,0.7L12,12.7l-6.6,6.6l-0.7-0.7l6.6-6.6L4.6,5.4l0.7-0.7l6.6,6.6l6.6-6.6l0.7,0.7L12.7,12z">
@@ -74,7 +75,7 @@
             </div>
         </div>
     </div>
-    <img src="https://lcedit.com/logo.png" id="image">
+    <img src="../logo.png" id="image">
     <p id="name">Livecountsedit</p>
     <div class="main">
         <div class="counter">
@@ -95,7 +96,7 @@
                 <div id="odo11a" class="odometer">0</div>
                 <div id="odo12a" class="odometer">0</div>
             </div>
-            <p class="label">Subscribers</p>
+            <p class="label" id="footer">Subscribers</p>
         </div>
         <hr>
         <div class="chart-area">
@@ -142,6 +143,11 @@
                     <label>Counter title/Username</label><br>
                     <input type="text" placeholder="Channel Name" id="name_input" autocomplete="off">
                 </div>
+                <div class="option">
+                    <label>Footer/Label</label><br>
+                    <input type="text" placeholder="Footer Title" id="footer_input" autocomplete="off">
+                </div>
+                <br>
                 <br>
                 <div class="option">
                     <label>Avatar URL</label><br>
@@ -152,8 +158,8 @@
                 </div>
                 <br>
                 <div class="option">
-                    <label>Counter value (integers only)</label><br>
-                    <input type="text" placeholder="Channel Subscribers" id="subscribers_input" autocomplete="off">
+                    <label>Counter value (whole numbers only)</label><br>
+                    <input type="number" placeholder="Channel Subscribers" id="subscribers_input" autocomplete="off">
                     <input type="checkbox" id="enabled" autocomplete="off" checked>
                 </div>
                 <br>
@@ -174,26 +180,8 @@
                             <br>
                             <br>
                             <span>Per Every</span>
-                            <span><input type="number" id="gain_every" autocomplete="off" placeholder="2"></span>
-                            <span>
-                                <select class="option-input" id="gain_rate">
-                                    <option value="1">second(s)</option>
-                                    <option value="60">minute(s)</option>
-                                    <option value="3600">hour(s)</option>
-                                    <option value="86400">day(s)</option>
-                                </select>
-                            </span>
+                            <span><input type="number" id="updateInterval" autocomplete="off" placeholder="2"></span><label> seconds</label>
                             <br>
-                            <br>
-                            <span>Sub Gain Rate In:</span>
-                            <span>
-                                <select class="option-input" id="gain_rate_in">
-                                    <option value="1">second(s)</option>
-                                    <option value="60">minute(s)</option>
-                                    <option value="3600">hour(s)</option>
-                                    <option value="86400">day(s)</option>
-                                </select>
-                            </span>
                         </p>
                         <br>
                         <button onclick="submit1()">Set Rates</button>
@@ -204,8 +192,8 @@
                 <br>
                 <p>Graph Type:</p>
                 <select class="option-input" id="graph_type">
-                    <option value="1">Live</option>
-                    <option value="2">Set Data</option>
+                    <option value="live">Live</option>
+                    <option value="set">Set Data</option>
                 </select><br>
                 <br>
                 <input id="dropdownTopText" placeholder="Top Text" autocomplete="off">
@@ -222,22 +210,38 @@
                 <button onclick="submit2()">Save Settings</button><br>
                 <button onclick="clearChart()">Clear Chart</button><br>
                 <br>
-                <hr class="hr2"><br>
-                <div style="display: grid; grid-template-columns: repeat(3,1fr);">
+                <hr class="hr2">
+                <br>
+                <p>Select comma type:</p>
+                <select name="selectcomma" id="selectcomma">
+                    <option value="comma1">,ddd</option>
+                    <option value="comma2"> ddd</option>
+                </select>
+                <br>
+                <br>
+                <hr class="hr2">
+
+                <div style="display: flex; width: 100%; gap: 0.3em;">
                     <button onclick="saveData()">Save Data</button>
                     <button onclick="exportData()">Export Data</button>
-                    <button onclick="toggleTheme()">Switch theme</button>
-                    <div>
-                        <input type="file" id="file_input2" accept=".json">
-                        <button onclick="importData()">Import Data</button>
-                    </div>
                     <button onclick="resetData()">Reset Data</button>
+                    <button onclick="toggleTheme()">Switch Theme (light/dark)</button>
+                </div><br>
+                <div style="display: flex; width: 100%; gap: 5em;">
                     <div>
                         <label>Autosave (15s)</label>
                         <input type="checkbox" id="autosave" autocomplete="off">
                     </div>
+                    <div>
+                        <label>Import Data</label>
+                        <input type="file" id="file_input2" accept=".json">
+                    </div>
                 </div>
-            </div>
+            <br>
+            <hr class="hr2">
+            <br>
+        </div>
+    </div>
 </body>
 <script src="./script.js"></script>
 
