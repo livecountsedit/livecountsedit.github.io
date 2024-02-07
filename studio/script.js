@@ -32,6 +32,7 @@ let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user"
 	dropdownBottomText: "Live Data",
 	id: uuidGen(),
 	autosave: true,
+	comma: true,
 	//unsed by studio
 	banner: "",
 	textColor: "#000",
