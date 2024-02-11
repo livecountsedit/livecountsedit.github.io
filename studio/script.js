@@ -10,6 +10,11 @@ const uuidGen = function () {
 	return a() + a() + '-' + a() + '-' + a() + '-' + a() + '-' + a() + a() + a();
 }
 
+const selectElement = document.getElementById('selectcomma');
+const comma1Element = document.getElementById('comma1a');
+const comma2Element = document.getElementById('comma2a');
+const comma3Element = document.getElementById('comma3a');
+
 let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {
 	name: "Loading",
 	image: "../default.png",
@@ -480,6 +485,26 @@ function render() {
 		odo12a.innerHTML = cmm[0]
 	}
 }
+
+selectElement.addEventListener('change', function() {
+	const selectedValue = this.value;
+	switch(selectedValue) {
+		case 'comma1':
+			comma1Element.textContent = ',';
+			comma2Element.textContent = ',';
+			comma3Element.textContent = ',';
+			break;
+		case 'comma2':
+			comma1Element.textContent = ' ';
+			comma2Element.textContent = ' ';
+			comma3Element.textContent = ' ';
+			break;
+		default:
+			comma1Element.textContent = ',';
+			comma2Element.textContent = ',';
+			comma3Element.textContent = ',';
+	}
+});
 
 function openmenu() {
 	if (document.getElementById('settingsMenu').style.visibility == "visible") {
