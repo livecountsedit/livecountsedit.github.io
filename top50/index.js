@@ -1131,7 +1131,7 @@ function update2() {
                                 .then(response => response.json())
                                 .then(json2 => {
                                     let count = 0;
-                                    let name = json2.user[0].count;
+                                    let name = json2.user[0].count.replace(/</g, '').replace(/>/g, '');
                                     let image = json2.user[1].count;
                                     let min = json.users[i].min;
                                     let max = json.users[i].max;
@@ -1147,7 +1147,7 @@ function update2() {
                                     }
                                     let id = json.users[i].id
                                     data.data.push({
-                                        "name": name,
+                                        "name": (name.replace(/</g, '').replace(/>/g, '')),
                                         "count": parseFloat(count),
                                         "image": image,
                                         "min_gain": min,
