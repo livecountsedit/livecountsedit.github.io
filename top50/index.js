@@ -488,16 +488,16 @@ function update() {
                             data.data[i].image = "../default.png";
                         }
                         document.getElementsByClassName("card")[i].children[1].src = data.data[i].image
-                        document.getElementsByClassName("card")[i].children[2].innerHTML = data.data[i].name
+                        document.getElementsByClassName("card")[i].children[2].innerText = data.data[i].name
                         document.getElementsByClassName("card")[i].children[1].id = "image_" + data.data[i].id
                         document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
                         document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
                         document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
                         document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
                         if (data.abbreviate == true) {
-                            document.getElementsByClassName("card")[i].children[3].innerHTML = abb(data.data[i].count)
+                            document.getElementsByClassName("card")[i].children[3].innerText = abb(data.data[i].count)
                         } else {
-                            document.getElementsByClassName("card")[i].children[3].innerHTML = Math.floor(data.data[i].count)
+                            document.getElementsByClassName("card")[i].children[3].innerText = Math.floor(data.data[i].count)
                         }
                         if (selected == data.data[i].id) {
                             document.getElementById("card_" + selected).style.border = "0.1em solid red";
@@ -506,12 +506,12 @@ function update() {
                         }
                         if (fastest == data.data[i].id) {
                             if (data.fastest == true) {
-                                document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
+                                document.getElementById("card_" + fastest).children[2].innerText = "🔥" + data.data[i].name
                             }
                         }
                         if (slowest == data.data[i].id) {
                             if (data.slowest == true) {
-                                document.getElementById("card_" + slowest).children[2].innerHTML = "⌛️" + data.data[i].name
+                                document.getElementById("card_" + slowest).children[2].innerText = "⌛️" + data.data[i].name
                             }
                         }
                     }
@@ -619,8 +619,8 @@ function edit() {
                 }
             }
             if (document.getElementById('edit_name_check').checked) {
-                if (card.querySelector('.name').innerHTML !== name && name !== "") {
-                    card.querySelector('.name').innerHTML = name;
+                if (card.querySelector('.name').innerText !== name && name !== "") {
+                    card.querySelector('.name').innerText = name;
                     for (let i = 0; i < data.data.length; i++) {
                         if (data.data[i].id == id) {
                             data.data[i].name = name;
@@ -629,8 +629,8 @@ function edit() {
                 }
             }
             if (document.getElementById('edit_count_check').checked) {
-                if (card.querySelector('.odometer').innerHTML !== count && count !== "") {
-                    card.querySelector('.odometer').innerHTML = count;
+                if (card.querySelector('.odometer').innerText !== count && count !== "") {
+                    card.querySelector('.odometer').innerText = count;
                     for (let i = 0; i < data.data.length; i++) {
                         if (data.data[i].id == id) {
                             data.data[i].count = count;
@@ -712,12 +712,12 @@ function load() {
                     let nameDiv = document.createElement('h1');
                     nameDiv.className = "name";
                     nameDiv.id = "name_" + currentIndex;
-                    nameDiv.innerHTML = name;
+                    nameDiv.innerText = name;
                     nameDiv.setAttribute("cid", id);
                     let countDiv = document.createElement('h2');
                     countDiv.classList = "odometer";
                     countDiv.id = "count_" + currentIndex;
-                    countDiv.innerHTML = count;
+                    countDiv.innerText = count;
                     countDiv.setAttribute("cid", id);
                     odo = new Odometer({
                         el: countDiv
@@ -762,10 +762,10 @@ function deleteChannel() {
         if (confirm("Are you sure you want to delete this channel?")) {
             let id = selected;
             let image = document.getElementById('image_' + id).src = "../default.png"
-            let name = document.getElementById('name_' + id).innerHTML = "Loading";
-            let count = document.getElementById('count_' + id).innerHTML = "0";
-            name.innerHTML = "";
-            count.innerHTML = "";
+            let name = document.getElementById('name_' + id).innerText = "Loading";
+            let count = document.getElementById('count_' + id).innerText = "0";
+            name.innerText = "";
+            count.innerText = "";
             image.src = "";
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id == id) {
@@ -955,16 +955,16 @@ function fix() {
         if (totalNums < 100) {
             document.querySelectorAll('.num').forEach(function (card) {
                 if (index < 10) {
-                    card.innerHTML = "0" + index
+                    card.innerText = "0" + index
                 }
                 index += 1;
             })
         } else {
             document.querySelectorAll('.num').forEach(function (card) {
                 if (index < 10) {
-                    card.innerHTML = "00" + index
+                    card.innerText = "00" + index
                 } else if (index < 100) {
-                    card.innerHTML = "0" + index
+                    card.innerText = "0" + index
                 }
                 index += 1;
             })
@@ -973,7 +973,7 @@ function fix() {
         document.getElementById('prependZeros').checked = false;
         let index = 1;
         document.querySelectorAll('.num').forEach(function (card) {
-            card.innerHTML = index
+            card.innerText = index
             index += 1;
         })
     }
@@ -1012,7 +1012,7 @@ function fix() {
     }
 
     document.getElementById('theme').value = data.theme;
-    document.getElementById('setting').innerHTML = "Current: " + data.hideSettings + ""
+    document.getElementById('setting').innerText = "Current: " + data.hideSettings + ""
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
         if (card.className.split(' ').includes("selected") == false) {
@@ -1089,8 +1089,8 @@ let update2Hold;
 if (connected == true) {
     update2()
     update2Hold = setInterval(update2, 5000);
-    document.getElementById('isconnected').innerHTML = "Yes";
-    document.getElementById('toConnect').innerHTML = "Disconnect";
+    document.getElementById('isconnected').innerText = "Yes";
+    document.getElementById('toConnect').innerText = "Disconnect";
 }
 
 function update2() {
@@ -1131,7 +1131,7 @@ function update2() {
                                 .then(response => response.json())
                                 .then(json2 => {
                                     let count = 0;
-                                    let name = json2.user[0].count.replace(/</g, '').replace(/>/g, '');
+                                    let name = json2.user[0].count;
                                     let image = json2.user[1].count;
                                     let min = json.users[i].min;
                                     let max = json.users[i].max;
@@ -1147,7 +1147,7 @@ function update2() {
                                     }
                                     let id = json.users[i].id
                                     data.data.push({
-                                        "name": (name.replace(/</g, '').replace(/>/g, '')),
+                                        "name": name,
                                         "count": parseFloat(count),
                                         "image": image,
                                         "min_gain": min,
@@ -1178,7 +1178,7 @@ function update2() {
             } else {
                 alert("You are no longer connected.");
                 clearInterval(update2Hold);
-                document.getElementById('isconnected').innerHTML = "No";
+                document.getElementById('isconnected').innerText = "No";
                 fetch('https://api.lcedit.com/create?code=' + code + '', {
                     method: 'POST'
                 })
@@ -1271,12 +1271,12 @@ function updateOdo() {
                 div.id = "count" + i;
                 if (data.data[i]) {
                     if (data.data[i]) {
-                        div.innerHTML = data.data[i].count.toLocaleString();
+                        div.innerText = data.data[i].count.toLocaleString();
                     } else {
-                        div.innerHTML = 0;
+                        div.innerText = 0;
                     }
                 } else {
-                    div.innerHTML = 0;
+                    div.innerText = 0;
                 }
                 document.getElementsByClassName("card")[i].appendChild(div);
                 let count = 0;
@@ -1306,9 +1306,9 @@ function updateOdo() {
                 div.className = "count";
                 div.id = "count" + i;
                 if (data.data[i]) {
-                    div.innerHTML = data.data[i].count.toLocaleString();
+                    div.innerText = data.data[i].count.toLocaleString();
                 } else {
-                    div.innerHTML = 0;
+                    div.innerText = 0;
                 }
                 document.getElementsByClassName("card")[i].appendChild(div);
                 if (data.data[i]) {
@@ -1417,7 +1417,7 @@ function hideSettings() {
     document.addEventListener('keydown', function (e) {
         data.hideSettings = e.key;
         alert("Key set to " + e.key)
-        document.getElementById('setting').innerHTML = "Current: " + e.key + ""
+        document.getElementById('setting').innerText = "Current: " + e.key + ""
         this.removeEventListener('keydown', arguments.callee, false);
     })
 }
@@ -1435,11 +1435,11 @@ document.addEventListener('keydown', function (e) {
 function pause() {
     if (data.pause == false) {
         data.pause = true;
-        document.getElementById('pauseB').innerHTML = "Resume"
+        document.getElementById('pauseB').innerText = "Resume"
         clearInterval(updateInterval);
     } else {
         data.pause = false;
-        document.getElementById('pauseB').innerHTML = "Pause"
+        document.getElementById('pauseB').innerText = "Pause"
         updateInterval = setInterval(update, data.updateInterval);
         update()
     }
@@ -1551,11 +1551,11 @@ function audit2() {
     if (data.audits == false) {
         data.audits = true
         auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
-        document.getElementById('audit').innerHTML = "Disable Audits"
+        document.getElementById('audit').innerText = "Disable Audits"
     } else {
         data.audits = false
         clearTimeout(auditTimeout)
-        document.getElementById('audit').innerHTML = "Enable Audits"
+        document.getElementById('audit').innerText = "Enable Audits"
     }
 }
 
@@ -1563,7 +1563,7 @@ function apiUpdate(interval) {
     if (interval) {
         if (data.apiUpdates.enabled == false) {
             clearInterval(apiInterval)
-            document.getElementById('enableApiUpdate').innerHTML = "Enable API Updates"
+            document.getElementById('enableApiUpdate').innerText = "Enable API Updates"
         }
     }
     let url = data.apiUpdates.url
@@ -1707,14 +1707,14 @@ function enableApiUpdate() {
     clearInterval(apiInterval)
     if (data.apiUpdates.enabled == false) {
         data.apiUpdates.enabled = true
-        document.getElementById('enableApiUpdate').innerHTML = "Disable API Updates"
+        document.getElementById('enableApiUpdate').innerText = "Disable API Updates"
         apiInterval = setInterval(function () {
             apiUpdate(true)
         }, data.apiUpdates.interval)
         apiUpdate(true)
     } else {
         data.apiUpdates.enabled = false
-        document.getElementById('enableApiUpdate').innerHTML = "Enable API Updates"
+        document.getElementById('enableApiUpdate').innerText = "Enable API Updates"
     }
 }
 
@@ -1758,7 +1758,7 @@ function saveAPIUpdates() {
         }
     }
     data.apiUpdates.interval = parseFloat(document.getElementById('apiUpdateInt').value) * 1000
-    data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerHTML == 'Disable API Updates' ? true : false
+    data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerText == 'Disable API Updates' ? true : false
     alert('Saved!')
 }
 
@@ -1786,7 +1786,7 @@ function loadAPIUpdates() {
     document.getElementById('updateID').checked = data.apiUpdates.response.id.enabled
     document.getElementById('pathID').value = data.apiUpdates.response.id.path
     document.getElementById('apiUpdateInt').value = data.apiUpdates.interval / 1000;
-    document.getElementById('enableApiUpdate').innerHTML = data.apiUpdates.enabled == true ? 'Disable API Updates' : 'Enable API Updates'
+    document.getElementById('enableApiUpdate').innerText = data.apiUpdates.enabled == true ? 'Disable API Updates' : 'Enable API Updates'
 }
 loadAPIUpdates()
 
@@ -1864,14 +1864,14 @@ function popupList() {
 function selectSpecificChannels() {
     if (pickingChannels == true) {
         pause()
-        document.getElementById('selectSpecific').innerHTML = 'Select Specific Channels'
+        document.getElementById('selectSpecific').innerText = 'Select Specific Channels'
         pickingChannels = false;
         alert("Saved")
     } else {
         if (confirm('This will reset the previous list of SELECTED channels.')) {
             specificChannels = [];
             alert('Click on the channels you want to add to the list. Click the button again to stop.')
-            document.getElementById('selectSpecific').innerHTML = 'Stop Selecting Channels'
+            document.getElementById('selectSpecific').innerText = 'Stop Selecting Channels'
             pause()
             pickingChannels = true;
         }
