@@ -6,15 +6,18 @@ let nextUpdateAudit = false;
 let popups = [];
 let specificChannels = [];
 let pickingChannels = false;
+let quickSelecting = false;
 let odometers=[];
 function abb(n) {
     let s = Math.sign(n);
     n = Math.abs(n);
     if (n < 1) return 0;
-    else return s*Math.floor(n/(10**(Math.floor(Math.log10(n))-2)))*(10**(Math.floor(Math.log10(n))-2))
+    else return Math.floor(s*Math.floor(n/(10**(Math.floor(Math.log10(n))-2)))*(10**(Math.floor(Math.log10(n))-2)))
 }
 function getDisplayedCount(n) {
-    if (data.abbreviate) return abb(n)
+    if (!isFinite(n)) n = 0;
+    if (!data.allowNegative && n < 0) n = 0;
+    if (data.abbreviate) return abb(n);
     else return Math.floor(n);
 }
 const uuidGen = function () {
@@ -473,14 +476,14 @@ function update() {
                 }
             }
             if (isNaN(data.data[i].count)) {
-                data.data[i].count == 0;
+                data.data[i].count = 0;
             }
             if (data.data[i].count == Infinity) {
-                data.data[i].count == 0;
+                data.data[i].count = 0;
             }
         }
         document.getElementById('quickSelect').innerHTML = selections.join("");
-        document.getElementById('quickSelect').value = past;
+        document.getElementById('quickSelect').value = past || 'select';
         if (document.getElementById('sorter').value == "fastest") {
             data.data = data.data.sort(function (a, b) {
                 return avg(b.min_gain, b.max_gain) - avg(a.min_gain, a.max_gain)
@@ -582,8 +585,18 @@ function update() {
 }
 
 let selected = null;
-document.getElementById('main').addEventListener('click', function (e) {
-    selecterFunction(e)
+document.getElementById('quickSelectButton').addEventListener('click', function (e) {
+    if (!pickingChannels) {
+        if (quickSelecting) {
+            quickSelecting = false;
+            document.getElementById('quickSelectButton').style.border = ""
+            document.getElementById('main').removeEventListener('click', selectorFunction, { once: true })
+        } else {
+            quickSelecting = true;
+            document.getElementById('quickSelectButton').style.border = "solid 0.2em green"
+            document.getElementById('main').addEventListener('click', selectorFunction, { once: true })
+        }
+    }
 })
 
 document.getElementById('order').addEventListener('change', function (e) {
@@ -601,7 +614,11 @@ document.getElementById('quickSelect').addEventListener('change', function (e) {
         let newForm = {
             target: { id: "image_" + document.getElementById('quickSelect').value }
         }
-        selecterFunction(newForm)
+        selectorFunction(newForm)
+    } else {
+        selectorFunction({
+            target: { id: null }
+        })
     }
 })
 
@@ -668,7 +685,7 @@ function edit() {
             }
             if (document.getElementById('edit_count_check').checked) {
                 if (card.querySelector('.odometer').innerText !== count && count !== "") {
-                    card.querySelector('.odometer').innerText = count;
+                    card.querySelector('.odometer').innerText = getDisplayedCount(count);
                     for (let i = 0; i < data.data.length; i++) {
                         if (data.data[i].id == id) {
                             data.data[i].count = count;
@@ -755,7 +772,7 @@ function load() {
                     let countDiv = document.createElement('h2');
                     countDiv.classList = "odometer";
                     countDiv.id = "count_" + currentIndex;
-                    countDiv.innerText = count;
+                    countDiv.innerText = getDisplayedCount(count);
                     countDiv.setAttribute("cid", id);
                     odo = new Odometer({
                         el: countDiv
@@ -821,6 +838,8 @@ function deleteChannel() {
                 }
             }
             selected = null;
+            document.getElementById('quickSelect').value = 'select';
+            refresh()
         }
     } else {
         alert("Please select a card by clicking it.");
@@ -1128,7 +1147,7 @@ function fix() {
     odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-inside, .odometer.odometer-theme-default.odometer-animating-up.odometer-animating .odometer-inside {
         color: ${data.odometerUp};
         }`
-    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
+    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-inside, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
         color: ${data.odometerDown};
         }`
 
@@ -1897,44 +1916,54 @@ function selectSpecificChannels() {
     if (pickingChannels == true) {
         pause()
         document.getElementById('selectSpecific').innerText = 'Select Specific Channels'
+        document.getElementById('main').removeEventListener('click', selectorFunction)
         pickingChannels = false;
         alert("Saved")
     } else {
         if (confirm('This will reset the previous list of SELECTED channels.')) {
+            quickSelecting = false;
+            document.getElementById('quickSelectButton').style.border = ""
+            document.getElementById('main').removeEventListener('click', selectorFunction, { once: true })
             specificChannels = [];
-            alert('Click on the channels you want to add to the list. Click the button again to stop.')
+            alert('Click on the channels you want to add to the list. Click the button again to stop. Counters will pause while selecting channels.')
+            document.getElementById('main').addEventListener('click', selectorFunction)
             document.getElementById('selectSpecific').innerText = 'Stop Selecting Channels'
             pause()
             pickingChannels = true;
+
         }
     }
 }
 
-function selecterFunction(e) {
+function selectorFunction(e) {
+    let target = e.target;
+    if (quickSelecting || pickingChannels) {
+        while (target && !target.id?.startsWith('card_') && target.nodeName !== 'BODY') {
+            target = target.parentElement
+        }
+        if (!target) return;
+    }
+    let id = target.id?.split('_')[1]
     if (pickingChannels == true) {
-        let id = e.target.id.split('_')[1]
         if (specificChannels.includes(id)) {
             specificChannels.splice(specificChannels.indexOf(id), 1)
             document.getElementById('card_' + id).style.border = 'solid 0.1em ' + data.boxBorder
         } else {
-            specificChannels.push(id)
-            document.getElementById('card_' + id).style.border = 'solid 0.1em blue'
-        }
-    } else {
-        let id = e.target.id.split("_")[1];
-        if (e.target.id.split("_").length > 2) {
-            for (let i = 2; i < e.target.id.split("_").length; i++) {
-                id = id + "_" + e.target.id.split("_")[i];
+            if (id) {
+                specificChannels.push(id)
+                document.getElementById('card_' + id).style.border = 'solid 0.1em blue'
             }
         }
+    } else {
         if (selected != null) {
             document.getElementById('card_' + selected + '').classList.remove('selected');
             document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
         }
-        if (id == selected) {
+        if (!id || id == selected) {
+            document.getElementById('quickSelect').value = 'select';
             if (selected != null) {
-                document.getElementById('card_' + id + '').classList.remove('selected');
-                document.getElementById('card_' + id + '').style.border = "solid 0.1em " + data.boxBorder + "";
+                document.getElementById('card_' + selected + '').classList.remove('selected');
+                document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
                 selected = null;
                 document.getElementById('edit_min_gain').value = "";
                 document.getElementById('edit_mean_gain').value = "";
@@ -1945,10 +1974,11 @@ function selecterFunction(e) {
                 document.getElementById('edit_image1').value = "";
             }
         } else {
-            if (document.getElementById('card_' + id + '')) {
-                document.getElementById('card_' + id + '').classList.add('selected');
-                document.getElementById('card_' + id + '').style.border = "solid 0.1em red"
-                selected = id;
+            selected = id;
+            document.getElementById('quickSelect').value = selected || 'select';
+            if (document.getElementById('card_' + selected + '')) {
+                document.getElementById('card_' + selected + '').classList.add('selected');
+                document.getElementById('card_' + selected + '').style.border = "solid 0.1em red"
                 for (let q = 0; q < data.data.length; q++) {
                     if (data.data[q].id == id) {
                         if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
@@ -1968,6 +1998,41 @@ function selecterFunction(e) {
                         document.getElementById('edit_image1').value = data.data[q].image;
                     }
                 }
+            }
+        }
+    }
+    quickSelecting = false;
+    document.getElementById('quickSelectButton').style.border = ""
+}
+
+function refresh() {
+    const currentChannel = document.getElementById('quickSelect').value;
+    if (!currentChannel || currentChannel == 'select') {
+        document.getElementById('edit_min_gain').value = "";
+        document.getElementById('edit_mean_gain').value = "";
+        document.getElementById('edit_std_gain').value = "";
+        document.getElementById('edit_max_gain').value = "";
+        document.getElementById('edit_name').value = "";
+        document.getElementById('edit_count').value = "";
+        document.getElementById('edit_image1').value = "";
+    } else {
+        for (let q = 0; q < data.data.length; q++) {
+            if (data.data[q].id == currentChannel) {
+                if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
+                    document.getElementById('edit_mean_gain').value = data.data[q].mean_gain;
+                    document.getElementById('edit_mean_gain_check').checked = true;
+                    document.getElementById('edit_std_gain').value = data.data[q].mean_gain;
+                    document.getElementById('edit_std_gain_check').checked = true;
+                } else {
+                    document.getElementById('edit_mean_gain').value = "";
+                    document.getElementById('edit_mean_gain_check').checked = false;
+                    document.getElementById('edit_std_gain_check').checked = false;
+                }
+                document.getElementById('edit_min_gain').value = data.data[q].min_gain;
+                document.getElementById('edit_max_gain').value = data.data[q].max_gain;
+                document.getElementById('edit_name').value = data.data[q].name;
+                document.getElementById('edit_count').value = data.data[q].count;
+                document.getElementById('edit_image1').value = data.data[q].image;
             }
         }
     }
