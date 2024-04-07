@@ -1,4 +1,8 @@
 updateOdo()
+function getDisplayedCount(n) {
+    if (data.abbreviate) return abb(n)
+    else return Math.floor(n);
+}
 document.querySelectorAll('.image').forEach(function (card) {
     if (!data.showImages) {
         card.style.display = "";
@@ -21,15 +25,16 @@ if (!data.showRankings) {
         card.style.display = "";
     })
 }
+const s = document.createElement('style');
+document.head.appendChild(s);
 if (!data.showBlankSlots) {
-    const s = document.createElement('style');
-    s.id = 'hideBlankSlotsCSS';
-    s.innerText = '#card_ * {display: none;}';
-    document.head.appendChild(s);
-} else {
-    const s = document.getElementById('hideBlankSlotsCSS');
-    if (s) s.remove();
+    s.innerText += '#card_ * {display: none;}'; 
 }
+
+if (!data.showDifferences) {
+    s.innerText += '.subgap * {display: none;}'; 
+}
+
 document.body.style.backgroundColor = data.bgColor;
 document.body.style.color = data.textColor;
 document.querySelectorAll('.card').forEach(function (card) {
@@ -51,17 +56,19 @@ if (data.theme.includes('top100')) {
 function update() {
     if (data) {
         let fastest = ""
-        let fastestCount = 0;
+        let fastestCount = -Infinity;
         let slowest = ""
-        let slowestCount = 0;
-        for (let i = 0; i < data.data.length; i++) {
-            if ((data.data[i].count - data.data[i].lastCount > fastestCount) || (fastestCount == 0)) {
-                fastestCount = data.data[i].count - data.data[i].lastCount;
-                fastest = data.data[i].id;
-            }
-            if ((data.data[i].count - data.data[i].lastCount < slowestCount) || (slowestCount == 0)) {
-                slowestCount = data.data[i].count - data.data[i].lastCount;
-                slowest = data.data[i].id;
+        let slowestCount = Infinity;
+        if (data.data.length > 1) {
+            for (let i = 0; i < data.data.length; i++) {
+                if ((data.data[i].count - data.data[i].lastCount >= fastestCount)) {
+                    fastestCount = data.data[i].count - data.data[i].lastCount;
+                    fastest = data.data[i].id;
+                }
+                if ((data.data[i].count - data.data[i].lastCount < slowestCount)) {
+                    slowestCount = data.data[i].count - data.data[i].lastCount;
+                    slowest = data.data[i].id;
+                }
             }
         }
         if (data.sort == "fastest") {
@@ -87,23 +94,26 @@ function update() {
                 } else {
                     num = (i + 1);
                 }
-                if (document.getElementsByClassName("card")[i]) {
+                const currentCard = document.getElementsByClassName("card")[i]
+                if (currentCard) {
                     if (data.data[i]) {
                         if (!data.data[i].image) {
                             data.data[i].image = "../default.png";
                         }
-                        document.getElementsByClassName("card")[i].children[1].src = data.data[i].image
-                        document.getElementsByClassName("card")[i].children[2].innerText = data.data[i].name
-                        document.getElementsByClassName("card")[i].children[1].id = "image_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
-                        if (data.abbreviate == true) {
-                            document.getElementsByClassName("card")[i].children[3].innerText = abb(data.data[i].count)
+                        currentCard.children[1].src = data.data[i].image
+                        currentCard.children[2].innerText = data.data[i].name
+                        currentCard.children[1].id = "image_" + data.data[i].id
+                        currentCard.children[2].id = "name_" + data.data[i].id
+                        currentCard.children[0].id = "num_" + data.data[i].id
+                        currentCard.id = "card_" + data.data[i].id
+                        currentCard.children[3].id = "count_" + data.data[i].id
+                        currentCard.children[3].innerText = getDisplayedCount(data.data[i].count)
+                        if (data.data[i+1]) {
+                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)-getDisplayedCount(data.data[i+1].count)
                         } else {
-                            document.getElementsByClassName("card")[i].children[3].innerText = Math.floor(data.data[i].count)
+                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)
                         }
+
                         if (fastest == data.data[i].id) {
                             if (data.fastest == true) {
                                 document.getElementById("card_" + fastest).children[2].innerText = "🔥" + data.data[i].name

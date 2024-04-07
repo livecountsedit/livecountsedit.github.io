@@ -1,7 +1,8 @@
 .odometer.odometer-auto-theme, .odometer.odometer-theme-default {
   display: -moz-inline-box;
   -moz-box-orient: vertical;
-  display: inline-block;
+  display: block;
+  text-wrap: nowrap;
   vertical-align: middle;
   *vertical-align: auto;
   position: relative;

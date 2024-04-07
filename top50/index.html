@@ -25,9 +25,16 @@
     <meta property="og:image" content="https://lcedit.com/images/top50.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="../jquery.js"></script>
+    <script>
+        window.odometerOptions = {auto: false};
+    </script>
     <script src="./odometer.js"></script>
     <script src="../highstock.js"></script>
     <script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>
+    <style id="designStyles"></style>
+    <style id="odometerStyles"></style>
+    <style id="hideDifferences"></style>
+    <style id="hideBlanks"></style>
 </head>
 
 <body>
@@ -71,6 +78,9 @@
                 </div>
                 <div>
                     <button onclick="reset()">Reset</button>
+                </div>
+                <div>
+                    <button onclick="zero()">Zero all counters</button>
                 </div>
                 <div>
                     <button onclick="save()">Save (In Browser)</button>
@@ -226,6 +236,10 @@
                         <div style="margin-top: 0px; text-align: center;">
                             <br>
                             <input type="checkbox" id="showBlankSlots" checked><label>Show Blank Slots</label>
+                        </div>
+                        <div style="margin-top: 0px; text-align: center;">
+                            <br>
+                            <input type="checkbox" id="showDifferences" checked><label>Show Differences</label>
                         </div>
                         <div style="margin-top: 0px; text-align: center;">
                             <br>

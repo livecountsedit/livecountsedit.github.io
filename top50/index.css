@@ -33,13 +33,14 @@ label,h1,h2,h3,h4,h5,h6,p {
 }
 
 .card {
-  height: 4.25vw;
+  height: 5.5vw;
   padding: 0.1vw;
   margin: 0.2vw;
   text-align: left;
   background: #141414;
   border: 0.1em solid #ffffff;
   transition: margin-top 500ms;
+  position: relative;
 }
 
 .image {
@@ -121,4 +122,9 @@ label,h1,h2,h3,h4,h5,h6,p {
 
 input[type=checkbox] {
   margin: 0.1em;
+}
+
+.subgap {
+  float: right;
+  font-size: 1.25vw;
 }

@@ -6,11 +6,16 @@ let nextUpdateAudit = false;
 let popups = [];
 let specificChannels = [];
 let pickingChannels = false;
+let odometers=[];
 function abb(n) {
     let s = Math.sign(n);
     n = Math.abs(n);
     if (n < 1) return 0;
     else return s*Math.floor(n/(10**(Math.floor(Math.log10(n))-2)))*(10**(Math.floor(Math.log10(n))-2))
+}
+function getDisplayedCount(n) {
+    if (data.abbreviate) return abb(n)
+    else return Math.floor(n);
 }
 const uuidGen = function () {
     let a = function () {
@@ -66,6 +71,7 @@ let data = {
     "showCounts": true,
     "showRankings": true,
     "showBlankSlots": true,
+    "showDifferences": false,
     "bgColor": "#FFF",
     "textColor": "#000",
     "boxColor": "#f7f5fe",
@@ -200,6 +206,9 @@ function initLoad(redo) {
     if ((!data.showBlankSlots) && (data.showBlankSlots !== false)) {
         data.showBlankSlots = true;
     }
+    if ((!data.showDifferences) && (data.showDifferences !== false)) {
+        data.showDifferences = true;
+    }
     if (!data.imageBorderColor) {
         data.imageBorderColor = '#000';
     }
@@ -227,9 +236,7 @@ function initLoad(redo) {
     let design = setupDesign();
     document.getElementById('main').innerHTML = design[0].innerHTML;
     document.getElementById('main').style = design[1];
-    const style = document.createElement('style');
-    style.innerHTML = design[2];
-    document.getElementsByTagName('head')[0].appendChild(style);
+    document.getElementById('designStyles').innerText = design[2];
     if (!data.uuid) {
         data.uuid = uuidGen();
     }
@@ -264,31 +271,30 @@ function setupDesign(list, sort, order) {
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
         if (cards == 100) {
             toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
-            .card { height: 2.15vw; }
+            .card { height: ${data.showDifferences ? '2.9vw' : '2.15vw'}; }
             .count { font-size: 1vw; }
-            .name { font-size: 0.75vw; }`;
+            .name { font-size: 0.75vw; }
+            .subgap {font-size: 0.75vw; }`;
         } else if (cards == 150) {
             toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
-            .card { height: 2.15vw; }
+            .card { height: ${data.showDifferences ? '2.9vw' : '2.15vw'}; }
             .count { font-size: 1vw; }
-            .name { font-size: 0.75vw; }`;
+            .name { font-size: 0.75vw; }
+            .subgap { font-size: 0.75vw; }`;
         } else {
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
         }
         for (let l = 1; l <= cards; l++) {
             const cc = (c < 10) ? "0" + c : c;
             const dataIndex = c - 1;
-            let abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0)}</div>`;
-            if (data.abbreviate == true) {
-                abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${abb(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>`;
-            }
-
             const htmlcard = document.createElement('div');
-            htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
-                <div class="num" id="num_${channels[dataIndex] ? channels[dataIndex].id : ''}">${cc}</div>
-                <img alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
-                <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">&ZeroWidthSpace;</div>
-                ${abbTest}
+            const cid = channels[dataIndex] ? channels[dataIndex].id : '';
+            htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
+                <div class="num" id="num_${cid}">${cc}</div>
+                <img src="../blank.png" alt="" id="image_${cid}" class="image">
+                <div class="name" id="name_${cid}">&ZeroWidthSpace;</div>
+                <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
+                <div class="subgap odometer"></div>
             </div>`;
             
             if (channels[dataIndex]) {
@@ -308,16 +314,15 @@ function setupDesign(list, sort, order) {
             for (let t = 1; t <= maxCards; t++) {
                 const cc = (c < 10) ? "0" + c : c;
                 const dataIndex = c - 1;
-                let abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0)}</div>`;
-                if (data.abbreviate == true) {
-                    abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${abb(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>`;
-                }
                 const htmlcard = document.createElement('div');
-                htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
-                    <div class="num" id="num_${channels[dataIndex] ? channels[dataIndex].id : ''}">${cc}</div>
-                    <img alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
-                    <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">&ZeroWidthSpace;</div>
-                    ${abbTest}
+                const cid = channels[dataIndex] ? channels[dataIndex].id : '';
+                htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
+                    <div class="num" id="num_${cid}">${cc}</div>
+                    <img src="../blank.png" alt="" id="image_${cid}" class="image">
+                    <div class="name" id="name_${cid}">&ZeroWidthSpace;</div>
+                    <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
+                    <div class="subgap odometer"></div>
+
                 </div>`;
                 if (channels[dataIndex]) {
                     htmlcard.querySelector('.image').src= channels[dataIndex].image || '../default.png'
@@ -331,21 +336,24 @@ function setupDesign(list, sort, order) {
         if (data.theme == 'top100') {
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
             toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
-            .card { height: 2.15vw; }
+            .card { height: ${data.showDifferences ? '2.9vw' : '2.15vw'}; }
             .count { font-size: 1vw; }
-            .name { font-size: 0.75vw; }`;
+            .name { font-size: 0.75vw; }
+            .subgap { font-size: 0.75vw; }`;
         } else if (data.theme == 'top150') {
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
             toReturn[2] = `.image { height: 2.15vw; width: 2.15vw; }
-            .card { height: 2.15vw; }
+            .card { height: ${data.showDifferences ? '2.9vw' : '2.15vw'}; }
             .count { font-size: 1vw; }
-            .name { font-size: 0.75vw; }`;
+            .name { font-size: 0.75vw; }
+            .subgap { font-size: 0.75vw;}`;
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
         } else {
-            toReturn[2] = `.image { height: 4.3vw; width: 4.3vw; }
-            .card { height: 4.3vw; }
+            toReturn[2] = `.image { height: 4.25vw; width: 4.25vw; }
+            .card { height: ${data.showDifferences ? '5.5vw' : '4.25vw'}; }
             .count { font-size: 2vw; }
-            .name { font-size: 1.5vw; }`;
+            .name { font-size: 1.5vw; }
+            .subgap {font-size: 1.25vw;}`;
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
         }
     }
@@ -424,9 +432,9 @@ function update() {
     let start = new Date().getTime();
     if (data) {
         let fastest = ""
-        let fastestCount = 0;
+        let fastestCount = -Infinity;
         let slowest = ""
-        let slowestCount = 0;
+        let slowestCount = Infinity;
         let past = document.getElementById('quickSelect').value;
         document.getElementById('quickSelect').innerHTML = "";
         let selections = ['<option value="select">Select</option>'];
@@ -442,13 +450,15 @@ function update() {
             } else {
                 data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
             }
-            if ((data.data[i].count - data.data[i].lastCount > fastestCount) || (fastestCount == 0)) {
-                fastestCount = data.data[i].count - data.data[i].lastCount;
-                fastest = data.data[i].id;
-            }
-            if ((data.data[i].count - data.data[i].lastCount < slowestCount) || (slowestCount == 0)) {
-                slowestCount = data.data[i].count - data.data[i].lastCount;
-                slowest = data.data[i].id;
+            if (data.data.length > 1) {
+                if ((data.data[i].count - data.data[i].lastCount >= fastestCount)) {
+                    fastestCount = data.data[i].count - data.data[i].lastCount;
+                    fastest = data.data[i].id;
+                }
+                if ((data.data[i].count - data.data[i].lastCount < slowestCount)) {
+                    slowestCount = data.data[i].count - data.data[i].lastCount;
+                    slowest = data.data[i].id;
+                }
             }
             if (nextUpdateAudit == true) {
                 let update = random(data.auditStats[0], data.auditStats[1])
@@ -498,22 +508,24 @@ function update() {
                 } else {
                     num = (i + 1);
                 }
-                if (document.getElementsByClassName("card")[i]) {
+                const currentCard = document.getElementsByClassName("card")[i]
+                if (currentCard) {
                     if (data.data[i]) {
                         if (!data.data[i].image) {
                             data.data[i].image = "../default.png";
                         }
-                        document.getElementsByClassName("card")[i].children[1].src = data.data[i].image
-                        document.getElementsByClassName("card")[i].children[2].innerText = data.data[i].name
-                        document.getElementsByClassName("card")[i].children[1].id = "image_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
-                        document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
-                        if (data.abbreviate == true) {
-                            document.getElementsByClassName("card")[i].children[3].innerText = abb(data.data[i].count)
+                        currentCard.children[1].src = data.data[i].image
+                        currentCard.children[2].innerText = data.data[i].name
+                        currentCard.children[1].id = "image_" + data.data[i].id
+                        currentCard.children[2].id = "name_" + data.data[i].id
+                        currentCard.children[0].id = "num_" + data.data[i].id
+                        currentCard.id = "card_" + data.data[i].id
+                        currentCard.children[3].id = "count_" + data.data[i].id
+                        currentCard.children[3].innerText = getDisplayedCount(data.data[i].count)
+                        if (data.data[i+1]) {
+                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)-getDisplayedCount(data.data[i+1].count)
                         } else {
-                            document.getElementsByClassName("card")[i].children[3].innerText = Math.floor(data.data[i].count)
+                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)
                         }
                         if (selected == data.data[i].id) {
                             document.getElementById("card_" + selected).style.border = "0.1em solid red";
@@ -530,6 +542,16 @@ function update() {
                                 document.getElementById("card_" + slowest).children[2].innerText = "⌛️" + data.data[i].name
                             }
                         }
+                    } else {
+                        currentCard.id = 'card_'
+                        currentCard.children[0].id = "num_"
+                        currentCard.children[1].id = "image_"
+                        currentCard.children[1].src = "../blank.png"
+                        currentCard.children[2].id = "name_"
+                        currentCard.children[2].innerText = '\u200b'
+                        currentCard.children[3].id = "count_"
+                        currentCard.children[3].innerText = '0'
+                        currentCard.children[4].innerText = '0'
                     }
                 }
             }
@@ -773,16 +795,26 @@ function reset() {
     }
 }
 
+function zero() {
+    if (confirm("Are you sure you want to zero all the counters?")) {
+        for (i = 0; i<data.data.length; i++) {
+            data.data[i].count = 0;
+        }
+    }
+}
+
 function deleteChannel() {
     if (selected !== null) {
         if (confirm("Are you sure you want to delete this channel?")) {
             let id = selected;
+            /*
             let image = document.getElementById('image_' + id).src = "../default.png"
             let name = document.getElementById('name_' + id).innerText = "Loading";
             let count = document.getElementById('count_' + id).innerText = "0";
             name.innerText = "";
             count.innerText = "";
             image.src = "";
+            */
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id == id) {
                     data.data.splice(i, 1);
@@ -870,6 +902,15 @@ document.getElementById('showBlankSlots').addEventListener('change', function ()
         data.showBlankSlots = true;
     } else {
         data.showBlankSlots = false;
+    }
+    fix()
+});
+
+document.getElementById('showDifferences').addEventListener('change', function () {
+    if (document.getElementById('showDifferences').checked) {
+        data.showDifferences = true;
+    } else {
+        data.showDifferences = false;
     }
     fix()
 });
@@ -976,15 +1017,25 @@ function fix() {
     }
     if (data.showBlankSlots) {
         document.getElementById('showBlankSlots').checked = true;
-        const s = document.getElementById('hideBlankSlotsCSS');
-        if (s) s.remove();
+        document.getElementById('hideBlanks').innerText = '';
     } else {
         document.getElementById('showBlankSlots').checked = false;
-        const s = document.createElement('style');
-        s.id = 'hideBlankSlotsCSS';
-        s.innerText = '#card_ * {display: none;}';
-        document.head.appendChild(s);
+        document.getElementById('hideBlanks').innerText = '#card_ * {display: none;}';
     }
+
+    if (data.showDifferences) {
+        // stuff
+        document.getElementById('showDifferences').checked = true;
+        const s = document.getElementById('hideDifferencesCSS');
+        document.getElementById('hideDifferences').innerText = '';
+    } else {
+        document.getElementById('showDifferences').checked = false;
+        document.getElementById('hideDifferences').innerText = '.subgap * {display: none;}';
+    }
+
+    let design = setupDesign()
+    document.getElementById('designStyles').innerText = design[2];
+
     if (data.prependZeros == true) {
         document.getElementById('prependZeros').checked = true;
         let index = 1;
@@ -1072,14 +1123,16 @@ function fix() {
     if (data.updateInterval) {
         document.getElementById('updateint').value = (data.updateInterval / 1000).toString()
     }
-    $('style').append(`.odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-up.odometer-animating .odometer-ribbon-inner {
+    let odometerStyles = document.getElementById('odometerStyles')
+    odometerStyles.innerText = '';
+    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-up.odometer-animating .odometer-ribbon-inner {
         color: ${data.odometerUp};
-        }`)
-    $('style').append(`.odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
+        }`
+    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
         color: ${data.odometerDown};
-        }`)
+        }`
 
-    $('style').append(`.odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner,
+    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner,
     .odometer.odometer-theme-default.odometer-animating-up .odometer-ribbon-inner {
         -webkit-transition: -webkit-transform ${data.odometerSpeed}s;
         -moz-transition: -moz-transform ${data.odometerSpeed}s;
@@ -1095,7 +1148,7 @@ function fix() {
         -ms-transition: -ms-transform ${data.odometerSpeed}s;
         -o-transition: -o-transform ${data.odometerSpeed}s;
         transition: transform ${data.odometerSpeed}s;
-    }`)
+    }`
 }
 
 function convert3letterhexto6letters(hex) {
@@ -1299,73 +1352,12 @@ document.getElementById('animation').addEventListener('click', function (event) 
 })
 
 function updateOdo() {
-    if (data.animation == true) {
-        for (let i = 0; i < data.max; i++) {
-            if (document.getElementsByClassName("card")[i]) {
-                document.getElementsByClassName("card")[i].children[3].remove();
-                let div = document.createElement("div");
-                div.className = "count";
-                div.id = "count" + i;
-                if (data.data[i]) {
-                    if (data.data[i]) {
-                        div.innerText = data.data[i].count.toLocaleString();
-                    } else {
-                        div.innerText = 0;
-                    }
-                } else {
-                    div.innerText = 0;
-                }
-                document.getElementsByClassName("card")[i].appendChild(div);
-                let count = 0;
-                if (data.data[i]) {
-                    count = data.data[i].count;
-                } else {
-                    count = 0;
-                }
-                if (data.abbreviate == true) {
-                    if (data.data[i]) {
-                        count = abb(data.data[i].count);
-                    }
-                }
-                new Odometer({
-                    el: document.getElementById("count" + i),
-                    value: count,
-                    format: '(,ddd)',
-                    theme: 'default'
-                })
-            }
-        }
-    } else {
-        for (let i = 0; i < data.max; i++) {
-            if (document.getElementsByClassName("card")[i]) {
-                document.getElementsByClassName("card")[i].children[3].remove();
-                let div = document.createElement("div");
-                div.className = "count";
-                div.id = "count" + i;
-                if (data.data[i]) {
-                    div.innerText = data.data[i].count.toLocaleString();
-                } else {
-                    div.innerText = 0;
-                }
-                document.getElementsByClassName("card")[i].appendChild(div);
-                if (data.data[i]) {
-                    new Odometer({
-                        el: document.getElementById("count" + i),
-                        value: data.data[i].count,
-                        format: '(,ddd)',
-                        theme: 'default',
-                        animation: 'count'
-                    })
-                } else {
-                    new Odometer({
-                        el: document.getElementById("count" + i),
-                        value: 0,
-                        format: '(,ddd)',
-                        theme: 'default',
-                        animation: 'count'
-                    })
-                }
-            }
+    odometers = Odometer.init();
+    for (i = 0; i < odometers.length; i++) {
+        if (data.animation) {
+            delete odometers[i].options.animation
+        } else {
+            odometers[i].options.animation = 'count'
         }
     }
 }
@@ -1859,6 +1851,7 @@ function popupList() {
         "showCounts": data.showCounts,
         "showRankings": data.showRankings,
         "showBlankSlots": data.showBlankSlots,
+        "showDifferences": data.showDifferences,
         "bgColor": data.bgColor,
         "textColor": data.textColor,
         "boxColor": data.boxColor,
