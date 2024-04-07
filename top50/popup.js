@@ -21,6 +21,15 @@ if (!data.showRankings) {
         card.style.display = "";
     })
 }
+if (!data.showBlankSlots) {
+    const s = document.createElement('style');
+    s.id = 'hideBlankSlotsCSS';
+    s.innerText = '#card_ * {display: none;}';
+    document.head.appendChild(s);
+} else {
+    const s = document.getElementById('hideBlankSlotsCSS');
+    if (s) s.remove();
+}
 document.body.style.backgroundColor = data.bgColor;
 document.body.style.color = data.textColor;
 document.querySelectorAll('.card').forEach(function (card) {
@@ -84,25 +93,25 @@ function update() {
                             data.data[i].image = "../default.png";
                         }
                         document.getElementsByClassName("card")[i].children[1].src = data.data[i].image
-                        document.getElementsByClassName("card")[i].children[2].innerHTML = data.data[i].name
+                        document.getElementsByClassName("card")[i].children[2].innerText = data.data[i].name
                         document.getElementsByClassName("card")[i].children[1].id = "image_" + data.data[i].id
                         document.getElementsByClassName("card")[i].children[2].id = "name_" + data.data[i].id
                         document.getElementsByClassName("card")[i].children[0].id = "num_" + data.data[i].id
                         document.getElementsByClassName("card")[i].id = "card_" + data.data[i].id
                         document.getElementsByClassName("card")[i].children[3].id = "count_" + data.data[i].id
                         if (data.abbreviate == true) {
-                            document.getElementsByClassName("card")[i].children[3].innerHTML = abb(data.data[i].count)
+                            document.getElementsByClassName("card")[i].children[3].innerText = abb(data.data[i].count)
                         } else {
-                            document.getElementsByClassName("card")[i].children[3].innerHTML = Math.floor(data.data[i].count)
+                            document.getElementsByClassName("card")[i].children[3].innerText = Math.floor(data.data[i].count)
                         }
                         if (fastest == data.data[i].id) {
                             if (data.fastest == true) {
-                                document.getElementById("card_" + fastest).children[2].innerHTML = "🔥" + data.data[i].name
+                                document.getElementById("card_" + fastest).children[2].innerText = "🔥" + data.data[i].name
                             }
                         }
                         if (slowest == data.data[i].id) {
                             if (data.slowest == true) {
-                                document.getElementById("card_" + slowest).children[2].innerHTML = "⌛️" + data.data[i].name
+                                document.getElementById("card_" + slowest).children[2].innerText = "⌛️" + data.data[i].name
                             }
                         }
                     }

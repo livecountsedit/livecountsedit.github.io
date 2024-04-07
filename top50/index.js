@@ -65,6 +65,7 @@ let data = {
     "showNames": true,
     "showCounts": true,
     "showRankings": true,
+    "showBlankSlots": true,
     "bgColor": "#FFF",
     "textColor": "#000",
     "boxColor": "#f7f5fe",
@@ -196,6 +197,9 @@ function initLoad(redo) {
     if ((!data.showRankings) && (data.showRankings !== false)) {
         data.showRankings = true;
     }
+    if ((!data.showBlankSlots) && (data.showBlankSlots !== false)) {
+        data.showBlankSlots = true;
+    }
     if (!data.imageBorderColor) {
         data.imageBorderColor = '#000';
     }
@@ -278,14 +282,21 @@ function setupDesign(list, sort, order) {
             if (data.abbreviate == true) {
                 abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${abb(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>`;
             }
-            const htmlcard = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
+
+            const htmlcard = document.createElement('div');
+            htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
                 <div class="num" id="num_${channels[dataIndex] ? channels[dataIndex].id : ''}">${cc}</div>
-                <img src="${channels[dataIndex] ? channels[dataIndex].image : '../default.png'}" alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
-                <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">${channels[dataIndex] ? channels[dataIndex].name : 'Loading'}</div>
+                <img alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
+                <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">&ZeroWidthSpace;</div>
                 ${abbTest}
             </div>`;
+            
+            if (channels[dataIndex]) {
+                htmlcard.querySelector('.image').src= channels[dataIndex].image || '../default.png'
+                htmlcard.querySelector('.name').innerText=channels[dataIndex].name
+            }
             c += 1;
-            main.innerHTML += htmlcard
+            main.innerHTML += htmlcard.innerHTML
         }
     } else {
         let columns = data.theme == 'top100' ? 10 : 5;
@@ -301,13 +312,18 @@ function setupDesign(list, sort, order) {
                 if (data.abbreviate == true) {
                     abbTest = `<div class="count odometer" id="count_${channels[dataIndex] ? channels[dataIndex].id : ''}">${abb(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>`;
                 }
-                const htmlcard = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
+                const htmlcard = document.createElement('div');
+                htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${channels[dataIndex] ? channels[dataIndex].id : ''}">
                     <div class="num" id="num_${channels[dataIndex] ? channels[dataIndex].id : ''}">${cc}</div>
-                    <img src="${channels[dataIndex] ? channels[dataIndex].image : '../default.png'}" alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
-                    <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">${channels[dataIndex] ? channels[dataIndex].name : 'Loading'}</div>
+                    <img alt="" id="image_${channels[dataIndex] ? channels[dataIndex].id : ''}" class="image">
+                    <div class="name" id="name_${channels[dataIndex] ? channels[dataIndex].id : ''}">&ZeroWidthSpace;</div>
                     ${abbTest}
                 </div>`;
-                htmlcolumn.innerHTML += htmlcard;
+                if (channels[dataIndex]) {
+                    htmlcard.querySelector('.image').src= channels[dataIndex].image || '../default.png'
+                    htmlcard.querySelector('.name').innerText=channels[dataIndex].name
+                }
+                htmlcolumn.innerHTML += htmlcard.innerHTML;
                 c += 1;
             }
             main.appendChild(htmlcolumn);
@@ -849,6 +865,15 @@ document.getElementById('prependZeros').addEventListener('change', function () {
     fix()
 });
 
+document.getElementById('showBlankSlots').addEventListener('change', function () {
+    if (document.getElementById('showBlankSlots').checked) {
+        data.showBlankSlots = true;
+    } else {
+        data.showBlankSlots = false;
+    }
+    fix()
+});
+
 document.getElementById('showRankings').addEventListener('change', function () {
     if (document.getElementById('showRankings').checked) {
         data.showRankings = true;
@@ -857,6 +882,7 @@ document.getElementById('showRankings').addEventListener('change', function () {
     }
     fix()
 });
+
 document.getElementById('showNames').addEventListener('change', function () {
     if (document.getElementById('showNames').checked) {
         data.showNames = true;
@@ -947,6 +973,17 @@ function fix() {
         document.querySelectorAll('.num').forEach(function (card) {
             card.style.display = "none";
         })
+    }
+    if (data.showBlankSlots) {
+        document.getElementById('showBlankSlots').checked = true;
+        const s = document.getElementById('hideBlankSlotsCSS');
+        if (s) s.remove();
+    } else {
+        document.getElementById('showBlankSlots').checked = false;
+        const s = document.createElement('style');
+        s.id = 'hideBlankSlotsCSS';
+        s.innerText = '#card_ * {display: none;}';
+        document.head.appendChild(s);
     }
     if (data.prependZeros == true) {
         document.getElementById('prependZeros').checked = true;
@@ -1821,6 +1858,7 @@ function popupList() {
         "showNames": data.showNames,
         "showCounts": data.showCounts,
         "showRankings": data.showRankings,
+        "showBlankSlots": data.showBlankSlots,
         "bgColor": data.bgColor,
         "textColor": data.textColor,
         "boxColor": data.boxColor,
