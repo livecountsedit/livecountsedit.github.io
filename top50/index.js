@@ -431,7 +431,7 @@ function create() {
     }
 }
 
-function update() {
+function update(doGains = true) {
     let start = new Date().getTime();
     if (data) {
         let fastest = ""
@@ -448,10 +448,12 @@ function update() {
             data.data[i].max_gain = parseFloat(data.data[i].max_gain);
             data.data[i].mean_gain = parseFloat(data.data[i].mean_gain);
             data.data[i].std_gain = parseFloat(data.data[i].std_gain);
-            if ((data.data[i].mean_gain && data.data[i].std_gain) && (data.data[i].mean_gain != 0) && (data.data[i].std_gain != 0)) {
-                data.data[i].count = parseFloat(data.data[i].count) + randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain))
-            } else {
-                data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
+            if (doGains) {
+                if ((data.data[i].mean_gain && data.data[i].std_gain) && (data.data[i].mean_gain != 0) && (data.data[i].std_gain != 0)) {
+                    data.data[i].count = parseFloat(data.data[i].count) + randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain))
+                }  else {
+                    data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
+                }
             }
             if (data.data.length > 1) {
                 if ((data.data[i].count - data.data[i].lastCount >= fastestCount)) {
@@ -463,7 +465,7 @@ function update() {
                     slowest = data.data[i].id;
                 }
             }
-            if (nextUpdateAudit == true) {
+            if (nextUpdateAudit == true && doGains) {
                 let update = random(data.auditStats[0], data.auditStats[1])
                 data.data[i].count = data.data[i].count + update
             }
@@ -475,10 +477,7 @@ function update() {
                     data.data[i].count = 0;
                 }
             }
-            if (isNaN(data.data[i].count)) {
-                data.data[i].count = 0;
-            }
-            if (data.data[i].count == Infinity) {
+            if (!isFinite(data.data[i].count)) {
                 data.data[i].count = 0;
             }
         }
@@ -817,7 +816,7 @@ function zero() {
         for (i = 0; i<data.data.length; i++) {
             data.data[i].count = 0;
         }
-        update()
+        update(false)
     }
 }
 
