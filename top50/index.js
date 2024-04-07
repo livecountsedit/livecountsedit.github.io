@@ -817,6 +817,7 @@ function zero() {
         for (i = 0; i<data.data.length; i++) {
             data.data[i].count = 0;
         }
+        update()
     }
 }
 
@@ -901,7 +902,7 @@ document.getElementById('imageBorder').addEventListener('change', function () {
     fix()
 });
 
-document.getElementById('imageBorder').addEventListener('change', function () {
+document.getElementById('imageBorderColor').addEventListener('change', function () {
     let color = this.value;
     data.imageBorderColor = color;
     fix()
