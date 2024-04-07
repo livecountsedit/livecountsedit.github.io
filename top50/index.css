@@ -41,6 +41,7 @@ label,h1,h2,h3,h4,h5,h6,p {
   border: 0.1em solid #ffffff;
   transition: margin-top 500ms;
   position: relative;
+  font-family: 'Roboto', sans-serif;
 }
 
 .image {
@@ -55,14 +56,12 @@ label,h1,h2,h3,h4,h5,h6,p {
 .count {
   transition: color 2s;
   font-size: 2vw;
-  font-family: 'Roboto', sans-serif;
   padding-left: 0.2vw;
   margin-top: 0;
   src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
 }
 
 .name {
-  font-family: 'Roboto', sans-serif;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
