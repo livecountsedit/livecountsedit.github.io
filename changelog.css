@@ -1,0 +1,40 @@
+body {
+    background-color: #1a1a20;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    padding-left: 5px;
+    padding-top: 5px;
+    text-align: center;
+}
+
+h1 {
+    background-color: #141414;
+    border: solid #FFF;
+    font-size: 2vw;
+}
+
+a {
+    color: #4babdb
+}
+
+div, .left {
+    text-align: left
+}
+
+div {
+    border: 1px solid white;
+    padding: 12px;
+    background-color: #333333;
+}
+
+h3 {
+    margin:0
+}
+
+.add {
+    color: lightgreen;
+}
+
+.remove {
+    color: lightcoral;
+}
