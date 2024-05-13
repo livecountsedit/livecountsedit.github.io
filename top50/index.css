@@ -8,19 +8,13 @@
 body {
   font-family: Arial;
   transition: color 2s;
-}
-
-label,h1,h2,h3,h4,h5,h6,p {
+  background-color: #141414;
   color: #000;
 }
 
-#disqus_thread {
-  background-color: #fff;
-}
-
-.main {
-  width: 100%;
-  transition: color 2s;
+h2 {
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 .num {
@@ -70,60 +64,92 @@ label,h1,h2,h3,h4,h5,h6,p {
   src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
 }
 
-.other {
-  width: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  border: solid 0.3vw #000;
-  transition: color 2s;
-  margin-top: 0vw;
-}
-
 .selected {
   background-color: #ccc;
   transition: color 2s;
   border: solid 1px red;
 }
 
-.slidecontainer {
-  width: 100%;
-}
-
-.slider {
-  width: 100%;
-  height: 25px;
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-}
-
-.slider:hover {
-  opacity: 1;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  background: #04AA6D;
+input,
+select,
+button {
+  font-size: 0.75vw;
+  font-family: 'Roboto', sans-serif;
   cursor: pointer;
 }
 
-.slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  background: #04AA6D;
-  cursor: pointer;
+input {
+  cursor: auto;
 }
 
 input[type=checkbox] {
   margin: 0.1em;
+  cursor: pointer;
 }
 
 .subgap {
   float: right;
   font-size: 1.25vw;
+}
+
+#main {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.topSettings {
+  margin-top: 0px;
+  border: 1px dashed #000;
+  border-bottom: none;
+  display: flex;
+  gap: 0.5em;
+}
+
+.userActions {
+  margin-top: 0px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.middleBoringSettings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.boringSettings {
+  display: flex;
+  gap: 2vw;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+#apiLink {
+  width: 50%;
+}
+
+.creds {
+  width: 95%;
+  height: 30%;
+}
+
+.apiExtraStuff {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 90%;
+}
+
+#stream {
+  display: grid; grid-template-columns: repeat(4, 1fr); text-align: center;
+}
+
+textarea {
+  width: 95%;
+}
+
+.discord {
+  font-size: 1.5em;
 }

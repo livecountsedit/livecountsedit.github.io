@@ -7,12 +7,12 @@ let popups = [];
 let specificChannels = [];
 let pickingChannels = false;
 let quickSelecting = false;
-let odometers=[];
+let odometers = [];
 function abb(n) {
     let s = Math.sign(n);
     n = Math.abs(n);
     if (n < 1) return 0;
-    else return Math.floor(s*Math.floor(n/(10**(Math.floor(Math.log10(n))-2)))*(10**(Math.floor(Math.log10(n))-2)))
+    else return Math.floor(s * Math.floor(n / (10 ** (Math.floor(Math.log10(n)) - 2))) * (10 ** (Math.floor(Math.log10(n)) - 2)))
 }
 function getDisplayedCount(n) {
     if (!isFinite(n)) n = 0;
@@ -41,9 +41,9 @@ function random(min, max) {
 function adjustColors() {
     let c = document.body.style.backgroundColor;
     if (!c) return;
-    let r,g,b;
+    let r, g, b;
     if (c.startsWith('#')) {
-        c = c.replace('#','');
+        c = c.replace('#', '');
         const color = parseInt(c, 16);
         r = (color >> 16);
         g = (color >> 8) & 0xff;
@@ -55,7 +55,7 @@ function adjustColors() {
         g = color[1];
         b = color[2];
     }
-    const brightness = (0.2126*r+0.7152*g+0.0722*b)/255;
+    const brightness = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
     const textLabels = document.querySelectorAll("label,h1,h2,h3,h4,h5,h6,p,strong,input[type=file]");
     if (brightness < 0.5) {
         for (i = 0; i < textLabels.length; i++) {
@@ -75,7 +75,7 @@ let data = {
     "showRankings": true,
     "showBlankSlots": true,
     "showDifferences": false,
-    "bgColor": "#FFF",
+    "bgColor": "#141414",
     "textColor": "#000",
     "boxColor": "#f7f5fe",
     "boxBorder": "#FFF",
@@ -115,6 +115,7 @@ let data = {
         'method': 'GET',
         'body': {},
         'headers': {},
+        'custom': false,
         'maxChannelsPerFetch': 'one',
         'response': {
             'loop': 'data',
@@ -131,10 +132,10 @@ let data = {
                 'path': 'image',
             },
             'id': {
-                'enabled': true,
                 'path': 'id',
+                'IDIncludes': false
             }
-        },
+        }
     }
 };
 let updateInterval;
@@ -169,10 +170,10 @@ function initLoad(redo) {
                     'path': 'image',
                 },
                 'id': {
-                    'enabled': true,
                     'path': 'id',
+                    'IDIncludes': false
                 }
-            },
+            }
         }
     }
     if (data.apiUpdates.enabled) {
@@ -249,6 +250,22 @@ function initLoad(redo) {
     fix();
     updateOdo();
     updateInterval = setInterval(update, data.updateInterval);
+    if (data.theme.includes('A')) {
+        document.getElementById('main').style = "";
+        var $grid = $('.main').isotope({
+            itemSelector: '.card',
+            layoutMode: 'fitRows',
+            getSortData: {
+                name: '.name',
+                number: '.number parseInt',
+            },
+            updateSortData: {
+                number: function (elem) {
+                    return parseInt($(elem).find('.number').text(), 10);
+                }
+            }
+        });
+    }
 }
 
 function setupDesign(list, sort, order) {
@@ -299,10 +316,10 @@ function setupDesign(list, sort, order) {
                 <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
                 <div class="subgap odometer"></div>
             </div>`;
-            
+
             if (channels[dataIndex]) {
-                htmlcard.querySelector('.image').src= channels[dataIndex].image || '../default.png'
-                htmlcard.querySelector('.name').innerText=channels[dataIndex].name
+                htmlcard.querySelector('.image').src = channels[dataIndex].image || '../default.png'
+                htmlcard.querySelector('.name').innerText = channels[dataIndex].name
             }
             c += 1;
             main.innerHTML += htmlcard.innerHTML
@@ -328,8 +345,8 @@ function setupDesign(list, sort, order) {
 
                 </div>`;
                 if (channels[dataIndex]) {
-                    htmlcard.querySelector('.image').src= channels[dataIndex].image || '../default.png'
-                    htmlcard.querySelector('.name').innerText=channels[dataIndex].name
+                    htmlcard.querySelector('.image').src = channels[dataIndex].image || '../default.png'
+                    htmlcard.querySelector('.name').innerText = channels[dataIndex].name
                 }
                 htmlcolumn.innerHTML += htmlcard.innerHTML;
                 c += 1;
@@ -365,28 +382,29 @@ function setupDesign(list, sort, order) {
 }
 
 function create() {
-    const addMinGain = document.getElementById('add_min_gain').value;
-    const addMaxGain = document.getElementById('add_max_gain').value;
-    const addMeanGain = document.getElementById('add_mean_gain').value;
-    const addStdGain = document.getElementById('add_std_gain').value;
-    const addCount = document.getElementById('add_count').value;
-    const addName = document.getElementById('add_name').value;
-    const addImage1 = document.getElementById('add_image1').value;
-    const addImage2 = document.getElementById('add_image2');
-    if (addMinGain === '' || addMaxGain === '') {
-        alert('Please fill the minimum and maximum gain.');
-        return;
+    let addMinGain = document.getElementById('add_min_gain').value;
+    let addMaxGain = document.getElementById('add_max_gain').value;
+    let addMeanGain = document.getElementById('add_mean_gain').value;
+    let addStdGain = document.getElementById('add_std_gain').value;
+    let addCount = document.getElementById('add_count').value;
+    let addName = document.getElementById('add_name').value;
+    let addImage1 = document.getElementById('add_image1').value;
+    let addImage2 = document.getElementById('add_image2');
+    if (addMinGain === '') {
+        addMinGain = 0;
+    }
+    if (addMaxGain === '') {
+        addMaxGain = 0;
     }
     const min = parseFloat(addMinGain);
     const max = parseFloat(addMaxGain);
     let mean = parseFloat(addMeanGain);
     let std = parseFloat(addStdGain);
     if (!addCount) {
-        alert('Please enter a count value');
-        return;
-    } else if (!addName) {
-        alert('Please enter a name value');
-        return;
+        addCount = 0;
+    }
+    if (!addName) {
+        addName = "Untitled";
     }
     let image = '';
     if (!addImage1) {
@@ -451,7 +469,7 @@ function update(doGains = true) {
             if (doGains) {
                 if ((data.data[i].mean_gain && data.data[i].std_gain) && (data.data[i].mean_gain != 0) && (data.data[i].std_gain != 0)) {
                     data.data[i].count = parseFloat(data.data[i].count) + randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain))
-                }  else {
+                } else {
                     data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
                 }
             }
@@ -503,7 +521,7 @@ function update(doGains = true) {
         if (document.getElementById('order').value == "asc") {
             data.data = data.data.reverse();
         }
-        if (data.visulization == 'default') {
+        if (!data.theme.includes('A')) {
             for (let i = 0; i < data.max; i++) {
                 if ((i + 1) < 10) {
                     num = "0" + (i + 1);
@@ -524,8 +542,8 @@ function update(doGains = true) {
                         currentCard.id = "card_" + data.data[i].id
                         currentCard.children[3].id = "count_" + data.data[i].id
                         currentCard.children[3].innerText = getDisplayedCount(data.data[i].count)
-                        if (data.data[i+1]) {
-                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)-getDisplayedCount(data.data[i+1].count)
+                        if (data.data[i + 1]) {
+                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
                         } else {
                             currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)
                         }
@@ -557,6 +575,53 @@ function update(doGains = true) {
                     }
                 }
             }
+        } else {
+            let lastPlaceSubs = data.data[data.max - 1].count;
+            let sortedData = [...data.data];
+            sortedData = sortedData.filter(x => x.count >= lastPlaceSubs);
+            let filteredData = {};
+            for (let i = 0; i < sortedData.length; i++) {
+                filteredData[sortedData[i].id] = sortedData[i];
+            }
+            let ids = Object.keys(filteredData);
+            let sortedIds = [...ids].sort((a, b) => filteredData[b].count - filteredData[a].count);
+            for (let i = 0; i < ids.length; i++) {
+                let id = ids[i];
+                let value = filteredData[id];
+                let element = $(`.card_${i}`);
+                if (element.length == 0) { }
+                element.find('.name').text(value.name);
+                element.find('.image').attr('src', value.image);
+                element.find('.count').text(getDisplayedCount(value.count));
+                if (selected == value.id) {
+                    element.css('border', '0.1em solid red');
+                } else {
+                    element.css('border', '0.1em solid ' + data.boxBorder + '');
+                }
+                if (fastest == value.id) {
+                    if (data.fastest == true) {
+                        element.find('.name').text("🔥" + value.name);
+                    }
+                }
+                if (slowest == value.id) {
+                    if (data.slowest == true) {
+                        element.find('.name').text("⌛️" + value.name);
+                    }
+                }
+                try {
+                    element.find('.subgap').text(getDisplayedCount(value.count - filteredData[ids[i + 1]].count));
+                } catch (e) { }
+            }
+            $('.main').isotope('updateSortData', $('.card'));
+            $('.main').isotope({
+                sortBy: 'number',
+                sortAscending: true
+            });
+            for (let q = 0; q < ids.length; q++) {
+                let element = $(`.card_${q}`);
+                element.find('.num').text(`#${sortedIds.indexOf(ids[q]) + 1}`);
+            }
+
         }
         for (let q = 0; q < popups.length; q++) {
             if ((!popups[q].popup) || (!popups[q].popup.document)) {
@@ -813,7 +878,7 @@ function reset() {
 
 function zero() {
     if (confirm("Are you sure you want to zero all the counters?")) {
-        for (i = 0; i<data.data.length; i++) {
+        for (i = 0; i < data.data.length; i++) {
             data.data[i].count = 0;
         }
         update(false)
@@ -1043,7 +1108,6 @@ function fix() {
     }
 
     if (data.showDifferences) {
-        // stuff
         document.getElementById('showDifferences').checked = true;
         const s = document.getElementById('hideDifferencesCSS');
         document.getElementById('hideDifferences').innerText = '';
@@ -1284,6 +1348,21 @@ function update2() {
                         }
                     }
                 }
+                if (json.system.length > 0) {
+                    for (let i = 0; i < json.system.length; i++) {
+                        if (json.system[i].type == "user") {
+                            let username = "";
+                            let set = 0;
+                            for (let a = 0; a < data.data.length; a++) {
+                                if (data.data[a].id == json.system[i].id) {
+                                    username = data.data[a].name;
+                                    set = data.data[a].count;
+                                }
+                            }
+                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/user?subs=' + set + '&name=' + username + '')
+                        }
+                    }
+                }
             } else {
                 alert("You are no longer connected.");
                 clearInterval(update2Hold);
@@ -1354,12 +1433,14 @@ function custom() {
         alert("Please enter a number.")
         return;
     }
-    alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + ')')
+    let returnText = prompt("What should the commands response be? (use $(user) for the name and $(query) for any additional text)")
+    alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + '&returnText=' + returnText + ')')
 }
 
-document.getElementById('connect').value = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query))';
-document.getElementById('connect3').value = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?value=edit)';
-document.getElementById('connect2').value = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=10,20)';
+document.getElementById('connect').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
+document.getElementById('connect2').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
+document.getElementById('connect3').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
+document.getElementById('connect4').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/user)';
 
 document.getElementById('animation').addEventListener('click', function (event) {
     if (event.target.checked) {
@@ -1580,21 +1661,12 @@ function audit() {
     auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
 }
 
-document.getElementById('auditMin').addEventListener('change', function () {
+function saveAuditSettings() {
     data.auditStats[0] = parseFloat(document.getElementById('auditMin').value)
-})
-
-document.getElementById('auditMax').addEventListener('change', function () {
     data.auditStats[1] = parseFloat(document.getElementById('auditMax').value)
-})
-
-document.getElementById('auditTimeMin').addEventListener('change', function () {
     data.auditStats[2] = parseFloat(document.getElementById('auditTimeMin').value)
-})
-
-document.getElementById('auditTimeMax').addEventListener('change', function () {
     data.auditStats[3] = parseFloat(document.getElementById('auditTimeMax').value)
-})
+}
 
 function audit2() {
     if (data.audits == false) {
@@ -1651,6 +1723,7 @@ function apiUpdate(interval) {
             return item;
         });
     }
+    console
     if (url.includes('{{channels}}')) {
         for (let i = 0; i < groups.length; i++) {
             let newUrl = url.replace('{{channels}}', groups[i])
@@ -1664,21 +1737,21 @@ function apiUpdate(interval) {
     }
     function fetchNext(url) {
         if (data.apiUpdates.method == 'GET') {
-            if (Object.keys(data.apiUpdates.headers).filter(x=>x).length) {
+            if (Object.keys(data.apiUpdates.headers).filter(x => x).length) {
                 fetch(url, {
                     method: data.apiUpdates.method,
                     headers: data.apiUpdates.headers,
                 }).then(response => response.json())
-                .then(json => {
-                    doStuff(json)
-                })
+                    .then(json => {
+                        doStuff(json)
+                    })
             } else {
                 fetch(url, {
                     method: data.apiUpdates.method
                 }).then(response => response.json())
-                .then(json => {
-                    doStuff(json)
-                })
+                    .then(json => {
+                        doStuff(json)
+                    })
             }
         } else {
             fetch(url, {
@@ -1693,63 +1766,115 @@ function apiUpdate(interval) {
     }
     function doStuff(json) {
         let channels = json;
-        if (data.apiUpdates.response.loop != 'data') {
-            channels = channels[data.apiUpdates.response['loop'].split('data.')[1]]
+        if (data.apiUpdates.response.loop !== 'data') {
+            channels = channels[data.apiUpdates.response.loop.split('data.')[1]];
         }
+        if (!Array.isArray(channels)) {
+            channels = [channels];
+        }
+        //example data: /*{"t":1715539737408,"counts":[{"value":"subscribers","count":257503920},{"value":"goal","count":496080},{"value":"apisubscribers","count":257000000},{"value":"views","count":48482055846},{"value":"apiviews","count":48459903570},{"value":"videos","count":793}],"user":[{"value":"name","count":"MrBeast"},{"value":"pfp","count":"http://www.banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA/avatar"},{"value":"banner","count":"http://www.banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"}]}*/
         for (let i = 0; i < channels.length; i++) {
-            let nameUpdate = undefined
-            let countUpdate = undefined
-            let imageUpdate = undefined
-            let idUpdate = undefined
-            if (data.apiUpdates.response.name.enabled == true) {
-                const propertyNames = data.apiUpdates.response.name.path.split('.')
+            let nameUpdate = undefined;
+            let countUpdate = undefined;
+            let imageUpdate = undefined;
+            let idUpdate = undefined;
+            if (data.apiUpdates.response.name.enabled === true) {
+                let propertyNames = data.apiUpdates.response.name.path.split('.');
+                propertyNames = propertyNames.map(prop => {
+                    if (prop.includes('[')) {
+                        const split = prop.split('[');
+                        const index = parseInt(split[1].split(']')[0]);
+                        return [split[0], index];
+                    }
+                    return prop;
+                }).flat();
                 let result = channels[i];
                 for (const propName of propertyNames) {
                     result = result[propName];
                 }
-                nameUpdate = result
+                nameUpdate = result;
             }
-            if (data.apiUpdates.response.count.enabled == true) {
-                const propertyNames = data.apiUpdates.response.count.path.split('.')
+            if (data.apiUpdates.response.count.enabled === true) {
+                let propertyNames = data.apiUpdates.response.count.path.split('.');
+                propertyNames = propertyNames.map(prop => {
+                    if (prop.includes('[')) {
+                        const split = prop.split('[');
+                        const index = parseInt(split[1].split(']')[0]);
+                        return [split[0], index];
+                    }
+                    return prop;
+                }).flat();
                 let result = channels[i];
                 for (const propName of propertyNames) {
                     result = result[propName];
                 }
-                countUpdate = result
+                countUpdate = result;
             }
-            if (data.apiUpdates.response.image.enabled == true) {
-                const propertyNames = data.apiUpdates.response.image.path.split('.')
+            if (data.apiUpdates.response.image.enabled === true) {
+                let propertyNames = data.apiUpdates.response.image.path.split('.');
+                propertyNames = propertyNames.map(prop => {
+                    if (prop.includes('[')) {
+                        const split = prop.split('[');
+                        const index = parseInt(split[1].split(']')[0]);
+                        return [split[0], index];
+                    }
+                    return prop;
+                }).flat();
                 let result = channels[i];
                 for (const propName of propertyNames) {
                     result = result[propName];
                 }
-                imageUpdate = result
+                imageUpdate = result;
             }
-            if (data.apiUpdates.response.id.enabled == true) {
-                const propertyNames = data.apiUpdates.response.id.path.split('.')
-                let result = channels[i];
-                for (const propName of propertyNames) {
-                    result = result[propName];
+            let propertyNames = data.apiUpdates.response.id.path.split('.');
+            propertyNames = propertyNames.map(prop => {
+                if (prop.includes('[')) {
+                    const split = prop.split('[');
+                    const index = parseInt(split[1].split(']')[0]);
+                    return [split[0], index];
                 }
-                idUpdate = result
+                return prop;
+            }).flat();
+            let result = channels[i];
+            for (const propName of propertyNames) {
+                result = result[propName];
             }
+            idUpdate = result;
+
             for (let r = 0; r < data.data.length; r++) {
-                if (data.data[r].id == idUpdate) {
-                    if (nameUpdate != undefined) {
-                        data.data[r].name = nameUpdate
+                if (data.apiUpdates.response.id.IDIncludes === true) {
+                    if (idUpdate.includes(data.data[r].id)) {
+                        if (nameUpdate !== undefined) {
+                            data.data[r].name = nameUpdate;
+                        }
+                        if (imageUpdate !== undefined) {
+                            data.data[r].image = imageUpdate;
+                        }
+                        if (countUpdate !== undefined) {
+                            if (abb(countUpdate) !== abb(data.data[r].count)) {
+                                data.data[r].count = countUpdate;
+                            }
+                        }
                     }
-                    if (imageUpdate != undefined) {
-                        data.data[r].image = imageUpdate
-                    }
-                    if (countUpdate != undefined) {
-                        if (abb(countUpdate) != abb(data.data[r].count)) {
-                            data.data[r].count = countUpdate
+                } else {
+                    if (data.data[r].id === idUpdate) {
+                        if (nameUpdate !== undefined) {
+                            data.data[r].name = nameUpdate;
+                        }
+                        if (imageUpdate !== undefined) {
+                            data.data[r].image = imageUpdate;
+                        }
+                        if (countUpdate !== undefined) {
+                            if (abb(countUpdate) !== abb(data.data[r].count)) {
+                                data.data[r].count = countUpdate;
+                            }
                         }
                     }
                 }
             }
         }
     }
+
 }
 
 function enableApiUpdate() {
@@ -1802,13 +1927,13 @@ function saveAPIUpdates() {
             'path': document.getElementById('pathImage').value
         },
         'id': {
-            'enabled': document.getElementById('updateID').checked,
+            'IDIncludes': document.getElementById('IDIncludes').checked,
             'path': document.getElementById('pathID').value
         }
     }
     data.apiUpdates.interval = parseFloat(document.getElementById('apiUpdateInt').value) * 1000
     data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerText == 'Disable API Updates' ? true : false
-    alert('Saved!')
+    alert('API Update Settings Saved')
 }
 
 function loadAPIUpdates() {
@@ -1832,7 +1957,7 @@ function loadAPIUpdates() {
     document.getElementById('pathCount').value = data.apiUpdates.response.count.path
     document.getElementById('updateImage').checked = data.apiUpdates.response.image.enabled
     document.getElementById('pathImage').value = data.apiUpdates.response.image.path
-    document.getElementById('updateID').checked = data.apiUpdates.response.id.enabled
+    document.getElementById('IDIncludes').checked = data.apiUpdates.response.id.IDIncludes
     document.getElementById('pathID').value = data.apiUpdates.response.id.path
     document.getElementById('apiUpdateInt').value = data.apiUpdates.interval / 1000;
     document.getElementById('enableApiUpdate').innerText = data.apiUpdates.enabled == true ? 'Disable API Updates' : 'Enable API Updates'
@@ -2037,3 +2162,68 @@ function refresh() {
         }
     }
 }
+
+document.getElementById("apiSource").addEventListener('change', function () {
+    if (document.getElementById("apiSource").value == 'mixerno1') {
+        data.apiUpdates = {
+            'enabled': false,
+            'url': 'https://mixerno.space/api/youtube-channel-counter/user/{{channels}}',
+            'interval': 10000,
+            'method': 'GET',
+            'body': '',
+            'headers': '',
+            'maxChannelsPerFetch': 'one',
+            'custom': false,
+            'response': {
+                'loop': 'data',
+                'name': {
+                    'enabled': true,
+                    'path': 'user[0].count'
+                },
+                'count': {
+                    'enabled': true,
+                    'path': 'counts[0].count'
+                },
+                'image': {
+                    'enabled': true,
+                    'path': 'user[1].count'
+                },
+                'id': {
+                    'IDIncludes': true,
+                    'path': 'user[1].count'
+                }
+            }
+        }
+    } else if (document.getElementById("apiSource").value == 'mixerno2') {
+        data.apiUpdates = {
+            'enabled': false,
+            'url': 'https://mixerno.space/api/youtube-channel-counter/user/{{channels}}',
+            'interval': 10000,
+            'method': 'GET',
+            'body': '',
+            'headers': '',
+            'maxChannelsPerFetch': 'one',
+            'custom': false,
+            'response': {
+                'loop': 'data',
+                'name': {
+                    'enabled': true,
+                    'path': 'user[0].count'
+                },
+                'count': {
+                    'enabled': true,
+                    'path': 'counts[2].count'
+                },
+                'image': {
+                    'enabled': true,
+                    'path': 'user[1].count'
+                },
+                'id': {
+                    'IDIncludes': true,
+                    'path': 'user[1].count'
+                }
+            }
+        }
+    }
+    loadAPIUpdates();
+})
