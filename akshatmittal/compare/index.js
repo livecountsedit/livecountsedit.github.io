@@ -111,8 +111,8 @@ class LivecountseditInterface {
                 }
             },
             this.setAvatar2 = function () {
-                if (!document.getElementById("options.counter.avatar.file").files.length) {
-                    if (!document.getElementById("options.counter.avatar.url").value) return;
+                if (!document.getElementById("options.counter.avatar.file2").files.length) {
+                    if (!document.getElementById("options.counter.avatar.url2").value) return;
                     else document.getElementById("yt_profile_vs2").src = document.getElementById("options.counter.avatar.url2").value
                 } else {
                     document.getElementById("yt_profile_vs2").src = URL.createObjectURL(document.getElementById("options.counter.avatar.file2").files[0])
