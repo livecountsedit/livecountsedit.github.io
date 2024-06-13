@@ -3795,9 +3795,9 @@ div.page-realtime-body .containment:after {
 
 .youtube-icon {
     position: absolute;
-    top: -12px; /* Adjust the top position as needed */
-    right: 0;
-    height: 1em; /* Set the size of the icon */
+    top: 0px;
+    margin-left: 8px;
+    height: 0.6em;
 }
 
 .realtime-username-youtube { color: #b3382c!important; }
