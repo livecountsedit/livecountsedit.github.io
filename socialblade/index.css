@@ -3789,6 +3789,17 @@ div.page-realtime-body .containment:after {
     width: 100vw;
 }
 
+.realtime-username-youtube {
+    position: relative;
+}
+
+.youtube-icon {
+    position: absolute;
+    top: 0px;
+    margin-left: 8px;
+    height: 0.6em;
+}
+
 .realtime-username-youtube { color: #b3382c!important; }
 .realtime-username-twitter { color: #b3382c!important; }
 .realtime-username-twitch { color: #b3382c!important; }
