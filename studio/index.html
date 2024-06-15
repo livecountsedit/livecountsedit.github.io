@@ -22,8 +22,6 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://lcedit.com" />
     <meta property="og:image" content="../images/studio.png" />
-    <script src="./odometer.js"></script>
-    <link href="./odometer.css" rel="stylesheet" />
     <link rel="stylesheet" id="themeStylesheet" href="./style.css">
     <script src="../highstock.js"></script>
 </head>
@@ -79,23 +77,7 @@
     <p id="name">Livecountsedit</p>
     <div class="main">
         <div class="counter">
-            <div id="count">
-                <div id="odo1a" class="odometer">0</div>
-                <div id="odo2a" class="odometer">0</div>
-                <div id="odo3a" class="odometer">0</div>
-                <div id="comma1a">,</div>
-                <div id="odo4a" class="odometer">0</div>
-                <div id="odo5a" class="odometer">0</div>
-                <div id="odo6a" class="odometer">0</div>
-                <div id="comma2a">,</div>
-                <div id="odo7a" class="odometer">0</div>
-                <div id="odo8a" class="odometer">0</div>
-                <div id="odo9a" class="odometer">0</div>
-                <div id="comma3a">,</div>
-                <div id="odo10a" class="odometer">0</div>
-                <div id="odo11a" class="odometer">0</div>
-                <div id="odo12a" class="odometer">0</div>
-            </div>
+            <div id="count" class="odometer"></div>
             <p class="label" id="footer">Subscribers</p>
         </div>
         <hr>
@@ -244,5 +226,5 @@
     </div>
 </body>
 <script src="./script.js"></script>
-
+<script src="./odometer.js"></script>
 </html>
