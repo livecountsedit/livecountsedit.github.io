@@ -1035,6 +1035,15 @@ sidebar navigation
     text-align: center;
 }
 
+.trophy-icon {
+    position: absolute;
+    width: 25px;
+    height: auto; 
+    left: 0px; 
+    top: 2px; 
+    object-fit: contain; 
+}
+
 @media (max-width: 1260px) {
     .display-1 {
         font-size: 6rem !important;
