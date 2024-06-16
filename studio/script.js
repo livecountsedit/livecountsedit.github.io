@@ -286,10 +286,10 @@ function exportData() {
 
 function toggleTheme() {
 	const stylesheet = document.getElementById("themeStylesheet");
-	if (stylesheet.getAttribute("href") === "./style.css") {
-		stylesheet.setAttribute("href", "./dark.css");
+	if (stylesheet.getAttribute("href") === "./dark.css") {
+		stylesheet.setAttribute("href", "./light.css");
 	} else {
-		stylesheet.setAttribute("href", "./style.css");
+		stylesheet.setAttribute("href", "./dark.css");
 	}
 }
 
