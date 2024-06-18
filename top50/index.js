@@ -649,7 +649,7 @@ function update(doGains = true) {
 }
 
 let selected = null;
-document.getElementById('quickSelectButton').addEventListener('click', function (e) {
+document.getElementById('quickSelectButton').addEventListener('change', function (e) {
     if (!pickingChannels) {
         if (quickSelecting) {
             quickSelecting = false;
