@@ -32,14 +32,15 @@
             <button id="tab-link-1" class="tab-link" onclick="openTab(event, 'tabs-1')">Counter</button>
             <button id="tab-link-2" class="tab-link" onclick="openTab(event, 'tabs-2')">Styles</button>
             <button id="tab-link-3" class="tab-link" onclick="openTab(event, 'tabs-3')">Advanced Settings</button>
-
+            <button id="tab-link-4" class="tab-link" onclick="openTab(event, 'tabs-4')">API Updates</button>
             <button class="btn btn-primary" onclick="submit()">Save settings</button><br>
             <button class="btn btn-primary" onclick="refreshCount()">Refresh count</button>
             <button class="btn btn-danger" onclick="reset()">Reset</button><br>
             <button class="btn btn-danger" onclick="resetChart()">Reset chart</button><br>
             <button id="pause-button" class="btn btn-secondary" onclick="togglePause()">Pause</button><br>
             <button class="btn btn-secondary" onclick="version()">Check version</button>
-            <button class="btn btn-secondary" onclick="exportToJSON()">Export data</button>
+            <button class="btn btn-secondary" onclick="exportToJSON()">Export data (public)</button>
+            <button class="btn btn-danger" onclick="exportToJSON(true)">Export data (private)</button>
             <button class="btn btn-secondary" onclick="document.querySelector('#import-data-v7').click()">Import data (v7)</button>
             <input type="file" class="file-import" id="import-data-v7" accept=".json">
             
@@ -209,6 +210,36 @@ Min2,Max2,Weight2"></textarea>
                 </div>
             </form>
         </div>
+        <div class="tab-content" id="tabs-4">
+            <form class="api-form" id="settingsForm-4">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="ytAPIEnabled" name="ytAPIEnabled">
+                    <span><label class="form-check-label" for="showImage">Enable YouTube API updates</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="This will update the counter if the abbreviated subscriber count does not match what is given in the API."> &#x1F6C8;</a></span>
+                </div>
+                <div class="mb-3">
+                    <span><label class="form-label" for="ytChannelID">YouTube channel ID</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="This is not the same as a YouTube handle or username. Use the tool linked below to help you easily find the YouTube channel ID. YouTube channel IDs are 24 characters long and begin with &quot;UC&quot;."> &#x1F6C8;</a></span><br>
+                    <a href="https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/">YouTube channel ID finder</a>
+                    <input class="form-control" id="ytChannelID" name="ytChannelID">
+                </div>
+                <div class="mb-3">
+                    <span><label class="form-label" for="ytAPIKey">YouTube Data API v3 key</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Read the article linked below if you are unsure of how to get one. Your YouTube API key should begin with &quot;AIzaSy&quot;. Do NOT share this key with anyone."> &#x1F6C8;</a></span><br>
+                    <a href="https://blog.hubspot.com/website/how-to-get-youtube-api-key">A tutorial on how to get one</a>
+                    <input class="form-control" id="ytAPIKey" name="ytAPIKey" type="password">
+                </div>
+                <div class="mb-3">
+                    <span><label class="form-label" for="apiInterval">API update interval</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10."> &#x1F6C8;</a></span>
+                    <input class="form-control" id="apiInterval" name="apiInterval" type="number" min="1" max="2147483.647">
+                </div>
+                <div class="mb-3">
+                    <span><label class="form-label" for="leeway">Overestimation leeway in percent</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively."> &#x1F6C8;</a></span>
+                    <input class="form-control" id="leeway" name="leeway" type="number" min="0" max="100">
+                </div>
+            </form>
+            <button class="btn btn-primary" onclick="submitAPI()">Save API settings</button><br>
+            <button class="btn btn-primary" onclick="updateAPI()">Update now</button>
+            <h5>Note: API settings are saved separately from the other settings.</h5><br>
+            <h5>Status indicator: <span id="apiStatusIndicator">--</span></h5>
+        </div>
         <div class="counter-content">
             <div class="counter-container">
                 <img class="banner" src="../default_banner.png" id="counter-banner">
@@ -222,7 +253,7 @@ Min2,Max2,Weight2"></textarea>
         </div>
     </div>
     <div class="page-footer">
-        <span>Version 7.0 - <a href="../index.html">Back to main page</a> - <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F">Not working?</a> - <a href="https://discord.gg/Uke3tdtYnD">Join the Livecountsedit Discord Server.</a> This site is a parody of popular realtime counters.</span>
+        <span>Version 7.0.1 - <a href="../index.html">Back to main page</a> - <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F">Not working?</a> - <a href="https://discord.gg/Uke3tdtYnD">Join the Livecountsedit Discord Server.</a> This site is a parody of popular realtime counters.</span>
     </div>
     <script src="../odometer/odometer.js"></script>
     <script src="../highstock.js"></script>
@@ -230,6 +261,5 @@ Min2,Max2,Weight2"></textarea>
     <script src="../bootstrap.js"></script>
     <script src="../counter.js"></script>
     <script src="./lcedit.js"></script>
-    <!--<script src="./index.js"></script>-->
 </body>
 </html>

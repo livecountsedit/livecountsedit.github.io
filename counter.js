@@ -4,8 +4,8 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
 })
 
 const LCEDIT = {
-    saveVersion: 1,
-    versionName: "7.0",
+    saveVersion: 2,
+    versionName: "7.0.1",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -90,15 +90,15 @@ const LCEDIT = {
             if (type === 'object' || type === 'function') throw new Error('Cannot set this form value');
             return v;
         },
-        cleanFormData: formData => {
+        cleanFormData: (formData, ref) => {
             result = {};
             const k = Object.keys(formData);
             for (i = 0; i < k.length; i++) {
-                result[k[i]] = LCEDIT.util.cleanFormValue(formData[k[i]], typeof defaultCounter[k[i]]);
+                result[k[i]] = LCEDIT.util.cleanFormValue(formData[k[i]], typeof ref[k[i]]);
             }
             return result;
         },
-        submitForms: (forms) => {
+        submitForms: (forms, ref) => {
             const results = {
                 success: true,
                 problematicForm: null,
@@ -112,7 +112,7 @@ const LCEDIT = {
                     for (k = 0; k < checkboxes.length; k++) {
                         fData.append(checkboxes[k].getAttribute('name'), checkboxes[k].checked)
                     }
-                    const newData = LCEDIT.util.cleanFormData(Object.fromEntries(fData.entries()));
+                    const newData = LCEDIT.util.cleanFormData(Object.fromEntries(fData.entries()), ref);
                     results.data = Object.assign(results.data, newData)
                 } else {
                     results.success = false;
@@ -147,6 +147,22 @@ const LCEDIT = {
             } else {
                 el.style.display = 'none';
             }
+        },
+        removePrivateData: data => {
+            let d = JSON.parse(JSON.stringify(data));
+            d.allowHTML = false;
+            d.private = false;
+            if (d.api) {
+                d.api.ytAPIEnabled = false;
+                d.api.ytAPIKey = '';
+            }
+            return d;
+        },
+        bringDownOverestimate: (actualCount, leeway) => {
+            if (actualCount < 1000) return actualCount;
+            let result = Math.floor(actualCount + (10 ** (Math.floor(Math.log10(actualCount))-2)) * (100 - leeway) / 100);
+            if (leeway === 0) result -= 1;
+            return result;
         }
     }
 }
@@ -252,6 +268,45 @@ window.odometerOptions = {
     auto: false
 }
 
+class Save {
+    constructor(type) {
+        this.allowHTML = false
+        this.saveType = type
+        this.version = LCEDIT.saveVersion
+        this.updateInterval = 2
+        this.updater = 0
+        this.title = 'save'
+        this.paused = false
+        this.lastSaved = 0
+        this.counters = []
+        this.private = true
+        this.api = {
+            ytAPIEnabled: false,
+            ytChannelID: "",
+            ytAPIKey: "",
+            apiInterval: 60,
+            leeway: 10,
+            updater: 0
+        }
+    }
+}
+
 function version() {
-    alert(`The code is currently on version ${LCEDIT.versionName}. If this does not match the version in the footer of this page, try the steps on the page linked with 'Not working?' or report an issue in the Livecountsedit Discord.`)
+    alert(`You are running Livecountsedit version ${LCEDIT.versionName}`)
+}
+
+function saveToJSON(private = false) {
+    return private ? JSON.stringify(saveData) : JSON.stringify(LCEDIT.util.removePrivateData(saveData));
+}
+
+function exportToJSON(private = false) {
+    if (private) {
+        if (!confirm("PLEASE READ: You are exporting a private save file. This means that the save file will include things like any API keys you have put in. If you do not wish for this data to be in your save file, export a public save that is safe to share publicly instead. Be sure to NEVER share the private save file with anyone you do not trust!")) return;
+    }
+    const a = document.createElement('a');
+    saveData.lastSaved = Date.now()
+    const file = new Blob([saveToJSON(private)], { type: 'text/json' });
+    a.href = URL.createObjectURL(file);
+    a.download = `${saveData.title}${private ? '-PRIVATE' : ''}.json`;
+    a.click();
 }
