@@ -33,7 +33,7 @@
     <script src="../highstock.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js"></script>
-   
+
     <!--<script id="dsq-count-scr" src="//livecountsedit.disqus.com/count.js" async></script>-->
     <style id="designStyles"></style>
     <style id="odometerStyles"></style>
@@ -229,11 +229,20 @@
                         </div>
                         <div>
                             <br>
-                            <input type="checkbox" id="fastest"><label>Icon For Fastest Channel</label>
+                            <input type="checkbox" id="fastest"><label>Icon For Fastest Channel</label><br>
+                            <input id="fastestIcon" autocomplete="off"><label> (emoji or text)</label>
                         </div>
                         <div>
                             <br>
-                            <input type="checkbox" id="slowest"><label>Icon For Slowest Channel</label>
+                            <input type="checkbox" id="multipleFastest"><label> Display Multiple Fastest Channels</label><br>
+                            <input id="multipleFastestThreshold" autocomplete="off"><label> Threshold</label>
+                            <br><label> Basically adds the fire icon
+                                to all channels gaining more than the provieded threshold</label>
+                        </div>
+                        <div>
+                            <br>
+                            <input type="checkbox" id="slowest"><label>Icon For Slowest Channel</label><br>
+                            <input id="slowestIcon" autocomplete="off"><label> (emoji or text)</label>
                         </div>
                         <div>
                             <br>
@@ -286,7 +295,7 @@
                         <div>
                             <br>
                             <label>Odometer Speed</label><br>
-                            <input value="2" id="odometerSpeed" autocomplete="off"><label>(in seconds)</label>
+                            <input value="2" id="odometerSpeed" autocomplete="off"><label> (in seconds)</label>
                         </div>
                         <div>
                             <br>
@@ -300,11 +309,20 @@
                         </div>
                         <div>
                             <br>
-                            <input type="checkbox" id="abbreviate"><label>Abbreviate Counts</label>
+                            <input type="checkbox" id="abbreviate"><label> Abbreviate Counts</label>
                         </div>
                         <div>
                             <br>
-                            <input type="checkbox" id="allowNegative"><label>Allow Negative Counts</label>
+                            <input type="checkbox" id="allowNegative"><label> Allow Negative Counts</label>
+                        </div>
+                        <div>
+                            <br>
+                            <input type="checkbox" id="randomCountUpdateTime"><label> Randomly Count Update Time</label>
+                        </div>
+                        <div>
+                            <br>
+                            <input type="checkbox" id="waterFallCountUpdateTime"><label> Waterfall Count Update
+                                Time</label>
                         </div>
                     </div>
                 </div>

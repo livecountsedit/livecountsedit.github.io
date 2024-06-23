@@ -85,7 +85,11 @@ let data = {
     "animation": true,
     "abbreviate": false,
     "fastest": true,
+    "fastestIcon": "🔥",
+    "multipleFastest": false,
+    "multipleFastestThreshold": 0,
     "slowest": true,
+    "slowestIcon": "⌛️",
     'odometerUp': 'null',
     'odometerDown': 'null',
     'odometerSpeed': 2,
@@ -108,6 +112,8 @@ let data = {
     'auditStats': [0, 0, 0, 0],
     "hideSettings": 'q',
     "allowNegative": false,
+    "randomCountUpdateTime": false,
+    "waterFallCountUpdateTime": false,
     'apiUpdates': {
         'enabled': false,
         'url': '',
@@ -456,6 +462,7 @@ function update(doGains = true) {
         let fastestCount = -Infinity;
         let slowest = ""
         let slowestCount = Infinity;
+        let multipleFastestChannels = [];
         let past = document.getElementById('quickSelect').value;
         document.getElementById('quickSelect').innerHTML = "";
         let selections = ['<option value="select">Select</option>'];
@@ -477,6 +484,11 @@ function update(doGains = true) {
                 if ((data.data[i].count - data.data[i].lastCount >= fastestCount)) {
                     fastestCount = data.data[i].count - data.data[i].lastCount;
                     fastest = data.data[i].id;
+                }
+                if ((data.multipleFastest == true)) {
+                    if ((data.data[i].count - data.data[i].lastCount) >= data.multipleFastestThreshold) {
+                        multipleFastestChannels.push(data.data[i].id);
+                    }
                 }
                 if ((data.data[i].count - data.data[i].lastCount < slowestCount)) {
                     slowestCount = data.data[i].count - data.data[i].lastCount;
@@ -523,57 +535,70 @@ function update(doGains = true) {
         }
         if (!data.theme.includes('A')) {
             for (let i = 0; i < data.max; i++) {
-                if ((i + 1) < 10) {
-                    num = "0" + (i + 1);
-                } else {
-                    num = (i + 1);
+                let extraTimeTillUpdate = 0;
+                const interval = data.updateInterval;
+                if (data.randomCountUpdateTime == true) {
+                    extraTimeTillUpdate = random(0, interval);
+                    console.log('Extra time till update: ' + extraTimeTillUpdate);
                 }
-                const currentCard = document.getElementsByClassName("card")[i]
-                if (currentCard) {
-                    if (data.data[i]) {
-                        if (!data.data[i].image) {
-                            data.data[i].image = "../default.png";
-                        }
-                        currentCard.children[1].src = data.data[i].image
-                        currentCard.children[2].innerText = data.data[i].name
-                        currentCard.children[1].id = "image_" + data.data[i].id
-                        currentCard.children[2].id = "name_" + data.data[i].id
-                        currentCard.children[0].id = "num_" + data.data[i].id
-                        currentCard.id = "card_" + data.data[i].id
-                        currentCard.children[3].id = "count_" + data.data[i].id
-                        currentCard.children[3].innerText = getDisplayedCount(data.data[i].count)
-                        if (data.data[i + 1]) {
-                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
-                        } else {
-                            currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)
-                        }
-                        if (selected == data.data[i].id) {
-                            document.getElementById("card_" + selected).style.border = "0.1em solid red";
-                        } else {
-                            document.getElementById("card_" + data.data[i].id).style.border = "0.1em solid " + data.boxBorder + "";
-                        }
-                        if (fastest == data.data[i].id) {
-                            if (data.fastest == true) {
-                                document.getElementById("card_" + fastest).children[2].innerText = "🔥" + data.data[i].name
-                            }
-                        }
-                        if (slowest == data.data[i].id) {
-                            if (data.slowest == true) {
-                                document.getElementById("card_" + slowest).children[2].innerText = "⌛️" + data.data[i].name
-                            }
-                        }
+                if (data.waterFallCountUpdateTime == true) {
+                    extraTimeTillUpdate = i * 100;
+                }
+                setTimeout(function () {
+                    if ((i + 1) < 10) {
+                        num = "0" + (i + 1);
                     } else {
-                        currentCard.id = 'card_'
-                        currentCard.children[0].id = "num_"
-                        currentCard.children[1].id = "image_"
-                        currentCard.children[1].src = "../blank.png"
-                        currentCard.children[2].id = "name_"
-                        currentCard.children[2].innerText = '\u200b'
-                        currentCard.children[3].id = "count_"
-                        currentCard.children[3].innerText = '0'
-                        currentCard.children[4].innerText = '0'
+                        num = (i + 1);
                     }
-                }
+                    const currentCard = document.getElementsByClassName("card")[i]
+                    if (currentCard) {
+                        if (data.data[i]) {
+                            if (!data.data[i].image) {
+                                data.data[i].image = "../default.png";
+                            }
+                            currentCard.children[1].src = data.data[i].image
+                            currentCard.children[2].innerText = data.data[i].name
+                            currentCard.children[1].id = "image_" + data.data[i].id
+                            currentCard.children[2].id = "name_" + data.data[i].id
+                            currentCard.children[0].id = "num_" + data.data[i].id
+                            currentCard.id = "card_" + data.data[i].id
+                            currentCard.children[3].id = "count_" + data.data[i].id
+                            currentCard.children[3].innerText = getDisplayedCount(data.data[i].count)
+                            if (data.data[i + 1]) {
+                                currentCard.children[4].innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
+                            } else {
+                                currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)
+                            }
+                            if (selected == data.data[i].id) {
+                                document.getElementById("card_" + selected).style.border = "0.1em solid red";
+                            } else {
+                                document.getElementById("card_" + data.data[i].id).style.border = "0.1em solid " + data.boxBorder + "";
+                            }
+                            if (multipleFastestChannels.includes(data.data[i].id)) {
+                                document.getElementById("card_" + data.data[i].id).children[2].innerText = "" + data.fastestIcon + " " + data.data[i].name
+                            } else if (fastest == data.data[i].id) {
+                                if (data.fastest == true) {
+                                    document.getElementById("card_" + fastest).children[2].innerText = "" + data.fastestIcon + " " + data.data[i].name
+                                }
+                            }
+                            if (slowest == data.data[i].id) {
+                                if (data.slowest == true) {
+                                    document.getElementById("card_" + slowest).children[2].innerText = "" + data.slowestIcon + " " + data.data[i].name
+                                }
+                            }
+                        } else {
+                            currentCard.id = 'card_'
+                            currentCard.children[0].id = "num_"
+                            currentCard.children[1].id = "image_"
+                            currentCard.children[1].src = "../blank.png"
+                            currentCard.children[2].id = "name_"
+                            currentCard.children[2].innerText = '\u200b'
+                            currentCard.children[3].id = "count_"
+                            currentCard.children[3].innerText = '0'
+                            currentCard.children[4].innerText = '0'
+                        }
+                    }
+                }, extraTimeTillUpdate);
             }
         } else {
             let lastPlaceSubs = data.data[data.max - 1].count;
@@ -600,12 +625,12 @@ function update(doGains = true) {
                 }
                 if (fastest == value.id) {
                     if (data.fastest == true) {
-                        element.find('.name').text("🔥" + value.name);
+                        element.find('.name').text("" + data.fastestIcon + " " + value.name);
                     }
                 }
                 if (slowest == value.id) {
                     if (data.slowest == true) {
-                        element.find('.name').text("⌛️" + value.name);
+                        element.find('.name').text("" + data.slowestIcon + " " + value.name);
                     }
                 }
                 try {
@@ -649,7 +674,7 @@ function update(doGains = true) {
 }
 
 let selected = null;
-document.getElementById('quickSelectButton').addEventListener('change', function (e) {
+document.getElementById('quickSelectButton').addEventListener('click', function (e) {
     if (!pickingChannels) {
         if (quickSelecting) {
             quickSelecting = false;
@@ -960,6 +985,22 @@ document.getElementById('allowNegative').addEventListener('change', function () 
     }
 });
 
+document.getElementById('randomCountUpdateTime').addEventListener('change', function () {
+    if (this.checked) {
+        data.randomCountUpdateTime = true;
+    } else {
+        data.randomCountUpdateTime = false;
+    }
+});
+
+document.getElementById('waterFallCountUpdateTime').addEventListener('change', function () {
+    if (this.checked) {
+        data.waterFallCountUpdateTime = true;
+    } else {
+        data.waterFallCountUpdateTime = false;
+    }
+});
+
 document.getElementById('imageBorder').addEventListener('change', function () {
     let num = this.value;
     data.imageBorder = num;
@@ -1046,6 +1087,10 @@ function fix() {
     if ((!data.fastest) && (data.fastest !== false)) {
         data.fastest = true;
     }
+    if (!data.fastestIcon) {
+        data.fastestIcon = "🔥";
+        data.slowestIcon = "⌛️";
+    }
     if ((!data.slowest) && (data.slowest !== false)) {
         data.slowest = true;
     }
@@ -1062,10 +1107,25 @@ function fix() {
     } else {
         document.getElementById('allowNegative').checked = false;
     }
+    if (data.randomCountUpdateTime == true) {
+        document.getElementById('randomCountUpdateTime').checked = true;
+    } else {
+        document.getElementById('randomCountUpdateTime').checked = false;
+    }
+    if (data.waterFallCountUpdateTime == true) {
+        document.getElementById('waterFallCountUpdateTime').checked = true;
+    } else {
+        document.getElementById('waterFallCountUpdateTime').checked = false;
+    }
     if (data.fastest == true) {
         document.getElementById('fastest').checked = true;
     } else {
         document.getElementById('fastest').checked = false;
+    }
+    if (data.multipleFastest == true) {
+        document.getElementById('multipleFastest').checked = true;
+    } else {
+        document.getElementById('multipleFastest').checked = false;
     }
     if (data.slowest == true) {
         document.getElementById('slowest').checked = true;
@@ -1203,6 +1263,9 @@ function fix() {
     document.getElementById('odometerSpeed').value = data.odometerSpeed;
     document.getElementById('imageBorder').value = data.imageBorder;
     document.getElementById('imageBorderColor').value = data.imageBorderColor;
+    document.getElementById('multipleFastestThreshold').value = data.multipleFastestThreshold || 0;
+    document.getElementById('fastestIcon').value = data.fastestIcon || '🔥';
+    document.getElementById('slowestIcon').value = data.slowestIcon || '⌛️';
     if (data.updateInterval) {
         document.getElementById('updateint').value = (data.updateInterval / 1000).toString()
     }
@@ -1493,6 +1556,29 @@ document.getElementById('fastest').addEventListener('click', function () {
     }
 })
 
+document.getElementById('multipleFastest').addEventListener('click', function () {
+    if (document.getElementById('multipleFastest').checked == true) {
+        data.multipleFastest = true;
+    } else {
+        data.multipleFastest = false;
+    }
+})
+
+document.getElementById('multipleFastestThreshold').addEventListener('change', function () {
+    let threshold = document.getElementById('multipleFastestThreshold').value;
+    data.multipleFastestThreshold = parseFloat(threshold);
+})
+
+document.getElementById('fastestIcon').addEventListener('change', function () {
+    let icon = document.getElementById('fastestIcon').value;
+    data.fastestIcon = icon;
+})
+
+document.getElementById('slowestIcon').addEventListener('change', function () {
+    let icon = document.getElementById('slowestIcon').value;
+    data.slowestIcon = icon;
+})
+
 document.getElementById('slowest').addEventListener('click', function () {
     if (document.getElementById('slowest').checked == true) {
         data.slowest = true;
@@ -1586,16 +1672,16 @@ function average(num1, num2) {
     return (num1 + num2) / 2
 }
 
-function create50dummychannels() {
-    for (let i = 0; i < 50; i++) {
-        data.data[i] = {
+function createDummyChannels(count) {
+    for (let i = 0; i < count; i++) {
+        data.data.push({
             name: "Channel " + i,
             count: Math.round(randomGaussian(1000, 100)),
             min_gain: 1,
             max_gain: 2,
             image: '../default.png',
             id: uuidGen()
-        }
+        })
     }
 }
 
@@ -1687,7 +1773,7 @@ function apiUpdate(interval) {
             document.getElementById('enableApiUpdate').innerText = "Enable API Updates"
         }
     }
-    let url = data.apiUpdates.url
+    let url = data.apiUpdates.url;
     let groups = []
     let channels = ''
     for (let i = 0; i < data.data.length; i++) {
@@ -1723,7 +1809,6 @@ function apiUpdate(interval) {
             return item;
         });
     }
-    console
     if (url.includes('{{channels}}')) {
         for (let i = 0; i < groups.length; i++) {
             let newUrl = url.replace('{{channels}}', groups[i])
@@ -1772,7 +1857,6 @@ function apiUpdate(interval) {
         if (!Array.isArray(channels)) {
             channels = [channels];
         }
-        //example data: /*{"t":1715539737408,"counts":[{"value":"subscribers","count":257503920},{"value":"goal","count":496080},{"value":"apisubscribers","count":257000000},{"value":"views","count":48482055846},{"value":"apiviews","count":48459903570},{"value":"videos","count":793}],"user":[{"value":"name","count":"MrBeast"},{"value":"pfp","count":"http://www.banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA/avatar"},{"value":"banner","count":"http://www.banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"}]}*/
         for (let i = 0; i < channels.length; i++) {
             let nameUpdate = undefined;
             let countUpdate = undefined;
@@ -2007,6 +2091,8 @@ function popupList() {
         "animation": data.animation,
         "abbreviate": data.abbreviate,
         "fastest": data.fastest,
+        "multipleFastest": data.multipleFastest,
+        "multipleFastestThreshold": data.multipleFastestThreshold,
         "slowest": data.slowest,
         'odometerUp': data.odometerUp,
         'odometerDown': data.odometerDown,
@@ -2124,6 +2210,7 @@ function selectorFunction(e) {
                     }
                 }
             }
+            refresh();
         }
     }
     quickSelecting = false;
