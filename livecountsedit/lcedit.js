@@ -37,6 +37,7 @@ counter = saveData.counters[0];
 
 window.onload = function () {
     if (document.getElementById('tab-link-0')) document.getElementById('tab-link-0').click();
+    chart = new Highcharts.chart(getChartOptions());
     if (localStorage.getItem('lcedit-lcedit')) {
         importFromJSON(localStorage.getItem('lcedit-lcedit'), true)
     }
@@ -44,8 +45,6 @@ window.onload = function () {
     updateGainType(counter.settings.gainType)
     updateStuff()
 }
-
-chart = new Highcharts.chart(getChartOptions());
 
 document.querySelector('#import-data-v7').addEventListener('input', () => {
     if (document.querySelector('#import-data-v7').files[0]) {
