@@ -15,6 +15,12 @@ const uuidGen = function () {
 	return a() + a() + '-' + a() + '-' + a() + '-' + a() + '-' + a() + a() + a();
 }
 
+const setMarginTopOfCount = function () {
+	const countElement = document.getElementById('count');
+	const value = document.getElementById('marginTopOfCount').value;
+	countElement.style.marginTop = `${value}px`;
+}
+
 const selectElement = document.getElementById('selectcomma');
 const comma1Element = document.getElementById('comma1a');
 const comma2Element = document.getElementById('comma2a');
