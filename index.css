@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
 
 body {
     background-color: #1a1a20;
@@ -22,7 +22,7 @@ a:hover {
 
 h1 {
     background-color: #141414;
-    font-size: 6vw;
+    font-size: 3vw;
     margin: 10px 0;
     animation: fadeInUp 1.5s ease-in-out;
 }
@@ -31,8 +31,8 @@ h1 {
     width: 100%;
     text-align: center;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
     animation: fadeInUp 1.5s ease-in-out;
 }
 
@@ -43,7 +43,8 @@ h1 {
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    width: 90%;
+    width: 25%;
+    min-width: 200px;
 }
 
 .options div:hover {
@@ -52,7 +53,7 @@ h1 {
 }
 
 button {
-    font-size: 6vw;
+    font-size: 4vw;
     width: 100%;
     background-color: #007bff;
     color: white;
@@ -71,7 +72,7 @@ button:hover {
 }
 
 .title {
-    font-size: 8vw;
+    font-size: 6vw;
     animation: fadeIn 2s ease-in-out;
 }
 
@@ -81,15 +82,15 @@ button:hover {
     }
 
     button {
-        font-size: 2vw;
+        font-size: 1.5vw;
     }
 
     .title {
-        font-size: 4vw;
+        font-size: 3vw;
     }
 
     h1 {
-        font-size: 3vw;
+        font-size: 1.5vw;
     }
 }
 
