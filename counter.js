@@ -4,8 +4,8 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
 })
 
 const LCEDIT = {
-    saveVersion: 2,
-    versionName: "7.0.1",
+    saveVersion: 3,
+    versionName: "7.0.3",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -17,7 +17,7 @@ const LCEDIT = {
             let s = Math.sign(n);
             n = Math.abs(n);
             if (n < 1) return 0;
-            else return s * Math.floor(n / (10 ** (Math.floor(Math.log10(n)) - 2))) * (10 ** (Math.floor(Math.log10(n)) - 2));
+            else return Math.round(s * Math.floor(n / (10 ** (Math.floor(Math.log10(n)) - 2))) * (10 ** (Math.floor(Math.log10(n)) - 2)));
         },
         random: (min = 0, max = 1) => {
             return (parseFloat(min) + Math.random() * (parseFloat(max) - parseFloat(min))) || 0;
@@ -77,7 +77,7 @@ const LCEDIT = {
                 const textareas = forms[i].querySelectorAll('textarea');
                 for (j = 0; j < textareas.length; j++) {
                     const v = formData[textareas[j].id];
-                    if (v != undefined) textareas[j].innerText = v;
+                    if (v != undefined) textareas[j].value = v;
                 }
             }
         },
@@ -181,6 +181,9 @@ let defaultCounter = {
     downColor: "#000000",
     footer: "",
     footerColor: "#000000",
+    gainPer: 2,
+    gainType: 0,
+    imageURL: "",
     keepChartData: false,
     max: Number.MAX_SAFE_INTEGER,
     maxChartValues: 450,
@@ -188,9 +191,7 @@ let defaultCounter = {
     meanRate: 0,
     min: 0,
     minRate: 0,
-    gainPer: 2,
-    gainType: 0,
-    imageURL: "",
+    offlineGains: false,
     showBanner: false,
     showChart: false,
     showFooter: false,
@@ -209,6 +210,9 @@ class Counter {
         this.settings = settings || { ...defaultCounter }
         this.gain = 0;
         this.chartData = [];
+        this.lastAPICount = null;
+        this.leeway = 0;
+        this.lastUpdated = Date.now();
         this.updateSettings = s => {
             if (!s) return;
             let k = Object.keys(s);
@@ -221,7 +225,18 @@ class Counter {
             this.setCount(this.settings.count);
         }
         this.update = () => {
-            if (!(Math.random() * 100 < this.settings.updateProbability)) return;
+            console.log((Date.now() - this.lastUpdated));
+            let offlineGain = 0;
+            if (((Date.now() - this.lastUpdated) > this.settings.updateInterval * 1e4) && this.settings.offlineGains) {
+                const missedIntervals = Math.floor((Date.now() - this.lastUpdated) / this.settings.updateInterval / 1e3);
+                offlineGain = missedIntervals * (this.settings.updateInterval / this.settings.gainPer) * this.getExpectedGain();
+            } else {
+                if (!(Math.random() * 100 < this.settings.updateProbability)) {
+                    this.lastUpdated = Date.now(); // this.lastUpdated means last time the counter attempted to update, so this is here
+                    return;
+                }
+            }
+            this.lastUpdated = Date.now();
             this.settings.gainPer = LCEDIT.util.clamp(this.settings.gainPer, 0.001);
             if (isNaN(this.settings.count)) this.settings.count = 0;
             const multiplier = (this.settings.updateInterval / this.settings.gainPer) * 100 / this.settings.updateProbability;
@@ -239,7 +254,22 @@ class Counter {
                 default:
                     this.gain = 0;
             }
-            this.setCount(this.settings.count + this.gain)
+            this.gain += offlineGain;
+            let newCount = this.settings.count + this.gain;
+            if (this.lastAPICount != null) {
+                let currentCount = LCEDIT.util.abb(newCount);
+                if (currentCount !== this.lastAPICount) {
+                    if (this.lastAPICount > currentCount) {
+                        this.setCount(this.lastAPICount)
+                    } else {
+                        this.setCount(LCEDIT.util.bringDownOverestimate(this.lastAPICount, this.leeway));
+                    }
+                } else {
+                    this.setCount(newCount);
+                }
+            } else {
+                this.setCount(newCount);
+            }
         }
         this.setCount = (x) => {
             this.settings.count = LCEDIT.util.clamp(x, this.settings.min, this.settings.max)
@@ -260,6 +290,26 @@ class Counter {
                 }
             }
             return this;
+        }
+        this.getExpectedGain = () => {
+            if (this.settings.updateProbability <= 0) return 0;
+            if (this.settings.gainType === 0) {
+                return (this.settings.minRate + this.settings.maxRate) / 2;
+            } else if (this.settings.gainType === 1) {
+                return this.settings.meanRate;
+            } else if (this.settings.gainType === 2) {
+                const rows = this.settings.customRate.split('\n');
+                let totalWeight = 0;
+                let result = 0;
+                for (i = 0; i < rows.length; i++) {
+                    const rowData = rows[i].replace(/ +/g, '').split(',');
+                    totalWeight += parseFloat(rowData[2]) || 0;
+                    result += (parseFloat(rowData[0]) + parseFloat(rowData[1])) * rowData[2];
+                }
+                return isFinite(result / totalWeight / 2) ? (result / totalWeight / 2) : 0;
+            } else {
+                return 0;
+            }
         }
     }
 }

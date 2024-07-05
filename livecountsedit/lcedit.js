@@ -95,6 +95,7 @@ function submitAPI() {
             updateAPI(true);
         } else {
             clearInterval(saveData.api.updater);
+            counter.lastAPICount = null;
             document.querySelector("#apiStatusIndicator").innerText = "--"
             document.querySelector("#apiStatusIndicator").style.color = "#ffffff"
         }
@@ -111,14 +112,8 @@ async function updateAPI(bypass = false) {
             const a = await fetch(url);
             const b = await a.json();
             const apiCount = parseInt(b.items[0].statistics.subscriberCount);
-            const currentCount = LCEDIT.util.abb(counter.getApparentCount());
-            if (currentCount !== apiCount) {
-                if (apiCount > currentCount) {
-                    counter.setCount(apiCount)
-                } else {
-                    counter.setCount(LCEDIT.util.bringDownOverestimate(apiCount, saveData.api.leeway));
-                }
-            }
+            counter.leeway = saveData.api.leeway;
+            counter.lastAPICount = apiCount;
             console.log("API updated")
             document.querySelector("#apiStatusIndicator").innerText = "OK"
             document.querySelector("#apiStatusIndicator").style.color = "#00ff00"
