@@ -2113,7 +2113,7 @@ function popupList() {
     let data = ${JSON.stringify(designStuff)};
     let observer = new MutationObserver(mutationRecords => {
         if (document.getElementById('channels')) {
-            data.data = JSON.parse(document.getElementById('channels').innerHTML);
+            data.data = JSON.parse(document.getElementById('channels').innerText);
             document.getElementById('channels').remove();
             update();
         }
