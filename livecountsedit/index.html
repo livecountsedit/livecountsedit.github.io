@@ -84,7 +84,8 @@
           type="button"
           class="btn btn-primary"
           data-bs-toggle="modal"
-          data-bs-target="#exampleModal"
+          data-bs-target="#optionsModal"
+          style="text-align: center; align-content: center"
         >
           Options
         </button>
@@ -92,16 +93,16 @@
         <!-- Modal -->
         <div
           class="modal fade"
-          id="exampleModal"
+          id="optionsModal"
           tabindex="-1"
-          aria-labelledby="exampleModalLabel"
+          aria-labelledby="optionsModalLabel"
           aria-hidden="true"
         >
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">
-                  Modal title
+                <h1 class="modal-title fs-5 text-black" id="optionsModalLabel">
+                  Options
                 </h1>
                 <button
                   type="button"
@@ -111,9 +112,6 @@
                 ></button>
               </div>
               <div class="modal-body">
-                <button class="btn btn-primary" onclick="submit()">
-                  Save settings</button
-                ><br />
                 <button class="btn btn-primary" onclick="refreshCount()">
                   Refresh count
                 </button>
