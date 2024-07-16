@@ -1,263 +1,761 @@
 <html>
-
-<head>
+  <head>
     <title>Livecountsedit - Fake Channel</title>
-    <link href="../odometer/odometer.css" rel="stylesheet">
-    <link href="../bootstrap.css" rel="stylesheet">
-    <link href="./index.css" rel="stylesheet" type="text/css">
-    <link rel="icon" href="../logo.png">
-    <meta charSet="utf-8" />
-    <meta name="description"
-        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
+    <link href="../odometer/odometer.css" rel="stylesheet" />
+    <link href="../bootstrap.css" rel="stylesheet" />
+    <link href="./index.css" rel="stylesheet" type="text/css" />
+    <link rel="icon" href="../logo.png" />
+    <meta charset="utf-8" />
+    <meta
+      name="description"
+      content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title"
-        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
-    <meta name="twitter:description"
-        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
-    <meta name="twitter:image" content="https://lcedit.com/images/livecountsedit.png" />
-    <meta property="og:title"
-        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
-    <meta property="og:description"
-        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
+    <meta
+      name="twitter:title"
+      content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW"
+    />
+    <meta
+      name="twitter:description"
+      content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW"
+    />
+    <meta
+      name="twitter:image"
+      content="https://lcedit.com/images/livecountsedit.png"
+    />
+    <meta
+      property="og:title"
+      content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW"
+    />
+    <meta
+      property="og:description"
+      content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://lcedit.com" />
-    <meta property="og:image" content="https://lcedit.com/images/livecountsedit.png" />
+    <meta
+      property="og:image"
+      content="https://lcedit.com/images/livecountsedit.png"
+    />
     <style></style>
-</head> 
-<body>
+  </head>
+  <body>
     <div class="lcedit-container">
-        <div class="tabs">
-            <button id="tab-link-0" class="tab-link" onclick="openTab(event, 'tabs-0')">General</button>
-            <button id="tab-link-1" class="tab-link" onclick="openTab(event, 'tabs-1')">Counter</button>
-            <button id="tab-link-2" class="tab-link" onclick="openTab(event, 'tabs-2')">Styles</button>
-            <button id="tab-link-3" class="tab-link" onclick="openTab(event, 'tabs-3')">Advanced Settings</button>
-            <button id="tab-link-4" class="tab-link" onclick="openTab(event, 'tabs-4')">API Updates</button>
-            <button class="btn btn-primary" onclick="submit()">Save settings</button><br>
-            <button class="btn btn-primary" onclick="refreshCount()">Refresh count</button>
-            <button class="btn btn-danger" onclick="reset()">Reset</button><br>
-            <button class="btn btn-danger" onclick="resetChart()">Reset chart</button><br>
-            <button id="pause-button" class="btn btn-secondary" onclick="togglePause()">Pause</button><br>
-            <button class="btn btn-secondary" onclick="version()">Check version</button>
-            <button class="btn btn-secondary" onclick="exportToJSON()">Export data (public)</button>
-            <button class="btn btn-danger" onclick="exportToJSON(true)">Export data (private)</button>
-            <button class="btn btn-secondary" onclick="document.querySelector('#import-data-v7').click()">Import data (v7)</button>
-            <input type="file" class="file-import" id="import-data-v7" accept=".json">
-            
-        </div>
-        <div class="tab-content" id="tabs-0">
-            <form class="counter-form" id="settingsForm-0">
-                <div class="mb-3">
-                    <label class="form-label" for="title">Name</label>
-                    <input class="form-control" id="title" name="title" type="text" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="count">Count</label>
-                    <input class="form-control" id="count" name="count" type="number" required step="any">
-                </div>
-                <hr>
-                <div class="mb-3">
-                    <label class="form-label" for="imageURL">Avatar URL</label>
-                    <input class="form-control" id="imageURL" name="imageURL" type="text">
-                    <label class="form-label" for="imageFile">or</label>
-                    <input class="form-control" id="imageFile" name="imageFile" type="file" accept="image/png, image/jpeg">
-                </div>
-                <hr>
-                <div class="mb-3">
-                    <label class="form-label" for="bannerURL">Banner URL</label>
-                    <input class="form-control" id="bannerURL" name="bannerURL" type="text">
-                    <label class="form-label" for="bannerFile">or</label>
-                    <input class="form-control" id="bannerFile" name="bannerFile" type="file" accept="image/png, image/jpeg">
-                </div>
-                <hr>
-                <div class="mb-3">
-                    <label class="form-label" for="footer">Footer</label>
-                    <input class="form-control" id="footer" name="footer" type="text">
-                </div>
-            </form>
+      <div class="tabs">
+        <button
+          id="tab-link-0"
+          class="tab-link"
+          onclick="openTab(event, 'tabs-0')"
+        >
+          General
+        </button>
+        <button
+          id="tab-link-1"
+          class="tab-link"
+          onclick="openTab(event, 'tabs-1')"
+        >
+          Counter
+        </button>
+        <button
+          id="tab-link-2"
+          class="tab-link"
+          onclick="openTab(event, 'tabs-2')"
+        >
+          Styles
+        </button>
+        <button
+          id="tab-link-3"
+          class="tab-link"
+          onclick="openTab(event, 'tabs-3')"
+        >
+          Advanced Settings
+        </button>
+        <button
+          id="tab-link-4"
+          class="tab-link"
+          onclick="openTab(event, 'tabs-4')"
+        >
+          API Updates
+        </button>
 
-        </div>
-        <div class="tab-content" id="tabs-1">
-            <form class="counter-form" id="settingsForm-1">
-                <div class="mb-3">
-                    <label class="form-label" for="gainType">Gain type</label>
-                    <select class="form-control" id="gainType" name="gainType" required>
-                        <option value="0">Uniform (Default)</option>
-                        <option value="1">Gaussian</option>
-                        <option value="2">Custom</option>
-                    </select>
-                </div>
-                <div class="mb-3 gain-0">
-                    <label class="form-label" for="minRate">Minimum rate</label>
-                    <input class="form-control" id="minRate" name="minRate" type="number" step="any">
-                </div>
-                <div class="mb-3 gain-0">
-                    <label class="form-label" for="maxRate">Maximum rate</label>
-                    <input class="form-control" id="maxRate" name="maxRate" type="number" step="any">
-                </div>
-                <div class="mb-3 gain-1">
-                    <label class="form-label" for="meanRate">Mean rate</label>
-                    <input class="form-control" id="meanRate" name="meanRate" type="number" step="any">
-                </div>
-                <div class="mb-3 gain-1">
-                    <span><label class="form-label" for="stdevRate">Standard deviation</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The expected distance from the mean the rate will be."> &#x1F6C8;</a></span>
-                    <input class="form-control" id="stdevRate" name="stdevRate" type="number" min="0" step="any">
-                </div>
-                <div class="mb-3 gain-2">
-                    <span><label class="form-label" for="customRate">Custom distribution</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Each line is of the form Min,Max,Weight. Weight is the relative probability of the line being chosen. Min and Max are the minimum and maximum rates for if this line is chosen."> &#x1F6C8;</a></span>
-                    <textarea class="form-control" id="customRate" name="customRate" placeholder="Min1,Max1,Weight1
-Min2,Max2,Weight2"></textarea>
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="gainPer">Gain per (seconds)</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount of time in seconds that the gain rates are calculated per. For example, set to 60 for a rate in followers/subscribers per minute, and 3600 for a rate in per hour."> &#x1F6C8;</a></span>
-                    <input class="form-control" id="gainPer" name="gainPer" type="number" min="0.001" step="any">
-                </div>
-            </form>
-        </div>
-        <div class="tab-content" id="tabs-2">
-            <form class="counter-form" id="settingsForm-2">
-                <div class="mb-3">
-                    <label class="form-label" for="titleColor">Username color</label>
-                    <input class="form-control form-control-color" id="titleColor" name="titleColor" type="color">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="counterColor">Counter color</label>
-                    <input class="form-control form-control-color" id="counterColor" name="counterColor" type="color">
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="upColor">Counter up color</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The color the counter changes to when counting up."> &#x1F6C8;</a></span>
-                    <input class="form-control form-control-color" id="upColor" name="upColor" type="color">
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="downColor">Counter down color</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The color the counter changes to when counting down."> &#x1F6C8;</a></span>
-                    <input class="form-control form-control-color" id="downColor" name="downColor" type="color">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="footerColor">Footer color</label>
-                    <input class="form-control form-control-color" id="footerColor" name="footerColor" type="color">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="bgColor">Background color</label>
-                    <input class="form-control form-control-color" id="bgColor" name="bgColor" type="color">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="chartColor">Chart color</label>
-                    <input class="form-control form-control-color" id="chartColor" name="chartColor" type="color">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="bannerBlur">Banner blur amount</label>
-                    <input class="form-control" id="bannerBlur" name="bannerBlur" type="number" min="0" step="any">
-                </div>
-            </form>
-        </div>
-        <div class="tab-content" id="tabs-3">
-            <form class="counter-form" id="settingsForm-3">
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="showImage" name="showImage">
-                    <label class="form-check-label" for="showImage">Show avatar</label>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="showBanner" name="showBanner">
-                    <label class="form-check-label" for="showBanner">Show banner</label>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="showChart" name="showChart">
-                    <label class="form-check-label" for="showChart">Show chart</label>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="showFooter" name="showFooter">
-                    <label class="form-check-label" for="showFooter">Show footer</label>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="abb" name="abb">
-                    <span><label class="form-check-label" for="abb">Abbreviate counter</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Limit the counter to show up to three significant digits, as in YouTube's API."> &#x1F6C8;</a></span>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="offlineGains" name="offlineGains">
-                    <span><label class="form-check-label" for="offlineGains">Offline gains</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Upon loading, update the counter if it has been gaining while the counter was not open. Only applies if the counter has not been open for at least ten update intervals."> &#x1F6C8;</a></span>
-                </div>
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="keepChartData" name="keepChartData">
-                    <label class="form-check-label" for="keepChartData">Keep chart data on reload</label>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="maxChartValues">Max chart values<a style="font-size:1rem" data-bs-toggle="tooltip" title="The maximum number of data points the chart will show."> &#x1F6C8;</a></label>
-                    <input class="form-control" id="maxChartValues" name="maxChartValues" type="number" min="3" max="10000">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="animationDuration">Animation duration in seconds</label>
-                    <input class="form-control" id="animationDuration" name="animationDuration" type="number" min="0" step="any">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="min">Minimum count</label>
-                    <input class="form-control" id="min" name="min" type="number" step="any" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="max">Maximum count</label>
-                    <input class="form-control" id="max" name="max" type="number" step="any" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="animationType">Animation type</label>
-                    <select class="form-control" id="animationType" name="animationType">
-                        <option value="0">Odometer (default)</option>
-                        <option value="1">Odometer (YouTube Studio)</option>
-                        <option value="2">Counting</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="updateInterval">Update interval in seconds</label>
-                    <input class="form-control" id="updateInterval" name="updateInterval" type="number" min="0.001" max="2147483.647" step="any">
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="updateProbability">Update probability in percent</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The percent chance that the counter will update during each update interval. If it updates, the gains will be scaled accordingly to match the given rates."> &#x1F6C8;</a></span>
-                    <input class="form-control" id="updateProbability" name="updateProbability" type="number" min="0" max="100" step="any">
-                </div>
-            </form>
-        </div>
-        <div class="tab-content" id="tabs-4">
-            <form class="api-form" id="settingsForm-4">
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="ytAPIEnabled" name="ytAPIEnabled">
-                    <span><label class="form-check-label" for="showImage">Enable YouTube API updates</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="This will update the counter if the abbreviated subscriber count does not match what is given in the API."> &#x1F6C8;</a></span>
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="ytChannelID">YouTube channel ID</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="This is not the same as a YouTube handle or username. Use the tool linked below to help you easily find the YouTube channel ID. YouTube channel IDs are 24 characters long and begin with &quot;UC&quot;."> &#x1F6C8;</a></span><br>
-                    <a href="https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/">YouTube channel ID finder</a>
-                    <input class="form-control" id="ytChannelID" name="ytChannelID">
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="ytAPIKey">YouTube Data API v3 key</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Read the article linked below if you are unsure of how to get one. Your YouTube API key should begin with &quot;AIzaSy&quot;. Do NOT share this key with anyone."> &#x1F6C8;</a></span><br>
-                    <a href="https://blog.hubspot.com/website/how-to-get-youtube-api-key">A tutorial on how to get one</a>
-                    <input class="form-control" id="ytAPIKey" name="ytAPIKey" type="password">
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="apiInterval">API update interval</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10."> &#x1F6C8;</a></span>
-                    <input class="form-control" id="apiInterval" name="apiInterval" type="number" min="1" max="2147483.647">
-                </div>
-                <div class="mb-3">
-                    <span><label class="form-label" for="leeway">Overestimation leeway in percent</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively."> &#x1F6C8;</a></span>
-                    <input class="form-control" id="leeway" name="leeway" type="number" min="0" max="100">
-                </div>
-            </form>
-            <button class="btn btn-primary" onclick="submitAPI()">Save API settings</button><br>
-            <button class="btn btn-primary" onclick="updateAPI()">Update now</button>
-            <h5>Note: API settings are saved separately from the other settings.</h5><br>
-            <h5>Status indicator: <span id="apiStatusIndicator">--</span></h5>
-        </div>
-        <div class="counter-content">
-            <div class="counter-container">
-                <img class="banner" src="../default_banner.png" id="counter-banner">
-                <img class="avatar" src="../default.png" id="counter-avatar">
-                <div class="counter-title" id="counter-title">Username</div>
-                <div class="counter odometer" id="counter-counter">0</div>
-                <div class="footer" id="counter-footer">Followers</div>
-                <br>
-                <div id="counter-chart" style="height: 45%;"></div>
+        <!-- Button trigger modal -->
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+          Options
+        </button>
+
+        <!-- Modal -->
+        <div
+          class="modal fade"
+          id="exampleModal"
+          tabindex="-1"
+          aria-labelledby="exampleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">
+                  Modal title
+                </h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <button class="btn btn-primary" onclick="submit()">
+                  Save settings</button
+                ><br />
+                <button class="btn btn-primary" onclick="refreshCount()">
+                  Refresh count
+                </button>
+                <button class="btn btn-danger" onclick="reset()">Reset</button
+                ><br />
+                <button class="btn btn-danger" onclick="resetChart()">
+                  Reset chart</button
+                ><br />
+                <button
+                  id="pause-button"
+                  class="btn btn-secondary"
+                  onclick="togglePause()"
+                >
+                  Pause</button
+                ><br />
+                <button class="btn btn-secondary" onclick="version()">
+                  Check version
+                </button>
+                <button class="btn btn-secondary" onclick="exportToJSON()">
+                  Export data (public)
+                </button>
+                <button class="btn btn-danger" onclick="exportToJSON(true)">
+                  Export data (private)
+                </button>
+                <button
+                  class="btn btn-secondary"
+                  onclick="document.querySelector('#import-data-v7').click()"
+                >
+                  Import data (v7)
+                </button>
+                <input
+                  type="file"
+                  class="file-import"
+                  id="import-data-v7"
+                  accept=".json"
+                />
+              </div>
             </div>
+          </div>
         </div>
+      </div>
+      <div class="tab-content" id="tabs-0">
+        <form class="counter-form" id="settingsForm-0">
+          <div class="mb-3">
+            <label class="form-label" for="title">Name</label>
+            <input
+              class="form-control"
+              id="title"
+              name="title"
+              type="text"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="count">Count</label>
+            <input
+              class="form-control"
+              id="count"
+              name="count"
+              type="number"
+              required
+              step="any"
+            />
+          </div>
+          <hr />
+          <div class="mb-3">
+            <label class="form-label" for="imageURL">Avatar URL</label>
+            <input
+              class="form-control"
+              id="imageURL"
+              name="imageURL"
+              type="text"
+            />
+            <label class="form-label" for="imageFile">or</label>
+            <input
+              class="form-control"
+              id="imageFile"
+              name="imageFile"
+              type="file"
+              accept="image/png, image/jpeg"
+            />
+          </div>
+          <hr />
+          <div class="mb-3">
+            <label class="form-label" for="bannerURL">Banner URL</label>
+            <input
+              class="form-control"
+              id="bannerURL"
+              name="bannerURL"
+              type="text"
+            />
+            <label class="form-label" for="bannerFile">or</label>
+            <input
+              class="form-control"
+              id="bannerFile"
+              name="bannerFile"
+              type="file"
+              accept="image/png, image/jpeg"
+            />
+          </div>
+          <hr />
+          <div class="mb-3">
+            <label class="form-label" for="footer">Footer</label>
+            <input class="form-control" id="footer" name="footer" type="text" />
+          </div>
+        </form>
+      </div>
+      <div class="tab-content" id="tabs-1">
+        <form class="counter-form" id="settingsForm-1">
+          <div class="mb-3">
+            <label class="form-label" for="gainType">Gain type</label>
+            <select class="form-control" id="gainType" name="gainType" required>
+              <option value="0">Uniform (Default)</option>
+              <option value="1">Gaussian</option>
+              <option value="2">Custom</option>
+            </select>
+          </div>
+          <div class="mb-3 gain-0">
+            <label class="form-label" for="minRate">Minimum rate</label>
+            <input
+              class="form-control"
+              id="minRate"
+              name="minRate"
+              type="number"
+              step="any"
+            />
+          </div>
+          <div class="mb-3 gain-0">
+            <label class="form-label" for="maxRate">Maximum rate</label>
+            <input
+              class="form-control"
+              id="maxRate"
+              name="maxRate"
+              type="number"
+              step="any"
+            />
+          </div>
+          <div class="mb-3 gain-1">
+            <label class="form-label" for="meanRate">Mean rate</label>
+            <input
+              class="form-control"
+              id="meanRate"
+              name="meanRate"
+              type="number"
+              step="any"
+            />
+          </div>
+          <div class="mb-3 gain-1">
+            <span
+              ><label class="form-label" for="stdevRate"
+                >Standard deviation</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The expected distance from the mean the rate will be."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <input
+              class="form-control"
+              id="stdevRate"
+              name="stdevRate"
+              type="number"
+              min="0"
+              step="any"
+            />
+          </div>
+          <div class="mb-3 gain-2">
+            <span
+              ><label class="form-label" for="customRate"
+                >Custom distribution</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="Each line is of the form Min,Max,Weight. Weight is the relative probability of the line being chosen. Min and Max are the minimum and maximum rates for if this line is chosen."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <textarea
+              class="form-control"
+              id="customRate"
+              name="customRate"
+              placeholder="Min1,Max1,Weight1
+Min2,Max2,Weight2"
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="gainPer">Gain per (seconds)</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The amount of time in seconds that the gain rates are calculated per. For example, set to 60 for a rate in followers/subscribers per minute, and 3600 for a rate in per hour."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <input
+              class="form-control"
+              id="gainPer"
+              name="gainPer"
+              type="number"
+              min="0.001"
+              step="any"
+            />
+          </div>
+        </form>
+      </div>
+      <div class="tab-content" id="tabs-2">
+        <form class="counter-form" id="settingsForm-2">
+          <div class="mb-3">
+            <label class="form-label" for="titleColor">Username color</label>
+            <input
+              class="form-control form-control-color"
+              id="titleColor"
+              name="titleColor"
+              type="color"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="counterColor">Counter color</label>
+            <input
+              class="form-control form-control-color"
+              id="counterColor"
+              name="counterColor"
+              type="color"
+            />
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="upColor">Counter up color</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The color the counter changes to when counting up."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <input
+              class="form-control form-control-color"
+              id="upColor"
+              name="upColor"
+              type="color"
+            />
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="downColor"
+                >Counter down color</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The color the counter changes to when counting down."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <input
+              class="form-control form-control-color"
+              id="downColor"
+              name="downColor"
+              type="color"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="footerColor">Footer color</label>
+            <input
+              class="form-control form-control-color"
+              id="footerColor"
+              name="footerColor"
+              type="color"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="bgColor">Background color</label>
+            <input
+              class="form-control form-control-color"
+              id="bgColor"
+              name="bgColor"
+              type="color"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="chartColor">Chart color</label>
+            <input
+              class="form-control form-control-color"
+              id="chartColor"
+              name="chartColor"
+              type="color"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="bannerBlur"
+              >Banner blur amount</label
+            >
+            <input
+              class="form-control"
+              id="bannerBlur"
+              name="bannerBlur"
+              type="number"
+              min="0"
+              step="any"
+            />
+          </div>
+        </form>
+      </div>
+      <div class="tab-content" id="tabs-3">
+        <form class="counter-form" id="settingsForm-3">
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="showImage"
+              name="showImage"
+            />
+            <label class="form-check-label" for="showImage">Show avatar</label>
+          </div>
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="showBanner"
+              name="showBanner"
+            />
+            <label class="form-check-label" for="showBanner">Show banner</label>
+          </div>
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="showChart"
+              name="showChart"
+            />
+            <label class="form-check-label" for="showChart">Show chart</label>
+          </div>
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="showFooter"
+              name="showFooter"
+            />
+            <label class="form-check-label" for="showFooter">Show footer</label>
+          </div>
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="abb"
+              name="abb"
+            />
+            <span
+              ><label class="form-check-label" for="abb"
+                >Abbreviate counter</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="Limit the counter to show up to three significant digits, as in YouTube's API."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+          </div>
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="offlineGains"
+              name="offlineGains"
+            />
+            <span
+              ><label class="form-check-label" for="offlineGains"
+                >Offline gains</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="Upon loading, update the counter if it has been gaining while the counter was not open. Only applies if the counter has not been open for at least ten update intervals."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+          </div>
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="keepChartData"
+              name="keepChartData"
+            />
+            <label class="form-check-label" for="keepChartData"
+              >Keep chart data on reload</label
+            >
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="maxChartValues"
+              >Max chart values<a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The maximum number of data points the chart will show."
+              >
+                &#x1F6C8;</a
+              ></label
+            >
+            <input
+              class="form-control"
+              id="maxChartValues"
+              name="maxChartValues"
+              type="number"
+              min="3"
+              max="10000"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="animationDuration"
+              >Animation duration in seconds</label
+            >
+            <input
+              class="form-control"
+              id="animationDuration"
+              name="animationDuration"
+              type="number"
+              min="0"
+              step="any"
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="min">Minimum count</label>
+            <input
+              class="form-control"
+              id="min"
+              name="min"
+              type="number"
+              step="any"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="max">Maximum count</label>
+            <input
+              class="form-control"
+              id="max"
+              name="max"
+              type="number"
+              step="any"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="animationType">Animation type</label>
+            <select
+              class="form-control"
+              id="animationType"
+              name="animationType"
+            >
+              <option value="0">Odometer (default)</option>
+              <option value="1">Odometer (YouTube Studio)</option>
+              <option value="2">Counting</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="updateInterval"
+              >Update interval in seconds</label
+            >
+            <input
+              class="form-control"
+              id="updateInterval"
+              name="updateInterval"
+              type="number"
+              min="0.001"
+              max="2147483.647"
+              step="any"
+            />
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="updateProbability"
+                >Update probability in percent</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The percent chance that the counter will update during each update interval. If it updates, the gains will be scaled accordingly to match the given rates."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <input
+              class="form-control"
+              id="updateProbability"
+              name="updateProbability"
+              type="number"
+              min="0"
+              max="100"
+              step="any"
+            />
+          </div>
+        </form>
+      </div>
+      <div class="tab-content" id="tabs-4">
+        <form class="api-form" id="settingsForm-4">
+          <div class="form-check mb-3">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="ytAPIEnabled"
+              name="ytAPIEnabled"
+            />
+            <span
+              ><label class="form-check-label" for="showImage"
+                >Enable YouTube API updates</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="This will update the counter if the abbreviated subscriber count does not match what is given in the API."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="ytChannelID"
+                >YouTube channel ID</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title='This is not the same as a YouTube handle or username. Use the tool linked below to help you easily find the YouTube channel ID. YouTube channel IDs are 24 characters long and begin with "UC".'
+              >
+                &#x1F6C8;</a
+              ></span
+            ><br />
+            <a
+              href="https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/"
+              >YouTube channel ID finder</a
+            >
+            <input class="form-control" id="ytChannelID" name="ytChannelID" />
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="ytAPIKey"
+                >YouTube Data API v3 key</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title='Read the article linked below if you are unsure of how to get one. Your YouTube API key should begin with "AIzaSy". Do NOT share this key with anyone.'
+              >
+                &#x1F6C8;</a
+              ></span
+            ><br />
+            <a
+              href="https://blog.hubspot.com/website/how-to-get-youtube-api-key"
+              >A tutorial on how to get one</a
+            >
+            <input
+              class="form-control"
+              id="ytAPIKey"
+              name="ytAPIKey"
+              type="password"
+            />
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="apiInterval"
+                >API update interval</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <input
+              class="form-control"
+              id="apiInterval"
+              name="apiInterval"
+              type="number"
+              min="1"
+              max="2147483.647"
+            />
+          </div>
+          <div class="mb-3">
+            <span
+              ><label class="form-label" for="leeway"
+                >Overestimation leeway in percent</label
+              ><a
+                style="font-size: 1rem"
+                data-bs-toggle="tooltip"
+                title="The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively."
+              >
+                &#x1F6C8;</a
+              ></span
+            >
+            <input
+              class="form-control"
+              id="leeway"
+              name="leeway"
+              type="number"
+              min="0"
+              max="100"
+            />
+          </div>
+        </form>
+        <button class="btn btn-primary" onclick="submitAPI()">
+          Save API settings</button
+        ><br />
+        <button class="btn btn-primary" onclick="updateAPI()">
+          Update now
+        </button>
+        <h5>
+          Note: API settings are saved separately from the other settings.
+        </h5>
+        <br />
+        <h5>Status indicator: <span id="apiStatusIndicator">--</span></h5>
+      </div>
+      <div class="counter-content">
+        <div class="counter-container">
+          <img class="banner" src="../default_banner.png" id="counter-banner" />
+          <img class="avatar" src="../default.png" id="counter-avatar" />
+          <div class="counter-title" id="counter-title">Username</div>
+          <div class="counter odometer" id="counter-counter">0</div>
+          <div class="footer" id="counter-footer">Followers</div>
+          <br />
+          <div id="counter-chart" style="height: 45%"></div>
+        </div>
+      </div>
     </div>
     <div class="page-footer">
-        <span>Version 7.0.3 - <a href="../index.html">Back to main page</a> - <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F">Not working?</a> - <a href="https://discord.gg/Uke3tdtYnD">Join the Livecountsedit Discord Server.</a> This site is a parody of popular realtime counters.</span>
+      <span
+        >Version 7.0.3 - <a href="../index.html">Back to main page</a> -
+        <a
+          href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F"
+          >Not working?</a
+        >
+        -
+        <a href="https://discord.gg/Uke3tdtYnD"
+          >Join the Livecountsedit Discord Server.</a
+        >
+        This site is a parody of popular realtime counters.</span
+      >
     </div>
     <script src="../odometer/odometer.js"></script>
     <script src="../highstock.js"></script>
@@ -265,5 +763,5 @@ Min2,Max2,Weight2"></textarea>
     <script src="../bootstrap.js"></script>
     <script src="../counter.js"></script>
     <script src="./lcedit.js"></script>
-</body>
+  </body>
 </html>
