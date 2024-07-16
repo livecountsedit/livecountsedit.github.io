@@ -79,7 +79,6 @@
           API Updates
         </button>
 
-        <!-- Button trigger modal -->
         <button
           type="button"
           class="btn btn-primary"
@@ -90,7 +89,6 @@
           Options
         </button>
 
-        <!-- Modal -->
         <div
           class="modal fade"
           id="optionsModal"
@@ -116,38 +114,101 @@
                   Refresh count
                 </button>
                 <button class="btn btn-danger" onclick="reset()">Reset</button
-                ><br />
+                ><br /><br />
                 <button class="btn btn-danger" onclick="resetChart()">
                   Reset chart</button
-                ><br />
+                ><br /><br />
                 <button
                   id="pause-button"
                   class="btn btn-secondary"
                   onclick="togglePause()"
                 >
                   Pause</button
-                ><br />
+                ><br /><br />
                 <button class="btn btn-secondary" onclick="version()">
-                  Check version
-                </button>
+                  Check version</button
+                ><br /><br />
                 <button class="btn btn-secondary" onclick="exportToJSON()">
                   Export data (public)
                 </button>
                 <button class="btn btn-danger" onclick="exportToJSON(true)">
-                  Export data (private)
-                </button>
+                  Export data (private)</button
+                ><br /><br />
                 <button
                   class="btn btn-secondary"
                   onclick="document.querySelector('#import-data-v7').click()"
                 >
                   Import data (v7)
                 </button>
+                <br />
+                <br />
+                <a class="btn btn-secondary" href="https://lcedit.com/"
+                  >Back to home</a
+                >
                 <input
                   type="file"
                   class="file-import"
                   id="import-data-v7"
                   accept=".json"
                 />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#infoModal"
+        >
+          Other information
+        </button>
+
+        <div
+          class="modal fade"
+          id="infoModal"
+          tabindex="-1"
+          aria-labelledby="infoModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5 text-black" id="exampleModalLabel">
+                  Information
+                </h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <span class="text-black"
+                  >Version 7.0.3 - This site is a parody of popular realtime
+                  counters.</span
+                ><br /><br />
+                <a
+                  href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F"
+                  class="btn btn-primary"
+                  >Not working?</a
+                >
+                <br />
+                <br />
+                <a href="https://discord.gg/Uke3tdtYnD" class="btn btn-primary"
+                  >Join the Livecountsedit Discord Server.</a
+                >
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
@@ -740,20 +801,6 @@ Min2,Max2,Weight2"
           <div id="counter-chart" style="height: 45%"></div>
         </div>
       </div>
-    </div>
-    <div class="page-footer">
-      <span
-        >Version 7.0.3 - <a href="../index.html">Back to main page</a> -
-        <a
-          href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F"
-          >Not working?</a
-        >
-        -
-        <a href="https://discord.gg/Uke3tdtYnD"
-          >Join the Livecountsedit Discord Server.</a
-        >
-        This site is a parody of popular realtime counters.</span
-      >
     </div>
     <script src="../odometer/odometer.js"></script>
     <script src="../highstock.js"></script>
