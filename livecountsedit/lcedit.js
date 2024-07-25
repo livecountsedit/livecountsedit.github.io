@@ -297,7 +297,7 @@ function importFromJSON(data, bypass=false) {
         }
         if (!data.version || data.version > LCEDIT.saveVersion) return alert('Incompatible version');
         if (data.private) {
-            if (!bypass && !confirm("You are importing a private save file. Please make sure you trust the author before importing!")) return;
+            if (!bypass && !confirm("You are importing a private save file. This includes sensitive information such as API settings. Please make sure you trust the author before importing!")) return;
         } else {
             data = LCEDIT.util.removePrivateData(data);
             data.private = true;
