@@ -436,3 +436,9 @@ function resetData() {
 		location.reload()
 	}
 }
+
+function resetChart() {
+	if (confirm("Are you sure you want to reset the chart?")) {
+		user.graphValues = [];
+	}
+}
