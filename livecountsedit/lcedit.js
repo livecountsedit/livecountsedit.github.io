@@ -143,7 +143,7 @@ function updateStuff() {
     document.querySelector('#counter-title').style.color = counter.settings.titleColor;
     saveData.allowHTML ? document.querySelector('#counter-footer').innerHTML = counter.settings.footer : document.querySelector('#counter-footer').innerText = counter.settings.footer
     document.querySelector('#counter-footer').style.color = counter.settings.footerColor;
-    document.querySelector('#counter-counter').innerText = counter.getApparentCount();
+    if (document.querySelector('#updateCount').checked === true) document.querySelector('#counter-counter').innerText = counter.getApparentCount()
     document.querySelector('#counter-counter').style.color = counter.settings.counterColor;
     document.querySelector('.counter-container').style.backgroundColor = counter.settings.bgColor;
     LCEDIT.util.setVisible(document.querySelector('#counter-banner'), counter.settings.showBanner)
