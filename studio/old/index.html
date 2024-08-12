@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Livecountsedit - Fake YouTube Studio</title>
+    <link href="./odometer.css" rel="stylesheet">
+    <link rel="icon" href="../../logo.png">
+    <meta charSet="utf-8" />
+    <meta name="description"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
+    <meta name="twitter:description"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
+    <meta name="twitter:image" content="../../images/studio.png" />
+    <meta property="og:title"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
+    <meta property="og:description"
+        content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lcedit.com" />
+    <meta property="og:image" content="../../images/studio.png" />
+    <script src="./odometer.js"></script>
+    <link href="./odometer.css" rel="stylesheet" />
+    <link rel="stylesheet" id="themeStylesheet" href="./dark.css">
+    <script src="../../highstock.js"></script>
+</head>
+
+<body>
+    <div id="settingsMenu">
+        <button id="close">Close</button><br><br>
+        <hr class="hr2">
+        <strong>You are using an old version of Livecountsedit YT Studio</strong>
+        <p>This version (v6.9) is for people who are experiencing an issue in which the counter does not show up correctly in current versions (v6.10+).</p>
+        <a href="../">Link to current version</a>
+        <hr class="hr2">
+        <br>
+        <h1>Settings</h1>
+        <div class="option">
+            <label>Counter title/Username</label><br>
+            <input type="text" placeholder="Channel Name" id="name_input" autocomplete="off">
+        </div>
+        <div class="option">
+            <label>Footer/Label</label><br>
+            <input type="text" placeholder="Footer Title" id="footer_input" autocomplete="off">
+        </div>
+        <br>
+        <br>
+        <div class="option">
+            <label>Avatar URL</label><br>
+            <input type="text" placeholder="https://example.com/image.png" id="image_input"
+                autocomplete="off"><br>
+            <strong>OR</strong>
+            <input type="file" id="file_input" accept="image/*" autocomplete="off">
+        </div>
+        <br>
+        <div class="option">
+            <label>Counter value (whole numbers only)</label><br>
+            <input type="number" placeholder="Channel Subscribers" id="subscribers_input" autocomplete="off">
+            <input type="checkbox" id="enabled" autocomplete="off" checked>
+        </div>
+        <br>
+        <button onclick="submit()">Set Settings</button>
+        <br>
+        <hr class="hr2">
+        <br>
+        <p>Counter Gain Rate</p>
+        <div class="option-section">
+            <div class="option">
+                <p>
+                    <span>Min Subs</span>
+                    <span><input type="number" id="min_subs" autocomplete="off" placeholder="0"></span>
+                    <br>
+                    <br>
+                    <span>Max Subs</span>
+                    <span><input type="number" id="max_subs" autocomplete="off" placeholder="0"></span>
+                    <br>
+                    <br>
+                    <span>Per Every</span>
+                    <span><input type="number" id="updateInterval" autocomplete="off" placeholder="2"></span><label> seconds</label>
+                    <br>
+                </p>
+                <br>
+                <button onclick="submit1()">Set Rates</button>
+            </div>
+        </div>
+        <br>
+        <hr class="hr2">
+        <br>
+        <p>Graph Type:</p>
+        <select class="option-input" id="graph_type">
+            <option value="live">Live</option>
+            <option value="set">Set Data</option>
+        </select><br>
+        <br>
+        <input id="dropdownTopText" placeholder="Top Text" autocomplete="off">
+        <input id="dropdownBottomText" placeholder="Bottom Text" autocomplete="off"><br>
+        <label>Max Graph Points: </label><input id="maxPoints" placeholder="100" autocomplete="off">
+        <br><br>
+        <div class="options">
+            <label>Graph Dates</label><br>
+            <textarea type="text" id="graph_dates"
+                autocomplete="off">Aug 31 2023, Sep 1 2023, Sep 2 2023, Sep 3 2023, Sep 4 2023, Sep 5 2023, Sep 6 2023</textarea><br>
+            <label>Graph Values</label><br>
+            <textarea type="text" id="graph_values" autocomplete="off">1, 2, 3, 4, 5, 6, 7</textarea>
+        </div>
+        <button onclick="submit2()">Save Settings</button><br>
+        <button onclick="clearChart()">Clear Chart</button><br>
+        <br>
+        <hr class="hr2">
+        <br>
+        <p>Select comma type:</p>
+        <select name="selectcomma" id="selectcomma">
+            <option value="comma1">,ddd</option>
+            <option value="comma2"> ddd</option>
+        </select>
+        <br>
+        <br>
+        <hr class="hr2">
+
+        <div style="display: flex; width: 100%; gap: 0.3em;">
+            <button onclick="saveData()">Save Data</button>
+            <button onclick="exportData()">Export Data</button>
+            <button onclick="resetData()">Reset Data</button>
+            <button onclick="toggleTheme()">Switch Theme (light/dark)</button>
+        </div><br>
+        <div style="display: flex; width: 100%; gap: 5em;">
+            <div>
+                <label>Autosave (15s)</label>
+                <input type="checkbox" id="autosave" autocomplete="off">
+            </div>
+            <div>
+                <label>Import Data</label>
+                <input type="file" id="file_input2" accept=".json">
+            </div>
+        </div>
+    <br>
+    <hr class="hr2">
+    <h3>Disclaimer</h3>
+    <p>This page is a parody of the original YouTube Studio live counter, which can be accessed in the <a href="https://studio.youtube.com">YouTube Studio</a>. All credit goes to <a href="https://youtube.com/">YouTube</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
+    <br>
+</div>
+    <div class="header">
+        <div class="sub-header">
+            <div id="updating-dot">
+                <span id="dot"></span>
+            </div>
+            <h4 class="live">Updating live</h4>
+        </div>
+        <div>
+            <div class="icon-container">
+                <svg viewBox="0 0 24 24" focusable="false" class="svg1">
+                    <g width="24" height="24" viewBox="0 0 24 24">
+                        <path
+                            d="M21.58 7.19C21.35 6.33 20.67 5.65 19.81 5.42C18.25 5 12 5 12 5C12 5 5.75 5 4.19 5.42C3.33 5.65 2.65 6.33 2.42 7.19C2 8.75 2 12 2 12C2 12 2 15.25 2.42 16.81C2.65 17.67 3.33 18.35 4.19 18.58C5.75 19 12 19 12 19C12 19 18.25 19 19.81 18.58C20.67 18.35 21.35 17.67 21.58 16.81C22 15.25 22 12 22 12C22 12 22 8.75 21.58 7.19ZM10 15V9L15.2 12L10 15Z"
+                            class="yt-icon"></path>
+                    </g>
+                </svg>
+            </div>
+        </div>
+        <div class="other2">
+            <div></div>
+            <div>
+                <div class="icon-container2">
+                    <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg2"
+                        onclick="openmenu()">
+                        <g>
+                            <path
+                                d="M13,14h-2v-2h2V14z M13,5h-2v6h2V5z M19,3H5v16.59l3.29-3.29L8.59,16H9h10V3 M20,2v15H9l-5,5V2H20L20,2z">
+                            </path>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <div class="icon-container2">
+                    <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg3"
+                        onclick="window.location.href = 'https://lcedit.com'">
+                        <g>
+                            <path
+                                d="M12.7,12l6.6,6.6l-0.7,0.7L12,12.7l-6.6,6.6l-0.7-0.7l6.6-6.6L4.6,5.4l0.7-0.7l6.6,6.6l6.6-6.6l0.7,0.7L12.7,12z">
+                            </path>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+    <img src="../../logo.png" id="image">
+    <p id="name">Livecountsedit</p>
+    <div class="main">
+        <div class="counter">
+            <div id="count">
+                <div id="odo1a" class="odometer">0</div>
+                <div id="odo2a" class="odometer">0</div>
+                <div id="odo3a" class="odometer">0</div>
+                <div id="comma1a">,</div>
+                <div id="odo4a" class="odometer">0</div>
+                <div id="odo5a" class="odometer">0</div>
+                <div id="odo6a" class="odometer">0</div>
+                <div id="comma2a">,</div>
+                <div id="odo7a" class="odometer">0</div>
+                <div id="odo8a" class="odometer">0</div>
+                <div id="odo9a" class="odometer">0</div>
+                <div id="comma3a">,</div>
+                <div id="odo10a" class="odometer">0</div>
+                <div id="odo11a" class="odometer">0</div>
+                <div id="odo12a" class="odometer">0</div>
+            </div>
+            <p class="label" id="footer">Subscribers</p>
+        </div>
+        <hr>
+        <div class="chart-area">
+            <center>
+                <div class="chart-area2">
+                    <div class="chart-labels-area">
+                        <p class="chart-labels-area1">Channel growth</p>
+                        <p class="chart-labels-area2">Total subscribers</p>
+                    </div>
+                    <div></div>
+                    <div class="chart-dropdown-area1">
+                        <div class="chart-dropdown-area1">
+                            <div class="alignLeft">
+                                <p id="dropdown-label1">
+                                    Aug 31 - Sep 6, 2023</p>
+                                <h4 id="dropdown-label2">
+                                    Last 7 days</h4>
+                            </div>
+                            <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg4">
+                                <g width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M18,9l-6,6L6,9H18z"></path>
+                                </g>
+                            </svg>
+                        </div>
+                        <div>
+                            <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg5">
+                                <g width="24" height="24" viewBox="0 0 24 24">
+                                    <path
+                                        d="M18.3504 8.93998L12.0004 15.29L5.65039 8.93998L6.36039 8.22998L12.0004 13.88L17.6504 8.22998L18.3504 8.93998Z">
+                                    </path>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div id="chart"></div>
+            </center>
+            
+    </div>
+</body>
+<script src="./script.js"></script>
+
+</html>

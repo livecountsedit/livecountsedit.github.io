@@ -27,7 +27,7 @@ const comma2Element = document.getElementById('comma2a');
 const comma3Element = document.getElementById('comma3a');
 
 let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {
-	name: "Loading",
+	name: "Livecountsedit",
 	image: "../default.png",
 	footer: "Subscribers",
 	count: 0,
@@ -57,7 +57,7 @@ let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user"
 	abbreviate: false,
 };
 if (!user.count) {
-	user.count = user.subscribers;
+	user.count = user.subscribers || 0;
 }
 
 function render() {

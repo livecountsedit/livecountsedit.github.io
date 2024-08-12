@@ -128,6 +128,32 @@ document.getElementById("options.counter.rates.basicMaximum").addEventListener('
 document.getElementById("options.counter.rates.mode.basic.units").addEventListener('input', Interface.setRate)
 document.getElementById("options.counter.rates.mode.basic.baseUnit").addEventListener('change', Interface.setRate)
 document.getElementById("options.counter.rates.mode.basic.baseUnit2").addEventListener('change', Interface.setRate)
+document.getElementById("options-icon").addEventListener("change", () => {
+    switch (document.getElementById("options-icon").value) {
+        case "youtube":
+            document.querySelector(".platform-icon").style.display = "inline";
+            document.querySelector(".platform-icon").src = "youtube-icon.png";
+            document.getElementById("platform-plus-sign").style.backgroundColor = "#e62117";
+            document.getElementById("userimg").style.border = "1px solid #e62117";
+            break;
+        case "twitch":
+            document.querySelector(".platform-icon").style.display = "inline";
+            document.querySelector(".platform-icon").src = "twitch-icon.png";
+            document.getElementById("platform-plus-sign").style.backgroundColor = "#7a31b3";
+            document.getElementById("userimg").style.border = "1px solid #7a31b3";
+            break;
+        case "twitter":
+            document.querySelector(".platform-icon").style.display = "inline";
+            document.querySelector(".platform-icon").src = "twitter-icon.png";
+            document.getElementById("platform-plus-sign").style.backgroundColor = "#317db3";
+            document.getElementById("userimg").style.border = "1px solid #317db3";
+            break;
+        default:
+            document.querySelector(".platform-icon").style.display = "none";
+            document.getElementById("platform-plus-sign").style.backgroundColor = "#333333";
+            document.getElementById("userimg").style.border = "1px solid #333333";
+    }
+})
 
 
 function resetgraph() {

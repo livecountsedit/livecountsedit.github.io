@@ -27,6 +27,119 @@
 </head>
 
 <body>
+    <div id="settingsMenu">
+        <button id="close">Close</button><br><br>
+        <hr class="hr2">
+        <br>
+        <h1>Settings</h1>
+        <div class="option">
+            <label>Counter title/Username</label><br>
+            <input type="text" placeholder="Channel Name" id="name_input" autocomplete="off" value="Livecountsedit">
+        </div>
+        <div class="option">
+            <label>Footer/Label</label><br>
+            <input type="text" placeholder="Footer Title" id="footer_input" autocomplete="off">
+        </div>
+        <br>
+        <br>
+        <div class="option">
+            <label>Avatar URL</label><br>
+            <input type="text" placeholder="https://example.com/image.png" id="image_input"
+                autocomplete="off" value="../default.png"><br>
+            <strong>OR</strong>
+            <input type="file" id="file_input" accept="image/*" autocomplete="off">
+        </div>
+        <br>
+        <div class="option">
+            <label>Counter value (whole numbers only)</label><br>
+            <input type="number" placeholder="Channel Subscribers" id="subscribers_input" autocomplete="off" value="0">
+            <input type="checkbox" id="enabled" autocomplete="off" checked>
+        </div>
+        <br>
+        <button onclick="submit()">Set Settings</button>
+        <br>
+        <hr class="hr2">
+        <br>
+        <p>Counter Gain Rate</p>
+        <div class="option-section">
+            <div class="option">
+                <p>
+                    <span>Min Subs</span>
+                    <span><input type="number" id="min_subs" autocomplete="off" placeholder="0"></span>
+                    <br>
+                    <br>
+                    <span>Max Subs</span>
+                    <span><input type="number" id="max_subs" autocomplete="off" placeholder="0"></span>
+                    <br>
+                    <br>
+                    <span>Per Every</span>
+                    <span><input type="number" id="updateInterval" autocomplete="off" placeholder="2"></span><label> seconds</label>
+                    <br>
+                </p>
+                <br>
+                <button onclick="submit1()">Set Rates</button>
+            </div>
+        </div>
+        <br>
+        <hr class="hr2">
+        <br>
+        <p>Graph Type:</p>
+        <select class="option-input" id="graph_type">
+            <option value="live">Live</option>
+            <option value="set">Set Data</option>
+        </select><br>
+        <br>
+        <input id="dropdownTopText" placeholder="Top Text" autocomplete="off">
+        <input id="dropdownBottomText" placeholder="Bottom Text" autocomplete="off"><br>
+        <label>Max Graph Points: </label><input id="maxPoints" placeholder="100" autocomplete="off">
+        <br><br>
+        <div class="options">
+            <label>Graph Dates</label><br>
+            <textarea type="text" id="graph_dates"
+                autocomplete="off">Aug 31 2023, Sep 1 2023, Sep 2 2023, Sep 3 2023, Sep 4 2023, Sep 5 2023, Sep 6 2023</textarea><br>
+            <label>Graph Values</label><br>
+            <textarea type="text" id="graph_values" autocomplete="off">1, 2, 3, 4, 5, 6, 7</textarea>
+        </div>
+        <button onclick="submit2()">Save Settings</button><br>
+        <button onclick="clearChart()">Clear Chart</button><br>
+        <br>
+        <hr class="hr2">
+        <br>
+        <p>Select comma type:</p>
+        <select name="selectcomma" id="selectcomma">
+            <option value="comma1">,ddd</option>
+            <option value="comma2"> ddd</option>
+        </select>
+        <br>
+        <br>
+        <hr class="hr2">
+
+        <div style="display: flex; width: 100%; gap: 0.3em;">
+            <button onclick="saveData()">Save Data</button>
+            <button onclick="exportData()">Export Data</button>
+            <button onclick="resetData()">Reset Data</button>
+            <button onclick="toggleTheme()">Switch Theme (light/dark)</button>
+        </div><br>
+        <div style="display: flex; width: 100%; gap: 5em;">
+            <div>
+                <label>Autosave (15s)</label>
+                <input type="checkbox" id="autosave" autocomplete="off">
+            </div>
+            <div>
+                <label>Import Data</label>
+                <input type="file" id="file_input2" accept=".json">
+            </div>
+        </div><br>
+    <hr class="hr2">
+    <p>Having issues with the counter not showing up correctly? Try the <a href="./old/index.html">old version</a> from before the odometer update. Alternatively, use the setting below.</p>
+    <input type="number" id="marginTopOfCount" placeholder="Margin Top of Count" autocomplete="off">
+    <button onclick="setMarginTopOfCount()">Set Margin Top of Count</button><br>
+    <label>0 is the default, the lower the number (including negative) the higher the count will be placed on screen and vice versa</label>
+    <hr class="hr2">
+    <br>
+    <h3>Disclaimer</h3>
+            <p>This page is a parody of the original YouTube Studio live counter, which can be accessed in the <a href="https://studio.youtube.com">YouTube Studio</a>. All credit goes to <a href="https://youtube.com/">YouTube</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
+</div>
     <div class="header">
         <div class="sub-header">
             <div id="updating-dot">
@@ -73,7 +186,7 @@
             </div>
         </div>
     </div>
-    <img src="../logo.png" id="image">
+    <img src="../default.png" id="image">
     <p id="name">Livecountsedit</p>
     <div class="main">
         <div class="counter">
@@ -116,115 +229,6 @@
                 </div>
                 <div id="chart"></div>
             </center>
-            <div id="settingsMenu">
-                <button id="close">Close</button><br><br>
-                <hr class="hr2">
-                <br>
-                <h1>Settings</h1>
-                <div class="option">
-                    <label>Counter title/Username</label><br>
-                    <input type="text" placeholder="Channel Name" id="name_input" autocomplete="off">
-                </div>
-                <div class="option">
-                    <label>Footer/Label</label><br>
-                    <input type="text" placeholder="Footer Title" id="footer_input" autocomplete="off">
-                </div>
-                <br>
-                <br>
-                <div class="option">
-                    <label>Avatar URL</label><br>
-                    <input type="text" placeholder="https://example.com/image.png" id="image_input"
-                        autocomplete="off"><br>
-                    <strong>OR</strong>
-                    <input type="file" id="file_input" accept="image/*" autocomplete="off">
-                </div>
-                <br>
-                <div class="option">
-                    <label>Counter value (whole numbers only)</label><br>
-                    <input type="number" placeholder="Channel Subscribers" id="subscribers_input" autocomplete="off">
-                    <input type="checkbox" id="enabled" autocomplete="off" checked>
-                </div>
-                <br>
-                <button onclick="submit()">Set Settings</button>
-                <br>
-                <hr class="hr2">
-                <br>
-                <p>Counter Gain Rate</p>
-                <div class="option-section">
-                    <div class="option">
-                        <p>
-                            <span>Min Subs</span>
-                            <span><input type="number" id="min_subs" autocomplete="off" placeholder="0"></span>
-                            <br>
-                            <br>
-                            <span>Max Subs</span>
-                            <span><input type="number" id="max_subs" autocomplete="off" placeholder="0"></span>
-                            <br>
-                            <br>
-                            <span>Per Every</span>
-                            <span><input type="number" id="updateInterval" autocomplete="off" placeholder="2"></span><label> seconds</label>
-                            <br>
-                        </p>
-                        <br>
-                        <button onclick="submit1()">Set Rates</button>
-                    </div>
-                </div>
-                <br>
-                <hr class="hr2">
-                <br>
-                <p>Graph Type:</p>
-                <select class="option-input" id="graph_type">
-                    <option value="live">Live</option>
-                    <option value="set">Set Data</option>
-                </select><br>
-                <br>
-                <input id="dropdownTopText" placeholder="Top Text" autocomplete="off">
-                <input id="dropdownBottomText" placeholder="Bottom Text" autocomplete="off"><br>
-                <label>Max Graph Points: </label><input id="maxPoints" placeholder="100" autocomplete="off">
-                <br><br>
-                <div class="options">
-                    <label>Graph Dates</label><br>
-                    <textarea type="text" id="graph_dates"
-                        autocomplete="off">Aug 31 2023, Sep 1 2023, Sep 2 2023, Sep 3 2023, Sep 4 2023, Sep 5 2023, Sep 6 2023</textarea><br>
-                    <label>Graph Values</label><br>
-                    <textarea type="text" id="graph_values" autocomplete="off">1, 2, 3, 4, 5, 6, 7</textarea>
-                </div>
-                <button onclick="submit2()">Save Settings</button><br>
-                <button onclick="clearChart()">Clear Chart</button><br>
-                <br>
-                <hr class="hr2">
-                <br>
-                <p>Select comma type:</p>
-                <select name="selectcomma" id="selectcomma">
-                    <option value="comma1">,ddd</option>
-                    <option value="comma2"> ddd</option>
-                </select>
-                <br>
-                <br>
-                <hr class="hr2">
-
-                <div style="display: flex; width: 100%; gap: 0.3em;">
-                    <button onclick="saveData()">Save Data</button>
-                    <button onclick="exportData()">Export Data</button>
-                    <button onclick="resetData()">Reset Data</button>
-                    <button onclick="toggleTheme()">Switch Theme (light/dark)</button>
-                </div><br>
-                <div style="display: flex; width: 100%; gap: 5em;">
-                    <div>
-                        <label>Autosave (15s)</label>
-                        <input type="checkbox" id="autosave" autocomplete="off">
-                    </div>
-                    <div>
-                        <label>Import Data</label>
-                        <input type="file" id="file_input2" accept=".json">
-                    </div>
-                </div><br>
-                <input type="number" id="marginTopOfCount" placeholder="Margin Top of Count" autocomplete="off">
-                <button onclick="setMarginTopOfCount()">Set Margin Top of Count</button><br>
-                <label>0 is the default, the lower the number (including negative) the higher the count will be placed on screen and vice versa</label>
-            <br>
-            <hr class="hr2">
-            <br>
         </div>
     </div>
 </body>
