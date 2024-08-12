@@ -154,25 +154,17 @@ const chart = new Highcharts.chart({
 });
 
 function abb(count) {
-	if (count === 0) return "0";
-	const ABBREVIATIONS = ["", "K", "M", "B"];
-	const isNegative = count < 0;
-	const absCount = Math.abs(count);
-	const index = absCount === 0 ? 0 : Math.floor(Math.log10(absCount) / 3);
-	let result = (absCount / Math.pow(1000, index)).toFixed(2).toString();
-	result += ABBREVIATIONS[index];
-	if (isNegative) {
-		result = `-${result}`;
-	}
-	const parts = result.split(".");
-	if (parts[1] && parts[1].length > 1) {
-		result = parts[0] + "." + parts[1][0];
-		result += ABBREVIATIONS[index];
-		if (isNegative) {
-			result = `-${result}`;
-		}
-	}
-	return result;
+	const negative = count < 0 ? true : false;
+    count = Math.round(Math.abs(count));
+    if (count < 1000) {
+        if (negative) return `-${count}`;
+        else return count.toString();
+    } else {
+        const abbreviations = "KMBT";
+        const a = Math.floor(Math.log10(count)/3)
+        if (negative) return "-" + (count / (1000 ** a)).toFixed(1) + abbreviations[a-1];
+        else return (count / (1000 ** a)).toFixed(1) + abbreviations[a-1];
+    }
 }
 
 function openmenu() {
