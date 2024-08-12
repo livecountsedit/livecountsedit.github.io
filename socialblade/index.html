@@ -167,7 +167,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=0.4" />
     <div class="page-title">
         <div class="containment">
-            <h2>Real Time YouTube Subscriber Count</h2>
+            <h2 id="realtime-title">Real Time YouTube Subscriber Count</h2>
             <h4>This page updates every second.</h4>
             <i class="fa fa-cogs" id="openSettings" onclick="openmenu()"></i>
             <i class="fa fa-users"></i>
@@ -192,12 +192,12 @@
                     <a href="/" target="_blank"><span>Subscribe</span><span id="platform-plus-sign">+</span></a>
                 </div>
                 <span><h3 id="userName" class="realtime-username-youtube">User</h3><sup><img src="youtube-icon.png"
-                alt="YouTube Icon" class="platform-icon"></sup></span>
+                alt="Icon" class="platform-icon"></sup></span>
 
             </div>
             <p id="rawCount" style="display: none;">0</p>
             <h5 id="counter" class="odometer">0</h5>
-            <p class="realtime-watermark"><span style="color: #a6270e;">YouTube Live Subscriber Count</span> - Powered
+            <p class="realtime-watermark"><span style="color: #a6270e;" id="live-count-watermark">YouTube Live Subscriber Count</span> - Powered
                 by SocialBlade.com</p>
         </div>
         <div class="page-realtime-chart">
