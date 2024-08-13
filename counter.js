@@ -5,7 +5,7 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
 
 const LCEDIT = {
     saveVersion: 3,
-    versionName: "7.0.3",
+    versionName: "7.0.4",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
