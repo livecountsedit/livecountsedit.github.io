@@ -5,7 +5,7 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
 
 const LCEDIT = {
     saveVersion: 3,
-    versionName: "7.0.4",
+    versionName: "7.0.6",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -225,9 +225,9 @@ class Counter {
             this.setCount(this.settings.count);
         }
         this.update = () => {
-            console.log((Date.now() - this.lastUpdated));
+            console.log(`Offline for: ${(Date.now() - this.lastUpdated) / 1000} seconds`);
             let offlineGain = 0;
-            if (((Date.now() - this.lastUpdated) > this.settings.updateInterval * 1e4) && this.settings.offlineGains) {
+            if (((Date.now() - this.lastUpdated) > this.settings.updateInterval * 1e4) && this.settings.offlineGains && this.lastUpdated > 0) {
                 const missedIntervals = Math.floor((Date.now() - this.lastUpdated) / this.settings.updateInterval / 1e3);
                 offlineGain = missedIntervals * (this.settings.updateInterval / this.settings.gainPer) * this.getExpectedGain();
             } else {
@@ -254,6 +254,9 @@ class Counter {
                 default:
                     this.gain = 0;
             }
+
+            console.log(`Offline gain: ${offlineGain}`)
+
             this.gain += offlineGain;
             let newCount = this.settings.count + this.gain;
             if (this.lastAPICount != null) {
@@ -283,6 +286,7 @@ class Counter {
         }
         this.fromJSON = s => {
             if (s.id) this.id = s.id;
+            if (s.lastUpdated) this.lastUpdated = s.lastUpdated;
             if (s.settings) this.updateSettings(s.settings)
             if (s.chartData) {
                 if (s.settings.keepChartData) {

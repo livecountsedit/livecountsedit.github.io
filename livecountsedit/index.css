@@ -128,3 +128,7 @@ body {
 .page-footer {
     text-align: center
 }
+
+.fa.fa-info-circle {
+    font-size: 1rem;
+}

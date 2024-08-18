@@ -5,6 +5,7 @@
     <link href="../odometer/odometer.css" rel="stylesheet">
     <link href="../bootstrap.css" rel="stylesheet">
     <link href="./index.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -100,16 +101,16 @@
                     <input class="form-control" id="meanRate" name="meanRate" type="number" step="any">
                 </div>
                 <div class="mb-3 gain-1">
-                    <span><label class="form-label" for="stdevRate">Standard deviation</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The expected distance from the mean the rate will be."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="stdevRate">Standard deviation</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The expected distance from the mean the rate will be."></i></span>
                     <input class="form-control" id="stdevRate" name="stdevRate" type="number" min="0" step="any">
                 </div>
                 <div class="mb-3 gain-2">
-                    <span><label class="form-label" for="customRate">Custom distribution</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Each line is of the form Min,Max,Weight. Weight is the relative probability of the line being chosen. Min and Max are the minimum and maximum rates for if this line is chosen."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="customRate">Custom distribution</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="Each line is of the form Min,Max,Weight. Weight is the relative probability of the line being chosen. Min and Max are the minimum and maximum rates for if this line is chosen."></i></span>
                     <textarea class="form-control" id="customRate" name="customRate" placeholder="Min1,Max1,Weight1
 Min2,Max2,Weight2"></textarea>
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="gainPer">Gain per (seconds)</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount of time in seconds that the gain rates are calculated per. For example, set to 60 for a rate in followers/subscribers per minute, and 3600 for a rate in per hour."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="gainPer">Gain per (seconds)</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The amount of time in seconds that the gain rates are calculated per. For example, set to 60 for a rate in followers/subscribers per minute, and 3600 for a rate in per hour."></i></span>
                     <input class="form-control" id="gainPer" name="gainPer" type="number" min="0.001" step="any">
                 </div>
             </form>
@@ -125,11 +126,11 @@ Min2,Max2,Weight2"></textarea>
                     <input class="form-control form-control-color" id="counterColor" name="counterColor" type="color">
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="upColor">Counter up color</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The color the counter changes to when counting up."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="upColor">Counter up color</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The color the counter changes to when counting up."></i></span>
                     <input class="form-control form-control-color" id="upColor" name="upColor" type="color">
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="downColor">Counter down color</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The color the counter changes to when counting down."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="downColor">Counter down color</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The color the counter changes to when counting down."></i></span>
                     <input class="form-control form-control-color" id="downColor" name="downColor" type="color">
                 </div>
                 <div class="mb-3">
@@ -170,18 +171,18 @@ Min2,Max2,Weight2"></textarea>
                 </div>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="abb" name="abb">
-                    <span><label class="form-check-label" for="abb">Abbreviate counter</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Limit the counter to show up to three significant digits, as in YouTube's API."> &#x1F6C8;</a></span>
+                    <span><label class="form-check-label" for="abb">Abbreviate counter</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="Limit the counter to show up to three significant digits, as in YouTube's API."></i></span>
                 </div>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="offlineGains" name="offlineGains">
-                    <span><label class="form-check-label" for="offlineGains">Offline gains (currently broken, will be fixed later)</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Upon loading, update the counter if it has been gaining while the counter was not open. Only applies if the counter has not been open for at least ten update intervals."> &#x1F6C8;</a></span>
+                    <span><label class="form-check-label" for="offlineGains">Offline gains</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="Upon loading, update the counter if it has been gaining while the counter was not open. Only applies if the counter has not been open for at least ten update intervals."></i></span>
                 </div>
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="keepChartData" name="keepChartData">
                     <label class="form-check-label" for="keepChartData">Keep chart data on reload</label>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="maxChartValues">Max chart values<a style="font-size:1rem" data-bs-toggle="tooltip" title="The maximum number of data points the chart will show."> &#x1F6C8;</a></label>
+                    <label class="form-label" for="maxChartValues">Max chart values<i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The maximum number of data points the chart will show."></i></label>
                     <input class="form-control" id="maxChartValues" name="maxChartValues" type="number" min="3" max="10000">
                 </div>
                 <div class="mb-3">
@@ -209,7 +210,7 @@ Min2,Max2,Weight2"></textarea>
                     <input class="form-control" id="updateInterval" name="updateInterval" type="number" min="0.001" max="2147483.647" step="any">
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="updateProbability">Update probability in percent</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The percent chance that the counter will update during each update interval. If it updates, the gains will be scaled accordingly to match the given rates."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="updateProbability">Update probability in percent</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The percent chance that the counter will update during each update interval. If it updates, the gains will be scaled accordingly to match the given rates."></i></span>
                     <input class="form-control" id="updateProbability" name="updateProbability" type="number" min="0" max="100" step="any">
                 </div>
             </form>
@@ -218,24 +219,24 @@ Min2,Max2,Weight2"></textarea>
             <form class="api-form" id="settingsForm-4">
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="ytAPIEnabled" name="ytAPIEnabled">
-                    <span><label class="form-check-label" for="showImage">Enable YouTube API updates</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="This will update the counter if the abbreviated subscriber count does not match what is given in the API."> &#x1F6C8;</a></span>
+                    <span><label class="form-check-label" for="showImage">Enable YouTube API updates</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="This will update the counter if the abbreviated subscriber count does not match what is given in the API."></i></span>
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="ytChannelID">YouTube channel ID</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="This is not the same as a YouTube handle or username. Use the tool linked below to help you easily find the YouTube channel ID. YouTube channel IDs are 24 characters long and begin with &quot;UC&quot;."> &#x1F6C8;</a></span><br>
+                    <span><label class="form-label" for="ytChannelID">YouTube channel ID</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="This is not the same as a YouTube handle or username. Use the tool linked below to help you easily find the YouTube channel ID. YouTube channel IDs are 24 characters long and begin with &quot;UC&quot;."></i></span><br>
                     <a href="https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/">YouTube channel ID finder</a>
                     <input class="form-control" id="ytChannelID" name="ytChannelID">
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="ytAPIKey">YouTube Data API v3 key</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="Read the article linked below if you are unsure of how to get one. Your YouTube API key should begin with &quot;AIzaSy&quot;. Do NOT share this key with anyone."> &#x1F6C8;</a></span><br>
+                    <span><label class="form-label" for="ytAPIKey">YouTube Data API v3 key</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="Read the article linked below if you are unsure of how to get one. Your YouTube API key should begin with &quot;AIzaSy&quot;. Do NOT share this key with anyone."></i></span><br>
                     <a href="https://blog.hubspot.com/website/how-to-get-youtube-api-key">A tutorial on how to get one</a>
                     <input class="form-control" id="ytAPIKey" name="ytAPIKey" type="password">
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="apiInterval">API update interval</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="apiInterval">API update interval</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10."></i></span>
                     <input class="form-control" id="apiInterval" name="apiInterval" type="number" min="1" max="2147483.647">
                 </div>
                 <div class="mb-3">
-                    <span><label class="form-label" for="leeway">Overestimation leeway in percent</label><a style="font-size:1rem" data-bs-toggle="tooltip" title="The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively."> &#x1F6C8;</a></span>
+                    <span><label class="form-label" for="leeway">Overestimation leeway in percent</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively."></i></span>
                     <input class="form-control" id="leeway" name="leeway" type="number" min="0" max="100">
                 </div>
             </form>
@@ -257,7 +258,7 @@ Min2,Max2,Weight2"></textarea>
         </div>
     </div>
     <div class="page-footer">
-        <span>Version 7.0.4 - <a href="../index.html">Back to main page</a> - <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F">Not working?</a> - <a href="../about/discord.html">Join the Livecountsedit Discord Server.</a> This site is a parody of popular realtime counters.</span>
+        <span>Version 7.0.6 - <a href="../index.html">Back to main page</a> - <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F">Not working?</a> - <a href="../about/discord.html">Join the Livecountsedit Discord Server.</a> This site is a parody of popular realtime counters.</span>
     </div>
     <script src="../odometer/odometer.js"></script>
     <script src="../highstock.js"></script>
