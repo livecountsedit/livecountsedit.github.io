@@ -797,12 +797,24 @@ function edit() {
 }
 
 function save() {
-    localStorage.setItem("data", JSON.stringify(data));
-    alert("Saved!");
+    try {
+        localStorage.setItem("data", JSON.stringify(data));
+        document.getElementById("storage-warning").style.display = "none";
+        alert("Saved!");
+    } catch (error) {
+        alert(`Error: ${error}`)
+        document.getElementById("storage-warning").style.display = "block";
+    }
 }
 
 function saveData2() {
-    localStorage.setItem("data", JSON.stringify(data));
+    try {
+        localStorage.setItem("data", JSON.stringify(data));
+        document.getElementById("storage-warning").style.display = "none";
+    } catch (error) {
+        console.error(error);
+        document.getElementById("storage-warning").style.display = "block";
+    }
 }
 
 document.getElementById('loadData1').addEventListener('change', function () {
@@ -823,80 +835,52 @@ function load1() {
 
 function load() {
     var data3 = {};
-    document.getElementById('main').innerHTML = "";
     if (document.getElementById('loadData1').files[0]) {
         document.getElementById('loadData1').files[0].text().then(function (data2) {
             data3 = JSON.parse(data2);
             if (data3.data) {
+                clearInterval(updateInterval);
+                clearInterval(auditTimeout);
                 data = JSON.parse(data2);
-                for (let i = 0; i < data.data.length; i++) {
-                    let id = data.data[i].id;
-                    let image = data.data[i].image;
-                    let name = data.data[i].name;
-                    let count = data.data[i].count;
-                    if (currentIndex < 10) {
-                        num = "0" + (currentIndex).toString();
-                    } else {
-                        num = currentIndex;
-                    }
-                    let card = document.createElement('div');
-                    card.className = "card";
-                    card.id = "card_" + currentIndex;
-                    card.setAttribute("cid", id);
-                    let div = document.createElement('div');
-                    div.className = "num";
-                    div.id = "num_" + currentIndex;
-                    div.innerHTML = num;
-                    div.setAttribute("cid", id);
-                    let img = document.createElement('img');
-                    img.className = "img";
-                    img.id = "img_" + currentIndex;
-                    img.src = image;
-                    img.setAttribute("cid", id);
-                    let nameDiv = document.createElement('h1');
-                    nameDiv.className = "name";
-                    nameDiv.id = "name_" + currentIndex;
-                    nameDiv.innerText = name;
-                    nameDiv.setAttribute("cid", id);
-                    let countDiv = document.createElement('h2');
-                    countDiv.classList = "odometer";
-                    countDiv.id = "count_" + currentIndex;
-                    countDiv.innerText = getDisplayedCount(count);
-                    countDiv.setAttribute("cid", id);
-                    odo = new Odometer({
-                        el: countDiv
-                    });
-                    card.appendChild(div);
-                    card.appendChild(img);
-                    card.appendChild(nameDiv);
-                    card.appendChild(countDiv);
-                    document.getElementById('main').appendChild(card);
-                    currentIndex++;
-                }
-                document.body.style.backgroundColor = data.bgColor;
-                document.body.style.color = data.textColor;
-                adjustColors();
                 if (!data.uuid) {
                     data.uuid = uuidGen();
                 }
-                localStorage.setItem("data", JSON.stringify(data));
-                location.reload();
+                try {
+                    localStorage.setItem("data", JSON.stringify(data));
+                } catch (error) {
+                    console.error(error);
+                }
+                document.getElementById('main').innerHTML = "";
+                initLoad('redo')
             }
         });
     }
 }
-function save2() {
-    let data2 = JSON.stringify(data);
-    let a = document.createElement('a');
-    let file = new Blob([data2], { type: 'text/json' });
-    a.href = URL.createObjectURL(file);
-    a.download = 'data.json';
-    a.click();
+function save2(public = false) {
+    let data2;
+    if (public) {
+        data2 = structuredClone(data);
+        data2.apiUpdates.enabled = false;
+        data2.apiUpdates.url = '';
+        data2.apiUpdates.body = Object.create(null);
+        data2.apiUpdates.headers = Object.create(null);
+        data2.uuid = null;
+    } else {
+        data2 = data;
+    }
+    if (public || confirm("PLEASE READ: You are exporting a private save file. This means that the save file will include things like any API keys you have put in. If you do not wish for this data to be in your save file, export a public save that is safe to share publicly instead. Be sure to NEVER share the private save file with anyone you do not trust!")) {
+        let data3 = JSON.stringify(data2);
+        let a = document.createElement('a');
+        let file = new Blob([data3], { type: 'text/json' });
+        a.href = URL.createObjectURL(file);
+        a.download = public ? 'data.json' : 'data-PRIVATE.json';
+        a.click();
+    }
 }
 
 function reset() {
     if (confirm("Are you sure you want to reset?")) {
-        localStorage.clear();
+        localStorage.removeItem("data");
         location.reload();
     }
 }
@@ -914,14 +898,6 @@ function deleteChannel() {
     if (selected !== null) {
         if (confirm("Are you sure you want to delete this channel?")) {
             let id = selected;
-            /*
-            let image = document.getElementById('image_' + id).src = "../default.png"
-            let name = document.getElementById('name_' + id).innerText = "Loading";
-            let count = document.getElementById('count_' + id).innerText = "0";
-            name.innerText = "";
-            count.innerText = "";
-            image.src = "";
-            */
             for (let i = 0; i < data.data.length; i++) {
                 if (data.data[i].id == id) {
                     data.data.splice(i, 1);

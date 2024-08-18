@@ -153,3 +153,7 @@ textarea {
 .discord {
   font-size: 1.5em;
 }
+
+#storage-warning {
+  display: none;
+}

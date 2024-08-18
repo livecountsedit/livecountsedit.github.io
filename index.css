@@ -36,3 +36,9 @@ button {
 .title {
    font-size: 4vw; 
 }
+
+.reset {
+    width: fit-content;
+    background-color: red;
+    color: white;
+}

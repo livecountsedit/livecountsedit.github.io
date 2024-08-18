@@ -91,7 +91,10 @@
                     <button onclick="save()">Save (In Browser)</button>
                 </div>
                 <div>
-                    <button onclick="save2()">Save (In File)</button>
+                    <button onclick="save2(true)">Export Public Save (In File)</button>
+                </div>
+                <div>
+                    <button onclick="save2()">Export Private Save (In File)</button>
                 </div>
                 <div>
                     <input type="checkbox" id="autosave" autocomplete="off"><label>Autosave (15s)</label>
@@ -99,14 +102,15 @@
                 <div>
                     <input type="checkbox" id="offline" autocomplete="off"><label>Offline Gains</label>
                 </div>
-            </div><br>
+            </div>
+            <p id="storage-warning"><strong>Warning: An error occurred when saving the data in your browser. This could be the result of your save file being too large. Learn more about this error in <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/Problems-with-Local-Storage">this article</a>.</strong></p>
             <div class="topSettings">
                 <div>
                     <label>Load Save (From Top 50 Save)</label><br>
                     <input type="file" id="loadData1" autocomplete="off">
                 </div>
                 <div>
-                    <label>Load Save (From Other Counter)</label><br>
+                    <label>Load Save (From YT Studio)</label><br>
                     <input type="file" id="loadData2" autocomplete="off">
                 </div>
                 <div>
@@ -262,7 +266,7 @@
                         </div>
                         <div>
                             <br>
-                            <input type="checkbox" id="prependZeros"><label>Prepend 0 To Ranks Less Than 100</label>
+                            <input type="checkbox" id="prependZeros"><label>Add Leading Zeros to Ranks</label>
                         </div>
                         <div>
                             <br>

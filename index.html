@@ -81,7 +81,31 @@
 
     <h3>Disclaimer</h3>
     <p>The counters on our website are parodies of live subscriber and follower count websites. All credit goes to the owners of the original websites for the designs of those pages. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
+
+    <h3>Reset All Data</h3>
+    <p>This button will reset local storage for lcedit.com (which means data for ALL counters that use save data will be wiped). Use this button if errors are preventing you from resetting corrupted data on a counter that uses save data. Be sure to reload the counter after using this.</p>
+    <button class="reset" onclick="resetAll()">RESET ALL DATA</button>
+
     <div id="disqus_thread" style="width: 100%;"></div>
+    <script>
+        function resetAll() {
+            if (confirm("Are you sure you want to reset ALL data for every counter on our site? This cannot be undone!")) {
+                if (confirm("FINAL WARNING: Are you REALLY sure you want to reset ALL data for every counter on our site? This cannot be undone!")) {
+                    try {
+                        localStorage.clear();
+                        alert("Successfully reset all data.")
+                    } catch (error) {
+                        console.error(error);
+                        alert("Uh-oh. An error occured while resetting all data.")
+                    }
+                } else {
+                    alert("Action cancelled.")
+                }
+            } else {
+                alert("Action cancelled.")
+            }
+        }
+    </script>
 
     <script>
         var disqus_config = function () {
