@@ -233,11 +233,11 @@ Min2,Max2,Weight2"></textarea>
                 </div>
                 <div class="mb-3">
                     <span><label class="form-label" for="apiInterval">API update interval</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10."></i></span>
-                    <input class="form-control" id="apiInterval" name="apiInterval" type="number" min="1" max="2147483.647">
+                    <input class="form-control" id="apiInterval" name="apiInterval" type="number" min="1" max="2147483.647" step="any">
                 </div>
                 <div class="mb-3">
                     <span><label class="form-label" for="leeway">Overestimation leeway in percent</label> <i class="fa fa-info-circle" data-bs-toggle="tooltip" title="The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively."></i></span>
-                    <input class="form-control" id="leeway" name="leeway" type="number" min="0" max="100">
+                    <input class="form-control" id="leeway" name="leeway" type="number" min="0" max="100" step="any">
                 </div>
             </form>
             <button class="btn btn-primary" onclick="submitAPI()">Save API settings</button><br>
