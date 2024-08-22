@@ -295,54 +295,54 @@
             <div>
                 <div class="option">
                     <label for="options.counter.title">Counter title/Video Name</label><br>
-                    <input type="text" placeholder="Video Name" class="option-input" id="options.counter.title">
+                    <input type="text" placeholder="Video Name" class="option-input" id="options.counter.title" value="Video">
                 </div>
                 <br>
                 <div class="option">
                     <label for="options.counter.avatar.url">Thumbnail URL</label><br>
-                    <input type="text" class="option-input" id="options.counter.avatar.url"><br>
+                    <input type="text" class="option-input" id="options.counter.avatar.url" value="https://lcedit.com/default.png"><br>
                     <strong>OR</strong>
                     <input type="file" class="option-input" id="options.counter.avatar.file">
                 </div>
                 <br>
                 <div class="option">
-                    <label for="options.counter.value">Counter 1 value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 1" class="option-input" id="options.counter.value">
+                    <label for="options.counter.value">View Counter Value (integers only)</label><br>
+                    <input type="text" placeholder="Counter 1" class="option-input" id="options.counter.value" value="0">
                     <button onclick="submit1()">Submit</button>
                 </div>
                 <div class="option">
-                    <label for="options.counter.value">Counter 2 value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 2" class="option-input" id="options.counter.value2">
+                    <label for="options.counter.value">Like Counter Value (integers only)</label><br>
+                    <input type="text" placeholder="Counter 2" class="option-input" id="options.counter.value2" value="0">
                     <button onclick="submit2()">Submit</button>
                 </div>
                 <div class="option">
-                    <label for="options.counter.value">Counter 3 value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 3" class="option-input" id="options.counter.value3">
+                    <label for="options.counter.value">Dislike Counter Value (integers only)</label><br>
+                    <input type="text" placeholder="Counter 3" class="option-input" id="options.counter.value3" value="0">
                     <button onclick="submit3()">Submit</button>
                 </div>
                 <div class="option">
-                    <label for="options.counter.value">Counter 4 value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 4" class="option-input" id="options.counter.value4">
+                    <label for="options.counter.value">Comment Counter Value (integers only)</label><br>
+                    <input type="text" placeholder="Counter 4" class="option-input" id="options.counter.value4" value="0">
                     <button onclick="submit4()">Submit</button>
                 </div>
 
                 <br>
-                <p>Counter Gain Rate 1</p>
+                <p>View Counter Gain Rate</p>
                 <div class="option-section" id="options.counter.rates.mode.0">
                     <div class="option">
                         <span>Min Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum0"></span>
+                                id="options.counter.rates.basicMinimum0" value="0"></span>
                         <br>
                         <br>
                         <span>Max Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum0"></span>
+                                id="options.counter.rates.basicMaximum0" value="0"></span>
                         <br>
                         <br>
-                        <span>Per Every</span>
+                        <span>Update Interval</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units0"></span>
+                                id="options.counter.rates.mode.basic.units0" value="2"></span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit0">
                                 <option value="1" id="options.counter.rates.mode.basic.units.second0">second(s)</option>
                                 <option value="60" id="options.counter.rates.mode.basic.units.minute0">minute(s)</option>
@@ -351,33 +351,33 @@
                             </select></span>
                         <br>
                         <br>
-                        <span>Counter Gain Rate In:</span>
+                        <span>Counter Gain Rate In Per 1:</span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit00">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second00">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute00">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour00">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day00">day(s)</option>
+                                <option value="1" id="options.counter.rates.mode.basic.units.second00">second</option>
+                                <option value="60" id="options.counter.rates.mode.basic.units.minute00">minute</option>
+                                <option value="3600" id="options.counter.rates.mode.basic.units.hour00">hour</option>
+                                <option value="86400" id="options.counter.rates.mode.basic.units.day00">day</option>
                             </select></span>
                         </p>
                     </div>
                 </div>
                 <br>
-                <p>Counter Gain Rate 2</p>
+                <p>Like Counter Gain Rate</p>
                 <div class="option-section" id="options.counter.rates.mode.1">
                     <div class="option">
                         <span>Min Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum1"></span>
+                                id="options.counter.rates.basicMinimum1" value="0"></span>
                         <br>
                         <br>
                         <span>Max Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum1"></span>
+                                id="options.counter.rates.basicMaximum1" value="0"></span>
                         <br>
                         <br>
-                        <span>Per Every</span>
+                        <span>Update Interval</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units1"></span>
+                                id="options.counter.rates.mode.basic.units1" value=2></span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit1">
                                 <option value="1" id="options.counter.rates.mode.basic.units.second1">second(s)</option>
                                 <option value="60" id="options.counter.rates.mode.basic.units.minute1">minute(s)</option>
@@ -386,33 +386,33 @@
                             </select></span>
                         <br>
                         <br>
-                        <span>Counter Gain Rate In:</span>
+                        <span>Counter Gain Rate In Per 1:</span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit11">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second11">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute11">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour11">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day11">day(s)</option>
+                                <option value="1" id="options.counter.rates.mode.basic.units.second11">second</option>
+                                <option value="60" id="options.counter.rates.mode.basic.units.minute11">minute</option>
+                                <option value="3600" id="options.counter.rates.mode.basic.units.hour11">hour</option>
+                                <option value="86400" id="options.counter.rates.mode.basic.units.day11">day</option>
                             </select></span>
                         </p>
                     </div>
                 </div>
                 <br>
-                <p>Counter Gain Rate 3</p>
+                <p>Dislike Counter Gain Rate</p>
                 <div class="option-section" id="options.counter.rates.mode.2">
                     <div class="option">
                         <span>Min Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum2"></span>
+                                id="options.counter.rates.basicMinimum2" value="0"></span>
                         <br>
                         <br>
                         <span>Max Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum2"></span>
+                                id="options.counter.rates.basicMaximum2" value="0"></span>
                         <br>
                         <br>
-                        <span>Per Every</span>
+                        <span>Update Interval</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units2"></span>
+                                id="options.counter.rates.mode.basic.units2" value=2></span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
                                 <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
                                 <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)</option>
@@ -421,33 +421,33 @@
                             </select></span>
                         <br>
                         <br>
-                        <span>Counter Gain Rate In:</span>
+                        <span>Counter Gain Rate In Per 1:</span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit22">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second22">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute22">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour22">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day22">day(s)</option>
+                                <option value="1" id="options.counter.rates.mode.basic.units.second22">second</option>
+                                <option value="60" id="options.counter.rates.mode.basic.units.minute22">minute</option>
+                                <option value="3600" id="options.counter.rates.mode.basic.units.hour22">hour</option>
+                                <option value="86400" id="options.counter.rates.mode.basic.units.day22">day</option>
                             </select></span>
                         </p>
                     </div>
                 </div>
                 <br>
-                <p>Counter Gain Rate 4</p>
+                <p>Comment Counter Gain Rate</p>
                 <div class="option-section" id="options.counter.rates.mode.3">
                     <div class="option">
                         <span>Min Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum3"></span>
+                                id="options.counter.rates.basicMinimum3" value="0"></span>
                         <br>
                         <br>
                         <span>Max Rate</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum3"></span>
+                                id="options.counter.rates.basicMaximum3" value="0"></span>
                         <br>
                         <br>
-                        <span>Per Every</span>
+                        <span>Update Interval</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units3"></span>
+                                id="options.counter.rates.mode.basic.units3" value=2></span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit3">
                                 <option value="1" id="options.counter.rates.mode.basic.units.second3">second(s)</option>
                                 <option value="60" id="options.counter.rates.mode.basic.units.minute3">minute(s)</option>
@@ -456,12 +456,12 @@
                             </select></span>
                         <br>
                         <br>
-                        <span>Counter Gain Rate In:</span>
+                        <span>Counter Gain Rate In Per 1:</span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit33">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second33">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute33">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour33">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day33">day(s)</option>
+                                <option value="1" id="options.counter.rates.mode.basic.units.second33">second</option>
+                                <option value="60" id="options.counter.rates.mode.basic.units.minute33">minute</option>
+                                <option value="3600" id="options.counter.rates.mode.basic.units.hour33">hour</option>
+                                <option value="86400" id="options.counter.rates.mode.basic.units.day33">day</option>
                             </select></span>
                         </p>
                     </div>

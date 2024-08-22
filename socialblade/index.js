@@ -178,7 +178,13 @@ document.getElementById("options-counter-type").addEventListener("change", () =>
             document.getElementById("userimg").style.border = "1px solid #333333";
     }
 })
-
+document.getElementById("options-chart").addEventListener("change", () => {
+    if (document.getElementById("options-chart").checked) {
+        document.getElementById("chart").style.display = "block";
+    } else {
+        document.getElementById("chart").style.display = "none";
+    }
+})
 
 function resetgraph() {
 

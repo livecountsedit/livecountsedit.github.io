@@ -30,41 +30,44 @@
     <a id="channelName" style="color: rgb(0, 0, 0); border: 3px none green;">Channel name</a>
     <div class="odometer odometer-auto-theme" id="channelSubs" style="color: rgb(0, 0, 0);">0</div>
     <div align="left" id="options">
-        <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title">
+        <span>Channel Name:</span>
+        <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title" value="User">
         <br>
+        <span>Channel Subscribers:</span>
         <input type="number" placeholder="Channel Subscribers (integers only)" class="option-input"
-            id="options.counter.value">
+            id="options.counter.value" value="0">
         <button onclick="submit()">Submit</button>
         <br>
+        <span>Min Subs:</span>
         <input placeholder="Min Subs" type="number" class="short-input option-input"
-            id="options.counter.rates.basicMinimum">
+            id="options.counter.rates.basicMinimum" value="0">
         <br>
+        <span>Max Subs:</span>
         <input placeholder="Max Subs" type="number" class="short-input option-input"
-            id="options.counter.rates.basicMaximum">
+            id="options.counter.rates.basicMaximum" value="0">
             <br>
-        <input type="number" placeholder="Per Every:" class="short-input option-input" id="options.counter.rates.mode.basic.units">
-        <br>
-        <select class="option-input" id="options.counter.rates.mode.basic.baseUnit">
+        <span>Update Interval in Seconds</span>
+        <input type="number" placeholder="Update Interval in Seconds" class="short-input option-input" id="options.counter.rates.mode.basic.units">
+        <select class="option-input" id="options.counter.rates.mode.basic.baseUnit" value="2">
             <option value="1" id="options.counter.rates.mode.basic.units.second">second(s)</option>
             <option value="60" id="options.counter.rates.mode.basic.units.minute">minute(s)</option>
             <option value="3600" id="options.counter.rates.mode.basic.units.hour">hour(s)</option>
             <option value="86400" id="options.counter.rates.mode.basic.units.day">day(s)</option>
         </select>
         <br>
-        <span>Sub Gain Rate In:</span>
-        <br>
+        <span>Sub Gain Rate In Per 1:</span>
         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
-                <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
-                <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)</option>
-                <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour(s)</option>
-                <option value="86400" id="options.counter.rates.mode.basic.units.day2">day(s)</option>
+                <option value="1" id="options.counter.rates.mode.basic.units.second2">second</option>
+                <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute</option>
+                <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour</option>
+                <option value="86400" id="options.counter.rates.mode.basic.units.day2">day</option>
             </select></span>
             <br>
-        <a href="/">Back to Livecountsedit</a>
     </div>
     </div>
     </div>
     </div>
+    
     <div id="container">
         <div class="odometer" id="channelSubs2">10</div>
         <div id="smallText">subscribers to 10</div>

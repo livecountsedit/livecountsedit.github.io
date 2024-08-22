@@ -206,13 +206,11 @@ input[type="checkbox"] {
 input[type="text"] {
     margin: 0px 0px 0px 0px;
     width: 12%;
-    height: 2%
 }
 
 input[type="number"] {
     margin: 0px 0px 0px 0px;
     width: 12%;
-    height: 2%
 }
 
 #log {

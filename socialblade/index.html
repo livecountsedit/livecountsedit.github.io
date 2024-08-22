@@ -36,19 +36,19 @@
             <br>
             <div class="option">
                 <label for="options.counter.title">Counter title/Username</label><br>
-                <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title">
+                <input type="text" placeholder="User" class="option-input" id="options.counter.title" value="User">
             </div>
             <br>
             <div class="option">
                 <label for="options.counter.avatar.url">Avatar URL</label><br>
-                <input type="text" class="option-input" id="options.counter.avatar.url"><br>
+                <input type="text" class="option-input" id="options.counter.avatar.url" value="https://lcedit.com/default.png"><br>
                 <strong>OR</strong>
                 <input type="file" class="option-input" id="options.counter.avatar.file">
             </div>
             <br>
             <div class="option">
                 <label for="options.counter.value">Counter value (integers only)</label><br>
-                <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value">
+                <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value" value="0">
                 <button onclick="submit()">Submit</button>
             </div>
             <br>
@@ -58,17 +58,17 @@
                     <p>
                         <span>Min Subs</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum"></span>
+                                id="options.counter.rates.basicMinimum" value="0"></span>
                         <br>
                         <br>
                         <span>Max Subs</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum"></span>
+                                id="options.counter.rates.basicMaximum" value="0"></span>
                         <br>
                         <br>
-                        <span>Per Every</span>
+                        <span>Update Interval</span>
                         <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units"></span>
+                                id="options.counter.rates.mode.basic.units" value="2"></span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit">
                                 <option value="1" id="options.counter.rates.mode.basic.units.second">second(s)</option>
                                 <option value="60" id="options.counter.rates.mode.basic.units.minute">minute(s)</option>
@@ -77,13 +77,13 @@
                             </select></span>
                         <br>
                         <br>
-                        <span>Sub Gain Rate In:</span>
+                        <span>Sub Gain Rate In Per 1:</span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)
+                                <option value="1" id="options.counter.rates.mode.basic.units.second2">second</option>
+                                <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute
                                 </option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day2">day(s)</option>
+                                <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour</option>
+                                <option value="86400" id="options.counter.rates.mode.basic.units.day2">day</option>
                             </select></span>
                     </p>
                 </div>
@@ -98,6 +98,10 @@
                     <option value="tiktok">TikTok</option>
                     <option value="none">None</option>
                 </select></span>
+            </div><br>
+
+            <div class="option">
+                <span><input type="checkbox" id="options-chart" checked>Show Chart</span>
             </div><br>
 
             <h3>Disclaimer</h3>

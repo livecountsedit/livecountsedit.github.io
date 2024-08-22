@@ -60,26 +60,26 @@
         <div>
         <div class="option">
             <label for="options.counter.title">Counter title/Username</label><br>
-            <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title">
+            <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title" value="User 1">
         </div>
         <div class="option">
             <label for="options.counter.value">Counter value (integers only)</label><br>
-            <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value">
+            <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value" value="0">
             <button onclick="submit()">Submit</button>
         </div>
         <div class="option">
             <label for="options.counter.footer">Counter footer (e.g. "Subscribers", "Followers")</label><br>
-            <input type="text" placeholder="Followers, Subscribers, etc" class="option-input" id="options.counter.footer"> 
+            <input type="text" placeholder="Followers, Subscribers, etc" class="option-input" id="options.counter.footer" value="Subscribers"> 
         </div>
         <div class="option">
             <label for="options.counter.banner.url">Banner URL</label><br>
-            <input type="text" class="option-input" id="options.counter.banner.url"><br>
+            <input type="text" class="option-input" id="options.counter.banner.url" value="https://lcedit.com/default_banner.png"><br>
             <strong>OR</strong>
             <input type="file" class="option-input" id="options.counter.banner.file">
         </div>
         <div class="option">
             <label for="options.counter.avatar.url">Avatar URL</label><br>
-            <input type="text" class="option-input" id="options.counter.avatar.url"><br>
+            <input type="text" class="option-input" id="options.counter.avatar.url" value="https://lcedit.com/default.png"><br>
             <strong>OR</strong>
             <input type="file" class="option-input" id="options.counter.avatar.file">
         </div>
@@ -90,15 +90,15 @@
             <div class="option">
                 <p>
                     <span>Min Subs</span>
-                    <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMinimum"></span>
+                    <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMinimum" value="0"></span>
                   <br>
                   <br>
                     <span>Max Subs</span>
-                    <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMaximum"></span>                  
+                    <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMaximum" value="0"></span>                  
                <br>
                <br>
-                    <span>Per Every</span>
-                    <span><input type="number" class="short-input option-input" id="options.counter.rates.mode.basic.units"></span>
+                    <span>Update Interval</span>
+                    <span><input type="number" class="short-input option-input" id="options.counter.rates.mode.basic.units" value=2></span>
                     <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit">
                         <option value="1" id="options.counter.rates.mode.basic.units.second">second(s)</option>
                         <option value="60" id="options.counter.rates.mode.basic.units.minute">minute(s)</option>
@@ -107,12 +107,12 @@
                     </select></span>
                     <br>
                     <br>
-                   <span>Sub Gain Rate In:</span>
+                   <span>Sub Gain Rate In Per 1:</span>
                     <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
-                        <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
-                        <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)</option>
-                        <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour(s)</option>
-                        <option value="86400" id="options.counter.rates.mode.basic.units.day2">day(s)</option>
+                        <option value="1" id="options.counter.rates.mode.basic.units.second2">second</option>
+                        <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute</option>
+                        <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour</option>
+                        <option value="86400" id="options.counter.rates.mode.basic.units.day2">day</option>
                     </select></span>
                 </p>
             </div>
@@ -123,26 +123,26 @@
         <div style="float: right; margin-top: -500px">
             <div class="option">
                 <label for="options.counter.title">Counter title/Username</label><br>
-                <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title2">
+                <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title2" value="User 2">
             </div>
             <div class="option">
                 <label for="options.counter.value">Counter value (integers only)</label><br>
-                <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value2">
+                <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value2" value="0">
                 <button onclick="submit2()">Submit</button>
             </div>
             <div class="option">
                 <label for="options.counter.footer">Counter footer (e.g. "Subscribers", "Followers")</label><br>
-                <input type="text" placeholder="Followers, Subscribers, etc" class="option-input" id="options.counter.footer2"> 
+                <input type="text" placeholder="Followers, Subscribers, etc" class="option-input" id="options.counter.footer2" value="Subscribers"> 
             </div>
             <div class="option">
                 <label for="options.counter.banner.url">Banner URL</label><br>
-                <input type="text" class="option-input" id="options.counter.banner.url2"><br>
+                <input type="text" class="option-input" id="options.counter.banner.url2" value="https://lcedit.com/default_banner.png"><br>
                 <strong>OR</strong>
                 <input type="file" class="option-input" id="options.counter.banner.file2">
             </div>
             <div class="option">
                 <label for="options.counter.avatar.url">Avatar URL</label><br>
-                <input type="text" class="option-input" id="options.counter.avatar.url2"><br>
+                <input type="text" class="option-input" id="options.counter.avatar.url2" value="https://lcedit.com/default.png"><br>
                 <strong>OR</strong>
                 <input type="file" class="option-input" id="options.counter.avatar.file2">
             </div>
@@ -153,15 +153,15 @@
                 <div class="option">
                     <p>
                         <span>Min Subs</span>
-                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMinimum2"></span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMinimum2" value="0"></span>
                       <br>
                       <br>
                         <span>Max Subs</span>
-                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMaximum2"></span>                  
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.basicMaximum2" value="0"></span>                  
                    <br>
                    <br>
-                        <span>Per Every</span>
-                        <span><input type="number" class="short-input option-input" id="options.counter.rates.mode.basic.units2"></span>
+                        <span>Update Interval</span>
+                        <span><input type="number" class="short-input option-input" id="options.counter.rates.mode.basic.units2" value="2"></span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit3">
                             <option value="1" id="options.counter.rates.mode.basic.units.second3">second(s)</option>
                             <option value="60" id="options.counter.rates.mode.basic.units.minute3">minute(s)</option>
@@ -170,12 +170,12 @@
                         </select></span>
                         <br>
                         <br>
-                       <span>Sub Gain Rate In:</span>
+                       <span>Sub Gain Rate In Per 1:</span>
                         <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit4">
-                            <option value="1" id="options.counter.rates.mode.basic.units.second4">second(s)</option>
-                            <option value="60" id="options.counter.rates.mode.basic.units.minute4">minute(s)</option>
-                            <option value="3600" id="options.counter.rates.mode.basic.units.hour4">hour(s)</option>
-                            <option value="86400" id="options.counter.rates.mode.basic.units.day4">day(s)</option>
+                            <option value="1" id="options.counter.rates.mode.basic.units.second4">second</option>
+                            <option value="60" id="options.counter.rates.mode.basic.units.minute4">minute</option>
+                            <option value="3600" id="options.counter.rates.mode.basic.units.hour4">hour</option>
+                            <option value="86400" id="options.counter.rates.mode.basic.units.day4">day</option>
                         </select></span>
                     </p>
                 </div>
@@ -186,11 +186,11 @@
     <div class="option">
         <label>Gap Settings</label>
         <label for="options.counter.title">Text/Name</label><br>
-        <input type="text" placeholder="Channel Name" class="option-input" id="gap.title">
+        <input type="text" placeholder="Channel Name" class="option-input" id="gap.title" value="Gap:">
         <br>
         <br>
-        <label for="options.counter.title">Update Interval</label><br>
-        <input type="text" placeholder="(In Seconds)" class="option-input" id="gap.time">
+        <label for="options.counter.title">Update Interval In Seconds</label><br>
+        <input type="text" placeholder="(In Seconds)" class="option-input" id="gap.time" value="2">
         <br>
         <br>
         <button onclick="disable()">Disable Graph</button>
