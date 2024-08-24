@@ -29,11 +29,15 @@
 <body>
     <div class="lcedit-container">
         <div class="tabs">
-            <button id="tab-link-0" class="tab-link" onclick="openTab(event, 'tabs-0')">General</button>
-            <button id="tab-link-1" class="tab-link" onclick="openTab(event, 'tabs-1')">Counter</button>
-            <button id="tab-link-2" class="tab-link" onclick="openTab(event, 'tabs-2')">Styles</button>
-            <button id="tab-link-3" class="tab-link" onclick="openTab(event, 'tabs-3')">Advanced Settings</button>
-            <button id="tab-link-4" class="tab-link" onclick="openTab(event, 'tabs-4')">API Updates</button>
+            <div class="tab-buttons">
+                <!--
+                <button id="tab-link-0" class="tab-link" onclick="openTab(event, 'tabs-0')">General</button>
+                <button id="tab-link-1" class="tab-link" onclick="openTab(event, 'tabs-1')">Counter</button>
+                <button id="tab-link-2" class="tab-link" onclick="openTab(event, 'tabs-2')">Styles</button>
+                <button id="tab-link-3" class="tab-link" onclick="openTab(event, 'tabs-3')">Advanced Settings</button>
+                <button id="tab-link-4" class="tab-link" onclick="openTab(event, 'tabs-4')">API Updates</button>
+            -->
+            </div>
             <button class="btn btn-primary" onclick="submit()">Save settings</button><br>
             <button class="btn btn-primary" onclick="refreshCount()">Refresh count</button>
             <button class="btn btn-danger" onclick="reset()">Reset</button><br>
@@ -46,6 +50,8 @@
             <input type="file" class="file-import" id="import-data-v7" accept=".json">
             
         </div>
+        <div class="tab-stuff"></div>
+        <!--
         <div class="tab-content" id="tabs-0">
             <form class="counter-form" id="settingsForm-0">
                 <div class="mb-3">
@@ -245,6 +251,7 @@ Min2,Max2,Weight2"></textarea>
             <h5>Note: API settings are saved separately from the other settings.</h5><br>
             <h5>Status indicator: <span id="apiStatusIndicator">--</span></h5>
         </div>
+    -->
         <div class="counter-content">
             <div class="counter-container">
                 <img class="banner" src="../default_banner.png" id="counter-banner">
@@ -258,11 +265,12 @@ Min2,Max2,Weight2"></textarea>
         </div>
     </div>
     <div class="page-footer">
-        <span>Version 7.0.7 - <a href="../index.html">Back to main page</a> - <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F">Not working?</a> - <a href="../about/discord.html">Join the Livecountsedit Discord Server.</a> This site is a parody of popular realtime counters.</span>
+        <span>Version 7.0.8 - <a href="../index.html">Back to main page</a> - <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/New-Updates-Not-Working%3F">Not working?</a> - <a href="../about/discord.html">Join the Livecountsedit Discord Server.</a> This site is a parody of popular realtime counters.</span>
     </div>
     <script src="../odometer/odometer.js"></script>
     <script src="../highstock.js"></script>
     <script src="../jquery.js"></script>
+    <script src="../drawMenu.js"></script>
     <script src="../bootstrap.js"></script>
     <script src="../counter.js"></script>
     <script src="./lcedit.js"></script>

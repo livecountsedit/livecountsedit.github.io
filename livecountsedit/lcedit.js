@@ -36,14 +36,31 @@ saveData.counters.push(new Counter(1))
 counter = saveData.counters[0];
 
 window.onload = function () {
-    if (document.getElementById('tab-link-0')) document.getElementById('tab-link-0').click();
     chart = new Highcharts.chart(getChartOptions());
     if (localStorage.getItem('lcedit-lcedit')) {
         importFromJSON(localStorage.getItem('lcedit-lcedit'), true)
     }
-    fillForms()
-    updateGainType(counter.settings.gainType)
-    updateStuff()
+    async function initMenu() {
+        const r = await fetch("./lcedit.json");
+        const data = await r.json();
+        drawMenu(data, document.querySelector(".tab-buttons"), document.querySelector(".tab-stuff"));
+    }
+    initMenu().then(() => {
+        if (document.getElementById('tab-link-0')) document.getElementById('tab-link-0').click();
+        fillForms();
+        updateGainType(counter.settings.gainType);
+        document.querySelector('#gainType').addEventListener('input', event => {
+            updateGainType(event.target.value);
+        })
+        let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        })
+        updateStuff();
+    }).catch(error => {
+        console.error(error);
+        alert("There was an error when loading the options menu.");
+    })
 }
 
 document.querySelector('#import-data-v7').addEventListener('input', () => {
@@ -249,9 +266,6 @@ function updateGainType(v) {
     }
 } 
 
-document.querySelector('#gainType').addEventListener('input', event => {
-    updateGainType(event.target.value)
-})
 
 function setPaused(paused) {
     if (paused) {

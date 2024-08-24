@@ -61,7 +61,7 @@ body {
     padding: 0px 12px;
     border: 1px solid var(--border-color, #ddd);
     border-left: none;
-    width: 30%;
+    width: 30vw;
     height: 100%;
     border-radius: 15px;
     overflow-y: scroll;

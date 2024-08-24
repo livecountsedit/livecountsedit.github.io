@@ -5,6 +5,7 @@
             "forms": [
                 {
                     "class": "counter-form",
+                    "id": "settingsForm-0",
                     "elements": [
                         {
                             "type": "section",
@@ -34,7 +35,10 @@
                             ]
                         },
                         {
-                            "type": "line"
+                            "type": "html",
+                            "elements": [
+                                "<hr>"
+                            ]
                         },
                         {
                             "type": "section",
@@ -57,7 +61,10 @@
                             ]
                         },
                         {
-                            "type": "line"
+                            "type": "html",
+                            "elements": [
+                                "<hr>"
+                            ]
                         },
                         {
                             "type": "section",
@@ -80,6 +87,7 @@
             "forms": [
                 {
                     "class": "counter-form",
+                    "id": "settingsForm-1",
                     "elements": [
                         {
                             "type": "section",
@@ -194,6 +202,7 @@
             "forms": [
                 {
                     "class": "counter-form",
+                    "id": "settingsForm-2",
                     "elements": [
                         {
                             "type": "section",
@@ -301,6 +310,7 @@
         },
         {
             "title": "Advanced Settings",
+            "id": "settingsForm-3",
             "forms": [
                 {
                     "class": "counter-form",
@@ -311,9 +321,7 @@
                                 {
                                     "label": "Show avatar",
                                     "id": "showImage",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -323,9 +331,7 @@
                                 {
                                     "label": "Show banner",
                                     "id": "showBanner",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -335,9 +341,7 @@
                                 {
                                     "label": "Show chart",
                                     "id": "showChart",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -347,9 +351,7 @@
                                 {
                                     "label": "Show footer",
                                     "id": "showFooter",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -360,9 +362,7 @@
                                     "label": "Abbreviate counter",
                                     "id": "abb",
                                     "info": "Limit the counter to show up to three significant digits, as in YouTube's API.",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -373,9 +373,7 @@
                                     "label": "Offline gains",
                                     "id": "offlineGains",
                                     "info": "Upon loading, update the counter if it has been gaining while the counter was not open. Only applies if the counter has not been open for at least ten update intervals.",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -385,9 +383,7 @@
                                 {
                                     "label": "Keep chart data on reload",
                                     "id": "keepChartData",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -502,6 +498,7 @@
             "forms": [
                 {
                     "class": "api-form",
+                    "id": "settingsForm-4",
                     "elements": [
                         {
                             "type": "checkbox",
@@ -510,9 +507,7 @@
                                     "label": "Enable YouTube API updates",
                                     "id": "ytAPIEnabled",
                                     "info": "This will update the counter if the abbreviated subscriber count does not match what is given in the API.",
-                                    "type": "checkbox",
-                                    "tag": "input",
-                                    "inputType": "checkbox"
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -581,20 +576,17 @@
                                     "inputNumberStep": "any"
                                 }
                             ]
-                        },
-                        {
-                            "type": "html",
-                            "elements": [
-                                "<button class=\"btn btn-primary\" onclick=\"submitAPI()\">Save API settings</button>",
-                                "<br>",
-                                "<button class=\"btn btn-primary\" onclick=\"updateAPI()\">Update now</button>",
-                                "<h5>Note: API settings are saved separately from the other settings.</h5>",
-                                "<br>",
-                                "<h5>Status indicator: <span id=\"apiStatusIndicator\">--</span></h5>"
-                            ]
                         }
                     ]
                 }
+            ],
+            "trailingHTML": [
+                "<button class=\"btn btn-primary\" onclick=\"submitAPI()\">Save API settings</button>",
+                "<br>",
+                "<button class=\"btn btn-primary\" onclick=\"updateAPI()\">Update now</button>",
+                "<h5>Note: API settings are saved separately from the other settings.</h5>",
+                "<br>",
+                "<h5>Status indicator: <span id=\"apiStatusIndicator\">--</span></h5>"
             ]
         }
     ]
