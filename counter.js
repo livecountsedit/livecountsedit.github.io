@@ -1,6 +1,6 @@
 const LCEDIT = {
-    saveVersion: 4,
-    versionName: "7.0.9",
+    saveVersion: 5,
+    versionName: "7.0.10",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -189,7 +189,9 @@ let defaultCounter = {
     meanRate: 0,
     min: 0,
     minRate: 0,
+    numberFormat: ",ddd",
     offlineGains: false,
+    reverseAnimation: false,
     showBanner: false,
     showChart: false,
     showFooter: false,

@@ -46,7 +46,7 @@
   };
 
   removeClass = function (el, name) {
-      return el.className = el.className.replace(new RegExp("(^| )" + (name.split(' ').join('|')) + "( |$)", 'gi'), ' ');
+      return el.className = el.className.replace(new RegExp("(^| )" + (name.split(' ').join('|')) + "( |$)", 'gi'), ' ').replace(/ +/g, " ");
   };
 
   addClass = function (el, name) {

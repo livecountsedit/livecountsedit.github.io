@@ -48,6 +48,7 @@ window.onload = function () {
     initMenu().then(() => {
         if (document.getElementById('tab-link-0')) document.getElementById('tab-link-0').click();
         fillForms();
+        refreshCount();
         updateGainType(counter.settings.gainType);
         document.querySelector('#gainType').addEventListener('input', event => {
             updateGainType(event.target.value);
@@ -152,12 +153,15 @@ function updateStuff() {
     clearInterval(saveData.updater);
     odometers = Odometer.init();
     odometers[0].options = {
-        animation: ['default','byDigit','count'][counter.settings.animationType],
+        animation: ['default','byDigit','count', 'minimal'][counter.settings.animationType],
         downColor: counter.settings.downColor,
         duration: counter.settings.animationDuration * 1000,
         removeLeadingZeros: counter.settings.animationType === 1,
+        reverseAnimation: counter.settings.reverseAnimation,
+        format: counter.settings.numberFormat || ",ddd",
         upColor: counter.settings.upColor
     }
+    odometers[0].render();
     document.querySelector('#counter-banner').src = counter.settings.bannerURL;
     document.querySelector('#counter-avatar').src = counter.settings.imageURL;
     saveData.allowHTML ? document.querySelector('#counter-title').innerHTML = counter.settings.title : document.querySelector('#counter-title').innerText = counter.settings.title
@@ -165,8 +169,8 @@ function updateStuff() {
     saveData.allowHTML ? document.querySelector('#counter-footer').innerHTML = counter.settings.footer : document.querySelector('#counter-footer').innerText = counter.settings.footer
     document.querySelector('#counter-footer').style.color = counter.settings.footerColor;
     document.querySelector('#counter-counter').innerText = counter.getApparentCount();
-    document.querySelector('#counter-counter').style.color = counter.settings.counterColor;
-    document.querySelector('.counter-container').style.backgroundColor = counter.settings.bgColor;
+    document.querySelector('.counter-container').style.color = counter.settings.counterColor;
+    document.querySelector('.counter-area').style.backgroundColor = counter.settings.bgColor;
     LCEDIT.util.setVisible(document.querySelector('#counter-banner'), counter.settings.showBanner)
     LCEDIT.util.setVisible(document.querySelector('#counter-avatar'), counter.settings.showImage, 'inline-block')
     LCEDIT.util.setVisible(document.querySelector('#counter-chart'), counter.settings.showChart)
@@ -294,14 +298,20 @@ function loadMyFont() {
             font = counter.settings.font;
             break;
         case 6:
-            document.head.innerHTML += `<link href="https://fonts.googleapis.com/css?family=${encodeURIComponent(counter.settings.font).replaceAll("%20","+")}:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">`;
+            if (!document.getElementById(`font-${counter.settings.font}`)) {
+                const fontStuff = document.createElement("link");
+                fontStuff.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(counter.settings.font).replaceAll("%20","+")}:100,200,300,400,500,600,700,800,900&display=swap`;
+                fontStuff.rel = "stylesheet";
+                fontStuff.id = `font-${counter.settings.font}`
+                document.head.appendChild(fontStuff);
+            }
             font = counter.settings.font;
             break;
         default:
             font = "none";
     }
     document.querySelector(".counter-content").style.fontFamily = font;
-    document.querySelector(".counter").style.fontWeight = counter.settings.fontWeight;
+    document.querySelector(".counter-container").style.fontWeight = counter.settings.fontWeight;
 }
 
 function setPaused(paused) {

@@ -445,6 +445,16 @@
                             ]
                         },
                         {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Reverse odometer animation direction",
+                                    "id": "reverseAnimation",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
                             "type": "section",
                             "elements": [
                                 {
@@ -510,7 +520,25 @@
                                     "selectOptions": [
                                         ["0", "Odometer (default)"],
                                         ["1", "Odomter (YouTube Studio)"],
-                                        ["2", "Counting"]
+                                        ["2", "Counting"],
+                                        ["3", "Odometer (minimal animation)"]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Number format",
+                                    "id": "numberFormat",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "selectOptions": [
+                                        [",ddd", "12,345 (comma separator)"],
+                                        [".ddd", "12.345 (dot separator)"],
+                                        [" ddd", "12 345 (space separator)"],
+                                        ["d", "12345 (no separator)"]
                                     ]
                                 }
                             ]
