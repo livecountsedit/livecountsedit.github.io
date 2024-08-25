@@ -43,7 +43,7 @@ body {
     border: 1px solid var(--border-color, #ddd);
     outline: none;
     cursor: pointer;
-    transition: .3s;
+    transition: background-color .3s;
     border-radius: 15px;
 }
 

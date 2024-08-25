@@ -303,6 +303,63 @@
                                     "inputNumberStep": "any"
                                 }
                             ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Font type",
+                                    "id": "fontType",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "intputRequired": true,
+                                    "selectOptions": [
+                                        ["0", "Default"],
+                                        ["1", "Serif"],
+                                        ["2", "Sans Serif"],
+                                        ["3", "Monospace"],
+                                        ["4", "Math"],
+                                        ["5", "Custom (System)"],
+                                        ["6", "Custom (Google Fonts)"]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "class": "custom-font-input",
+                            "elements": [
+                                {
+                                    "label": "Font",
+                                    "id": "font",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Font weight",
+                                    "id": "fontWeight",
+                                    "info": "How thin or bold the font is. Only affects the number of the counter. Note: Not all font weights are supported on all fonts.",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "selectOptions": [
+                                        ["100", "Thin"],
+                                        ["200", "Extra Light"],
+                                        ["300", "Light"],
+                                        ["400", "Regular"],
+                                        ["500", "Medium"],
+                                        ["600", "Semibold"],
+                                        ["700", "Bold"],
+                                        ["800", "Extra Bold"],
+                                        ["900", "Black"]
+                                    ]
+                                }
+                            ]
                         }
                     ]
                 }

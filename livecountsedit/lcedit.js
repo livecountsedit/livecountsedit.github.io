@@ -52,6 +52,10 @@ window.onload = function () {
         document.querySelector('#gainType').addEventListener('input', event => {
             updateGainType(event.target.value);
         })
+        updateFontType(counter.settings.fontType);
+        document.querySelector('#fontType').addEventListener('input', event => {
+            updateFontType(event.target.value);
+        })
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -86,7 +90,7 @@ function submit() {
             saveData.counters[0].updateSettings(result.data);
             updateStuff()
         } else {
-            addEventListener('fileReady', () => { // this took forever to fix brUHHHHHHHHH
+            addEventListener('fileReady', () => {
                 ready++
                 if (ready === result.files) {
                     saveData.counters[0].updateSettings(result.data);
@@ -168,6 +172,7 @@ function updateStuff() {
     LCEDIT.util.setVisible(document.querySelector('#counter-chart'), counter.settings.showChart)
     LCEDIT.util.setVisible(document.querySelector('#counter-footer'), counter.settings.showFooter)
     document.querySelector('#counter-banner').style.filter = `blur(${counter.settings.bannerBlur}px)`
+    loadMyFont();
     if (counter.settings.showChart) chart.update(getChartOptions());
     updateCounter();
     if (!saveData.paused) saveData.updater = setInterval(updateCounter, saveData.updateInterval * 1000)
@@ -264,8 +269,40 @@ function updateGainType(v) {
             if (k) k.disabled = (i != v)
         }
     }
-} 
+}
 
+function updateFontType(v) {
+    LCEDIT.util.setVisible(document.querySelector(".custom-font-input"), (v == 5 || v == 6));
+}
+
+function loadMyFont() {
+    let font;
+    switch (counter.settings.fontType) {
+        case 1:
+            font = "serif";
+            break;
+        case 2:
+            font = "sans-serif";
+            break;
+        case 3:
+            font = "monospace";
+            break;
+        case 4:
+            font = "math";
+            break;
+        case 5:
+            font = counter.settings.font;
+            break;
+        case 6:
+            document.head.innerHTML += `<link href="https://fonts.googleapis.com/css?family=${encodeURIComponent(counter.settings.font).replaceAll("%20","+")}:100,200,300,400,500,600,700,800,900&display=swap" rel="stylesheet">`;
+            font = counter.settings.font;
+            break;
+        default:
+            font = "none";
+    }
+    document.querySelector(".counter-content").style.fontFamily = font;
+    document.querySelector(".counter").style.fontWeight = counter.settings.fontWeight;
+}
 
 function setPaused(paused) {
     if (paused) {

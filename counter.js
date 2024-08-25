@@ -1,6 +1,6 @@
 const LCEDIT = {
-    saveVersion: 3,
-    versionName: "7.0.8",
+    saveVersion: 4,
+    versionName: "7.0.9",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -174,6 +174,9 @@ let defaultCounter = {
     counterColor: "#000000",
     customRate: "",
     downColor: "#000000",
+    font: "Arial, Helvetica, sans-serif",
+    fontType: 5,
+    fontWeight: 400,
     footer: "",
     footerColor: "#000000",
     gainPer: 2,
