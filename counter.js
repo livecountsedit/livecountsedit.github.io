@@ -1,6 +1,6 @@
 const LCEDIT = {
     saveVersion: 5,
-    versionName: "7.0.10",
+    versionName: "7.0.11",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
