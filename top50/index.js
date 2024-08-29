@@ -308,6 +308,11 @@ function setupDesign(list, sort, order) {
             .name { font-size: ${data.showDifferences ? 0.5 : 0.75}vw; }
             .subgap { font-size: 0.7vw;}`;
         } else {
+            toReturn[2] = `.image { height: ${data.showDifferences ? 3 : 4.25}vw; width: ${data.showDifferences ? 3 : 4.25}vw; }
+            .card { height: 4.25vw; }
+            .count { font-size: ${data.showDifferences ? 1.4 : 2}vw; }
+            .name { font-size: ${data.showDifferences ? 1.05 : 1.5}vw; }
+            .subgap {font-size: 1.25vw;}`;
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
         }
         for (let l = 1; l <= cards; l++) {
