@@ -1,6 +1,6 @@
 const LCEDIT = {
-    saveVersion: 6,
-    versionName: "7.1",
+    saveVersion: 7,
+    versionName: "7.1.3",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -143,6 +143,13 @@ const LCEDIT = {
                 el.style.display = 'none';
             }
         },
+        setVisibleKeepSpace: (el, visible) => {
+            if (visible) {
+                el.style.visibility = 'visible';
+            } else {
+                el.style.visibility = 'hidden';
+            }
+        },
         removePrivateData: data => {
             let d = JSON.parse(JSON.stringify(data));
             d.allowHTML = false;
@@ -170,6 +177,8 @@ let defaultCounter = {
     bannerURL: "",
     bgColor: "#000000",
     chartColor: "#ff0000",
+    chartCreditsEnabled: false,
+    chartGridColor: "#bdbdbd",
     count: 0,
     counterColor: "#000000",
     customRate: "",
@@ -195,6 +204,7 @@ let defaultCounter = {
     reverseAnimation: false,
     showBanner: false,
     showChart: false,
+    showChartGrid: false,
     showFooter: false,
     showImage: true,
     stdevRate: 0,
@@ -343,7 +353,8 @@ class Save {
             leeway: 10,
             updater: 0
         },
-        this.project = "livecountsedit"
+        this.project = "livecountsedit",
+        this.isFullScreen = false
     }
 }
 

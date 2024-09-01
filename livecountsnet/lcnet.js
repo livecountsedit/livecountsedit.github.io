@@ -167,11 +167,7 @@ function updateStuff() {
     document.querySelector('.counter-container').style.color = counter.settings.counterColor;
     document.querySelector('.counter-container-2').style.color = counter.settings.counterColor;
     document.body.style.backgroundColor = counter.settings.bgColor;
-    if (counter.settings.showImage) {
-        document.querySelector('#lcnet-avatar').style.visibility = "none";
-    } else {
-        document.querySelector('#lcnet-avatar').style.visibility = "visible";
-    }
+    LCEDIT.util.setVisibleKeepSpace(document.querySelector('#lcnet-avatar'), counter.settings.showImage)
     loadMyFont();
     updateCounter();
     document.querySelector('#lcnet-update-text').innerText = `updated every ${saveData.updateInterval} second${saveData.updateInterval === 1 ? "" : "s"}`;

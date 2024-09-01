@@ -32,6 +32,7 @@ body {
     width: 15%;
     height: 100%;
     border-radius: 15px;
+    overflow-y: auto;
 }
 
 .tab-link {
@@ -126,7 +127,11 @@ body {
 }
 
 .page-footer {
-    text-align: center
+    text-align: center;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    position: absolute;
 }
 
 .fa.fa-info-circle {

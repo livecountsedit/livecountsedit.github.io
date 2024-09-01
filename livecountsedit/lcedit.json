@@ -320,6 +320,18 @@
                             "type": "section",
                             "elements": [
                                 {
+                                    "label": "Chart grid and label color",
+                                    "id": "chartGridColor",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "color"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
                                     "label": "Banner blur amount",
                                     "id": "bannerBlur",
                                     "type": "option",
@@ -424,6 +436,26 @@
                                 {
                                     "label": "Show chart",
                                     "id": "showChart",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Show chart grid and labels",
+                                    "id": "showChartGrid",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Show \"lcedit.com\" chart credits",
+                                    "id": "chartCreditsEnabled",
                                     "type": "checkbox"
                                 }
                             ]

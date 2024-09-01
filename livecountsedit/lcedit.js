@@ -4,6 +4,7 @@ const saveType = 1;
 defaultCounter = Object.assign(defaultCounter, {
     bannerURL: "https://lcedit.com/default_banner.png",
     bgColor: "#222233",
+    chartCreditsEnabled: true,
     counterColor: "#ffffff",
     downColor: "#ffffff",
     footer: "Subscribers",
@@ -11,6 +12,7 @@ defaultCounter = Object.assign(defaultCounter, {
     imageURL: "https://lcedit.com/default.png",
     showBanner: true,
     showChart: true,
+    showChartGrid: true,
     showFooter: true,
     titleColor: "#ffffff",
     upColor: "#ffffff"
@@ -157,13 +159,15 @@ function updateStuff() {
     document.querySelector('#counter-footer').style.color = counter.settings.footerColor;
     document.querySelector('#counter-counter').innerText = counter.getApparentCount();
     document.querySelector('.counter-container').style.color = counter.settings.counterColor;
+    document.querySelector('.counter-content').style.backgroundColor = counter.settings.bgColor;
     document.querySelector('.counter-area').style.backgroundColor = counter.settings.bgColor;
-    LCEDIT.util.setVisible(document.querySelector('#counter-banner'), counter.settings.showBanner)
+    LCEDIT.util.setVisibleKeepSpace(document.querySelector('#counter-banner'), counter.settings.showBanner)
     LCEDIT.util.setVisible(document.querySelector('#counter-avatar'), counter.settings.showImage, 'inline-block')
     LCEDIT.util.setVisible(document.querySelector('#counter-chart'), counter.settings.showChart)
     LCEDIT.util.setVisible(document.querySelector('#counter-footer'), counter.settings.showFooter)
     document.querySelector('#counter-banner').style.filter = `blur(${counter.settings.bannerBlur}px)`
     loadMyFont();
+    toggleFullScreen(saveData.isFullScreen);
     if (counter.settings.showChart) chart.update(getChartOptions());
     updateCounter();
     if (!saveData.paused) saveData.updater = setInterval(updateCounter, saveData.updateInterval * 1000)
@@ -187,26 +191,43 @@ function getChartOptions() {
         },
         xAxis: {
             type: "datetime",
-            gridLineColor: "#bdbdbd",
-            lineColor: "#000000",
-            minorGridLineColor: "#bdbdbd",
-            tickColor: "#000000",
+            visible: counter.settings.showChartGrid,
+            gridLineColor: counter.settings.chartGridColor,
+            lineColor: counter.settings.chartGridColor,
+            minorGridLineColor: counter.settings.chartGridColor,
+            minorTickColor: counter.settings.chartGridColor,
+            tickColor: counter.settings.chartGridColor,
             title: {
                 text: ""
+            },
+            labels: {
+                style: {
+                    color: counter.settings.chartGridColor
+                }
             }
         },
         yAxis: {
-            grindLineColor: "#bdbdbd",
-            lineColor: "#000000",
-            minorGridLineColor: "#bdbdbd",
-            tickColor: "#000000",
+            gridLineColor: counter.settings.chartGridColor,
+            visible: counter.settings.showChartGrid,
+            lineColor: counter.settings.chartGridColor,
+            minorGridLineColor: counter.settings.chartGridColor,
+            minorTickColor: counter.settings.chartGridColor,
+            tickColor: counter.settings.chartGridColor,
             title: {
                 text: ""
+            },
+            labels: {
+                style: {
+                    color: counter.settings.chartGridColor
+                }
             }
         },
         credits: {
-            enabled: true,
-            text: "lcedit.com"
+            enabled: counter.settings.chartCreditsEnabled,
+            text: "lcedit.com",
+            style: {
+                color: counter.settings.chartGridColor
+            }
         },
         series: [{
             showInLegend: false,
@@ -383,6 +404,26 @@ function importFromJSON(data, bypass=false) {
             return alert('Error')
         }
     }
+}
+
+function toggleFullScreen(value) {
+    if (value !== undefined) {
+        saveData.isFullScreen = value;
+    } else {
+        saveData.isFullScreen = !saveData.isFullScreen;
+    }
+    LCEDIT.util.setVisible(document.querySelector(".tabs"), !saveData.isFullScreen);
+    LCEDIT.util.setVisible(document.querySelector(".tab-stuff"), !saveData.isFullScreen);
+    if (saveData.isFullScreen) {
+        document.querySelector(".counter-content").style.width = "100%";
+        document.querySelector(".counter-content").style.border = "none";
+        document.body.style.backgroundColor = counter.settings.bgColor;
+    } else {
+        document.querySelector(".counter-content").style.width = "50%";
+        document.querySelector(".counter-content").style.border = "1px solid var(--border-color, #ddd)";
+        document.body.style.backgroundColor = "var(--bg-color, #1a1a20)";
+    }
+    if (chart) chart.reflow();
 }
 
 function saveInBrowser() {
