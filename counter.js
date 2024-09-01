@@ -1,6 +1,6 @@
 const LCEDIT = {
-    saveVersion: 5,
-    versionName: "7.0.11",
+    saveVersion: 6,
+    versionName: "7.1",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -183,6 +183,7 @@ let defaultCounter = {
     gainType: 0,
     imageURL: "",
     keepChartData: false,
+    lcNetSubButton: false,
     max: Number.MAX_SAFE_INTEGER,
     maxChartValues: 450,
     maxRate: 0,
@@ -341,7 +342,8 @@ class Save {
             apiInterval: 60,
             leeway: 10,
             updater: 0
-        }
+        },
+        this.project = "livecountsedit"
     }
 }
 
@@ -363,4 +365,18 @@ function exportToJSON(private = false) {
     a.href = URL.createObjectURL(file);
     a.download = `${saveData.title}${private ? '-PRIVATE' : ''}.json`;
     a.click();
+}
+
+function openTab(e, f) {
+    var a, b, c;
+    b = document.getElementsByClassName('tab-content');
+    for (a = 0; a < b.length; a++) {
+        b[a].style.display = 'none';
+    }
+    c = document.getElementsByClassName('tab-link');
+    for (a = 0; a < c.length; a++) {
+        c[a].className = c[a].className.replace(' active', '');
+    }
+    document.getElementById(f).style.display = 'block';
+    e.currentTarget.className += ' active'
 }

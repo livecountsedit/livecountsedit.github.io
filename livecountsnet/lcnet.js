@@ -1,34 +1,44 @@
-let chart;
-const saveType = 1;
+let odometers = [];
+const saveType = 2;
 
 defaultCounter = Object.assign(defaultCounter, {
-    bannerURL: "https://lcedit.com/default_banner.png",
-    bgColor: "#222233",
-    counterColor: "#ffffff",
-    downColor: "#ffffff",
-    footer: "Subscribers",
-    footerColor: "#ffffff",
+    bgColor: "#d0e4fe",
     imageURL: "https://lcedit.com/default.png",
-    showBanner: true,
-    showChart: true,
-    showFooter: true,
-    titleColor: "#ffffff",
-    upColor: "#ffffff"
-})
-
-let odometers = [];
+    lcNetSubButton: true
+});
 
 let saveData = new Save(saveType)
 saveData.counters.push(new Counter(1))
 counter = saveData.counters[0];
 
+function calculateNextGoal(n) {
+    if (n < 10) return 10;
+    else return (Math.floor(n/(10**Math.floor(Math.log10(n)))) + 1)*(10**Math.floor(Math.log10(n)));
+}
+
+function formatNumber(n) {
+    n = n.toLocaleString("en-US");
+    switch (counter.settings.numberFormat) {
+        case 'd':
+            n = n.replaceAll(',', '');
+            break;
+        case '.ddd':
+            n = n.replaceAll(',', '.');
+            break;
+        case ' ddd':
+            n = n.replaceAll(',', ' ');
+            break;
+        default:
+    }
+    return n;
+}
+
 window.onload = function () {
-    chart = new Highcharts.chart(getChartOptions());
-    if (localStorage.getItem('lcedit-lcedit')) {
-        importFromJSON(localStorage.getItem('lcedit-lcedit'), true)
+    if (localStorage.getItem('lcedit-lcnet')) {
+        importFromJSON(localStorage.getItem('lcedit-lcnet'), true)
     }
     async function initMenu() {
-        const r = await fetch("./lcedit.json");
+        const r = await fetch("./lcnet.json");
         const data = await r.json();
         drawMenu(data, document.querySelector(".tab-buttons"), document.querySelector(".tab-stuff"));
     }
@@ -39,10 +49,6 @@ window.onload = function () {
         updateGainType(counter.settings.gainType);
         document.querySelector('#gainType').addEventListener('input', event => {
             updateGainType(event.target.value);
-        })
-        updateFontType(counter.settings.fontType);
-        document.querySelector('#fontType').addEventListener('input', event => {
-            updateFontType(event.target.value);
         })
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -139,7 +145,7 @@ async function updateAPI(bypass = false) {
 function updateStuff() {
     clearInterval(saveData.updater);
     odometers = Odometer.init();
-    odometers[0].options = {
+    let opts = {
         animation: ['default','byDigit','count', 'minimal'][counter.settings.animationType],
         downColor: counter.settings.downColor,
         duration: counter.settings.animationDuration * 1000,
@@ -148,86 +154,32 @@ function updateStuff() {
         format: counter.settings.numberFormat || ",ddd",
         upColor: counter.settings.upColor
     }
-    odometers[0].render();
-    document.querySelector('#counter-banner').src = counter.settings.bannerURL;
-    document.querySelector('#counter-avatar').src = counter.settings.imageURL;
-    saveData.allowHTML ? document.querySelector('#counter-title').innerHTML = counter.settings.title : document.querySelector('#counter-title').innerText = counter.settings.title
-    document.querySelector('#counter-title').style.color = counter.settings.titleColor;
-    saveData.allowHTML ? document.querySelector('#counter-footer').innerHTML = counter.settings.footer : document.querySelector('#counter-footer').innerText = counter.settings.footer
-    document.querySelector('#counter-footer').style.color = counter.settings.footerColor;
-    document.querySelector('#counter-counter').innerText = counter.getApparentCount();
+    odometers[0].options = opts;
+    odometers[1].options = opts;
+    document.querySelector('#lcnet-avatar').src = counter.settings.imageURL;
+    saveData.allowHTML ? document.querySelector('#lcnet-name').innerHTML = counter.settings.title : document.querySelector('#lcnet-name').innerText = counter.settings.title
+    document.querySelector('.counter-content').style.color = counter.settings.titleColor;
+    document.querySelector('#lcnet-count').innerText = counter.getApparentCount();
     document.querySelector('.counter-container').style.color = counter.settings.counterColor;
-    document.querySelector('.counter-area').style.backgroundColor = counter.settings.bgColor;
-    LCEDIT.util.setVisible(document.querySelector('#counter-banner'), counter.settings.showBanner)
-    LCEDIT.util.setVisible(document.querySelector('#counter-avatar'), counter.settings.showImage, 'inline-block')
-    LCEDIT.util.setVisible(document.querySelector('#counter-chart'), counter.settings.showChart)
-    LCEDIT.util.setVisible(document.querySelector('#counter-footer'), counter.settings.showFooter)
-    document.querySelector('#counter-banner').style.filter = `blur(${counter.settings.bannerBlur}px)`
-    loadMyFont();
-    if (counter.settings.showChart) chart.update(getChartOptions());
-    updateCounter();
-    if (!saveData.paused) saveData.updater = setInterval(updateCounter, saveData.updateInterval * 1000)
-}
-
-function getCounterData() {
-    return counter.chartData
-}
-
-function getChartOptions() {
-    return {
-        chart: {
-            renderTo: "counter-chart",
-            type: "spline",
-            zoomType: "x",
-            backgroundColor: "transparent",
-            plotBorderColor: "transparent"
-        },
-        title: {
-            text: ""
-        },
-        xAxis: {
-            type: "datetime",
-            gridLineColor: "#bdbdbd",
-            lineColor: "#000000",
-            minorGridLineColor: "#bdbdbd",
-            tickColor: "#000000",
-            title: {
-                text: ""
-            }
-        },
-        yAxis: {
-            grindLineColor: "#bdbdbd",
-            lineColor: "#000000",
-            minorGridLineColor: "#bdbdbd",
-            tickColor: "#000000",
-            title: {
-                text: ""
-            }
-        },
-        credits: {
-            enabled: true,
-            text: "lcedit.com"
-        },
-        series: [{
-            showInLegend: false,
-            name: counter.settings.footer,
-            marker: { enabled: false },
-            color: counter.settings.chartColor,
-            lineColor: counter.settings.chartColor,
-            data: getCounterData()
-        }]
+    document.querySelector('.counter-container-2').style.color = counter.settings.counterColor;
+    document.body.style.backgroundColor = counter.settings.bgColor;
+    if (counter.settings.showImage) {
+        document.querySelector('#lcnet-avatar').style.visibility = "none";
+    } else {
+        document.querySelector('#lcnet-avatar').style.visibility = "visible";
     }
+    loadMyFont();
+    updateCounter();
+    document.querySelector('#lcnet-update-text').innerText = `updated every ${saveData.updateInterval} second${saveData.updateInterval === 1 ? "" : "s"}`;
+    if (!saveData.paused) saveData.updater = setInterval(updateCounter, saveData.updateInterval * 1000)
 }
 
 function updateCounter() {
     counter.update();
     console.log('Counter updated')
-    document.querySelector('#counter-counter').innerText = counter.getApparentCount();
-    while (chart.series[0].data.length >= counter.settings.maxChartValues) {
-        chart.series[0].removePoint(0)
-    }
-    chart.series[0].addPoint([Date.now(), counter.getApparentCount()]);
-    counter.chartData = chart.series[0].data.map(x => [x.x, x.y])
+    document.querySelector('#lcnet-small-count').innerText = calculateNextGoal(counter.getApparentCount()) - counter.getApparentCount();
+    document.querySelector('#lcnet-count').innerText = counter.getApparentCount();
+    document.querySelector('#lcnet-small-text').innerText = `subscribers to ${formatNumber(calculateNextGoal(counter.getApparentCount()))}`;
 }
 
 function reset(bypass = false) {
@@ -236,18 +188,11 @@ function reset(bypass = false) {
         clearInterval(saveData.api.updater);
         document.querySelector("#apiStatusIndicator").innerText = "--"
         document.querySelector("#apiStatusIndicator").style.color = "#ffffff"
-        resetChart(true)
         saveData = new Save(saveType)
         saveData.counters[0] = counter = new Counter(1);
         fillForms()
         updateStuff()
         setPaused(false)
-    }
-}
-
-function resetChart(bypass = false) {
-    if (bypass || confirm("Are you sure you want to reset the chart?")) {
-        chart.series[0].setData([]);
     }
 }
 
@@ -299,6 +244,7 @@ function loadMyFont() {
     }
     document.querySelector(".counter-content").style.fontFamily = font;
     document.querySelector(".counter-container").style.fontWeight = counter.settings.fontWeight;
+    document.querySelector(".counter-container-2").style.fontWeight = counter.settings.fontWeight;
 }
 
 function setPaused(paused) {
@@ -375,7 +321,6 @@ function importFromJSON(data, bypass=false) {
                 saveData.counters.push(new Counter().fromJSON(data.counters[i]))
             }
             counter = saveData.counters[0];   
-            if (counter.settings.showChart) chart.update(getChartOptions()) 
             updateStuff()
             fillForms();
         } catch (e) {
@@ -385,9 +330,23 @@ function importFromJSON(data, bypass=false) {
     }
 }
 
+function setCountManually() {
+    if (isFinite(parseFloat(document.getElementById("lcnet-input-count").value))) {
+        counter.setCount(parseFloat(document.getElementById("lcnet-input-count").value));
+        updateCounter();
+    }
+}
+
+function livecountsNetSubscribe() {
+    if (counter.settings.lcNetSubButton) {
+        counter.setCount(counter.settings.count + 1);
+        updateCounter();
+    }
+}
+
 function saveInBrowser() {
     saveData.lastSaved = Date.now();
-    localStorage.setItem('lcedit-lcedit', saveToJSON(true));
+    localStorage.setItem('lcedit-lcnet', saveToJSON(true));
     console.log('Saved in browser')
 }
 

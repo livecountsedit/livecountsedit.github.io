@@ -1,0 +1,589 @@
+{
+    "tabs": [
+        {
+            "title": "General",
+            "forms": [
+                {
+                    "class": "counter-form",
+                    "id": "settingsForm-0",
+                    "elements": [
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Name",
+                                    "id": "title",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text",
+                                    "inputRequired": true
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Count",
+                                    "id": "count",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputRequired": true,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "html",
+                            "elements": [
+                                "<hr>"
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Avatar URL",
+                                    "id": "imageURL",
+                                    "info": "Avatar only shows if the window's aspect ratio is less than 6:5.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text"
+                                }, 
+                                {
+                                    "label": "or",
+                                    "id": "imageFile",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "file",
+                                    "inputFileAccept": "image/png, image/jpeg"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Counter",
+            "forms": [
+                {
+                    "class": "counter-form",
+                    "id": "settingsForm-1",
+                    "elements": [
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Gain type",
+                                    "id": "gainType",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "inputRequired": true,
+                                    "selectOptions": [
+                                        ["0", "Uniform (Default)"],
+                                        ["1", "Gaussian"],
+                                        ["2", "Custom"]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "class": "gain-0",
+                            "elements": [
+                                {
+                                    "label": "Minimum rate",
+                                    "id": "minRate",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "class": "gain-0",
+                            "elements": [
+                                {
+                                    "label": "Maximum rate",
+                                    "id": "maxRate",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "class": "gain-1",
+                            "elements": [
+                                {
+                                    "label": "Mean rate",
+                                    "id": "meanRate",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "class": "gain-1",
+                            "elements": [
+                                {
+                                    "label": "Standard deviation",
+                                    "id": "stdevRate",
+                                    "info": "The expected distance from the mean the rate will be.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberMin": 0,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "class": "gain-2",
+                            "elements": [
+                                {
+                                    "label": "Custom distribution",
+                                    "id": "customRate",
+                                    "info": "Each line is of the form Min,Max,Weight. Weight is the relative probability of the line being chosen. Min and Max are the minimum and maximum rates for if this line is chosen.",
+                                    "type": "option",
+                                    "tag": "textarea",
+                                    "placeholder": "Min1,Max1,Weight1\nMin2,Max2,Weight2"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Gain per (seconds)",
+                                    "id": "gainPer",
+                                    "info": "The amount of time in seconds that the gain rates are calculated per. For example, set to 60 for a rate in followers/subscribers per minute, and 3600 for a rate in per hour.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberMin": 0.001,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }, 
+        {
+            "title": "Styles",
+            "forms": [
+                {
+                    "class": "counter-form",
+                    "id": "settingsForm-2",
+                    "elements": [
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Username color",
+                                    "id": "titleColor",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "color"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Counter color",
+                                    "id": "counterColor",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "color"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Counter up color",
+                                    "id": "upColor",
+                                    "info": "The color the counter changes to when counting up.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "color"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Counter down color",
+                                    "id": "downColor",
+                                    "info": "The color the counter changes to when counting down.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "color"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Background color",
+                                    "id": "bgColor",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "color"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Font type",
+                                    "id": "fontType",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "intputRequired": true,
+                                    "selectOptions": [
+                                        ["0", "Default"],
+                                        ["1", "Serif"],
+                                        ["2", "Sans Serif"],
+                                        ["3", "Monospace"],
+                                        ["4", "Math"],
+                                        ["5", "Custom (System)"],
+                                        ["6", "Custom (Google Fonts)"]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "class": "custom-font-input",
+                            "elements": [
+                                {
+                                    "label": "Font",
+                                    "id": "font",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Font weight",
+                                    "id": "fontWeight",
+                                    "info": "How thin or bold the font is. Only affects the number of the counter. Note: Not all font weights are supported on all fonts.",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "selectOptions": [
+                                        ["100", "Thin"],
+                                        ["200", "Extra Light"],
+                                        ["300", "Light"],
+                                        ["400", "Regular"],
+                                        ["500", "Medium"],
+                                        ["600", "Semibold"],
+                                        ["700", "Bold"],
+                                        ["800", "Extra Bold"],
+                                        ["900", "Black"]
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "title": "Advanced Settings",
+            "id": "settingsForm-3",
+            "forms": [
+                {
+                    "class": "counter-form",
+                    "elements": [
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Show avatar",
+                                    "id": "showImage",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Abbreviate counter",
+                                    "id": "abb",
+                                    "info": "Limit the counter to show up to three significant digits, as in YouTube's API.",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Offline gains",
+                                    "id": "offlineGains",
+                                    "info": "Upon loading, update the counter if it has been gaining while the counter was not open. Only applies if the counter has not been open for at least ten update intervals.",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Reverse odometer animation direction",
+                                    "id": "reverseAnimation",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Clicking \"Subscribe!\" increases sub count by 1",
+                                    "id": "lcNetSubButton",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Animation duration in seconds",
+                                    "id": "animationDuration",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberMin": 0,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Minimum count",
+                                    "id": "min",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Maximum count",
+                                    "id": "max",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Animation type",
+                                    "id": "animationType",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "selectOptions": [
+                                        ["0", "Odometer (default)"],
+                                        ["1", "Odomter (YouTube Studio)"],
+                                        ["2", "Counting"],
+                                        ["3", "Odometer (minimal animation)"]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Number format",
+                                    "id": "numberFormat",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "selectOptions": [
+                                        [",ddd", "12,345 (comma separator)"],
+                                        [".ddd", "12.345 (dot separator)"],
+                                        [" ddd", "12 345 (space separator)"],
+                                        ["d", "12345 (no separator)"]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Update interval in seconds",
+                                    "id": "updateInterval",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberMin": 0.001,
+                                    "inputNumberMax": 2147483.647,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Update probability in percent",
+                                    "id": "updateProbability",
+                                    "info": "The percent chance that the counter will update during each update interval. If it updates, the gains will be scaled accordingly to match the given rates.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberMin": 0,
+                                    "inputNumberMax": 100,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }, 
+        {
+            "title": "API Updates",
+            "forms": [
+                {
+                    "class": "api-form",
+                    "id": "settingsForm-4",
+                    "elements": [
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Enable YouTube API updates",
+                                    "id": "ytAPIEnabled",
+                                    "info": "This will update the counter if the abbreviated subscriber count does not match what is given in the API.",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "YouTube channel ID",
+                                    "id": "ytChannelID",
+                                    "info": "This is not the same as a YouTube handle or username. Use the tool linked below to help you easily find the YouTube channel ID. YouTube channel IDs are 24 characters long and begin with &quot;UC&quot;.",
+                                    "link": [
+                                        "https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/",
+                                        "YouTube channel ID finder"
+                                    ],
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "YouTube Data API v3 key",
+                                    "id": "ytAPIKey",
+                                    "info": "Read the article linked below if you are unsure of how to get one. Your YouTube API key should begin with &quot;AIzaSy&quot;. Do NOT share this key with anyone.",
+                                    "link": [
+                                        "https://blog.hubspot.com/website/how-to-get-youtube-api-key",
+                                        "A tutorial on how to get one"
+                                    ],
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "password"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "API update interval",
+                                    "id": "apiInterval",
+                                    "info": "The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberMin": 1,
+                                    "inputNumberMax": 2147483.647,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        }, 
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Overestimation leeway in percent",
+                                    "id": "leeway",
+                                    "info": "The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "number",
+                                    "inputNumberMin": 0,
+                                    "inputNumberMax": 100,
+                                    "inputNumberStep": "any"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "trailingHTML": [
+                "<button class=\"btn btn-primary\" onclick=\"submitAPI()\">Save API settings</button>",
+                "<br>",
+                "<button class=\"btn btn-primary\" onclick=\"updateAPI()\">Update now</button>",
+                "<h5>Note: API settings are saved separately</h5>",
+                "<h5>from the other settings.</h5>",
+                "<br>",
+                "<h5>Status indicator: <span id=\"apiStatusIndicator\">--</span></h5>"
+            ]
+        },
+        {
+            "title": "Credits",
+            "trailingHTML": [
+
+                "<p>@ColleensCuber (<a href=\"https://x.com/LivecountsSite\">@LivecountsSite</a>) for the original Livecounts.net</p>",
+                "<p>Disclaimer: This page is a parody of the original Livecounts.net counter.<br>We are not affiliated with Livecounts.net in any way.<br>This website is for educational and entertainment purposes only.<br>We do not make any profit off of this site.<br>We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976.<br>No copyright infringement is intended.<br>We also do not condone the use of this site for spreading misinformation.</p>",
+                "<p>Livecountsedit by Straight From MG and RandomPerson3465</p>",
+                "<a href=\"/about/discord.html\">Join our Discord!</a>"
+            ]
+        }
+    ]
+}
