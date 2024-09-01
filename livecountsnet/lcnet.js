@@ -50,6 +50,10 @@ window.onload = function () {
         document.querySelector('#gainType').addEventListener('input', event => {
             updateGainType(event.target.value);
         })
+        updateFontType(counter.settings.fontType);
+        document.querySelector('#fontType').addEventListener('input', event => {
+            updateFontType(event.target.value);
+        })
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
