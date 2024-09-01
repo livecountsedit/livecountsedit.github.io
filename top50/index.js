@@ -1240,7 +1240,11 @@ function fix() {
         if (card.className.split(' ').includes("selected") == false) {
             card.style.border = "solid 0.1em " + data.boxBorder;
         }
-        card.style.borderRadius = data.boxBorderRadius + "%";
+        if (["top100","top150","top100H","top150H"].includes(data.theme)) {
+            card.style.borderRadius = (((parseFloat(data.boxBorderRadius) || 0) / 200) * 2.15) + "vw " + (((parseFloat(data.boxBorderRadius) || 0) / 200) * 2.15) + "vw";
+        } else {
+            card.style.borderRadius = (((parseFloat(data.boxBorderRadius) || 0) / 200) * 4.25) + "vw " + (((parseFloat(data.boxBorderRadius) || 0) / 200) * 4.25) + "vw";
+        }
     });
     document.querySelectorAll('.image').forEach(function (card) {
         card.style.borderRadius = data.imageBorder + "%";
