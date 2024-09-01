@@ -80,6 +80,7 @@ let data = {
     "boxColor": "#f7f5fe",
     "boxBorder": "#FFF",
     "imageBorder": "0",
+    "boxBorderRadius": "0",
     "imageBorderColor": "#000",
     "prependZeros": false,
     "animation": true,
@@ -221,6 +222,9 @@ function initLoad(redo) {
     }
     if (!data.imageBorderColor) {
         data.imageBorderColor = '#000';
+    }
+    if (!data.boxBorderRadius) {
+        data.boxBorderRadius = '0';
     }
     if (!data.order) {
         data.order = 'desc';
@@ -994,6 +998,12 @@ document.getElementById('imageBorderColor').addEventListener('change', function 
     fix()
 });
 
+document.getElementById('boxBorderRadius').addEventListener('change', function () {
+    let num = this.value;
+    data.boxBorderRadius = num;
+    fix()
+});
+
 document.getElementById('prependZeros').addEventListener('change', function () {
     if (this.checked) {
         data.prependZeros = true;
@@ -1230,6 +1240,7 @@ function fix() {
         if (card.className.split(' ').includes("selected") == false) {
             card.style.border = "solid 0.1em " + data.boxBorder;
         }
+        card.style.borderRadius = data.boxBorderRadius + "%";
     });
     document.querySelectorAll('.image').forEach(function (card) {
         card.style.borderRadius = data.imageBorder + "%";
@@ -1244,6 +1255,7 @@ function fix() {
     document.getElementById('odometerSpeed').value = data.odometerSpeed;
     document.getElementById('imageBorder').value = data.imageBorder;
     document.getElementById('imageBorderColor').value = data.imageBorderColor;
+    document.getElementById('boxBorderRadius').value = data.boxBorderRadius;
     document.getElementById('multipleFastestThreshold').value = data.multipleFastestThreshold || 0;
     document.getElementById('fastestIcon').value = data.fastestIcon || '🔥';
     document.getElementById('slowestIcon').value = data.slowestIcon || '⌛️';
@@ -2067,6 +2079,7 @@ function popupList() {
         "boxColor": data.boxColor,
         "boxBorder": data.boxBorder,
         "imageBorder": data.imageBorder,
+        "boxBorderRadius": data.boxBorderRadius,
         "imageBorderColor": data.imageBorderColor,
         "prependZeros": data.prependZeros,
         "animation": data.animation,
