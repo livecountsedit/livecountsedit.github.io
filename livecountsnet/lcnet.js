@@ -4,7 +4,8 @@ const saveType = 2;
 defaultCounter = Object.assign(defaultCounter, {
     bgColor: "#d0e4fe",
     imageURL: "https://lcedit.com/default.png",
-    lcNetSubButton: true
+    lcNetSubButton: true,
+    max: 1e10-1
 });
 
 let saveData = new Save(saveType)
@@ -174,8 +175,8 @@ function updateStuff() {
     if (!saveData.paused) saveData.updater = setInterval(updateCounter, saveData.updateInterval * 1000)
 }
 
-function updateCounter() {
-    counter.update();
+function updateCounter(addGain = true) {
+    counter.update(addGain);
     console.log('Counter updated')
     document.querySelector('#lcnet-small-count').innerText = calculateNextGoal(counter.getApparentCount()) - counter.getApparentCount();
     document.querySelector('#lcnet-count').innerText = counter.getApparentCount();
@@ -333,14 +334,14 @@ function importFromJSON(data, bypass=false) {
 function setCountManually() {
     if (isFinite(parseFloat(document.getElementById("lcnet-input-count").value))) {
         counter.setCount(parseFloat(document.getElementById("lcnet-input-count").value));
-        updateCounter();
+        updateCounter(false);
     }
 }
 
 function livecountsNetSubscribe() {
     if (counter.settings.lcNetSubButton) {
         counter.setCount(counter.settings.count + 1);
-        updateCounter();
+        updateCounter(false);
     }
 }
 

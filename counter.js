@@ -1,6 +1,6 @@
 const LCEDIT = {
     saveVersion: 7,
-    versionName: "7.1.3",
+    versionName: "7.1.4",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -235,10 +235,10 @@ class Counter {
             }
             this.setCount(this.settings.count);
         }
-        this.update = () => {
+        this.update = (addGain = true) => {
             console.log(`Offline for: ${(Date.now() - this.lastUpdated) / 1000} seconds`);
             let offlineGain = 0;
-            if (((Date.now() - this.lastUpdated) > this.settings.updateInterval * 1e4) && this.settings.offlineGains && this.lastUpdated > 0) {
+            if (((Date.now() - this.lastUpdated) > this.settings.updateInterval * 1e4) && this.settings.offlineGains && this.lastUpdated > 0 && addGain) {
                 const missedIntervals = Math.floor((Date.now() - this.lastUpdated) / this.settings.updateInterval / 1e3);
                 offlineGain = missedIntervals * (this.settings.updateInterval / this.settings.gainPer) * this.getExpectedGain();
             } else {
@@ -248,28 +248,34 @@ class Counter {
                 }
             }
             this.lastUpdated = Date.now();
-            this.settings.gainPer = LCEDIT.util.clamp(this.settings.gainPer, 0.001);
-            if (isNaN(this.settings.count)) this.settings.count = 0;
-            const multiplier = (this.settings.updateInterval / this.settings.gainPer) * 100 / this.settings.updateProbability;
-            switch (this.settings.gainType) {
-                case 0:
-                    this.gain = LCEDIT.util.random(this.settings.minRate, this.settings.maxRate) * multiplier;
-                    break;
-                case 1:
-                    this.gain = LCEDIT.util.randomGaussian(this.settings.meanRate, this.settings.stdevRate) * multiplier;
-                    break;
-                case 2:
-                    const d = LCEDIT.util.createCustomDistribution(this.settings.customRate);
-                    this.gain = LCEDIT.util.randomFromCustomDistribution(d) * multiplier;
-                    break;
-                default:
-                    this.gain = 0;
+            let newCount;
+            if (addGain) {
+                this.settings.gainPer = LCEDIT.util.clamp(this.settings.gainPer, 0.001);
+                if (isNaN(this.settings.count)) this.settings.count = 0;
+                const multiplier = (this.settings.updateInterval / this.settings.gainPer) * 100 / this.settings.updateProbability;
+                switch (this.settings.gainType) {
+                    case 0:
+                        this.gain = LCEDIT.util.random(this.settings.minRate, this.settings.maxRate) * multiplier;
+                        break;
+                    case 1:
+                        this.gain = LCEDIT.util.randomGaussian(this.settings.meanRate, this.settings.stdevRate) * multiplier;
+                        break;
+                    case 2:
+                        const d = LCEDIT.util.createCustomDistribution(this.settings.customRate);
+                        this.gain = LCEDIT.util.randomFromCustomDistribution(d) * multiplier;
+                        break;
+                    default:
+                        this.gain = 0;
+                }
+
+                console.log(`Offline gain: ${offlineGain}`)
+
+                this.gain += offlineGain;
+                newCount = this.settings.count + this.gain;
+            } else {
+                this.gain = 0;
+                newCount = this.settings.count;
             }
-
-            console.log(`Offline gain: ${offlineGain}`)
-
-            this.gain += offlineGain;
-            let newCount = this.settings.count + this.gain;
             if (this.lastAPICount != null) {
                 let currentCount = LCEDIT.util.abb(newCount);
                 if (currentCount !== this.lastAPICount) {
