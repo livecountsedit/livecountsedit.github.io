@@ -24,6 +24,8 @@ h2 {
   margin-right: 0.2vw;
   margin-left: 0.2vw;
   src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
+  display: flex;
+  height: 100%;
 }
 
 .card {

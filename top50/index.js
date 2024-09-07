@@ -105,7 +105,6 @@ let data = {
     "hideSettings": 'q',
     'offlineGains': false,
     'lastOnline': new Date().getTime(),
-    'visulization': 'default',
     'max': 50,
     'autosave': true,
     'pause': false,
@@ -143,7 +142,8 @@ let data = {
                 'IDIncludes': false
             }
         }
-    }
+    },
+    "verticallyCenterRanks": false
 };
 let updateInterval;
 let apiInterval;
@@ -217,9 +217,6 @@ function initLoad(redo) {
     if ((!data.showBlankSlots) && (data.showBlankSlots !== false)) {
         data.showBlankSlots = true;
     }
-    if ((!data.showDifferences) && (data.showDifferences !== false)) {
-        data.showDifferences = true;
-    }
     if (!data.imageBorderColor) {
         data.imageBorderColor = '#000';
     }
@@ -230,7 +227,6 @@ function initLoad(redo) {
         data.order = 'desc';
     }
     data.pause = false;
-    data.visulization = 'default';
     if (data.lastOnline && data.offlineGains == true) {
         const interval = data.updateInterval / 1000;
         const secondsPassed = (new Date().getTime() - data.lastOnline) / 1000;
@@ -325,7 +321,7 @@ function setupDesign(list, sort, order) {
             const htmlcard = document.createElement('div');
             const cid = channels[dataIndex] ? channels[dataIndex].id : '';
             htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
-                <div class="num" id="num_${cid}">${cc}</div>
+                <div class="num" id="num_${cid}"><div>${cc}</div></div>
                 <img src="../blank.png" alt="" id="image_${cid}" class="image">
                 <div class="name" id="name_${cid}">&ZeroWidthSpace;</div>
                 <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
@@ -352,7 +348,7 @@ function setupDesign(list, sort, order) {
                 const htmlcard = document.createElement('div');
                 const cid = channels[dataIndex] ? channels[dataIndex].id : '';
                 htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
-                    <div class="num" id="num_${cid}">${cc}</div>
+                    <div class="num" id="num_${cid}"><div>${cc}</div></div>
                     <img src="../blank.png" alt="" id="image_${cid}" class="image">
                     <div class="name" id="name_${cid}">&ZeroWidthSpace;</div>
                     <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
@@ -653,7 +649,7 @@ function update(doGains = true) {
             });
             for (let q = 0; q < ids.length; q++) {
                 let element = $(`.card_${q}`);
-                element.find('.num').text(`#${sortedIds.indexOf(ids[q]) + 1}`);
+                element.find('.num').firstChild.text(`#${sortedIds.indexOf(ids[q]) + 1}`);
             }
 
         }
@@ -1022,6 +1018,15 @@ document.getElementById('showBlankSlots').addEventListener('change', function ()
     fix()
 });
 
+document.getElementById('verticallyCenterRanks').addEventListener('change', function () {
+    if (document.getElementById('verticallyCenterRanks').checked) {
+        data.verticallyCenterRanks = true;
+    } else {
+        data.verticallyCenterRanks = false;
+    }
+    fix()
+})
+
 document.getElementById('showDifferences').addEventListener('change', function () {
     if (document.getElementById('showDifferences').checked) {
         data.showDifferences = true;
@@ -1158,6 +1163,14 @@ function fix() {
         document.getElementById('hideBlanks').innerText = '#card_ * {display: none;}';
     }
 
+    if (data.verticallyCenterRanks) {
+        document.getElementById('verticallyCenterRanks').checked = true;
+        document.getElementById("centerRanks").innerText = ".num { align-items: center };"
+    } else {
+        document.getElementById('verticallyCenterRanks').checked = false;
+        document.getElementById("centerRanks").innerText = "";
+    }
+
     if (data.showDifferences) {
         document.getElementById('showDifferences').checked = true;
         const s = document.getElementById('hideDifferencesCSS');
@@ -1177,16 +1190,16 @@ function fix() {
         if (totalNums < 100) {
             document.querySelectorAll('.num').forEach(function (card) {
                 if (index < 10) {
-                    card.innerText = "0" + index
+                    card.firstChild.innerText = "0" + index
                 }
                 index += 1;
             })
         } else {
             document.querySelectorAll('.num').forEach(function (card) {
                 if (index < 10) {
-                    card.innerText = "00" + index
+                    card.firstChild.innerText = "00" + index
                 } else if (index < 100) {
-                    card.innerText = "0" + index
+                    card.firstChild.innerText = "0" + index
                 }
                 index += 1;
             })
@@ -1195,7 +1208,7 @@ function fix() {
         document.getElementById('prependZeros').checked = false;
         let index = 1;
         document.querySelectorAll('.num').forEach(function (card) {
-            card.innerText = index
+            card.firstChild.innerText = index
             index += 1;
         })
     }
@@ -2077,6 +2090,7 @@ function popupList() {
         "showCounts": data.showCounts,
         "showRankings": data.showRankings,
         "showBlankSlots": data.showBlankSlots,
+        "verticallyCenterRanks": data.verticallyCenterRanks,
         "showDifferences": data.showDifferences,
         "bgColor": data.bgColor,
         "textColor": data.textColor,
@@ -2099,8 +2113,7 @@ function popupList() {
         'sort': data.sort,
         'order': data.order,
         'max': data.max,
-        'data': data.data,
-        'visulization': data.visulization
+        'data': data.data
     }
     popup.document.write('<link href="./index.css" rel="stylesheet" type="text/css">')
     popup.document.write('<link href="./odometer.css" rel="stylesheet" type="text/css">')
