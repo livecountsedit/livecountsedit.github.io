@@ -1,6 +1,6 @@
 const LCEDIT = {
     saveVersion: 7,
-    versionName: "7.1.4",
+    versionName: "7.1.5",
     util: {
         clamp: (input, min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) => {
             if (isNaN(input)) input = 0;
@@ -52,6 +52,19 @@ const LCEDIT = {
             }
             return result;
         },
+        validateCustomDistribution: (data) => {
+            const rows = data.split("\n");
+            for (i = 0; i < rows.length; i++) {
+                const rowData = rows[i].replace(/ +/g, '').split(',');
+                if (!isFinite(parseFloat(rowData[0])) || !isFinite(parseFloat(rowData[1]))) {
+                    return "All min and max values need to be valid."
+                }
+                if (!isFinite(parseFloat(rowData[2])) || parseFloat(rowData[2]) < 0) {
+                    return "All row weights need to be valid."
+                }
+            }
+            return "";
+        },
         removeClass: (el, name) => {
             return el.className = el.className.replace(new RegExp("(^| )" + (name.split(' ').join('|')) + "( |$)", 'gi'), ' ');
         },
@@ -101,6 +114,13 @@ const LCEDIT = {
                 files: 0
             }
             for (j = 0; j < forms.length; j++) {
+                if (forms[j].querySelector("#customRate")) {
+                    try {
+                        forms[j].querySelector("#customRate").setCustomValidity(LCEDIT.util.validateCustomDistribution(forms[j].querySelector("#customRate").value));
+                    } catch (error) {
+                        console.error(error);
+                    }
+                }
                 if (forms[j].checkValidity()) {
                     const fData = new FormData(forms[j]);
                     const checkboxes = forms[j].querySelectorAll("input[type=checkbox]");
@@ -325,7 +345,7 @@ class Counter {
                 for (i = 0; i < rows.length; i++) {
                     const rowData = rows[i].replace(/ +/g, '').split(',');
                     totalWeight += parseFloat(rowData[2]) || 0;
-                    result += (parseFloat(rowData[0]) + parseFloat(rowData[1])) * rowData[2];
+                    result += (parseFloat(rowData[0]) + parseFloat(rowData[1])) * parseFloat(rowData[2]);
                 }
                 return isFinite(result / totalWeight / 2) ? (result / totalWeight / 2) : 0;
             } else {

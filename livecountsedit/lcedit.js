@@ -277,7 +277,7 @@ function updateGainType(v) {
         const g = document.querySelectorAll(`.gain-${i}`)
         for (j = 0; j < g.length; j++) {
             LCEDIT.util.setVisible(g[j], i == v);
-            const k = g[j].querySelector('input')
+            const k = g[j].querySelector('input,textarea')
             if (k) k.disabled = (i != v)
         }
     }
@@ -366,7 +366,6 @@ function importFromJSON(data, bypass=false) {
         if (data.saveType !== saveType) {
             if (!bypass && !confirm("You are importing a save from a different counter. The styles from that counter will be applied if possible. Are you sure you want to import it here?")) return;
         }
-        data.saveType = saveType;
         if (data.private) {
             if (!bypass && !confirm("You are importing a private save file. Please make sure you trust the author before importing!")) return;
         } else {
@@ -374,6 +373,8 @@ function importFromJSON(data, bypass=false) {
             data.private = true;
         }
         try {
+            data.saveType = saveType;
+            data.version = LCEDIT.saveVersion;
             clearInterval(saveData.updater);
             clearInterval(saveData.api.updater);
             for (i = 0; i < Object.keys(data).length; i++) {
@@ -396,9 +397,14 @@ function importFromJSON(data, bypass=false) {
                 saveData.counters.push(new Counter().fromJSON(data.counters[i]))
             }
             counter = saveData.counters[0];   
-            if (counter.settings.showChart) chart.update(getChartOptions()) 
-            updateStuff()
+            if (counter.settings.showChart) chart.update(getChartOptions())
+            updateStuff();
             fillForms();
+            if (!bypass) {
+                updateGainType(counter.settings.gainType);
+                updateFontType(counter.settings.fontType);
+                refreshCount();
+            }
         } catch (e) {
             console.error(e);
             return alert('Error')
