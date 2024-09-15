@@ -193,6 +193,18 @@ function initLoad(redo) {
             }
         }
     }
+    if (!data.fireIcons) {
+        data.fireIcons = {
+            'enabled': false,
+            'type': 'gain',
+            'firePosition': 'above',
+            'fireScale': 1,
+            'fireBorderRadius': 0,
+            'fireBorderColor': '#000',
+            'fireBorderWidth': 0,
+            'created': []
+        }
+    }
     if (data.apiUpdates.enabled) {
         apiInterval = setInterval(function () {
             apiUpdate(true);
