@@ -8,6 +8,14 @@ let specificChannels = [];
 let pickingChannels = false;
 let quickSelecting = false;
 let odometers = [];
+function escapeHTML(text) {
+    return text
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
 function abb(n) {
     let s = Math.sign(n);
     n = Math.abs(n);
@@ -620,45 +628,47 @@ function update(doGains = true) {
                                     document.getElementById("card_" + slowest).children[2].innerText = "" + data.slowestIcon + " " + data.data[i].name
                                 }
                             }
-                            /*<option value="replace">Replace Rank</option>
-                                <option value="before">Before Rank</option>
-                                <option value="after">After Rank</option>
-                                <option value="above">Above Rank</option>
-                                <option value="below">Below Rank</option>
-                                <option value="left">Left of Name</option>
-                                <option value="right">Right of Name</option>
-                                <option value="replaceName">Replace Name</option>*/
                             if (data.fireIcons.enabled) {
+                                let firePosition = data.fireIcons.firePosition;
+                                if (firePosition == 'before' || firePosition == 'after') {
+                                    document.getElementById("styles").innerHTML = `.num { display: flex; }`;
+                                } else {
+                                    document.getElementById("styles").innerHTML = ``;
+                                }
                                 for (let q = 0; q < data.fireIcons.created.length; q++) {
                                     if (data.fireIcons.created[q].threshold <= data.data[i].count) {
                                         let icon = data.fireIcons.created[q].icon;
-                                        let firePosition = data.fireIcons.firePosition;
                                         let fire = document.createElement('img');
                                         fire.classList = 'fireIcon';
-                                        fire.style = `height: 1.5vw; width: 1.5vw; scale: ${data.fireIcons.fireScale};
-                                        border-radius: ${data.fireIcons.fireBorderRadius}%; border: solid ${data.fireIcons.fireBorderWidth}px ${data.fireIcons.fireBorderColor};`;
-                                        fire.src = icon;
-                                        if (firePosition == 'above') {
-                                            currentCard.children[2].prepend(fire);
-                                        } else if (firePosition == 'below') {
-                                            currentCard.children[2].append(fire);
-                                        } else if (firePosition == 'left') {
-                                            currentCard.children[2].prepend(fire);
-                                        } else if (firePosition == 'right') {
-                                            currentCard.children[2].append(fire);
-                                        } else if (firePosition == 'replace') {
-                                            currentCard.children[2].innerText = icon;
-                                        } else if (firePosition == 'replaceName') {
-                                            currentCard.children[2].innerText = icon;
+                                        fire.style = `height: 1.5vw; width: 1.5vw; scale: ${escapeHTML(data.fireIcons.fireScale)};
+                                        border-radius: ${escapeHTML(data.fireIcons.fireBorderRadius)}%; border: solid ${escapeHTML(data.fireIcons.fireBorderWidth)}px ${escapeHTML(data.fireIcons.fireBorderColor)};`;
+                                        fire.src = escapeHTML(icon);
+                                        if (firePosition == 'replace') {
+                                            currentCard.children[0].innerHTML = fire.outerHTML;
                                         } else if (firePosition == 'before') {
-                                            currentCard.children[2].innerText = icon + data.data[i].name;
+                                            currentCard.children[0].innerHTML = fire.outerHTML + `<div>#${num}</div>`;
                                         } else if (firePosition == 'after') {
-                                            currentCard.children[2].innerText = data.data[i].name + icon;
+                                            currentCard.children[0].innerHTML = `<div>#${num}</div>` + fire.outerHTML;
                                         } else if (firePosition == 'above') {
-                                            currentCard.children[2].prepend(fire);
+                                            currentCard.children[0].innerHTML = fire.outerHTML + `<br><div>#${num}</div>`;
+                                        } else if (firePosition == 'below') {
+                                            currentCard.children[0].innerHTML = `<div>#${num}</div><br>` + fire.outerHTML;
+                                        } else if (firePosition == 'left') {
+                                            currentCard.children[2].innerHTML = fire.outerHTML + currentCard.children[2].innerHTML;
+                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                        } else if (firePosition == 'right') {
+                                            currentCard.children[2].innerHTML = currentCard.children[2].innerHTML + fire.outerHTML;
+                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                        } else if (firePosition == 'replaceName') {
+                                            currentCard.children[2].innerHTML = fire.outerHTML;
+                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                        } else {
+                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
                                         }
                                     }
                                 }
+                            } else {
+                                currentCard.children[0].innerHTML = `<div>#${num}</div>`;
                             }
                         } else {
                             currentCard.id = 'card_'
@@ -2458,15 +2468,6 @@ const saveFireIcon = async () => {
     loadFireIcons();
 }
 
-function escapeHTML(text) {
-    return text
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
- }
-
 const loadFireIcons = () => {
     let div = document.getElementById('fireIcons');
     div.innerHTML = '';
@@ -2474,13 +2475,13 @@ const loadFireIcons = () => {
         let fireIcon = data.fireIcons.created[i];
         let icon = fireIcon.icon;
         if (icon) {
-            icon = `<img src="${escapeHTML(icon)}" style="height: 1em; width: 1em;">`
+            icon = `<img src="${escapeHTML(icon)}" style="height: 1.5em; width: 1.5em;">`
         }
         let include = fireIcon.include.length > 0 ? `Include: ${fireIcon.include.join(', ')}` : '';
         let html = `
             <div style="display: flex; justify-content: space-between; color: #FFF; padding: 0.5em; margin: 0.5em 0; border-radius: 0.2em;">
                 <div style="display: flex; align-items: center;">
-                    <div style="color: #FFF; padding: 0.2em; border-radius: 0.2em;">${escapeHTML(icon)}</div>
+                    <div style="color: #FFF; padding: 0.2em; border-radius: 0.2em;">${icon}</div>
                     <div style="margin-left: 0.5em;">${escapeHTML(fireIcon.name)}</div>
                     <div style="margin-left: 0.5em;"><b>Threshold: ${escapeHTML(fireIcon.threshold)}</b></div>
                 </div>
