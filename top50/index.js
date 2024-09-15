@@ -2484,7 +2484,7 @@ const loadFireIcons = () => {
                     <div style="margin-left: 0.5em;">${escapeHTML(fireIcon.name)}</div>
                     <div style="margin-left: 0.5em;"><b>Threshold: ${escapeHTML(fireIcon.threshold)}</b></div>
                 </div>
-                <div>${include}</div>
+                <div>${escapeHTML(include)}</div>
                 <div><button onclick="deleteFireIcon(${i})">Delete</button></div>
             </div>`
         div.innerHTML += html;
