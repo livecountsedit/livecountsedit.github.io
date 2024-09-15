@@ -159,3 +159,10 @@ textarea {
 #storage-warning {
   display: none;
 }
+
+.fireIcon {
+  margin-left: 5px;
+  vertical-align: middle;
+  position: relative;
+  top: -3px;
+}

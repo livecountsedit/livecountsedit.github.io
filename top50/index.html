@@ -104,7 +104,10 @@
                     <input type="checkbox" id="offline" autocomplete="off"><label>Offline Gains</label>
                 </div>
             </div>
-            <p id="storage-warning"><strong>Warning: An error occurred when saving the data in your browser. This could be the result of your save file being too large. Learn more about this error in <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/Problems-with-Local-Storage">this article</a>.</strong></p>
+            <p id="storage-warning"><strong>Warning: An error occurred when saving the data in your browser. This could
+                    be the result of your save file being too large. Learn more about this error in <a
+                        href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/Problems-with-Local-Storage">this
+                        article</a>.</strong></p>
             <div class="topSettings">
                 <div>
                     <label>Load Save (From Top 50 Save)</label><br>
@@ -185,6 +188,33 @@
                         <label>Max Time: <input placeholder="Audit Every (max seconds)" id="auditTimeMax"></label><br>
                         <button onclick="saveAuditSettings()">Save Audit Settings</button>
                         <button onclick="audit2()" id="audit">Enable Audits</button>
+                    </div><br>
+                    <h2>Fire Icons</h2>
+                    <div>
+                        <label>Enable Fire Icons: <input type="checkbox" id="fireEnabled"></label><br>
+                        <label>Type: <select id="fireType">
+                                <option value="gain">Gain</option>
+                                <option value="total">Total</option>
+                            </select>
+                        </label><br>
+                        <label>Icon Scale: <input id="fireScale" placeholder="1" autocomplete="off"></label><br>
+                        <label>Icon Border Radius: <input id="fireBorderRadius" placeholder="50" autocomplete="off"><label>%</label></label><br>
+                        <label>Icon Border Color: <input type="color" value="#000000" id="fireBorderColor" autocomplete="off"></label><br>
+                        <label>Icon Border Width: <input id="fireBorderWidth" placeholder="0" autocomplete="off"></label><br>
+                        <label>Icon Position: <select id="firePosition">
+                                <option value="replace">Replace Rank</option>
+                                <option value="before">Before Rank</option>
+                                <option value="after">After Rank</option>
+                                <option value="above">Above Rank</option>
+                                <option value="below">Below Rank</option>
+                                <option value="left">Left of Name</option>
+                                <option value="right">Right of Name</option>
+                                <option value="replaceName">Replace Name</option>
+                            </select></label>
+                        <div id="fireIconsCreate">
+                            <button onclick="addFireIcon()">Add Fire Icon</button>
+                        </div>
+                        <div id="fireIcons"></div>
                     </div>
                 </div>
             </div>
@@ -239,7 +269,8 @@
                         </div>
                         <div>
                             <br>
-                            <input type="checkbox" id="multipleFastest"><label> Display Multiple Fastest Channels</label><br>
+                            <input type="checkbox" id="multipleFastest"><label> Display Multiple Fastest
+                                Channels</label><br>
                             <input id="multipleFastestThreshold" autocomplete="off"><label> Threshold</label>
                             <br><label> Basically adds the fire icon
                                 to all channels gaining more than the provieded threshold</label>
@@ -407,7 +438,8 @@
                     <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)"
                         autocomplete="off">
                     <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
-                    <button onclick="saveAPIUpdates()" id="saveapi">Save API Update Settings</button><label> Make sure to do an actual save too</label><br>
+                    <button onclick="saveAPIUpdates()" id="saveapi">Save API Update Settings</button><label> Make sure
+                        to do an actual save too</label><br>
                     <strong>MAKE SURE TO SAVE BEFORE ENABLING</strong>
                     <label>this will only update the count if the {count} of the abbreviated number changes</label>
                 </div>
@@ -463,7 +495,8 @@
         <script src="./index.js"></script>
         <br>
         <center>
-            <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug reports</a>
+            <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
+                reports</a>
         </center>
         <div id="disqus_thread"></div>
     </div>

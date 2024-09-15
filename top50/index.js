@@ -114,6 +114,17 @@ let data = {
     "allowNegative": false,
     "randomCountUpdateTime": false,
     "waterFallCountUpdateTime": false,
+    "verticallyCenterRanks": false,
+    'fireIcons': {
+        'enabled': false,
+        'type': 'gain',
+        'firePosition': 'above',
+        'fireScale': 1,
+        'fireBorderRadius': 0,
+        'fireBorderColor': '#000',
+        'fireBorderWidth': 0,
+        'created': []
+    },
     'apiUpdates': {
         'enabled': false,
         'url': '',
@@ -142,8 +153,7 @@ let data = {
                 'IDIncludes': false
             }
         }
-    },
-    "verticallyCenterRanks": false
+    }
 };
 let updateInterval;
 let apiInterval;
@@ -539,6 +549,13 @@ function update(doGains = true) {
             data.data = data.data.reverse();
         }
         if (!data.theme.includes('A')) {
+            if (data.fireIcons.enabled) {
+                if (data.fireIcons.created.length > 0) {
+                    data.fireIcons.created.sort(function (a, b) {
+                        return b.threshold - a.threshold
+                    });
+                }
+            }
             for (let i = 0; i < data.max; i++) {
                 let extraTimeTillUpdate = 0;
                 const interval = data.updateInterval;
@@ -589,6 +606,46 @@ function update(doGains = true) {
                             if (slowest == data.data[i].id) {
                                 if (data.slowest == true) {
                                     document.getElementById("card_" + slowest).children[2].innerText = "" + data.slowestIcon + " " + data.data[i].name
+                                }
+                            }
+                            /*<option value="replace">Replace Rank</option>
+                                <option value="before">Before Rank</option>
+                                <option value="after">After Rank</option>
+                                <option value="above">Above Rank</option>
+                                <option value="below">Below Rank</option>
+                                <option value="left">Left of Name</option>
+                                <option value="right">Right of Name</option>
+                                <option value="replaceName">Replace Name</option>*/
+                            if (data.fireIcons.enabled) {
+                                for (let q = 0; q < data.fireIcons.created.length; q++) {
+                                    if (data.fireIcons.created[q].threshold <= data.data[i].count) {
+                                        let icon = data.fireIcons.created[q].icon;
+                                        let firePosition = data.fireIcons.firePosition;
+                                        let fire = document.createElement('img');
+                                        fire.classList = 'fireIcon';
+                                        fire.style = `height: 1.5vw; width: 1.5vw; scale: ${data.fireIcons.fireScale};
+                                        border-radius: ${data.fireIcons.fireBorderRadius}%; border: solid ${data.fireIcons.fireBorderWidth}px ${data.fireIcons.fireBorderColor};`;
+                                        fire.src = icon;
+                                        if (firePosition == 'above') {
+                                            currentCard.children[2].prepend(fire);
+                                        } else if (firePosition == 'below') {
+                                            currentCard.children[2].append(fire);
+                                        } else if (firePosition == 'left') {
+                                            currentCard.children[2].prepend(fire);
+                                        } else if (firePosition == 'right') {
+                                            currentCard.children[2].append(fire);
+                                        } else if (firePosition == 'replace') {
+                                            currentCard.children[2].innerText = icon;
+                                        } else if (firePosition == 'replaceName') {
+                                            currentCard.children[2].innerText = icon;
+                                        } else if (firePosition == 'before') {
+                                            currentCard.children[2].innerText = icon + data.data[i].name;
+                                        } else if (firePosition == 'after') {
+                                            currentCard.children[2].innerText = data.data[i].name + icon;
+                                        } else if (firePosition == 'above') {
+                                            currentCard.children[2].prepend(fire);
+                                        }
+                                    }
                                 }
                             }
                         } else {
@@ -651,7 +708,6 @@ function update(doGains = true) {
                 let element = $(`.card_${q}`);
                 element.find('.num').firstChild.text(`#${sortedIds.indexOf(ids[q]) + 1}`);
             }
-
         }
         for (let q = 0; q < popups.length; q++) {
             if ((!popups[q].popup) || (!popups[q].popup.document)) {
@@ -1253,7 +1309,7 @@ function fix() {
         if (card.className.split(' ').includes("selected") == false) {
             card.style.border = "solid 0.1em " + data.boxBorder;
         }
-        if (["top100","top150","top100H","top150H"].includes(data.theme)) {
+        if (["top100", "top150", "top100H", "top150H"].includes(data.theme)) {
             card.style.borderRadius = (((parseFloat(data.boxBorderRadius) || 0) / 200) * 2.15) + "vw " + (((parseFloat(data.boxBorderRadius) || 0) / 200) * 2.15) + "vw";
         } else {
             card.style.borderRadius = (((parseFloat(data.boxBorderRadius) || 0) / 200) * 4.25) + "vw " + (((parseFloat(data.boxBorderRadius) || 0) / 200) * 4.25) + "vw";
@@ -2328,3 +2384,132 @@ document.getElementById("apiSource").addEventListener('change', function () {
     }
     loadAPIUpdates();
 })
+
+const addFireIcon = () => {
+    if (document.getElementById('fireIconCreate')) {
+        document.getElementById('fireIconCreate').remove();
+    } else {
+        let div = document.createElement('div');
+        div.id = 'fireIconCreate';
+        div.style.color = '#FFF';
+        div.innerHTML = `
+            <label>Fire Icon Name: </label><input type="text" id="fireIcon" placeholder="Fire Icon 1"><br>
+            <label>Fire Icon Threshold: </label><input type="text" id="fireIconThreshold" placeholder="1000"><br>
+            <label>Fire Icon:</label><input type="text" id="fireIconUrl" placeholder="https://example.com/image.png"><label> or </label><input type="file" id="fireIconFile"><br>
+            <label>Include Only: </label><input type="text" id="fireIconInclude" placeholder="(optional) ex: abc,def,ghi"><br>
+            <button onclick="saveFireIcon()">Add</button>
+        `
+        document.getElementById('fireIconsCreate').appendChild(div);
+    }
+}
+
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+const saveFireIcon = async () => {
+    let file = document.getElementById('fireIconFile').files[0];
+    if (file) {
+        file = await getBase64(file);
+    } else {
+        file = document.getElementById('fireIconUrl').value;
+    }
+    if (!file || !document.getElementById('fireIcon').value || !document.getElementById('fireIconThreshold').value) {
+        alert('Please fill out all fields.')
+        return;
+    }
+    if (!data.fireIcons) {
+        data.fireIcons = {
+            'enabled': false,
+            'type': 'gain',
+            'firePosition': 'above',
+            'fireScale': 1,
+            'marginTop': 0,
+            'fireBorderColor': '#FFF',
+            'fireBorderWidth': 0,
+            'fireBorderRadius': 0,
+            'created': []
+        }
+    }
+    data.fireIcons.created.push({
+        name: document.getElementById('fireIcon').value,
+        threshold: document.getElementById('fireIconThreshold').value,
+        icon: file,
+        include: document.getElementById('fireIconInclude').value.split(',')
+    })
+    document.getElementById('fireIconCreate').remove();
+    loadFireIcons();
+}
+
+const loadFireIcons = () => {
+    let div = document.getElementById('fireIcons');
+    div.innerHTML = '';
+    for (let i = 0; i < data.fireIcons.created.length; i++) {
+        let fireIcon = data.fireIcons.created[i];
+        let icon = fireIcon.icon;
+        if (icon) {
+            icon = `<img src="${icon}" style="height: 1em; width: 1em;">`
+        }
+        let include = fireIcon.include.length > 0 ? `Include: ${fireIcon.include.join(', ')}` : '';
+        let html = `
+            <div style="display: flex; justify-content: space-between; color: #FFF; padding: 0.5em; margin: 0.5em 0; border-radius: 0.2em;">
+                <div style="display: flex; align-items: center;">
+                    <div style="color: #FFF; padding: 0.2em; border-radius: 0.2em;">${icon}</div>
+                    <div style="margin-left: 0.5em;">${fireIcon.name}</div>
+                    <div style="margin-left: 0.5em;"><b>Threshold: ${fireIcon.threshold}</b></div>
+                </div>
+                <div>${include}</div>
+                <div><button onclick="deleteFireIcon(${i})">Delete</button></div>
+            </div>`
+        div.innerHTML += html;
+    }
+    if (data.fireIcons.created.length == 0) {
+        div.innerHTML = 'No fire icons created.'
+    }
+    document.getElementById('fireEnabled').checked = data.fireIcons.enabled || false;
+    document.getElementById('fireType').value = data.fireIcons.type || 'gain';
+    document.getElementById('firePosition').value = data.fireIcons.firePosition || 'above';
+    document.getElementById('fireScale').value = data.fireIcons.fireScale || 1;
+    document.getElementById('fireBorderColor').value = data.fireIcons.fireBorderColor || '#FFF';
+    document.getElementById('fireBorderWidth').value = data.fireIcons.fireBorderWidth || 0;
+    document.getElementById('fireBorderRadius').value = data.fireIcons.fireBorderRadius || 0;
+}
+loadFireIcons();
+
+const deleteFireIcon = (index) => {
+    data.fireIcons.created.splice(index, 1);
+    loadFireIcons();
+}
+
+document.getElementById('fireEnabled').addEventListener('click', function () {
+    data.fireIcons.enabled = document.getElementById('fireEnabled').checked;
+});
+
+document.getElementById('fireType').addEventListener('change', function () {
+    data.fireIcons.type = document.getElementById('fireType').value;
+});
+
+document.getElementById('firePosition').addEventListener('change', function () {
+    data.fireIcons.firePosition = document.getElementById('firePosition').value;
+});
+
+document.getElementById('fireScale').addEventListener('change', function () {
+    data.fireIcons.fireScale = document.getElementById('fireScale').value;
+});
+
+document.getElementById('fireBorderColor').addEventListener('change', function () {
+    data.fireIcons.fireBorderColor = document.getElementById('fireBorderColor').value;
+});
+
+document.getElementById('fireBorderWidth').addEventListener('change', function () {
+    data.fireIcons.fireBorderWidth = document.getElementById('fireBorderWidth').value;
+});
+
+document.getElementById('fireBorderRadius').addEventListener('change', function () {
+    data.fireIcons.fireBorderRadius = document.getElementById('fireBorderRadius').value;
+});
