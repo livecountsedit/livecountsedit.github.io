@@ -2025,8 +2025,8 @@ function saveAPIUpdates() {
             'path': document.getElementById('pathID').value
         }
     }
-    data.apiUpdates.interval = parseFloat(document.getElementById('apiUpdateInt').value) * 1000
-    data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerText == 'Disable API Updates' ? true : false
+    data.apiUpdates.interval = parseFloat(document.getElementById('apiUpdateInt').value) * 1000;
+    data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerText == 'Disable API Updates' ? true : false;
     alert('API Update Settings Saved')
 }
 
@@ -2165,7 +2165,9 @@ function selectorFunction(e) {
         }
         if (!target) return;
     }
-    let id = target.id?.split('_')[1]
+    //let id = target.id?.split('_')[1]
+    //some ids may have more than one underscore, some may have 2, 3, 4, etc. we want all but the first one
+    let id = target.id?.split('_').slice(1).join('_')
     if (pickingChannels == true) {
         if (specificChannels.includes(id)) {
             specificChannels.splice(specificChannels.indexOf(id), 1)
@@ -2178,6 +2180,7 @@ function selectorFunction(e) {
         }
     } else {
         if (selected != null) {
+            console.log(document.getElementById('card_' + selected + ''), 'card_' + selected + '')
             document.getElementById('card_' + selected + '').classList.remove('selected');
             document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
         }
