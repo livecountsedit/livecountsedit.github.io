@@ -2458,6 +2458,15 @@ const saveFireIcon = async () => {
     loadFireIcons();
 }
 
+function escapeHTML(text) {
+    return text
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
 const loadFireIcons = () => {
     let div = document.getElementById('fireIcons');
     div.innerHTML = '';
@@ -2465,15 +2474,15 @@ const loadFireIcons = () => {
         let fireIcon = data.fireIcons.created[i];
         let icon = fireIcon.icon;
         if (icon) {
-            icon = `<img src="${icon}" style="height: 1em; width: 1em;">`
+            icon = `<img src="${escapeHTML(icon)}" style="height: 1em; width: 1em;">`
         }
         let include = fireIcon.include.length > 0 ? `Include: ${fireIcon.include.join(', ')}` : '';
         let html = `
             <div style="display: flex; justify-content: space-between; color: #FFF; padding: 0.5em; margin: 0.5em 0; border-radius: 0.2em;">
                 <div style="display: flex; align-items: center;">
-                    <div style="color: #FFF; padding: 0.2em; border-radius: 0.2em;">${icon}</div>
-                    <div style="margin-left: 0.5em;">${fireIcon.name}</div>
-                    <div style="margin-left: 0.5em;"><b>Threshold: ${fireIcon.threshold}</b></div>
+                    <div style="color: #FFF; padding: 0.2em; border-radius: 0.2em;">${escapeHTML(icon)}</div>
+                    <div style="margin-left: 0.5em;">${escapeHTML(fireIcon.name)}</div>
+                    <div style="margin-left: 0.5em;"><b>Threshold: ${escapeHTML(fireIcon.threshold)}</b></div>
                 </div>
                 <div>${include}</div>
                 <div><button onclick="deleteFireIcon(${i})">Delete</button></div>
