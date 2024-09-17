@@ -9,6 +9,7 @@ let pickingChannels = false;
 let quickSelecting = false;
 let odometers = [];
 function escapeHTML(text) {
+    text = text.toString();
     return text
          .replace(/&/g, "&amp;")
          .replace(/</g, "&lt;")
