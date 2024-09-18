@@ -637,7 +637,18 @@ function update(doGains = true) {
                                     document.getElementById("styles").innerHTML = ``;
                                 }
                                 for (let q = 0; q < data.fireIcons.created.length; q++) {
-                                    if (data.fireIcons.created[q].threshold <= data.data[i].count) {
+                                    let equation = false;
+                                    //either gain or total
+                                    if (data.fireIcons.type == 'total') {
+                                        if (data.data[i].count >= data.fireIcons.created[q].threshold) {
+                                            equation = true;
+                                        }
+                                    } else if (data.fireIcons.type == 'gain') {
+                                        if ((data.data[i].count - data.data[i].lastCount) >= data.fireIcons.created[q].threshold) {
+                                            equation = true;
+                                        }
+                                    }
+                                    if (equation) {
                                         let icon = data.fireIcons.created[q].icon;
                                         let fire = document.createElement('img');
                                         fire.classList = 'fireIcon';
@@ -666,6 +677,8 @@ function update(doGains = true) {
                                         } else {
                                             currentCard.children[0].innerHTML = `<div>#${num}</div>`;
                                         }
+                                    } else {
+                                        currentCard.children[0].innerHTML = `<div>#${num}</div>`;
                                     }
                                 }
                             } else {
