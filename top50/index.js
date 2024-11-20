@@ -636,6 +636,7 @@ function update(doGains = true) {
                                 } else {
                                     document.getElementById("styles").innerHTML = ``;
                                 }
+                                data.fireIcons.created.sort((a, b) => parseFloat(b.threshold) - parseFloat(a.threshold));
                                 for (let q = 0; q < data.fireIcons.created.length; q++) {
                                     let equation = false;
                                     //either gain or total
@@ -658,31 +659,32 @@ function update(doGains = true) {
                                         if (firePosition == 'replace') {
                                             currentCard.children[0].innerHTML = fire.outerHTML;
                                         } else if (firePosition == 'before') {
-                                            currentCard.children[0].innerHTML = fire.outerHTML + `<div>#${num}</div>`;
+                                            currentCard.children[0].innerHTML = fire.outerHTML + `<div>${num}</div>`;
                                         } else if (firePosition == 'after') {
-                                            currentCard.children[0].innerHTML = `<div>#${num}</div>` + fire.outerHTML;
+                                            currentCard.children[0].innerHTML = `<div>${num}</div>` + fire.outerHTML;
                                         } else if (firePosition == 'above') {
-                                            currentCard.children[0].innerHTML = fire.outerHTML + `<br><div>#${num}</div>`;
+                                            currentCard.children[0].innerHTML = fire.outerHTML + `<br><div>${num}</div>`;
                                         } else if (firePosition == 'below') {
-                                            currentCard.children[0].innerHTML = `<div>#${num}</div><br>` + fire.outerHTML;
+                                            currentCard.children[0].innerHTML = `<div>${num}</div><br>` + fire.outerHTML;
                                         } else if (firePosition == 'left') {
                                             currentCard.children[2].innerHTML = fire.outerHTML + currentCard.children[2].innerHTML;
-                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                            currentCard.children[0].innerHTML = `<div>${num}</div>`;
                                         } else if (firePosition == 'right') {
                                             currentCard.children[2].innerHTML = currentCard.children[2].innerHTML + fire.outerHTML;
-                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                            currentCard.children[0].innerHTML = `<div>${num}</div>`;
                                         } else if (firePosition == 'replaceName') {
                                             currentCard.children[2].innerHTML = fire.outerHTML;
-                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                            currentCard.children[0].innerHTML = `<div>${num}</div>`;
                                         } else {
-                                            currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                            currentCard.children[0].innerHTML = `<div>${num}</div>`;
                                         }
+                                        break;
                                     } else {
-                                        currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                        currentCard.children[0].innerHTML = `<div>${num}</div>`;
                                     }
                                 }
                             } else {
-                                currentCard.children[0].innerHTML = `<div>#${num}</div>`;
+                                currentCard.children[0].innerHTML = `<div>${num}</div>`;
                             }
                         } else {
                             currentCard.id = 'card_'
@@ -742,7 +744,7 @@ function update(doGains = true) {
             });
             for (let q = 0; q < ids.length; q++) {
                 let element = $(`.card_${q}`);
-                element.find('.num').firstChild.text(`#${sortedIds.indexOf(ids[q]) + 1}`);
+                element.find('.num').firstChild.text(`${sortedIds.indexOf(ids[q]) + 1}`);
             }
         }
         for (let q = 0; q < popups.length; q++) {
