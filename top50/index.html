@@ -4,7 +4,7 @@
 <head>
     <title>Livecountsedit - Fake Top 50</title>
     <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css" rel="stylesheet" type="text/css">
+    <link href="./index.css?cache=1" rel="stylesheet" type="text/css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -39,6 +39,8 @@
     <style id="hideDifferences"></style>
     <style id="hideBlanks"></style>
     <style id="centerRanks"></style>
+    <style id="rankSizeStyles"></style>
+    <style id="differenceStyling"></style>
 </head>
 
 <body>
@@ -70,11 +72,13 @@
                         <option value="top50">Top 50 (Vertical Columns)</option>
                         <option value="top100">Top 100 (Vertical Columns)</option>
                         <option value="top150">Top 150 (Vertical Columns)</option>
+                        <option value="top200">Top 200 (Vertical Columns)</option>
                         <option value="top10H">Top 10 (Horizontal Columns)</option>
                         <option value="top25H">Top 25 (Horizontal Columns)</option>
                         <option value="top50H">Top 50 (Horizontal Columns)</option>
                         <option value="top100H">Top 100 (Horizontal Columns)</option>
                         <option value="top150H">Top 150 (Horizontal Columns)</option>
+                        <option value="top200H">Top 200 (Horizontal Columns)</option>
                         <option value="top10A">Top 10 (Animated [BETA])</option>
                     </select>
                 </div>
@@ -116,14 +120,6 @@
                     <label>Load Save (From YT Studio)</label><br>
                     <input type="file" id="loadData2" autocomplete="off">
                 </div>
-                <div>
-                    <label>Popup lists allow you to better view smaller or larger groups of channels in their own
-                        window. The popup list's settings will match your settings at the time you create the
-                        list.</label><br>
-                    <button id="selectSpecific" onclick="selectSpecificChannels()">Select Specific Channels
-                        (Optional)</button>
-                    <button onclick="popupList()">Save and Open In Popup Window</button>
-                </div>
             </div>
             <hr>
             <div class="userActions">
@@ -142,6 +138,8 @@
                     <input placeholder="Mean Gain" id="add_mean_gain"><br>
                     <input placeholder="Range From Mean (Standard Deviation)" id="add_std_gain"><br>
                     <br>
+                    <input placeholder="Card Background Color" id="add_bg_color"><br>
+                    <br>
                     <button onclick="create()">Create</button>
                 </div>
                 <div>
@@ -153,6 +151,7 @@
                     <button id="quickSelectButton">Quick Select</button>
                     <button id="refreshButton" onclick="refresh()">Refresh</button>
                     <br>
+                    <label id="edit_channel_id">Channel ID:</label><br>
                     <input placeholder="Name" id="edit_name" value=""><input type="checkbox" id="edit_name_check"
                         checked><br>
                     <input placeholder="Image" id="edit_image1" value=""><label>or</label>
@@ -171,6 +170,8 @@
                     <input placeholder="Range From Mean (Standard Deviation)" id="edit_std_gain">
                     <input id="edit_std_gain_check" type="checkbox" checked><br>
                     <br>
+                    <input placeholder="Card Background Color" id="edit_bg_color">
+                    <input id="edit_bg_color_check" type="checkbox" checked><br>
                     <div>
                         <button onclick="edit()">Edit</button>
                         <button onclick="deleteChannel()">Delete</button>
@@ -190,18 +191,21 @@
                     </div><br>
                     <h2>Fire Icons (BETA)</h2>
                     <div>
-                        <label>Enable Fire Icons: <input type="checkbox" id="fireEnabled"></label><br>
+                        <label>Enable Fire Icons: <input type="checkbox" id="fireEnabled"></label><button
+                            onclick="importMDMIcons()" style="margin-left: 10px;">Import MDM Icons</button><br>
                         <label>Type: <select id="fireType">
                                 <option value="gain">Gain</option>
+                                <option value="hour">Hour</option>
                                 <option value="total">Total</option>
                             </select>
                         </label><br>
-                        <label>Icon Scale: <input id="fireScale" placeholder="1" autocomplete="off"></label><br>
-                        <label>Icon Border Radius: <input id="fireBorderRadius" placeholder="50" autocomplete="off"><label>%</label></label><br>
-                        <label>Icon Border Color: <input type="color" value="#000000" id="fireBorderColor" autocomplete="off"></label><br>
-                        <label>Icon Border Width: <input id="fireBorderWidth" placeholder="0" autocomplete="off"></label><br>
+                        <label>Icon Border Color: <input type="color" value="#000000" id="fireBorderColor"
+                                autocomplete="off"></label><br>
+                        <label>Icon Border Width: <input id="fireBorderWidth" placeholder="0"
+                                autocomplete="off"></label><br>
                         <label>Icon Position: <select id="firePosition">
-                                <option value="replace">Replace Rank</option>
+                                <option value="mdm">[MDM] Replace Rank</option>
+                                <option value="replace">Replace Rank Text</option>
                                 <option value="before">Before Rank</option>
                                 <option value="after">After Rank</option>
                                 <option value="above">Above Rank</option>
@@ -229,23 +233,35 @@
                         </div>
                         <div>
                             <br>
+                            <label>Box Spacing</label><br>
+                            <input value="0.2" id="boxSpacing" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Rank Size</label><br>
+                            <input value="1" id="rankSize" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
                             <label>Text Color</label><br>
                             <input type="color" value="#000000" id="textPicker" autocomplete="off">
                         </div>
                         <div>
                             <br>
                             <label>Box Background Color</label><br>
-                            <input type="color" value="#000000" id="boxPicker" autocomplete="off">
+                            <input type="color" value="#FFFFFF" id="boxPicker" autocomplete="off">
                         </div>
                         <div>
                             <br>
                             <label>Box Border Color</label><br>
                             <input type="color" value="#000000" id="borderPicker" autocomplete="off">
+                            <button id="disableBoxBorderColor">X</button>
                         </div>
                         <div>
                             <br>
                             <label>Image Border Color</label><br>
                             <input type="color" value="#000000" id="imageBorderColor" autocomplete="off">
+                            <button id="disableImageBorderColor">X</button>
                         </div>
                         <div>
                             <br>
@@ -265,14 +281,6 @@
                             <br>
                             <input type="checkbox" id="fastest"><label>Icon For Fastest Channel</label><br>
                             <input id="fastestIcon" autocomplete="off"><label> (emoji or text)</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="multipleFastest"><label> Display Multiple Fastest
-                                Channels</label><br>
-                            <input id="multipleFastestThreshold" autocomplete="off"><label> Threshold</label>
-                            <br><label> Basically adds the fire icon
-                                to all channels gaining more than the provieded threshold</label>
                         </div>
                         <div>
                             <br>
@@ -305,10 +313,6 @@
                         </div>
                         <div>
                             <br>
-                            <input type="checkbox" id="showDifferences" checked><label>Show Differences</label>
-                        </div>
-                        <div>
-                            <br>
                             <input type="checkbox" id="verticallyCenterRanks"><label>Vertically Center Ranks</label>
                         </div>
                         <div>
@@ -320,6 +324,22 @@
                             <br>
                             <label>Box Border Roundness (0-100)</label><br>
                             <input value="0" id="boxBorderRadius" autocomplete="off"><label>%</label>
+                        </div>
+                        <div>
+                            <br>
+                            <label>Box Background (gain)</label><br>
+                            <input type="color" value="#f7f5fe" id="boxBGGain" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Box Background (lose)</label><br>
+                            <input type="color" value="#f7f5fe" id="boxBGLose" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Box Background Duration (in seconds)</label><br>
+                            <input value="1" id="boxBGLength" autocomplete="off"><br>
+                            <label>*Leave at 0 to disable</label>
                         </div>
                     </div>
                 </div>
@@ -343,16 +363,6 @@
                         </div>
                         <div>
                             <br>
-                            <label>Min Gain (only for streams)</label><br>
-                            <input value="-10000" id="min_gain_global" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Max Gain (only for streams)</label><br>
-                            <input value="10000" id="max_gain_global" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
                             <input type="checkbox" id="abbreviate"><label> Abbreviate Counts</label>
                         </div>
                         <div>
@@ -367,138 +377,180 @@
                             <br>
                             <input type="checkbox" id="waterFallCountUpdateTime"><label> Waterfall Count Updates</label>
                         </div>
+                    </div><br><br>
+                    <div class="boringSettings">
+                        <div>
+                            <br>
+                            <input type="checkbox" id="showDifferences" checked><label>Show Differences</label>
+                            <br>
+                            <label>Differences Placing (top): </label><input type="text" id="topDifferencePlacing"
+                                autocomplete="off">
+                            <br>
+                            <label>Differences Placing (left): </label><input type="text" id="leftDifferencePlacing"
+                                autocomplete="off">
+                            <br>
+                            <label>Differences Color: </label><input type="text" id="differenceColor"
+                                autocomplete="off">
+                        </div>
+                        <div><br>
+                            <label>Difference Images: </label><input type="checkbox" id="enableDifferenceImages"
+                                autocomplete="off">
+                            <br>
+                            <label>Image Place (top): </label><input type="text" id="topDifferenceImagePlacing"
+                                autocomplete="off">
+                            <br>
+                            <label>Image Placing (left): </label><input type="text" id="leftDifferenceImagePlacing"
+                                autocomplete="off">
+                            <br>
+                            <label>Image Size: </label><input type="text" id="differenceImageSize"
+                                autocomplete="off"><br>
+                            <label>Image Shaking: </label><input type="checkbox" id="enableImageShakes"
+                                autocomplete="off">
+                            <br>
+                            <label>Image: </label><input placeholder="Image"
+                                id="differenceImageUrl"><br><label>or:</label>
+                            <input placeholder="Image" type="file" id="differenceImageFile"><button
+                                onclick="saveImageForDiffs()">Save Image Upload</button>
+                            <br>
+                        </div>
                     </div>
                 </div>
             </div>
-            <hr>
-            <div class="middleBoringSettings">
-                <div>
-                    <label class="bold">API Update Settings:</label><br><br>
-                    <label>API Source Preset: </label><select id="apiSource" autocomplete="off">
-                        <option value="custom">Custom API</option>
-                        <option value="mixerno1">[abbreviated] mixerno.space</option>
-                        <option value="mixerno2">[estimated] mixerno.space</option>
-                        <option value="soon">[COMING SOON]</option>
+        </div>
+        <hr>
+        <div class="middleBoringSettings">
+            <div>
+                <label class="bold">API Update Settings:</label><br><br>
+                <label>API Source Preset: </label><select id="apiSource" autocomplete="off">
+                    <option value="custom">Custom API</option>
+                    <option value="mixerno1">[abbreviated] mixerno.space</option>
+                    <option value="mixerno2">[estimated] mixerno.space</option>
+                    <option value="soon">[COMING SOON]</option>
+                </select>
+                <div id="apiSettings">
+                    <label>Make sure the part to include the channel is at the very end and left open OR use
+                        <strong>{{channels}}</strong> to indentify where they should go.</label>
+                    <input id="apiLink"
+                        placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id="><select
+                        autocomplete="off" id="apiType">
+                        <option value="none">Max Channels Per Fetch (1)</option>
+                        <option value="one">1 Channel</option>
+                        <option value="ten">10 Channels</option>
+                        <option value="twentyfive">25 Channels</option>
+                        <option value="fifty">50 Channels</option>
+                        <option value="onehundred">100 Channels</option>
+                        <option value="unlimited">No Limit</option>
                     </select>
-                    <div id="apiSettings">
-                        <label>Make sure the part to include the channel is at the very end and left open OR use
-                            <strong>{{channels}}</strong> to indentify where they should go.</label>
-                        <input id="apiLink"
-                            placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id="><select
-                            autocomplete="off" id="apiType">
-                            <option value="none">Max Channels Per Fetch (1)</option>
-                            <option value="one">1 Channel</option>
-                            <option value="ten">10 Channels</option>
-                            <option value="twentyfive">25 Channels</option>
-                            <option value="fifty">50 Channels</option>
-                            <option value="onehundred">100 Channels</option>
-                            <option value="unlimited">No Limit</option>
-                        </select>
-                        <br>
-                        <label>Loop through (data = root): </label><input id="apiLoop" placeholder="data.items"
-                            autocomplete="off"><br>
-                        <label>Method: <select id="apiMethod" autocomplete="off">
-                                <option value="GET">GET</option>
-                                <option value="POST">POST</option>
-                            </select></label>
-                        <div class="apiExtraStuff">
-                            <div>
-                                <h3>Headers (optional)</h3>
-                                <textarea id="extraCred"
-                                    placeholder="Authorization: auth code;&#10Authorization2: auth code2;"
-                                    autocomplete="off" class="creds"></textarea><br>
-                            </div>
-                            <div>
-                                <h3>Body: (optional)</h3>
-                                <textarea id="body" placeholder="value1=lol;&#10value2=lol;" autocomplete="off"
-                                    class="creds"></textarea><br>
-                            </div>
-                            <div>
-                                <h3>Updates</h3>
-                                <input type="checkbox" id="updateName" autocomplete="off"><label>Name </label><input
-                                    id="pathName" placeholder="snippet.title" autocomplete="off"><br>
-                                <input type="checkbox" id="updateImage" autocomplete="off"><label>Image
-                                </label><input id="pathImage" placeholder="snippet.thumbnails.default.url"
-                                    autocomplete="off"><br>
-                                <input type="checkbox" id="updateCount" autocomplete="off"><label>Count
-                                </label><input id="pathCount" placeholder="statistics.subscriberCount"
-                                    autocomplete="off"><br>
+                    <br>
+                    <label>Loop through (data = root): </label><input id="apiLoop" placeholder="data.items"
+                        autocomplete="off"><br>
+                    <label>Method: <select id="apiMethod" autocomplete="off">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                        </select></label>
+                    <div class="apiExtraStuff">
+                        <div>
+                            <h3>Headers (optional)</h3>
+                            <textarea id="extraCred"
+                                placeholder="Authorization: auth code;&#10Authorization2: auth code2;"
+                                autocomplete="off" class="creds"></textarea><br>
+                        </div>
+                        <div>
+                            <h3>Body: (optional)</h3>
+                            <textarea id="body" placeholder="value1=lol;&#10value2=lol;" autocomplete="off"
+                                class="creds"></textarea><br>
+                        </div>
+                        <div>
+                            <h3>Updates</h3>
+                            <input type="checkbox" id="updateName" autocomplete="off"><label>Name </label><input
+                                id="pathName" placeholder="snippet.title" autocomplete="off"><br>
+                            <input type="checkbox" id="updateImage" autocomplete="off"><label>Image
+                            </label><input id="pathImage" placeholder="snippet.thumbnails.default.url"
+                                autocomplete="off"><br>
+                            <input type="checkbox" id="updateCount" autocomplete="off"><label>Count
+                            </label><input id="pathCount" placeholder="statistics.subscriberCount"
+                                autocomplete="off"><br>
 
-                                <label>ID (Required) </label><input id="pathID" placeholder="id" autocomplete="off"><br>
-                                <input type="checkbox" id="IDIncludes" autocomplete="off"><label>Used to disect the
-                                    id
-                                    from a string like "https://banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"</label>
-                            </div>
-                        </div>
-                        <hr>
-                    </div><br>
-                    <button onclick="apiUpdate()">Update Now</button>
-                    <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)"
-                        autocomplete="off">
-                    <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
-                    <button onclick="saveAPIUpdates()" id="saveapi">Save API Update Settings</button><label> Make sure
-                        to do an actual save too</label><br>
-                    <strong>MAKE SURE TO SAVE BEFORE ENABLING</strong>
-                    <label>this will only update the count if the {count} of the abbreviated number changes</label>
-                </div>
-                <div>
-                    <label class="bold">FYSC Stream Hub</label><br>
-                    <div id="stream">
-                        <div>
-                            <p>Add this to the response section of the nightbot command.</p>
-                            <p>This command allows users to be added.</p>
-                            <p>Example Usage: {!add 100/200} 100 is in the min and 200 is the max. You can limit the min
-                                and max.</p>
-                            </p>
-                            <textarea id="connect" autocomplete="off"></textarea>
-                        </div>
-                        <div>
-                            <p>Add this to the response section of the nightbot command.</p>
-                            <p>This command allows users to be edited.</p>
-                            <p>Example Usage: {!edit 100/200} 100 is in the min and 200 is the max. You can limit the
-                                max and min.</p>
-                            </p>
-                            <textarea id="connect3" autocomplete="off"></textarea>
-                        </div>
-                        <div>
-                            <p>Add this to the response section of the nightbot command.</p>
-                            <p>This is an EXAMPLE command that just shows how to add example commands. ?values= shows
-                                the min and the max gains possible.</p>
-                            <textarea id="connect2" autocomplete="off"></textarea>
-                        </div>
-                        <div>
-                            <p>Add this to the response section of the nightbot command.</p>
-                            <p>This is an EXAMPLE command that just shows how to retrieve a user's subscriber count from
-                                this site.</p>
-                            <textarea id="connect4" autocomplete="off"></textarea>
+                            <label>ID (Required) </label><input id="pathID" placeholder="id" autocomplete="off"><br>
+                            <input type="checkbox" id="IDIncludes" autocomplete="off"><label>Used to disect the
+                                id
+                                from a string like "https://banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"</label>
                         </div>
                     </div>
                     <hr>
+                </div><br>
+                <input id="forceUpdates" type="checkbox" autocomplete="off"><label>Force Updates (even without count changes)</label><br>
+                <button onclick="apiUpdate()">Update Now</button>
+                <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)" autocomplete="off">
+                <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
+                <button onclick="saveAPIUpdates()" id="saveapi">Save API Update Settings</button><label> Make sure
+                    to do an actual save too</label><br>
+                <strong>MAKE SURE TO SAVE BEFORE ENABLING</strong>
+                <label>this will only update the count if the {count} of the abbreviated number changes</label>
+            </div>
+            <div>
+                <label class="bold">FYSC Stream Hub</label><br>
+                <div>
+                    <label>Min Gain (only for streams):</label>
+                    <input value="-10000" id="min_gain_global" autocomplete="off">
+                    <label> - Max Gain (only for streams): </label><input value="10000" id="max_gain_global"
+                        autocomplete="off">
+                </div>
+                <div id="stream">
                     <div>
-                        <p>Click the button below to connect to NightBot (gives you access live chat for commands)</p>
-                        <div class="middleBoringSettings">
-                            <div>
-                                <button onclick="connect()" class="discord" id="toConnect">Connect</button><br>
-                                <label>Connected: </label><label id="isconnected">No</label><br>
-                            </div>
-                            <button onclick="custom()" class="discord">Custom Command Maker</button>
-                        </div>
-                        <h3>How to setup NightBot & LCEDIT for streams: <a
-                                href="https://www.youtube.com/watch?v=j40Xs1zZqg4">Tutorial Video</a></h3>
+                        <p>Add this to the response section of the nightbot command.</p>
+                        <p>This command allows users to be added.</p>
+                        <p>Example Usage: {!add 100/200} 100 is in the min and 200 is the max. You can limit the min
+                            and max.</p>
+                        </p>
+                        <textarea id="connect" autocomplete="off"></textarea>
+                    </div>
+                    <div>
+                        <p>Add this to the response section of the nightbot command.</p>
+                        <p>This command allows users to be edited.</p>
+                        <p>Example Usage: {!edit 100/200} 100 is in the min and 200 is the max. You can limit the
+                            max and min.</p>
+                        </p>
+                        <textarea id="connect3" autocomplete="off"></textarea>
+                    </div>
+                    <div>
+                        <p>Add this to the response section of the nightbot command.</p>
+                        <p>This is an EXAMPLE command that just shows how to add example commands. ?values= shows
+                            the min and the max gains possible.</p>
+                        <textarea id="connect2" autocomplete="off"></textarea>
+                    </div>
+                    <div>
+                        <p>Add this to the response section of the nightbot command.</p>
+                        <p>This is an EXAMPLE command that just shows how to retrieve a user's subscriber count from
+                            this site.</p>
+                        <textarea id="connect4" autocomplete="off"></textarea>
                     </div>
                 </div>
+                <hr>
+                <div>
+                    <p>Click the button below to connect to NightBot (gives you access live chat for commands)</p>
+                    <div class="middleBoringSettings">
+                        <div>
+                            <button onclick="connect()" class="discord" id="toConnect">Connect</button><br>
+                            <label>Connected: </label><label id="isconnected">No</label><br>
+                        </div>
+                        <button onclick="custom()" class="discord">Custom Command Maker</button>
+                    </div>
+                    <h3>How to setup NightBot & LCEDIT for streams: <a
+                            href="https://www.youtube.com/watch?v=j40Xs1zZqg4">Tutorial Video</a></h3>
+                </div>
             </div>
-            <hr>
         </div>
-        <script src="./index.js"></script>
-        <br>
-        <center>
-            <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
-                reports</a>
-        </center>
+        <hr>
+    </div>
+    <script src="./index.js?cache=2"></script>
+    <br>
+    <center>
+        <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
+            reports</a>
+    </center>
     </div>
     <style id="styles"></style>
-
 </body>
 
 </html>
