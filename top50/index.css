@@ -48,6 +48,7 @@ h2 {
   border: solid 0.1em #000;
   z-index: 1;
   position: relative;
+  margin-top: 0px;
 }
 
 .count {
@@ -61,7 +62,7 @@ h2 {
 .name {
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  text-overflow:clip;
   padding-left: 0.1vw;
   font-size: 1.5vw;
   src: url('../../fonts/Roboto-Regular.ttf') format('truetype');

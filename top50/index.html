@@ -24,6 +24,8 @@
     <meta property="og:url" content="https://lcedit.com" />
     <meta property="og:image" content="https://lcedit.com/images/top50.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5666487244102554"
+        crossorigin="anonymous"></script>
 
     <script src="../jquery.js"></script>
     <script>
@@ -41,6 +43,7 @@
     <style id="centerRanks"></style>
     <style id="rankSizeStyles"></style>
     <style id="differenceStyling"></style>
+    <style id="cardStyles"></style>
 </head>
 
 <body>
@@ -234,12 +237,34 @@
                         <div>
                             <br>
                             <label>Box Spacing</label><br>
-                            <input value="0.2" id="boxSpacing" autocomplete="off">
+                            <input type="number" value="0.2" id="boxSpacing" autocomplete="off">
                         </div>
                         <div>
                             <br>
                             <label>Rank Size</label><br>
-                            <input value="1" id="rankSize" autocomplete="off">
+                            <input type="number" value="1" id="rankSize" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Name Size</label><br>
+                            <input type="number" value="1" id="nameSize" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Count Size</label><br>
+                            <input type="number" value="1" id="countSize" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Image Size</label><br>
+                            <input type="number" value="1" id="imageSize" autocomplete="off">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Card Width</label><br>
+                            <input type="number" value="1" id="cardWidth" autocomplete="off">
+                            <br><label>Card Height</label><br>
+                            <input type="number" value="1" id="cardHeight" autocomplete="off">
                         </div>
                         <div>
                             <br>
@@ -293,6 +318,10 @@
                         </div>
                         <div>
                             <br>
+                            <input type="number" id="rankingsWidth"><label>Rank Box Width</label>
+                        </div>
+                        <div>
+                            <br>
                             <input type="checkbox" id="showImages" checked><label>Show Images</label>
                         </div>
                         <div>
@@ -318,12 +347,12 @@
                         <div>
                             <br>
                             <label>Image Border Radius</label><br>
-                            <input value="50" id="imageBorder" autocomplete="off"><label>%</label>
+                            <input type="number" value="50" id="imageBorder" autocomplete="off"><label>%</label>
                         </div>
                         <div>
                             <br>
                             <label>Box Border Roundness (0-100)</label><br>
-                            <input value="0" id="boxBorderRadius" autocomplete="off"><label>%</label>
+                            <input type="number" value="0" id="boxBorderRadius" autocomplete="off"><label>%</label>
                         </div>
                         <div>
                             <br>
@@ -338,7 +367,7 @@
                         <div>
                             <br>
                             <label>Box Background Duration (in seconds)</label><br>
-                            <input value="1" id="boxBGLength" autocomplete="off"><br>
+                            <input type="number" value="1" id="boxBGLength" autocomplete="off"><br>
                             <label>*Leave at 0 to disable</label>
                         </div>
                     </div>
@@ -354,12 +383,13 @@
                         <div>
                             <br>
                             <label>Update Interval (in seconds)</label><br>
-                            <input value="2" id="updateint" autocomplete="off">
+                            <input type="number" value="2" id="updateint" autocomplete="off">
                         </div>
                         <div>
                             <br>
                             <label>Odometer Speed</label><br>
-                            <input value="2" id="odometerSpeed" autocomplete="off"><label> (in seconds)</label>
+                            <input type="number" value="2" id="odometerSpeed" autocomplete="off"><label> (in
+                                seconds)</label>
                         </div>
                         <div>
                             <br>
@@ -383,26 +413,32 @@
                             <br>
                             <input type="checkbox" id="showDifferences" checked><label>Show Differences</label>
                             <br>
-                            <label>Differences Placing (top): </label><input type="text" id="topDifferencePlacing"
+                            <label>Difference Threshold: </label><input type="number" id="differenceThreshold"
                                 autocomplete="off">
                             <br>
-                            <label>Differences Placing (left): </label><input type="text" id="leftDifferencePlacing"
+                            <label>Differences Placing (top): </label><input type="number" id="topDifferencePlacing"
+                                autocomplete="off">
+                            <br>
+                            <label>Differences Placing (left): </label><input type="number" id="leftDifferencePlacing"
                                 autocomplete="off">
                             <br>
                             <label>Differences Color: </label><input type="text" id="differenceColor"
                                 autocomplete="off">
+                            <br>
+                            <label>Difference Size: </label>
+                            <input type="number" value="1" id="differenceSize" autocomplete="off">
                         </div>
                         <div><br>
                             <label>Difference Images: </label><input type="checkbox" id="enableDifferenceImages"
                                 autocomplete="off">
                             <br>
-                            <label>Image Place (top): </label><input type="text" id="topDifferenceImagePlacing"
+                            <label>Image Place (top): </label><input type="number" id="topDifferenceImagePlacing"
                                 autocomplete="off">
                             <br>
-                            <label>Image Placing (left): </label><input type="text" id="leftDifferenceImagePlacing"
+                            <label>Image Placing (left): </label><input type="number" id="leftDifferenceImagePlacing"
                                 autocomplete="off">
                             <br>
-                            <label>Image Size: </label><input type="text" id="differenceImageSize"
+                            <label>Image Size: </label><input type="number" id="differenceImageSize"
                                 autocomplete="off"><br>
                             <label>Image Shaking: </label><input type="checkbox" id="enableImageShakes"
                                 autocomplete="off">
@@ -413,7 +449,35 @@
                                 onclick="saveImageForDiffs()">Save Image Upload</button>
                             <br>
                         </div>
-                    </div>
+                    </div><br><br><br>
+                    <!--<div class="boringSettings">
+                        <div>
+                            <label class="bold">TOP Settings:</label>
+                            <br><br>
+                            <label>How many sections?</label><br>
+                            <input type="number" id="totalSections"><label> sections</label><br><br>
+                            <label>Set the order of sizes?</label>
+                            <label>ex: (1, 5, 4, 3) - they are relative to each other</label>
+                            <br>
+                            <label>Sizes: </label><input type="text" id="sizeSections">
+                            <br><br>
+                            <label>How tall should the top part be?</label><br>
+                            <input type="number" id="heightSections"><br><br>
+                        </div>
+                        <div>
+                            <label>For each section, select its purpose.</label>
+                            <div id="sections" style="height: 200px; overflow-y: scroll;">
+
+                            options:
+                                text:
+                                    color, size, scroll
+                                gains: 
+                                    color, size, scroll
+                                battle: 
+                                    color, size, (custom, closest)
+                            </div>
+                        </div>
+                    </div>-->
                 </div>
             </div>
         </div>
@@ -479,7 +543,8 @@
                     </div>
                     <hr>
                 </div><br>
-                <input id="forceUpdates" type="checkbox" autocomplete="off"><label>Force Updates (even without count changes)</label><br>
+                <input id="forceUpdates" type="checkbox" autocomplete="off"><label>Force Updates (even without count
+                    changes)</label><br>
                 <button onclick="apiUpdate()">Update Now</button>
                 <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)" autocomplete="off">
                 <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>

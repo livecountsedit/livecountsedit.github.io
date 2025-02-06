@@ -86,7 +86,6 @@ function adjustColors() {
 
 function mergeWithExampleData(imported, example) {
     if (typeof imported !== 'object' || imported === null) return example;
-
     for (let key in example) {
         if (!imported.hasOwnProperty(key)) {
             imported[key] = example[key];
@@ -104,8 +103,10 @@ let example_data = {
     "showNames": true,
     "showCounts": true,
     "showRankings": true,
+    "rankingsWidth": '10',
     "showBlankSlots": true,
     "showDifferences": false,
+    "differenceThreshold": 100,
     "differenceStyles": {
         "left": "75",
         "top": "-5",
@@ -116,10 +117,18 @@ let example_data = {
         "imageEnabled": false,
         "shakingEnabled": true,
         "differenceImage": "./mdm_gifs/lightning.png",
+        "differenceSize": '5',
+    },
+    "cardStyles": {
+        "cardWidth": '',
+        "cardHeight": '',
+        "imageSize": '',
+        "nameSize": '',
+        "countSize": '',
+        "rankSize": '',
     },
     "bgColor": "#141414",
     "textColor": "#000",
-    "rankSize": "15",
     "boxColor": "#f7f5fe",
     "boxBorder": "#FFF",
     "imageBorder": "0",
@@ -206,19 +215,18 @@ initLoad()
 function initLoad(redo) {
     let storedData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : null;
 
-    if (storedData) {
-        data = mergeWithExampleData(storedData, example_data);
-    } else {
-        data = example_data;
+    if (!redo) {
+        if (storedData) {
+            data = mergeWithExampleData(storedData, example_data);
+        } else {
+            data = example_data;
+        }
     }
 
     if (data.apiUpdates.enabled) {
         apiInterval = setInterval(function () {
             apiUpdate(true);
         }, parseFloat(data.apiUpdates.interval));
-    }
-    if (!data.theme) {
-        data.theme = 'top50';
     }
     if (data.theme.includes('top100')) {
         data.max = 100;
@@ -232,21 +240,6 @@ function initLoad(redo) {
         data.max = 150;
     } else if (data.theme.includes('top200')) {
         data.max = 200;
-    }
-    if ((!data.showImages) && (data.showImages !== false)) {
-        data.showImages = true;
-    }
-    if ((!data.showNames) && (data.showNames !== false)) {
-        data.showNames = true;
-    }
-    if ((!data.showCounts) && (data.showCounts !== false)) {
-        data.showCounts = true;
-    }
-    if ((!data.showRankings) && (data.showRankings !== false)) {
-        data.showRankings = true;
-    }
-    if ((!data.showBlankSlots) && (data.showBlankSlots !== false)) {
-        data.showBlankSlots = true;
     }
     data.pause = false;
     if (data.lastOnline && data.offlineGains == true) {
@@ -268,7 +261,7 @@ function initLoad(redo) {
     let design = setupDesign();
     document.getElementById('main').innerHTML = design[0].innerHTML;
     document.getElementById('main').style = design[1];
-    document.getElementById('designStyles').innerText = design[2];
+    //document.getElementById('designStyles').innerText = design[2];
     if (!data.uuid) {
         data.uuid = uuidGen();
     }
@@ -311,43 +304,65 @@ function setupDesign(list, sort, order) {
             channels = channels.reverse();
         }
     }
+
+    if ((data.theme.includes('top100')) || (data.theme.includes('top150'))) {
+        toReturn[2] = `.image { height: ${(data.showDifferences) ? 1.5 : 2.15}vw; width: ${(data.showDifferences) ? 1.5 : 2.15}vw; }
+        .card { height: 2.3vw; }
+        .count { font-size: ${(data.showDifferences) ? 0.7 : 1}vw; }
+        .name { font-size: ${(data.showDifferences) ? 0.5 : 0.75}vw; }
+        .subgap { font-size: 0.7vw;};`
+
+        data.cardStyles.imageSize = (data.showDifferences) ? 1.5 : 2.15;
+        data.cardStyles.cardHeight = '2.15'
+        data.cardStyles.countSize = (data.showDifferences) ? '0.7' : '1'
+        data.cardStyles.nameSize = (data.showDifferences) ? '0.5' : '0.75';
+        data.differenceStyles.differenceSize = '0.7vw';
+        toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+
+    } else if (data.theme.includes('top200')) {
+        toReturn[2] = `.image { height: ${(data.showDifferences) ? 1.2 : 1.8}vw; width: ${(data.showDifferences) ? 1.2 : 1.8}vw; }
+        .card { height: 2vw; }
+        .count { font-size: ${(data.showDifferences) ? 0.6 : 0.9}vw; }
+        .name { font-size: ${(data.showDifferences) ? 0.4 : 0.6}vw; }
+        .subgap { font-size: 0.6vw; };`
+        toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+
+        data.cardStyles.imageSize = (data.showDifferences) ? 1.2 : 1.8;
+        data.cardStyles.cardHeight = '1.8'
+        data.cardStyles.countSize = (data.showDifferences) ? '0.6' : '0.9'
+        data.cardStyles.nameSize = (data.showDifferences) ? '0.4' : '0.6';
+        data.differenceStyles.differenceSize = '0.6vw';
+    } else {
+        toReturn[2] = `.image { height: ${(data.showDifferences) ? 3 : 4.25}vw; width: ${(data.showDifferences) ? 3 : 4.25}vw; }
+        .card { height: 4.5vw; }
+        .count { font-size: ${(data.showDifferences) ? 1.4 : 2}vw; }
+        .name { font-size: ${(data.showDifferences) ? 1.05 : 1.5}vw; }
+        .subgap {font-size: 1.25vw;};`
+        toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+
+        data.cardStyles.imageSize = (data.showDifferences) ? 3 : 4.25;
+        data.cardStyles.cardHeight = '4.25'
+        data.cardStyles.countSize = (data.showDifferences) ? '1.4' : '2'
+        data.cardStyles.nameSize = (data.showDifferences) ? '1.05' : '1.5';
+        data.differenceStyles.differenceSize = '1.25vw';
+    }
+
     if (data.theme.includes('H')) {
         let cards = parseInt(data.theme.split('H')[0].split('top')[1]);
-        toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        if (cards == 100) {
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; width: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; }
-            .card { height: 2.15vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 0.7 : 1}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 0.5 : 0.75}vw; }
-            .subgap { font-size: 0.7vw;}`;
-        } else if (cards == 150) {
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; width: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; }
-            .card { height: 2.15vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 0.7 : 1}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 0.5 : 0.75}vw; }
-            .subgap { font-size: 0.7vw;}`;
-        } else if (cards == 200) {
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 1.2 : 1.8}vw; width: ${(data.showDifferences == 'default') ? 1.2 : 1.8}vw; }
-            .card { height: 1.8vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 0.6 : 0.9}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 0.4 : 0.6}vw; }
-            .subgap { font-size: 0.6vw; }`;
+        toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+
+        if (cards > 50) {
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        } else {
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 3 : 4.25}vw; width: ${(data.showDifferences == 'default') ? 3 : 4.25}vw; }
-            .card { height: 4.25vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 1.4 : 2}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 1.05 : 1.5}vw; }
-            .subgap {font-size: 1.25vw;}`;
-            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+            data.cardStyles.cardWidth = '9'
         }
+
         for (let l = 1; l <= cards; l++) {
             const cc = (c < 10) ? "0" + c : c;
             const dataIndex = c - 1;
             const htmlcard = document.createElement('div');
             const cid = channels[dataIndex] ? channels[dataIndex].id : '';
             htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
-                <div class="num" id="num_${cid}"><div>${cc}</div></div>
+                <div class="num" id="num_${cid}"><div class="num_text">${cc}</div></div>
                 <img src="../blank.png" alt="" id="image_${cid}" class="image">
                 <div>
                     <div class="name" id="name_${cid}">Loading...</div>
@@ -380,14 +395,14 @@ function setupDesign(list, sort, order) {
                 const htmlcard = document.createElement('div');
                 const cid = channels[dataIndex] ? channels[dataIndex].id : '';
                 htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
-                    <div class="num" id="num_${cid}"><div>${cc}</div></div>
-                    <img src="../blank.png" alt="" id="image_${cid}" class="image">
-                    <div>
-                        <div class="name" id="name_${cid}">Loading...</div>
-                        <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
-                    </div>
-                    <img src="${data.differenceStyles.differenceImage}" class="gapimg">
-                    <div class="subgap odometer"></div>
+                <div class="num" id="num_${cid}"><div class="num_text">${cc}</div></div>
+                <img src="../blank.png" alt="" id="image_${cid}" class="image">
+                <div>
+                    <div class="name" id="name_${cid}">Loading...</div>
+                    <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
+                </div>
+                <img src="${data.differenceStyles.differenceImage}" class="gapimg">
+                <div class="subgap odometer"></div>
                 </div>`;
                 if (channels[dataIndex]) {
                     if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
@@ -400,40 +415,12 @@ function setupDesign(list, sort, order) {
             }
             main.appendChild(htmlcolumn);
         }
-        if (data.theme == 'top100') {
-            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; width: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; }
-            .card { height: 2.15vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 0.7 : 1}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 0.5 : 0.75}vw; }
-            .subgap { font-size: 0.7vw;}`;
-        } else if (data.theme == 'top150') {
-            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; width: ${(data.showDifferences == 'default') ? 1.5 : 2.15}vw; }
-            .card { height: 2.15vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 0.7 : 1}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 0.5 : 0.75}vw; }
-            .subgap { font-size: 0.7vw;}`;
-            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        } else if (data.theme == 'top200') {
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 1.2 : 1.8}vw; width: ${(data.showDifferences == 'default') ? 1.2 : 1.8}vw; }
-            .card { height: 1.8vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 0.6 : 0.9}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 0.4 : 0.6}vw; }
-            .subgap { font-size: 0.6vw; }`;
-            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-        } else {
-            toReturn[2] = `.image { height: ${(data.showDifferences == 'default') ? 3 : 4.25}vw; width: ${(data.showDifferences == 'default') ? 3 : 4.25}vw; }
-            .card { height: 4.25vw; }
-            .count { font-size: ${(data.showDifferences == 'default') ? 1.4 : 2}vw; }
-            .name { font-size: ${(data.showDifferences == 'default') ? 1.05 : 1.5}vw; }
-            .subgap {font-size: 1.25vw;}`;
-            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
-        }
     }
     toReturn[0] = main;
+    document.getElementById('theme').value = data.theme;
     return toReturn;
 }
+
 
 function create() {
     let addMinGain = document.getElementById('add_min_gain').value;
@@ -511,7 +498,7 @@ function setupMDMStyles(undo) {
     if (undo) {
         appendedMDMStyles = false;
         document.getElementById('mdm-styles').remove();
-        document.querySelectorAll('.num').forEach(item=> {
+        document.querySelectorAll('.num').forEach(item => {
             item.style.backgroundImage = '';
             item.style.border = '';
         })
@@ -525,7 +512,6 @@ function setupMDMStyles(undo) {
     
                         .num {
                             height: 100%;
-                            width: 40px;
                             display: flex;
                             ${data.verticallyCenterRanks ? 'flex-direction: column' : ''}
                             align-items: center;
@@ -537,7 +523,7 @@ function setupMDMStyles(undo) {
                         }
 
                         .num_text {
-                            ${data.verticallyCenterRanks ? 'margin-top: 0.25em;' : 'margin-top: -1.25em;'}
+                            ${data.verticallyCenterRanks ? 'margin-top: 0.25em;' : 'margin-top: 0em;'}
                             z-index: 1000;
                             margin-left: 0.1em;
                         }
@@ -674,9 +660,17 @@ function update(doGains = true) {
                             currentCard.children[2].children[1].id = "count_" + data.data[i].id
                             currentCard.children[2].children[1].innerText = getDisplayedCount(data.data[i].count)
                             if (data.data[i + 1]) {
-                                currentCard.children[4].innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
+                                if (data.data[i].count - data.data[i + 1].count < parseInt(data.differenceThreshold)) {
+                                    currentCard.children[4].innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
+                                    currentCard.children[4].style.visibility = 'visible'
+                                    currentCard.children[3].style.visibility = 'visible'
+                                } else {
+                                    currentCard.children[3].style.visibility = 'hidden'
+                                    currentCard.children[4].style.visibility = 'hidden'
+                                }
                             } else {
-                                currentCard.children[4].innerText = getDisplayedCount(data.data[i].count)
+                                currentCard.children[4].style.visibility = 'hidden'
+                                currentCard.children[3].style.visibility = 'hidden'
                             }
                             if (selected == data.data[i].id) {
                                 document.getElementById("card_" + selected).style.border = "0.1em solid red";
@@ -799,6 +793,10 @@ function update(doGains = true) {
                                         break;
                                     } else {
                                         currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
+                                        if (firePosition == 'mdm') {
+                                            currentCard.children[0].style.backgroundImage = `url('')`;
+                                            currentCard.children[0].style.color = `${data.textColor}`;
+                                        }
                                     }
                                 }
                             } else {
@@ -1166,7 +1164,37 @@ document.getElementById('textPicker').addEventListener('change', function () {
 });
 
 document.getElementById('rankSize').addEventListener('change', function () {
-    data.rankSize = this.value;
+    data.cardStyles.rankSize = this.value;
+    fix();
+});
+
+document.getElementById('differenceSize').addEventListener('change', function () {
+    data.differenceStyles.differenceSize = this.value;
+    fix();
+});
+
+document.getElementById('cardWidth').addEventListener('change', function () {
+    data.cardStyles.cardWidth = this.value;
+    fix();
+});
+
+document.getElementById('cardHeight').addEventListener('change', function () {
+    data.cardStyles.cardHeight = this.value;
+    fix();
+});
+
+document.getElementById('imageSize').addEventListener('change', function () {
+    data.cardStyles.imageSize = this.value;
+    fix();
+});
+
+document.getElementById('nameSize').addEventListener('change', function () {
+    data.cardStyles.nameSize = this.value;
+    fix();
+});
+
+document.getElementById('countSize').addEventListener('change', function () {
+    data.cardStyles.countSize = this.value;
     fix();
 });
 
@@ -1248,47 +1276,52 @@ document.getElementById('verticallyCenterRanks').addEventListener('change', func
     } else {
         data.verticallyCenterRanks = false;
     }
-    fix()
+    fix();
 });
 
 document.getElementById('topDifferencePlacing').addEventListener('change', function () {
     data.differenceStyles.top = document.getElementById('topDifferencePlacing').value;
-    fix()
-});
-
-document.getElementById('enableImageShakes').addEventListener('change', function () {
-    data.differenceStyles.shakingEnabled = document.getElementById('enableImageShakes').checked;
-    fix()
+    fix();
 });
 
 document.getElementById('leftDifferencePlacing').addEventListener('change', function () {
     data.differenceStyles.left = document.getElementById('leftDifferencePlacing').value;
-    fix()
+    fix();
+});
+
+document.getElementById('differenceThreshold').addEventListener('change', function () {
+    data.differenceThreshold = document.getElementById('differenceThreshold').value;
+    fix();
+});
+
+document.getElementById('enableImageShakes').addEventListener('change', function () {
+    data.differenceStyles.shakingEnabled = document.getElementById('enableImageShakes').checked;
+    fix();
 });
 
 document.getElementById('differenceColor').addEventListener('change', function () {
     data.differenceStyles.color = document.getElementById('differenceColor').value;
-    fix()
+    fix();
 });
 
 document.getElementById('enableDifferenceImages').addEventListener('change', function () {
     data.differenceStyles.imageEnabled = document.getElementById('enableDifferenceImages').checked;
-    fix()
+    fix();
 });
 
 document.getElementById('leftDifferenceImagePlacing').addEventListener('change', function () {
     data.differenceStyles.imageLeft = document.getElementById('leftDifferenceImagePlacing').value;
-    fix()
+    fix();
 });
 
 document.getElementById('topDifferenceImagePlacing').addEventListener('change', function () {
     data.differenceStyles.imageTop = document.getElementById('topDifferenceImagePlacing').value;
-    fix()
+    fix();
 });
 
 document.getElementById('differenceImageSize').addEventListener('change', function () {
     data.differenceStyles.imageSize = document.getElementById('differenceImageSize').value;
-    fix()
+    fix();
 });
 
 document.getElementById('differenceImageUrl').addEventListener('change', function () {
@@ -1326,14 +1359,15 @@ document.getElementById('showDifferences').addEventListener('change', function (
 });
 
 document.getElementById('showRankings').addEventListener('change', function () {
-    if (document.getElementById('showRankings').checked) {
-        data.showRankings = true;
-    } else {
-        data.showRankings = false;
-    }
+    data.showRankings = document.getElementById('showRankings').checked;
     fix()
 });
 
+
+document.getElementById('rankingsWidth').addEventListener('change', function () {
+    data.rankingsWidth = document.getElementById('rankingsWidth').value;
+    fix()
+});
 document.getElementById('showNames').addEventListener('change', function () {
     if (document.getElementById('showNames').checked) {
         data.showNames = true;
@@ -1458,6 +1492,7 @@ function fix() {
 
     document.getElementById('leftDifferencePlacing').value = data.differenceStyles.left;
     document.getElementById('topDifferencePlacing').value = data.differenceStyles.top;
+    document.getElementById('differenceThreshold').value = data.differenceThreshold;
     document.getElementById('differenceColor').value = data.differenceStyles.color;
 
     document.getElementById('enableDifferenceImages').checked = data.differenceStyles.imageEnabled;
@@ -1473,11 +1508,12 @@ function fix() {
 
     document.getElementById('differenceStyling').innerText = `
         .subgap {
-            margin-top: ${data.differenceStyles.top}%;
+            top: ${data.differenceStyles.top}%;
             z-index: 100;
             position: absolute;
             float: none;
-            margin-left: ${data.differenceStyles.left}%;
+            left: ${data.differenceStyles.left}%;
+            font-size: ${data.differenceStyles.differenceSize}vw;
         }
 
         .subgap {
@@ -1489,12 +1525,26 @@ function fix() {
             height: ${data.differenceStyles.imageSize}px;
             ${data.differenceStyles.imageEnabled ? "" : "display: none"};
             left: ${data.differenceStyles.imageLeft}%;
-            margin-top: ${data.differenceStyles.imageTop}%;
+            top: ${data.differenceStyles.imageTop}%;
             ${data.differenceStyles.shakingEnabled ? "animation: shake 1s infinite;" : ""}
         }`;
 
-    let design = setupDesign()
-    document.getElementById('designStyles').innerText = design[2];
+    document.getElementById('cardStyles').innerText = `
+            .name {
+                font-size: ${data.cardStyles.nameSize}vw;
+            }
+            .count {
+                font-size: ${data.cardStyles.countSize}vw;
+            }
+            .image {
+                height: ${data.cardStyles.imageSize}vw;
+                width: ${data.cardStyles.imageSize}vw;
+            }
+            .card {
+                height: ${data.cardStyles.cardHeight}vw;
+                width: ${data.cardStyles.cardWidth}vw;
+            }
+        `
 
     if (data.prependZeros == true) {
         document.getElementById('prependZeros').checked = true;
@@ -1559,7 +1609,6 @@ function fix() {
         })
     }
 
-    document.getElementById('theme').value = data.theme;
     document.getElementById('setting').innerText = "Current: " + data.hideSettings + ""
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
@@ -1577,17 +1626,33 @@ function fix() {
         card.style.borderColor = data.imageBorderColor;
     });
     document.getElementById('main').children = Array.from(document.getElementById('main').children).forEach(child => {
-        Array.from(child.children).forEach(child2 => {
-            child2.style.margin = data.boxSpacing + 'vw';
-        });
+        if (data.theme.includes('H')) {
+            child.style.margin = data.boxSpacing + 'vw';
+        } else {
+            Array.from(child.children).forEach(child2 => {
+                child2.style.margin = data.boxSpacing + 'vw';
+            });
+        }
     });
     document.getElementById('rankSizeStyles').innerText = `
         .num_text {
-        font-size: ${data.rankSize}px;
-        }`;
+        font-size: ${data.cardStyles.rankSize}px;
+        }
+
+        .num {
+          width: ${data.rankingsWidth}px;
+        }
+        
+        `;
     document.getElementById('backPicker').value = convert3letterhexto6letters(data.bgColor);
     document.getElementById('boxSpacing').value = data.boxSpacing;
-    document.getElementById('rankSize').value = data.rankSize;
+    document.getElementById('rankSize').value = data.cardStyles.rankSize;
+    document.getElementById('differenceSize').value = data.differenceStyles.differenceSize;
+    document.getElementById('cardWidth').value = data.cardStyles.cardWidth;
+    document.getElementById('cardHeight').value = data.cardStyles.cardHeight;
+    document.getElementById('nameSize').value = data.cardStyles.nameSize;
+    document.getElementById('countSize').value = data.cardStyles.countSize;
+    document.getElementById('imageSize').value = data.cardStyles.imageSize;
     document.getElementById('textPicker').value = convert3letterhexto6letters(data.textColor);
     document.getElementById('boxPicker').value = convert3letterhexto6letters(data.boxColor);
     document.getElementById('borderPicker').value = convert3letterhexto6letters(data.boxBorder);
@@ -1866,8 +1931,7 @@ document.getElementById('abbreviate').addEventListener('click', function () {
 })
 
 document.getElementById('theme').addEventListener('change', function () {
-    let theme = document.getElementById('theme').value;
-    data.theme = theme;
+    data.theme = document.getElementById('theme').value;
     themeChanger();
 })
 
