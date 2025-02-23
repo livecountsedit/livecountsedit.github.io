@@ -32,7 +32,6 @@
         window.odometerOptions = { auto: false };
     </script>
     <script src="./odometer.js"></script>
-    <script src="../highstock.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js"></script>
 
@@ -47,6 +46,7 @@
 </head>
 
 <body>
+    <div id="header"></div>
     <div class="main" id="main"></div>
     <hr>
     <div class="other" id="settings">
@@ -141,8 +141,9 @@
                     <input placeholder="Mean Gain" id="add_mean_gain"><br>
                     <input placeholder="Range From Mean (Standard Deviation)" id="add_std_gain"><br>
                     <br>
-                    <input placeholder="Card Background Color" id="add_bg_color"><br>
-                    <br>
+                    <input placeholder="Card Background" id="add_bg_color">
+                    <br><label>For a gradient, put "linear-gradient(red, yellow)" <a href="https://www.w3schools.com/css/css3_gradients.asp">More Information</a></label>
+                    <br><br>
                     <button onclick="create()">Create</button>
                 </div>
                 <div>
@@ -173,8 +174,9 @@
                     <input placeholder="Range From Mean (Standard Deviation)" id="edit_std_gain">
                     <input id="edit_std_gain_check" type="checkbox" checked><br>
                     <br>
-                    <input placeholder="Card Background Color" id="edit_bg_color">
-                    <input id="edit_bg_color_check" type="checkbox" checked><br>
+                    <input placeholder="Card Background" id="edit_bg_color">
+                    <br><label>For a gradient, put "linear-gradient(red, yellow)" <a href="https://www.w3schools.com/css/css3_gradients.asp">More Information</a></label>
+                    <input id="edit_bg_color_check" type="checkbox" checked><br><br>
                     <div>
                         <button onclick="edit()">Edit</button>
                         <button onclick="deleteChannel()">Delete</button>
@@ -237,34 +239,39 @@
                         <div>
                             <br>
                             <label>Box Spacing</label><br>
-                            <input type="number" value="0.2" id="boxSpacing" autocomplete="off">
+                            <input type="number" value="0.2" id="boxSpacing" autocomplete="off" step="0.1">
                         </div>
                         <div>
                             <br>
                             <label>Rank Size</label><br>
-                            <input type="number" value="1" id="rankSize" autocomplete="off">
+                            <input type="number" value="1" id="rankSize" autocomplete="off" step="0.1">
                         </div>
                         <div>
                             <br>
                             <label>Name Size</label><br>
-                            <input type="number" value="1" id="nameSize" autocomplete="off">
+                            <input type="number" value="1" id="nameSize" autocomplete="off" step="0.1">
                         </div>
                         <div>
                             <br>
                             <label>Count Size</label><br>
-                            <input type="number" value="1" id="countSize" autocomplete="off">
+                            <input type="number" value="1" id="countSize" autocomplete="off" step="0.1">
                         </div>
                         <div>
                             <br>
                             <label>Image Size</label><br>
-                            <input type="number" value="1" id="imageSize" autocomplete="off">
+                            <input type="number" value="1" id="imageSize" autocomplete="off" step="0.1">
+                        </div>
+                        <div>
+                            <br>
+                            <label>Rank Box Width</label><br>
+                            <input type="number" id="rankingsWidth" step="0.1">
                         </div>
                         <div>
                             <br>
                             <label>Card Width</label><br>
-                            <input type="number" value="1" id="cardWidth" autocomplete="off">
+                            <input type="number" value="1" id="cardWidth" autocomplete="off" step="0.1">
                             <br><label>Card Height</label><br>
-                            <input type="number" value="1" id="cardHeight" autocomplete="off">
+                            <input type="number" value="1" id="cardHeight" autocomplete="off" step="0.1">
                         </div>
                         <div>
                             <br>
@@ -315,10 +322,6 @@
                         <div>
                             <br>
                             <input type="checkbox" id="showRankings" checked><label>Show Rankings</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="number" id="rankingsWidth"><label>Rank Box Width</label>
                         </div>
                         <div>
                             <br>
@@ -416,29 +419,29 @@
                             <label>Difference Threshold: </label><input type="number" id="differenceThreshold"
                                 autocomplete="off">
                             <br>
-                            <label>Differences Placing (top): </label><input type="number" id="topDifferencePlacing"
-                                autocomplete="off">
+                            <label>Differences Placing (top): </label><input type="number" step="0.1"
+                                id="topDifferencePlacing" autocomplete="off">
                             <br>
-                            <label>Differences Placing (left): </label><input type="number" id="leftDifferencePlacing"
-                                autocomplete="off">
+                            <label>Differences Placing (left): </label><input type="number" step="0.1"
+                                id="leftDifferencePlacing" autocomplete="off">
                             <br>
                             <label>Differences Color: </label><input type="text" id="differenceColor"
                                 autocomplete="off">
                             <br>
                             <label>Difference Size: </label>
-                            <input type="number" value="1" id="differenceSize" autocomplete="off">
+                            <input type="number" step="0.1" value="1" id="differenceSize" autocomplete="off">
                         </div>
                         <div><br>
                             <label>Difference Images: </label><input type="checkbox" id="enableDifferenceImages"
                                 autocomplete="off">
                             <br>
-                            <label>Image Place (top): </label><input type="number" id="topDifferenceImagePlacing"
-                                autocomplete="off">
+                            <label>Image Place (top): </label><input type="number" step="0.1"
+                                id="topDifferenceImagePlacing" autocomplete="off">
                             <br>
-                            <label>Image Placing (left): </label><input type="number" id="leftDifferenceImagePlacing"
-                                autocomplete="off">
+                            <label>Image Placing (left): </label><input type="number" step="0.1"
+                                id="leftDifferenceImagePlacing" autocomplete="off">
                             <br>
-                            <label>Image Size: </label><input type="number" id="differenceImageSize"
+                            <label>Image Size: </label><input type="number" step="0.1" id="differenceImageSize"
                                 autocomplete="off"><br>
                             <label>Image Shaking: </label><input type="checkbox" id="enableImageShakes"
                                 autocomplete="off">
@@ -449,10 +452,12 @@
                                 onclick="saveImageForDiffs()">Save Image Upload</button>
                             <br>
                         </div>
-                    </div><br><br><br>
-                    <!--<div class="boringSettings">
+                    </div><br><hr><br>
+                    <div class="middleBoringSettings">
                         <div>
-                            <label class="bold">TOP Settings:</label>
+                            <label class="bold">TOP Settings: (BETA)</label><br>
+                            <label>(might be buggy, please report all bugs in the discord!)</label>
+                            <button onclick="saveTopSettings()">Save Top Settings</button>
                             <br><br>
                             <label>How many sections?</label><br>
                             <input type="number" id="totalSections"><label> sections</label><br><br>
@@ -463,21 +468,14 @@
                             <br><br>
                             <label>How tall should the top part be?</label><br>
                             <input type="number" id="heightSections"><br><br>
+                            <label>How far apart should the sections be?</label><br>
+                            <input type="number" id="gapSections"><br><br>
                         </div>
                         <div>
-                            <label>For each section, select its purpose.</label>
-                            <div id="sections" style="height: 200px; overflow-y: scroll;">
-
-                            options:
-                                text:
-                                    color, size, scroll
-                                gains: 
-                                    color, size, scroll
-                                battle: 
-                                    color, size, (custom, closest)
-                            </div>
+                            <strong>For each section, select its purpose: </strong><button onclick="createNewSection()">Create New Section</button><hr>
+                            <div id="sections" style="height: 400px; overflow-y: scroll;"></div>
                         </div>
-                    </div>-->
+                    </div>
                 </div>
             </div>
         </div>
@@ -489,7 +487,6 @@
                     <option value="custom">Custom API</option>
                     <option value="mixerno1">[abbreviated] mixerno.space</option>
                     <option value="mixerno2">[estimated] mixerno.space</option>
-                    <option value="soon">[COMING SOON]</option>
                 </select>
                 <div id="apiSettings">
                     <label>Make sure the part to include the channel is at the very end and left open OR use
@@ -536,9 +533,8 @@
                                 autocomplete="off"><br>
 
                             <label>ID (Required) </label><input id="pathID" placeholder="id" autocomplete="off"><br>
-                            <input type="checkbox" id="IDIncludes" autocomplete="off"><label>Used to disect the
-                                id
-                                from a string like "https://banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"</label>
+                            <input type="checkbox" id="IDIncludes" autocomplete="off"><label> - Enable if ID is part of
+                                another string like: "https://banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"</label>
                         </div>
                     </div>
                     <hr>

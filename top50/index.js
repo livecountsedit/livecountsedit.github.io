@@ -120,12 +120,12 @@ let example_data = {
         "differenceSize": '5',
     },
     "cardStyles": {
-        "cardWidth": '',
-        "cardHeight": '',
-        "imageSize": '',
-        "nameSize": '',
-        "countSize": '',
-        "rankSize": '',
+        "cardWidth": '19',
+        "cardHeight": '4.2',
+        "imageSize": '3',
+        "nameSize": '1',
+        "countSize": '2',
+        "rankSize": '15',
     },
     "bgColor": "#141414",
     "textColor": "#000",
@@ -206,6 +206,58 @@ let example_data = {
             }
         },
         'forceUpdates': false
+    },
+    'headerSettings': {
+        'totalSections': 3,
+        'headerHeight': 100,
+        'boxWidth': '2,2,2',
+        'sectionGap': 10,
+        'items': [ //it's possible to have more items than sections
+            {
+                "name": "Battle",
+                "type": "battle",
+                "attributes": {
+                    "size": 30,
+                    "type": "custom" //custom or closest
+                }
+            },
+            {
+                "name": "Container",
+                "type": "box",
+                "attributes": {
+                    "rows": 2
+                }
+            }, {
+                "name": "Text 1",
+                "type": "text",
+                "childOf": "Container",
+                "attributes": {
+                    "text": "Test Text 1",
+                    "color": "red",
+                    "size": 30,
+                    "scrollTime": 5
+                }
+            }, {
+                "name": "Text 2",
+                "type": "text",
+                "childOf": "Container",
+                "attributes": {
+                    "text": "Test Text 2",
+                    "color": "red",
+                    "size": 30,
+                    "scrollTime": 0,
+                    "valueFrom": "gains" //counts, gains, count[id], gain[id]
+                }
+            }, {
+                "name": "Text 3",
+                "type": "text",
+                "attributes": {
+                    "text": "Test Text 3",
+                    "color": "red",
+                    "size": 30
+                }
+            }
+        ]
     }
 };
 let updateInterval;
@@ -286,6 +338,7 @@ function initLoad(redo) {
     }
 }
 
+
 function setupDesign(list, sort, order) {
     let c = 1;
     let toReturn = ["", "", ""]
@@ -311,14 +364,7 @@ function setupDesign(list, sort, order) {
         .count { font-size: ${(data.showDifferences) ? 0.7 : 1}vw; }
         .name { font-size: ${(data.showDifferences) ? 0.5 : 0.75}vw; }
         .subgap { font-size: 0.7vw;};`
-
-        data.cardStyles.imageSize = (data.showDifferences) ? 1.5 : 2.15;
-        data.cardStyles.cardHeight = '2.15'
-        data.cardStyles.countSize = (data.showDifferences) ? '0.7' : '1'
-        data.cardStyles.nameSize = (data.showDifferences) ? '0.5' : '0.75';
-        data.differenceStyles.differenceSize = '0.7vw';
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-
     } else if (data.theme.includes('top200')) {
         toReturn[2] = `.image { height: ${(data.showDifferences) ? 1.2 : 1.8}vw; width: ${(data.showDifferences) ? 1.2 : 1.8}vw; }
         .card { height: 2vw; }
@@ -326,12 +372,6 @@ function setupDesign(list, sort, order) {
         .name { font-size: ${(data.showDifferences) ? 0.4 : 0.6}vw; }
         .subgap { font-size: 0.6vw; };`
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-
-        data.cardStyles.imageSize = (data.showDifferences) ? 1.2 : 1.8;
-        data.cardStyles.cardHeight = '1.8'
-        data.cardStyles.countSize = (data.showDifferences) ? '0.6' : '0.9'
-        data.cardStyles.nameSize = (data.showDifferences) ? '0.4' : '0.6';
-        data.differenceStyles.differenceSize = '0.6vw';
     } else {
         toReturn[2] = `.image { height: ${(data.showDifferences) ? 3 : 4.25}vw; width: ${(data.showDifferences) ? 3 : 4.25}vw; }
         .card { height: 4.5vw; }
@@ -339,12 +379,6 @@ function setupDesign(list, sort, order) {
         .name { font-size: ${(data.showDifferences) ? 1.05 : 1.5}vw; }
         .subgap {font-size: 1.25vw;};`
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
-
-        data.cardStyles.imageSize = (data.showDifferences) ? 3 : 4.25;
-        data.cardStyles.cardHeight = '4.25'
-        data.cardStyles.countSize = (data.showDifferences) ? '1.4' : '2'
-        data.cardStyles.nameSize = (data.showDifferences) ? '1.05' : '1.5';
-        data.differenceStyles.differenceSize = '1.25vw';
     }
 
     if (data.theme.includes('H')) {
@@ -370,6 +404,7 @@ function setupDesign(list, sort, order) {
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
                 <div class="subgap odometer"></div>
+                <canvas class="chart" id="chart_${cid}"></canvas>
             </div>`;
 
             if (channels[dataIndex]) {
@@ -403,6 +438,7 @@ function setupDesign(list, sort, order) {
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
                 <div class="subgap odometer"></div>
+                <canvas class="chart" id="chart_${cid}"></canvas>
                 </div>`;
                 if (channels[dataIndex]) {
                     if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
@@ -519,13 +555,13 @@ function setupMDMStyles(undo) {
                             background-position: center;
                             background-size: cover;
                             font-size: 1.5em;
-                            margin-left: 0.1em;
+
                         }
 
                         .num_text {
-                            ${data.verticallyCenterRanks ? 'margin-top: 0.25em;' : 'margin-top: 0em;'}
+                            ${data.verticallyCenterRanks ? 'margin-top: 0.25em;' : 'margin-top: -1.5em;'}
                             z-index: 1000;
-                            margin-left: 0.1em;
+                            text-align: center;
                         }
                             </style>`
     document.body.insertAdjacentHTML('beforeend', stylesToAppend);
@@ -642,16 +678,19 @@ function update(doGains = true) {
                                 data.data[i].image = "../default.png";
                             }
                             if ((data.data[i].bg) && (boxBGLength !== '1')) {
-                                currentCard.style.backgroundColor = data.data[i].bg;
+                                currentCard.style.background = data.data[i].bg;
                             } else {
                                 currentCard.style.backgroundColor = data.boxColor;
                             }
                             currentCard.id = "card_" + data.data[i].id
                             currentCard.children[0].id = "num_" + data.data[i].id
 
-                            if (currentCard.children[1].src != data.data[i].image) {
-                                currentCard.children[1].src = data.data[i].image
+                            const absoluteUrl = new URL(data.data[i].image, window.location.href).href;
+
+                            if (!(currentCard.children[1].src === absoluteUrl)) {
+                                currentCard.children[1].src = data.data[i].image;
                             }
+
                             currentCard.children[1].id = "image_" + data.data[i].id
 
                             currentCard.children[2].children[0].innerText = data.data[i].name
@@ -659,6 +698,7 @@ function update(doGains = true) {
 
                             currentCard.children[2].children[1].id = "count_" + data.data[i].id
                             currentCard.children[2].children[1].innerText = getDisplayedCount(data.data[i].count)
+                            //HERE
                             if (data.data[i + 1]) {
                                 if (data.data[i].count - data.data[i + 1].count < parseInt(data.differenceThreshold)) {
                                     currentCard.children[4].innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
@@ -734,12 +774,12 @@ function update(doGains = true) {
                                             }
                                         }
                                     } else if (data.fireIcons.type == 'hour') {
-                                        let subs = data.data[i].count - data.data[i].lastCount;  // Correct: track new gains
+                                        let subs = data.data[i].count - data.data[i].lastCount;
 
-                                        let updateInterval = data.updateInterval / 1000;  // Convert ms to seconds
-                                        let updatesPerHour = 3600 / updateInterval;  // Calculate how many updates happen in an hour
+                                        let updateInterval = data.updateInterval / 1000;
+                                        let updatesPerHour = 3600 / updateInterval;
 
-                                        let subsPerUpdateThreshold = data.fireIcons.created[q].threshold / updatesPerHour;  // Correct scaling
+                                        let subsPerUpdateThreshold = data.fireIcons.created[q].threshold / updatesPerHour;
 
                                         if (data.fireIcons.created[q].method == '>=') {
                                             equation = subs >= subsPerUpdateThreshold;
@@ -818,7 +858,9 @@ function update(doGains = true) {
                             currentCard.id = 'card_'
                             currentCard.children[0].id = "num_"
                             currentCard.children[1].id = "image_"
-                            currentCard.children[1].src = "../blank.png"
+                            if (!currentCard.children[1].src == '../blank.png') {
+                                currentCard.children[1].src = "../blank.png"
+                            }
                             currentCard.children[2].children[0].id = "name_"
                             currentCard.children[2].children[0].innerText = 'Loading...'
                             currentCard.children[2].children[1].id = "count_"
@@ -1060,7 +1102,7 @@ function load() {
                     console.error(error);
                 }
                 document.getElementById('main').innerHTML = "";
-                initLoad('redo')
+                window.location.reload()
             }
         });
     } else {
@@ -1392,7 +1434,6 @@ document.getElementById('showCounts').addEventListener('change', function () {
     }
     fix()
 });
-
 function fix() {
     if (data.audits == true) {
         auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[4])) * 1000)
@@ -1661,6 +1702,7 @@ function fix() {
     document.getElementById('odometerSpeed').value = data.odometerSpeed;
     document.getElementById('imageBorder').value = data.imageBorder;
     document.getElementById('imageBorderColor').value = data.imageBorderColor;
+    document.getElementById('rankingsWidth').value = data.rankingsWidth;
 
     document.getElementById('boxBGGain').value = data.boxBGGain;
     document.getElementById('boxBGLose').value = data.boxBGLose;
@@ -2763,6 +2805,7 @@ const loadFireIcons = () => {
     document.getElementById('firePosition').value = data.fireIcons.firePosition || 'above';
     document.getElementById('fireBorderColor').value = data.fireIcons.fireBorderColor || '#FFF';
     document.getElementById('fireBorderWidth').value = data.fireIcons.fireBorderWidth || 0;
+    adjustColors();
 }
 loadFireIcons();
 
@@ -2848,4 +2891,324 @@ function importMDMIcons() {
             loadFireIcons();
         })
         .catch(error => console.error('Error importing MDM icons:', error));
+}
+
+let headerIntervals = [];
+function loadHeader() {
+    headerIntervals.forEach(interval => {
+        clearInterval(interval);
+    });
+    headerIntervals = [];
+    document.getElementById('header').innerHTML = '';
+    document.getElementById('header').style.height = data.headerSettings.headerHeight + 'px';
+    document.getElementById('header').style.gridTemplateColumns = data.headerSettings.boxWidth.split(',').map(x => x.trim() + 'fr').join(' ');
+    document.getElementById('header').style.gap = data.headerSettings.sectionGap + "px";
+
+    for (let i = 0; i < data.headerSettings.items.length; i++) {
+        const item = data.headerSettings.items[i];
+        const div = document.createElement('div');
+        div.classList.add('header_child')
+        div.id = 'header_' + item.name;
+        if (item.type == 'text') {
+            div.innerHTML = `<p class="header-text">${item.attributes.text}</p>`;
+            div.style.color = item.attributes.color;
+            div.style.fontSize = item.attributes.size + "px";
+
+            if (item.attributes.scrollTime > 0) {
+                const scrollDistance = item.attributes.text.length * item.attributes.size;
+                const scrollSpeed = scrollDistance / item.attributes.scrollTime;
+                div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${item.attributes.text}</marquee>`
+            }
+
+            if (item.attributes.valueFrom && item.attributes.valueFrom != 'none') {
+                if (item.attributes.updateInterval != 0) {
+                    headerIntervals.push(setInterval(function () {
+                        let string = "";
+                        let array = [];
+                        if (item.attributes.valueFrom == 'gains') {
+                            array = [...data.data].sort((a, b) => (a.count - a.last) - (b.count - b.last));
+                        } else if (item.attributes.valueFrom == 'counts') {
+                            array = [...data.data].sort((a, b) => (a.count) - (b.count));
+                        }
+                        if (item.attributes.sortOrder == 'asc') {
+                            array = array.reverse();
+                        }
+                        array = array.slice(0, item.attributes.length);
+                        string = array.map(x => `${x.name}: ${x.count.toLocaleString('en-US')}`);
+                        const scrollDistance = string.join(', ').length * item.attributes.size;
+                        const scrollSpeed = scrollDistance / item.attributes.scrollTime;
+                        div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${string.join(', ')}</marquee>`
+                    }, item.attributes.updateInterval));
+                }
+            }
+        }
+        if (item.type == 'battle') {
+            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
+                <div class="battle_container">
+                    <img style="float: left; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image1_${item.name}"></img>
+                    <div class="battle_info">
+                        <p id="battle_name1_${item.name}" class="name">Loading...</p>
+                        <p class="odometer count" id="battle_count1_${item.name}">0</p>
+                    </div>
+                </div>
+                <div>
+                    <p class="name">Difference:</p>
+                    <p class="odometer battle_difference count" id="battle_difference_${item.name}">0</p>
+                </div>
+                <div class="reverse battle_container">
+                <div class="battle_info">
+                        <p id="battle_name2_${item.name}" class="name">Loading...</p>
+                        <p class="odometer count" id="battle_count2_${item.name}">0</p>
+                    </div>
+                    <img style="float: right; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image2_${item.name}"></img>
+                </div>
+                </div>`;
+            headerIntervals.push(setInterval(function () {
+                let user1 = {};
+                let user2 = {};
+                if (item.attributes.type == 'custom') {
+                    user1 = data.data.find(u => u.id == item.attributes.ids[0]);
+                    user2 = data.data.find(u => u.id == item.attributes.ids[1]);
+                } else {
+                    let users = findClosestBattle();
+                    user1 = users.channels[0];
+                    user2 = users.channels[1];
+                }
+
+                if (user1) {
+                    document.getElementById('battle_name1_' + item.name).innerHTML = user1.name;
+                    document.getElementById('battle_count1_' + item.name).innerHTML = user1.count;
+                    if (!document.getElementById('battle_image1_' + item.name).src == user1.image) {
+                        document.getElementById('battle_image1_' + item.name).src = user1.image;
+                    }
+                }
+                if (user2) {
+                    document.getElementById('battle_name2_' + item.name).innerHTML = user2.name;
+                    document.getElementById('battle_count2_' + item.name).innerHTML = user2.count;
+                    if (!document.getElementById('battle_image2_' + item.name).src == user2.image) {
+                        document.getElementById('battle_image2_' + item.name).src = user2.image;
+                    }
+                }
+                document.getElementById('battle_difference_' + item.name).innerHTML = Math.abs(user1.count - user2.count);
+            }, item.attributes.updateInterval));
+        }
+        if (item.type == 'user') {
+            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
+                <div class="battle_container">
+                    <img style="float: left; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="user_image1_${item.name}"></img>
+                    <div class="battle_info">
+                        <p id="user_name1_${item.name}" class="name">Loading...</p>
+                        <p class="odometer count" id="user_count1_${item.name}">0</p>
+                    </div>
+                </div>`;
+            headerIntervals.push(setInterval(function () {
+                let user1 = {};
+                if (item.attributes.type == 'custom') {
+                    user1 = data.data.find(u => u.id == item.attributes.ids[0]);
+                } else {
+                    user1 = findFastestChannel();
+                }
+
+                if (user1) {
+                    document.getElementById('user_name1_' + item.name).innerHTML = user1.name;
+                    document.getElementById('user_count1_' + item.name).innerHTML = user1.count;
+                    if (!document.getElementById('user_image1_' + item.name).src == user1.image) {
+                        document.getElementById('user_image1_' + item.name).src = user1.image;
+                    }
+                }
+            }, item.attributes.updateInterval));
+        }
+        if (!item.childOf) {
+            document.getElementById('header').appendChild(div);
+        } else {
+            const parent = document.getElementById('header_' + item.childOf);
+            parent.appendChild(div);
+        }
+    }
+    updateOdo()
+}
+
+function findClosestBattle() {
+    let pairs = [];
+    for (let i = 0; i < data.data.length - 1; i++) {
+        pairs.push({
+            diff: Math.abs(data.data[i].count - data.data[i + 1].count),
+            channels: [data.data[i], data.data[i + 1]]
+        });
+    }
+    pairs.sort((a, b) => a.diff - b.diff);
+    return pairs[0];
+}
+
+function findFastestChannel() {
+    let toReturn = [...data.data].sort((a, b) => (a.count - a.last) - (b.count - b.last));
+    return toReturn[0];
+}
+
+function saveTopSettings() {
+    let items = [];
+    document.querySelector("#sections").children = Array.from(document.querySelector("#sections").children).forEach(parent => {
+        let item = {
+            "attributes": {
+            }
+        };
+        parent.children = Array.from(parent.children).forEach(child => {
+            if (child.classList && child.classList.contains("header_option")) {
+                console.log(child.classList[0].split('_')[2], child.value)
+                if (child.classList[0].includes('attribute')) {
+                    if (child.type == 'number') {
+                        item['attributes'][child.classList[0].split('_')[2]] = parseInt(child.value);
+                    } else {
+                        item['attributes'][child.classList[0].split('_')[2]] = child.value;
+                    }
+                } else {
+                    item[child.classList[0].split('_')[2]] = child.value;
+                }
+            }
+        });
+        items.push(item);
+    });
+    data.headerSettings = {
+        totalSections: document.getElementById("totalSections").value,
+        headerHeight: document.getElementById("heightSections").value,
+        boxWidth: document.getElementById("sizeSections").value,
+        sectionGap: document.getElementById("gapSections").value,
+        items: items
+    }
+    save()
+    loadHeader()
+}
+
+function loadTopSettings(itemName, itemType) {
+    if (!itemType) {
+        document.getElementById("totalSections").value = data.headerSettings.totalSections;
+        document.getElementById("heightSections").value = data.headerSettings.headerHeight;
+        document.getElementById("sizeSections").value = data.headerSettings.boxWidth;
+        document.getElementById("gapSections").value = data.headerSettings.sectionGap;
+    }
+    document.getElementById("sections").innerHTML = ``;
+    data.headerSettings.items.forEach(item => {
+        if (item.name == itemName) {
+            item.type = itemType;
+        }
+
+        let div = document.createElement("div");
+        div.className = "headerItem";
+        div.id = `headerItem_${item.name}`;
+        let textSettings = `
+            <label>Content:</label>
+            <input type="text" value="${item.attributes.text || ''}" class="section_attribute_text header_option" /><br>
+            <label>Color:</label>
+            <input type="color" value="${item.attributes.color || '#FFF'}" class="section_attribute_color header_option" /><br>
+            <label>Size:</label>
+            <input type="number" value="${item.attributes.size || '20'}" class="section_attribute_size header_option" /><br>
+            <label>Scroll Duration: (0 = disabled)</label>
+            <input type="number" value="${item.attributes.scrollTime || '0'}" class="section_attribute_scrollTime header_option" /><br>
+            <hr style="width: 50%;" />
+            <label>Get Value From:</label>
+            <select class="section_attribute_valueFrom header_option">
+                <option value="none" ${item.attributes.valueFrom === 'none' ? 'selected' : ''}>Disabled</option>
+                <option value="gains" ${item.attributes.valueFrom === 'gains' ? 'selected' : ''}>Gains</option>
+                <option value="counts" ${item.attributes.valueFrom === 'counts' ? 'selected' : ''}>Counts</option>
+            </select><br>
+            <label>(Above) List Length:</label>
+            <input type="number" value="${item.attributes.length || 0}" class="section_attribute_length header_option" /><br>
+            <label>(Above) Sort Order:</label>
+            <select class="section_attribute_sortOrder header_option">
+                <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
+                <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
+            </select><br>
+            <label>(Above) Update Interval:</label>
+            <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
+        `;
+        if (!item.attributes.ids) {
+            item.attributes.ids = ["", ""]
+        }
+        let battleSettings = `
+            <label>Background Color:</label>
+            <input type="color" value="${item.attributes.bgColor || '#000'}" class="section_attribute_bgColor header_option" /><br>
+            <label>Height:</label>
+            <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_boxHeight header_option" /><br>
+            <label>Image Size:</label>
+            <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option" /><br>
+            <label>(Above) Update Interval:</label>
+            <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
+            <label>Type:</label>
+            <select class="section_attribute_type header_option">
+                <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest (in difference, IDs are ignored)</option>
+                <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom (specify IDs below)</option>
+            </select><br>
+            <label>User 1 ID:</label><input value="${item.attributes.ids[0]}" class="section_attribute_id1 header_option" /><br>
+            <label>User 2 ID:</label><input value="${item.attributes.ids[1]}" class="section_attribute_id2 header_option" /><br>
+        `;
+        let userSettings = `
+            <label>Background Color:</label>
+            <input type="color" value="${item.attributes.bgColor || '#000'}" class="section_attribute_bgColor header_option" /><br>
+            <label>Height:</label>
+            <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option" /><br>
+            <label>Image Size:</label>
+            <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option" /><br>
+            <label>Update Interval:</label>
+            <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
+            <label>Type:</label>
+            <select class="section_attribute_type header_option">
+                <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest (ID is ignored)</option>
+                <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom (specify ID below)</option>
+            </select><br>
+            <label>User 1 ID:</label><input value="${item.attributes.ids[0]}" class="section_attribute_id1 header_option" /><br>
+            `;
+        let boxSettings = `
+            <label>Rows:</label>
+            <input type="number" value="${item.attributes.rows || 0}" class="section_attribute_rows header_option" /><br>
+        `;
+        div.innerHTML = `<br>
+            <label>Name: </label><input type="text" value="${item.name}" class="section_option_name header_option" />
+            <strong>Type: </strong><select class="section_option_type header_option" value="${item.type}" onchange="loadTopSettings('${item.name}', this.value)" onchange="loadTopSettings('${item.name}', this.value)" />
+                <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
+                <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
+                <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
+                <option value="box" ${item.type === "box" ? "selected" : ""}>Box</option>
+            </select><br>
+            <label>Child of (enter name of parent box): </label><input type="text" value="${item.childOf || ""}" class="section_option_childOf header_option" placeholder="or leave blank :)" />
+            ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings : item.type == 'box' ? boxSettings : ''}
+            <br>
+            <button type="button" onclick="removeTopSetting('${item.name}')">Delete</button>
+            <br><hr>
+            `;
+        document.getElementById("sections").appendChild(div);
+    });
+    adjustColors();
+    loadHeader();
+};
+loadTopSettings();
+
+function removeTopSetting(name) {
+    if (confirm("Are you sure you want to delete this setting?")) {
+        let itemToRemove = data.headerSettings.items.find(item => item.name === name);
+        if (itemToRemove) {
+            data.headerSettings.items.splice(data.headerSettings.items.indexOf(itemToRemove), 1);
+            loadTopSettings();
+        }
+    }
+}
+
+function createNewSection() {
+    let item = {
+        "attributes": {
+            "text": "Text",
+            "color": "#ffffff",
+            "size": 30,
+            "scrollTime": 0,
+            "valueFrom": "none",
+            "length": 0,
+            "sortOrder": "asc",
+            "updateInterval": 0,
+            "ids": ["", ""]
+        },
+        "name": "Text " + data.headerSettings.items.length,
+        "type": "text",
+        "childOf": "Container"
+    }
+    data.headerSettings.items.unshift(item);
+    loadTopSettings();
 }
