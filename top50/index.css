@@ -24,6 +24,7 @@ h2 {
   font-weight: 900;
   src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
   height: 100%;
+  display: flex;
   justify-content: center;
 }
 

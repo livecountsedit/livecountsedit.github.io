@@ -262,7 +262,7 @@ function initLoad(redo) {
                  */
 
                 data.data[i].count += randomGaussian(
-                    meanGain * intervalsPassed, 
+                    meanGain * intervalsPassed,
                     stdGain * Math.sqrt(intervalsPassed));
             } else {
 
@@ -331,15 +331,7 @@ function initLoad(redo) {
         element.classList.remove("hidden");
         button.classList.add("enabled");
     });
-    Array.from(document.getElementById('container').children).forEach(child => {
-        let isActive = !child.classList.contains('hidden');
-        if (isActive) {
-            let place = data.settingsEnabled.indexOf(child.id);
-            child.style.order = place + 1;
-        } else {
-            child.style.order = 'auto';
-        }
-    });
+    fixSettings();
 };
 
 
@@ -557,13 +549,27 @@ function setupMDMStyles(undo) {
                             background-position: center;
                             background-size: cover;
                             font-size: 1.5em;
-
                         }
 
                         .num_text {
                             ${data.verticallyCenterRanks ? 'margin-top: 0.25em;' : 'margin-top: -1.5em;'}
                             z-index: 1000;
                             text-align: center;
+                        }
+
+                        .num:hover {
+                            background-color: #555;
+                        }
+
+                        .num_text:hover {
+                            background-color: #555;
+                        }
+
+                        .num_text span {
+                            font-size: 1.2em;
+                        }
+
+                        .num_text span:nth-child(2)
                         }
                             </style>`
     document.body.insertAdjacentHTML('beforeend', stylesToAppend);
@@ -1320,6 +1326,11 @@ document.getElementById('verticallyCenterRanks').addEventListener('change', func
         data.verticallyCenterRanks = true;
     } else {
         data.verticallyCenterRanks = false;
+    }
+    if (data.fireIcons.firePosition == 'mdm') {
+        setupMDMStyles()
+    } else {
+        setupMDMStyles(true)
     }
     fix();
 });
@@ -2558,8 +2569,6 @@ function selectorFunction(e) {
         }
         if (!target) return;
     }
-    //let id = target.id?.split('_')[1]
-    //some ids may have more than one underscore, some may have 2, 3, 4, etc. we want all but the first one
     let id = target.id?.split('_').slice(1).join('_')
     if (pickingChannels == true) {
         if (specificChannels.includes(id)) {
@@ -2976,10 +2985,17 @@ function loadHeader() {
                     headerIntervals.push(setInterval(function () {
                         let string = "";
                         let array = [];
+                        let sourceData = [...data.data];
+                        if (item.attributes.idList && item.attributes.idList !== '') {
+                            let idList = item.attributes.idList.split(',');
+                            for (let i = 0; i < idList.length; i++) {
+                                array.push(sourceData.find(x => x.id == idList[i].trim()));
+                            }
+                        }
                         if (item.attributes.valueFrom == 'gains') {
-                            array = [...data.data].sort((a, b) => (a.count - a.lastCount) - (b.count - b.lastCount));
+                            array = sourceData.sort((a, b) => (a.count - a.lastCount) - (b.count - b.lastCount));
                         } else if (item.attributes.valueFrom == 'counts') {
-                            array = [...data.data].sort((a, b) => (a.count) - (b.count));
+                            array = sourceData.sort((a, b) => (a.count) - (b.count));
                         }
                         if (item.attributes.sortOrder == 'asc') {
                             array = array.reverse();
@@ -2987,15 +3003,29 @@ function loadHeader() {
                         array = array.slice(0, item.attributes.length);
                         if (item.attributes.valueFrom == 'counts') {
                             string = array.map(x => {
-                            return `${x.name}: ${Math.floor(x.count).toLocaleString('en-US')}`});
-                        } else {
+                                return `${x.name}: ${Math.floor(x.count).toLocaleString('en-US')}`
+                            });
+                        } else if (item.attributes.valueFrom == 'gains') {
                             string = array.map(x => {
-                            return`${x.name}: ${Math.floor(x.count-x.lastCount).toLocaleString('en-US')}`});
+                                return `${x.name}: ${Math.floor(x.count - x.lastCount).toLocaleString('en-US')}`
+                            });
+                        } else {
+                            for (let i = 0; i < array.length; i += 2) {
+                                let endComma = ', '
+                                if (!array[i+1] || !array[i+2]) {
+                                    endComma = '';
+                                }
+                                string += `${array[i].name} vs ${array[i + 1].name}: ${Math.floor(array[i].count - array[i + 1].count).toLocaleString('en-US')}${endComma}`
+                            }
                         }
-                        const scrollDistance = string.join(', ').length * item.attributes.size;
-                        const scrollSpeed = scrollDistance / item.attributes.scrollTime;
-                        div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${string.join(', ')}</marquee>`
-                    }, item.attributes.updateInterval*1000));
+                        if (item.attributes.scrollTime != '0') {
+                            const scrollDistance = string.join(', ').length * item.attributes.size;
+                            const scrollSpeed = scrollDistance / item.attributes.scrollTime;
+                            div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${string.join(', ')}</marquee>`
+                        } else[
+                            div.innerHTML = `<p class="header-text">${string}</p>`
+                        ]
+                    }, item.attributes.updateInterval * 1000));
                 }
             }
         }
@@ -3024,8 +3054,8 @@ function loadHeader() {
                 let user1 = {};
                 let user2 = {};
                 if (item.attributes.type == 'custom') {
-                    user1 = data.data.find(u => u.id == item.attributes.ids[0]);
-                    user2 = data.data.find(u => u.id == item.attributes.ids[1]);
+                    user1 = data.data.find(u => u.id == item.attributes.id1);
+                    user2 = data.data.find(u => u.id == item.attributes.id2);
                 } else {
                     let users = findClosestBattle();
                     user1 = users.channels[0];
@@ -3042,13 +3072,12 @@ function loadHeader() {
                 if (user2) {
                     document.getElementById('battle_name2_' + item.name).innerHTML = user2.name;
                     document.getElementById('battle_count2_' + item.name).innerHTML = Math.floor(user2.count);
-                    console.log(user2.image, document.getElementById('battle_image2_' + item.name).src);
                     if (document.getElementById('battle_image2_' + item.name).src !== user2.image) {
                         document.getElementById('battle_image2_' + item.name).src = user2.image;
                     }
                 }
                 document.getElementById('battle_difference_' + item.name).innerHTML = Math.floor(user1.count - user2.count);
-            }, item.attributes.updateInterval*1000));
+            }, item.attributes.updateInterval * 1000));
         }
         if (item.type == 'user') {
             div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
@@ -3062,7 +3091,7 @@ function loadHeader() {
             headerIntervals.push(setInterval(function () {
                 let user1 = {};
                 if (item.attributes.type == 'custom') {
-                    user1 = data.data.find(u => u.id == item.attributes.ids[0]);
+                    user1 = data.data.find(u => u.id == item.attributes.id1);
                 } else {
                     user1 = findFastestChannel();
                 }
@@ -3074,7 +3103,7 @@ function loadHeader() {
                         document.getElementById('user_image1_' + item.name).src = user1.image;
                     }
                 }
-            }, item.attributes.updateInterval*1000));
+            }, item.attributes.updateInterval * 1000));
         }
         if (!item.childOf) {
             document.getElementById('header').appendChild(div);
@@ -3168,6 +3197,7 @@ function loadTopSettings(itemName, itemType) {
                 <option value="none" ${item.attributes.valueFrom === 'none' ? 'selected' : ''}>Disabled</option>
                 <option value="gains" ${item.attributes.valueFrom === 'gains' ? 'selected' : ''}>Gains</option>
                 <option value="counts" ${item.attributes.valueFrom === 'counts' ? 'selected' : ''}>Counts</option>
+                <option value="gaps" ${item.attributes.valueFrom === 'gaps' ? 'selected' : ''}>Gaps</option>
             </select><br>
             <label>(Above) List Length:</label>
             <input type="number" value="${item.attributes.length || 0}" class="section_attribute_length header_option" /><br>
@@ -3178,10 +3208,9 @@ function loadTopSettings(itemName, itemType) {
             </select><br>
             <label>(Above) Update Interval (seconds):</label>
             <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
+            <label>List IDs (separated via a comma) (for gaps it'll collect the first 2, then second 2, etc) to be used (OR leave blank):</label>
+            <input type="text" value="${item.attributes?.idList?.toString() || ''}" class="section_attribute_idList header_option" /><br>
         `;
-        if (!item.attributes.ids) {
-            item.attributes.ids = ["", ""]
-        }
         let battleSettings = `
             <label>Background Color:</label>
             <input type="color" value="${item.attributes.bgColor || '#000'}" class="section_attribute_bgColor header_option" /><br>
@@ -3198,8 +3227,8 @@ function loadTopSettings(itemName, itemType) {
                 <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest (in difference, IDs are ignored)</option>
                 <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom (specify IDs below)</option>
             </select><br>
-            <label>User 1 ID:</label><input value="${item.attributes.ids[0]}" class="section_attribute_id1 header_option" /><br>
-            <label>User 2 ID:</label><input value="${item.attributes.ids[1]}" class="section_attribute_id2 header_option" /><br>
+            <label>User 1 ID:</label><input value="${item.attributes.id1}" class="section_attribute_id1 header_option" /><br>
+            <label>User 2 ID:</label><input value="${item.attributes.id2}" class="section_attribute_id2 header_option" /><br>
         `;
         let userSettings = `
             <label>Background Color:</label>
@@ -3217,7 +3246,7 @@ function loadTopSettings(itemName, itemType) {
                 <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest (ID is ignored)</option>
                 <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom (specify ID below)</option>
             </select><br>
-            <label>User 1 ID:</label><input value="${item.attributes.ids[0]}" class="section_attribute_id1 header_option" /><br>
+            <label>User 1 ID:</label><input value="${item.attributes.id1}" class="section_attribute_id1 header_option" /><br>
             `;
         let boxSettings = `
             <label>Rows:</label>
@@ -3236,6 +3265,8 @@ function loadTopSettings(itemName, itemType) {
             ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings : item.type == 'box' ? boxSettings : ''}
             <br>
             <button type="button" onclick="removeTopSetting('${item.name}')">Delete</button>
+            <button type="button" onclick="reorderTopSetting('${item.name}', 'up')">Move Up</button>
+            <button type="button" onclick="reorderTopSetting('${item.name}', 'down')">Move Down</button>
             <br><hr>
             `;
         document.getElementById("sections").appendChild(div);
@@ -3265,9 +3296,10 @@ function createNewSection() {
             "length": 0,
             "sortOrder": "asc",
             "updateInterval": 2,
-            "ids": ["", ""]
+            "id1": "",
+            "id2": ""
         },
-        "name": "Text " + data.headerSettings.items.length,
+        "name": "Item " + data.headerSettings.items.length,
         "type": "text",
         "childOf": ""
     }
@@ -3286,6 +3318,35 @@ function displaySetting(id, item) {
         document.getElementById(id).classList.remove("hidden");
         data.settingsEnabled.push(id);
     }
+    fixSettings();
+}
+
+function reorderTopSetting(item, direction) {
+    let element = data.headerSettings.items.find(setting => setting.name === item);
+    let index = data.headerSettings.items.indexOf(element);
+    if (direction === 'up') {
+        if (element && index > 0) {
+            let previousElement = data.headerSettings.items[index - 1];
+            if (previousElement) {
+                //swap elements
+                data.headerSettings.items.splice(index, 1);
+                data.headerSettings.items.splice(index - 1, 0, element);
+            }
+        }
+    } else if (direction === 'down') {
+        if (element && index < data.headerSettings.items.length - 1) {
+            let nextElement = data.headerSettings.items[index + 1];
+            if (nextElement) {
+                //swap elements
+                data.headerSettings.items.splice(index, 1);
+                data.headerSettings.items.splice(index + 1, 0, element);
+            }
+        }
+    }
+    loadTopSettings();
+}
+
+function fixSettings() {
     Array.from(document.getElementById('container').children).forEach(child => {
         let isActive = !child.classList.contains('hidden');
         if (isActive) {
