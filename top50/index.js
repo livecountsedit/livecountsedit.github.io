@@ -2987,11 +2987,9 @@ function loadHeader() {
                         array = array.slice(0, item.attributes.length);
                         if (item.attributes.valueFrom == 'counts') {
                             string = array.map(x => {
-                                console.log(x)
                             return `${x.name}: ${Math.floor(x.count).toLocaleString('en-US')}`});
                         } else {
                             string = array.map(x => {
-                                console.log(x)
                             return`${x.name}: ${Math.floor(x.count-x.lastCount).toLocaleString('en-US')}`});
                         }
                         const scrollDistance = string.join(', ').length * item.attributes.size;
@@ -3006,18 +3004,18 @@ function loadHeader() {
                 <div class="battle_container">
                     <img style="float: left; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image1_${item.name}"></img>
                     <div class="battle_info">
-                        <p id="battle_name1_${item.name}" class="name">Loading...</p>
-                        <p class="odometer count" id="battle_count1_${item.name}">0</p>
+                        <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
+                        <p class="odometer count" id="battle_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>
                 <div>
-                    <p class="name">Difference:</p>
-                    <p class="odometer battle_difference count" id="battle_difference_${item.name}">0</p>
+                    <p class="name" style="font-size: ${item.attributes.fontSize}px;">Difference:</p>
+                    <p class="odometer battle_difference count" id="battle_difference_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                 </div>
                 <div class="reverse battle_container">
                 <div class="battle_info">
-                        <p id="battle_name2_${item.name}" class="name">Loading...</p>
-                        <p class="odometer count" id="battle_count2_${item.name}">0</p>
+                        <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
+                        <p class="odometer count" id="battle_count2_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                     <img style="float: right; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image2_${item.name}"></img>
                 </div>
@@ -3037,27 +3035,28 @@ function loadHeader() {
                 if (user1) {
                     document.getElementById('battle_name1_' + item.name).innerHTML = user1.name;
                     document.getElementById('battle_count1_' + item.name).innerHTML = Math.floor(user1.count);
-                    if (!document.getElementById('battle_image1_' + item.name).src == user1.image) {
+                    if (document.getElementById('battle_image1_' + item.name).src !== user1.image) {
                         document.getElementById('battle_image1_' + item.name).src = user1.image;
                     }
                 }
                 if (user2) {
                     document.getElementById('battle_name2_' + item.name).innerHTML = user2.name;
                     document.getElementById('battle_count2_' + item.name).innerHTML = Math.floor(user2.count);
-                    if (!document.getElementById('battle_image2_' + item.name).src == user2.image) {
+                    console.log(user2.image, document.getElementById('battle_image2_' + item.name).src);
+                    if (document.getElementById('battle_image2_' + item.name).src !== user2.image) {
                         document.getElementById('battle_image2_' + item.name).src = user2.image;
                     }
                 }
                 document.getElementById('battle_difference_' + item.name).innerHTML = Math.floor(user1.count - user2.count);
-            }, item.attributes.updateInterval));
+            }, item.attributes.updateInterval*1000));
         }
         if (item.type == 'user') {
             div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
                 <div class="battle_container">
                     <img style="float: left; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="user_image1_${item.name}"></img>
                     <div class="battle_info">
-                        <p id="user_name1_${item.name}" class="name">Loading...</p>
-                        <p class="odometer count" id="user_count1_${item.name}">0</p>
+                        <p id="user_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
+                        <p class="odometer count" id="user_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>`;
             headerIntervals.push(setInterval(function () {
@@ -3071,11 +3070,11 @@ function loadHeader() {
                 if (user1) {
                     document.getElementById('user_name1_' + item.name).innerHTML = user1.name;
                     document.getElementById('user_count1_' + item.name).innerHTML = user1.count;
-                    if (!document.getElementById('user_image1_' + item.name).src == user1.image) {
+                    if (document.getElementById('user_image1_' + item.name).src !== user1.image) {
                         document.getElementById('user_image1_' + item.name).src = user1.image;
                     }
                 }
-            }, item.attributes.updateInterval));
+            }, item.attributes.updateInterval*1000));
         }
         if (!item.childOf) {
             document.getElementById('header').appendChild(div);
@@ -3177,7 +3176,7 @@ function loadTopSettings(itemName, itemType) {
                 <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
                 <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
             </select><br>
-            <label>(Above) Update Interval:</label>
+            <label>(Above) Update Interval (seconds):</label>
             <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
         `;
         if (!item.attributes.ids) {
@@ -3190,7 +3189,9 @@ function loadTopSettings(itemName, itemType) {
             <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_boxHeight header_option" /><br>
             <label>Image Size:</label>
             <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option" /><br>
-            <label>(Above) Update Interval:</label>
+            <label>Font Size:</label>
+            <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option" /><br>
+            <label>(Above) Update Interval (seconds):</label>
             <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
             <label>Type:</label>
             <select class="section_attribute_type header_option">
@@ -3207,6 +3208,8 @@ function loadTopSettings(itemName, itemType) {
             <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option" /><br>
             <label>Image Size:</label>
             <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option" /><br>
+            <label>Font Size:</label>
+            <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option" /><br>
             <label>Update Interval:</label>
             <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
             <label>Type:</label>
