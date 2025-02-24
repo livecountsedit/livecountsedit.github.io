@@ -283,6 +283,20 @@ function initLoad(redo) {
                 )
             }
         }
+
+        // const interval = data.updateInterval / 1000;
+        // const secondsPassed = (new Date().getTime() - data.lastOnline) / 1000;
+        // for (let i = 0; i < data.data.length; i++) {
+        //     if (parseFloat(data.mean_gain) > 0) {
+        //         const gain = randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain));
+        //         const gained = gain * (secondsPassed / interval);
+        //         data.data[i].count += gained;
+        //     } else {
+        //         const gain = average(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
+        //         let gained = gain * (secondsPassed / interval);
+        //         data.data[i].count += gained;
+        //     }
+        // }
         data.lastOnline = new Date().getTime();
     }
     let design = setupDesign();
