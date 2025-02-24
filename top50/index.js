@@ -3156,8 +3156,7 @@ function loadTopSettings(itemName, itemType) {
             <input type="number" value="${item.attributes.size || '20'}" class="section_attribute_size header_option" /><br>
             <label>Scroll Duration: (0 = disabled)</label>
             <input type="number" value="${item.attributes.scrollTime || '0'}" class="section_attribute_scrollTime header_option" /><br>
-            <hr style="width: 50%;" />
-            <label>Get Value From:</label>
+            <br><label>Get Value From:</label>
             <select class="section_attribute_valueFrom header_option">
                 <option value="none" ${item.attributes.valueFrom === 'none' ? 'selected' : ''}>Disabled</option>
                 <option value="gains" ${item.attributes.valueFrom === 'gains' ? 'selected' : ''}>Gains</option>
@@ -3222,6 +3221,7 @@ function loadTopSettings(itemName, itemType) {
                 <option value="box" ${item.type === "box" ? "selected" : ""}>Box</option>
             </select><br>
             <label>Child of (enter name of parent box): </label><input type="text" value="${item.childOf || ""}" class="section_option_childOf header_option" placeholder="or leave blank :)" />
+            <br><br>
             ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings : item.type == 'box' ? boxSettings : ''}
             <br>
             <button type="button" onclick="removeTopSetting('${item.name}')">Delete</button>
@@ -3258,7 +3258,7 @@ function createNewSection() {
         },
         "name": "Text " + data.headerSettings.items.length,
         "type": "text",
-        "childOf": "Container"
+        "childOf": ""
     }
     data.headerSettings.items.unshift(item);
     loadTopSettings();
