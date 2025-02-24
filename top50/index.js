@@ -250,17 +250,37 @@ function initLoad(redo) {
     }
     data.pause = false;
     if (data.lastOnline && data.offlineGains == true) {
-        const interval = data.updateInterval / 1000;
-        const secondsPassed = (new Date().getTime() - data.lastOnline) / 1000;
+        const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval;
         for (let i = 0; i < data.data.length; i++) {
-            if (parseFloat(data.mean_gain) > 0) {
-                const gain = randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain));
-                const gained = gain * (secondsPassed / interval);
-                data.data[i].count += gained;
+            if (isFinite(data.data[i].std_gain)) {
+                const meanGain = parseFloat(data.data[i].mean_gain) || 0;
+                const stdGain = parseFloat(data.data[i].std_gain) || 0;
+
+                /*
+                    The sum of N normally distributed random variables with mean M and standard deviation S
+                    is normally distributed with mean M*N and standard deviation S*sqrt(N).
+                 */
+
+                data.data[i].count += randomGaussian(
+                    meanGain * intervalsPassed, 
+                    stdGain * Math.sqrt(intervalsPassed));
             } else {
-                const gain = average(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
-                let gained = gain * (secondsPassed / interval);
-                data.data[i].count += gained;
+
+                /*
+                    The sum of N uniformly distributed random variables with minimum A and maximum B
+                    is approximately normally distributed with mean (A+B)*N/2 and standard deviation
+                    (B-A)*sqrt(N/12).
+
+                    See https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution#Approximating_a_Normal_distribution
+                    for more details.
+                */
+
+                const minGain = parseFloat(data.data[i].min_gain) || 0;
+                const maxGain = parseFloat(data.data[i].max_gain) || 0;
+                data.data[i].count += randomGaussian(
+                    (maxGain + minGain) * intervalsPassed / 2,
+                    (maxGain - minGain) * Math.sqrt(intervalsPassed / 12)
+                )
             }
         }
         data.lastOnline = new Date().getTime();
