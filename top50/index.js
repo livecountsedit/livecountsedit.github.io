@@ -2989,7 +2989,7 @@ function loadHeader() {
                         const scrollDistance = string.join(', ').length * item.attributes.size;
                         const scrollSpeed = scrollDistance / item.attributes.scrollTime;
                         div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${string.join(', ')}</marquee>`
-                    }, item.attributes.updateInterval));
+                    }, item.attributes.updateInterval*1000));
                 }
             }
         }
@@ -3253,7 +3253,7 @@ function createNewSection() {
             "valueFrom": "none",
             "length": 0,
             "sortOrder": "asc",
-            "updateInterval": 0,
+            "updateInterval": 2,
             "ids": ["", ""]
         },
         "name": "Text " + data.headerSettings.items.length,
