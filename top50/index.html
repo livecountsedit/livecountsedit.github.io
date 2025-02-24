@@ -34,6 +34,7 @@
     <script src="./odometer.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
     <style id="designStyles"></style>
     <style id="odometerStyles"></style>
@@ -53,36 +54,33 @@
         <div>
             <div class="topSettings">
                 <div>
-                    <label>Sort By:</label>
                     <select id="sorter" autocomplete="off">
-                        <option value="num">Number</option>
-                        <option value="name">Name</option>
-                        <option value="fastest">Fastest</option>
+                        <option value="num">Sort By: Number</option>
+                        <option value="name">Sort By: Name</option>
+                        <option value="fastest">Sort By: Fastest</option>
                     </select>
                 </div>
                 <div>
-                    <label>Order:</label>
                     <select id="order" autocomplete="off">
-                        <option value="asc">Ascending</option>
-                        <option value="desc">Descending</option>
+                        <option value="asc">Order: Ascending</option>
+                        <option value="desc">Order: Descending</option>
                     </select>
                 </div>
                 <div>
-                    <label>Theme:</label>
                     <select id="theme" autocomplete="off">
-                        <option value="top10">Top 10 (Vertical Columns)</option>
-                        <option value="top25">Top 25 (Vertical Columns)</option>
-                        <option value="top50">Top 50 (Vertical Columns)</option>
-                        <option value="top100">Top 100 (Vertical Columns)</option>
-                        <option value="top150">Top 150 (Vertical Columns)</option>
-                        <option value="top200">Top 200 (Vertical Columns)</option>
-                        <option value="top10H">Top 10 (Horizontal Columns)</option>
-                        <option value="top25H">Top 25 (Horizontal Columns)</option>
-                        <option value="top50H">Top 50 (Horizontal Columns)</option>
-                        <option value="top100H">Top 100 (Horizontal Columns)</option>
-                        <option value="top150H">Top 150 (Horizontal Columns)</option>
-                        <option value="top200H">Top 200 (Horizontal Columns)</option>
-                        <option value="top10A">Top 10 (Animated [BETA])</option>
+                        <option value="top10">Theme: Top 10 (Vertical Columns)</option>
+                        <option value="top25">Theme: Top 25 (Vertical Columns)</option>
+                        <option value="top50">Theme: Top 50 (Vertical Columns)</option>
+                        <option value="top100">Theme: Top 100 (Vertical Columns)</option>
+                        <option value="top150">Theme: Top 150 (Vertical Columns)</option>
+                        <option value="top200">Theme: Top 200 (Vertical Columns)</option>
+                        <option value="top10H">Theme: Top 10 (Horizontal Columns)</option>
+                        <option value="top25H">Theme: Top 25 (Horizontal Columns)</option>
+                        <option value="top50H">Theme: Top 50 (Horizontal Columns)</option>
+                        <option value="top100H">Theme: Top 100 (Horizontal Columns)</option>
+                        <option value="top150H">Theme: Top 150 (Horizontal Columns)</option>
+                        <option value="top200H">Theme: Top 200 (Horizontal Columns)</option>
+                        <option value="top10A">Theme: Top 10 (Animated [BETA])</option>
                     </select>
                 </div>
                 <div>
@@ -125,493 +123,520 @@
                 </div>
             </div>
             <hr>
-            <div class="userActions">
-                <div>
-                    <h2>Add Channel</h2>
-                    <br>
-                    <input placeholder="ID (for api updates, optional, permanent)" id="add_id"><br>
-                    <input placeholder="Name" id="add_name"><br>
-                    <input placeholder="Image" id="add_image1"><label>or</label>
-                    <input placeholder="Image" type="file" id="add_image2"><br>
-                    <input placeholder="Count" id="add_count"><br>
-                    <input placeholder="Min Gain" id="add_min_gain"><br>
-                    <input placeholder="Max Gain" id="add_max_gain"><br>
-                    <br>
-                    <label>If filled in then min/max is ignored.</label><br>
-                    <input placeholder="Mean Gain" id="add_mean_gain"><br>
-                    <input placeholder="Range From Mean (Standard Deviation)" id="add_std_gain"><br>
-                    <br>
-                    <input placeholder="Card Background" id="add_bg_color">
-                    <br><label>For a gradient, put "linear-gradient(red, yellow)" <a href="https://www.w3schools.com/css/css3_gradients.asp">More Information</a></label>
-                    <br><br>
-                    <button onclick="create()">Create</button>
-                </div>
-                <div>
-                    <h2>Edit Channel</h2>
-                    <br>
-                    <select id="quickSelect">
-                        <option value="select">Select</option>
-                    </select>
-                    <button id="quickSelectButton">Quick Select</button>
-                    <button id="refreshButton" onclick="refresh()">Refresh</button>
-                    <br>
-                    <label id="edit_channel_id">Channel ID:</label><br>
-                    <input placeholder="Name" id="edit_name" value=""><input type="checkbox" id="edit_name_check"
-                        checked><br>
-                    <input placeholder="Image" id="edit_image1" value=""><label>or</label>
-                    <input placeholder="Image" type="file" id="edit_image2" value=""><input type="checkbox"
-                        id="edit_image_check" checked><br>
-                    <input placeholder="Count" id="edit_count" value=""><input id="edit_count_check" type="checkbox"
-                        checked><br>
-                    <input placeholder="Min Gain" id="edit_min_gain" value=""><input id="edit_min_gain_check"
-                        type="checkbox" checked><br>
-                    <input placeholder="Max Gain" id="edit_max_gain" value=""><input id="edit_max_gain_check"
-                        type="checkbox" checked><br>
-                    <br>
-                    <label>If filled in then min/max is ignored.</label><br>
-                    <input placeholder="Mean Gain" id="edit_mean_gain" value="">
-                    <input id="edit_mean_gain_check" type="checkbox" checked><br>
-                    <input placeholder="Range From Mean (Standard Deviation)" id="edit_std_gain">
-                    <input id="edit_std_gain_check" type="checkbox" checked><br>
-                    <br>
-                    <input placeholder="Card Background" id="edit_bg_color">
-                    <br><label>For a gradient, put "linear-gradient(red, yellow)" <a href="https://www.w3schools.com/css/css3_gradients.asp">More Information</a></label>
-                    <input id="edit_bg_color_check" type="checkbox" checked><br><br>
-                    <div>
-                        <button onclick="edit()">Edit</button>
-                        <button onclick="deleteChannel()">Delete</button>
-                        <button onclick="downloadChannel()">Export</button>
-                    </div>
-                </div>
-                <div>
-                    <h2>Audit Settings</h2>
-                    <div>
-                        <label>Min Value: <input placeholder="Min" id="auditMin"></label>
-                        <label>Max Value: <input placeholder="Max" id="auditMax"></label><br>
-                        <label>Audit Every: (in seconds)</label><br>
-                        <label>Min Time: <input placeholder="Audit Every (min seconds)" id="auditTimeMin"></label>
-                        <label>Max Time: <input placeholder="Audit Every (max seconds)" id="auditTimeMax"></label><br>
-                        <button onclick="saveAuditSettings()">Save Audit Settings</button>
-                        <button onclick="audit2()" id="audit">Enable Audits</button>
-                    </div><br>
-                    <h2>Fire Icons (BETA)</h2>
-                    <div>
-                        <label>Enable Fire Icons: <input type="checkbox" id="fireEnabled"></label><button
-                            onclick="importMDMIcons()" style="margin-left: 10px;">Import MDM Icons</button><br>
-                        <label>Type: <select id="fireType">
-                                <option value="gain">Gain</option>
-                                <option value="hour">Hour</option>
-                                <option value="total">Total</option>
-                            </select>
-                        </label><br>
-                        <label>Icon Border Color: <input type="color" value="#000000" id="fireBorderColor"
-                                autocomplete="off"></label><br>
-                        <label>Icon Border Width: <input id="fireBorderWidth" placeholder="0"
-                                autocomplete="off"></label><br>
-                        <label>Icon Position: <select id="firePosition">
-                                <option value="mdm">[MDM] Replace Rank</option>
-                                <option value="replace">Replace Rank Text</option>
-                                <option value="before">Before Rank</option>
-                                <option value="after">After Rank</option>
-                                <option value="above">Above Rank</option>
-                                <option value="below">Below Rank</option>
-                                <option value="left">Left of Name</option>
-                                <option value="right">Right of Name</option>
-                                <option value="replaceName">Replace Name</option>
-                            </select></label>
-                        <div id="fireIconsCreate">
-                            <button onclick="addFireIcon()">Add Fire Icon</button>
-                        </div>
-                        <div id="fireIcons"></div>
-                    </div>
-                </div>
+        </div>
+        <center>
+            <button class="settingType" id="button_addSettings" onclick="displaySetting('addSettings', this)">Add
+                User</button>
+            <button class="settingType" id="button_editSettings" onclick="displaySetting('editSettings', this)">Edit
+                User</button>
+            <button class="settingType" id="button_auditSettings" onclick="displaySetting('auditSettings', this)">Audit
+                Settings</button>
+            <button class="settingType" id="button_designSettings"
+                onclick="displaySetting('designSettings', this)">Design Settings</button>
+            <button class="settingType" id="button_technicalSettings"
+                onclick="displaySetting('technicalSettings', this)">Technical Settings</button>
+            <button class="settingType" id="button_fireSettings" onclick="displaySetting('fireSettings', this)">Fire
+                Settings</button>
+            <button class="settingType" id="button_differenceSettings"
+                onclick="displaySetting('differenceSettings', this)">Difference
+                Settings</button>
+            <button class="settingType" id="button_apiSettings" onclick="displaySetting('apiSettings', this)">API
+                Settings</button>
+            <button class="settingType" id="button_fyscSettings" onclick="displaySetting('fyscSettings', this)">FYSC
+                Settings</button>
+            <button class="settingType" id="button_topSettings" onclick="displaySetting('topSettings', this)">Top
+                Settings</button>
+        </center>
+    </div>
+    <hr>
+    <div id="container">
+        <div id="addSettings" class="hidden">
+            <div>
+                <h2>Add Channel</h2>
+                <br>
+                <input placeholder="ID (for api updates, optional, permanent)" id="add_id"><br>
+                <input placeholder="Name" id="add_name"><br>
+                <input placeholder="Image" id="add_image1"><label>or</label>
+                <input placeholder="Image" type="file" id="add_image2"><br>
+                <input placeholder="Count" id="add_count"><br>
+                <input placeholder="Min Gain" id="add_min_gain"><br>
+                <input placeholder="Max Gain" id="add_max_gain"><br>
+                <br>
+                <label>If filled in then min/max is ignored.</label><br>
+                <input placeholder="Mean Gain" id="add_mean_gain"><br>
+                <input placeholder="Range From Mean (Standard Deviation)" id="add_std_gain"><br>
+                <br>
+                <input placeholder="Card Background" id="add_bg_color">
+                <br><label>For a gradient, put "linear-gradient(red, yellow)" <a
+                        href="https://www.w3schools.com/css/css3_gradients.asp">More Information</a></label>
+                <br><br>
+                <button onclick="create()">Create</button>
             </div>
-            <hr>
-            <div class="middleBoringSettings">
+        </div>
+        <div id="editSettings" class="hidden">
+            <div>
+                <h2>Edit Channel</h2>
+                <br>
+                <select id="quickSelect">
+                    <option value="select">Select</option>
+                </select>
+                <button id="quickSelectButton">Quick Select</button>
+                <button id="refreshButton" onclick="refresh()">Refresh</button>
+                <br>
+                <label id="edit_channel_id">Channel ID:</label><br>
+                <input placeholder="Name" id="edit_name" value=""><input type="checkbox" id="edit_name_check"
+                    checked><br>
+                <input placeholder="Image" id="edit_image1" value=""><label>or</label>
+                <input placeholder="Image" type="file" id="edit_image2" value=""><input type="checkbox"
+                    id="edit_image_check" checked><br>
+                <input placeholder="Count" id="edit_count" value=""><input id="edit_count_check" type="checkbox"
+                    checked><br>
+                <input placeholder="Min Gain" id="edit_min_gain" value=""><input id="edit_min_gain_check"
+                    type="checkbox" checked><br>
+                <input placeholder="Max Gain" id="edit_max_gain" value=""><input id="edit_max_gain_check"
+                    type="checkbox" checked><br>
+                <br>
+                <label>If filled in then min/max is ignored.</label><br>
+                <input placeholder="Mean Gain" id="edit_mean_gain" value="">
+                <input id="edit_mean_gain_check" type="checkbox" checked><br>
+                <input placeholder="Range From Mean (Standard Deviation)" id="edit_std_gain">
+                <input id="edit_std_gain_check" type="checkbox" checked><br>
+                <br>
+                <input placeholder="Card Background" id="edit_bg_color">
+                <br><label>For a gradient, put "linear-gradient(red, yellow)" <a
+                        href="https://www.w3schools.com/css/css3_gradients.asp">More Information</a></label>
+                <input id="edit_bg_color_check" type="checkbox" checked><br><br>
                 <div>
-                    <label class="bold">Design Settings:</label>
-                    <div class="boringSettings">
-                        <div>
-                            <br>
-                            <label>Background Color</label><br>
-                            <input type="color" value="#000000" id="backPicker" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Box Spacing</label><br>
-                            <input type="number" value="0.2" id="boxSpacing" autocomplete="off" step="0.1">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Rank Size</label><br>
-                            <input type="number" value="1" id="rankSize" autocomplete="off" step="0.1">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Name Size</label><br>
-                            <input type="number" value="1" id="nameSize" autocomplete="off" step="0.1">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Count Size</label><br>
-                            <input type="number" value="1" id="countSize" autocomplete="off" step="0.1">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Image Size</label><br>
-                            <input type="number" value="1" id="imageSize" autocomplete="off" step="0.1">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Rank Box Width</label><br>
-                            <input type="number" id="rankingsWidth" step="0.1">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Card Width</label><br>
-                            <input type="number" value="1" id="cardWidth" autocomplete="off" step="0.1">
-                            <br><label>Card Height</label><br>
-                            <input type="number" value="1" id="cardHeight" autocomplete="off" step="0.1">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Text Color</label><br>
-                            <input type="color" value="#000000" id="textPicker" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Box Background Color</label><br>
-                            <input type="color" value="#FFFFFF" id="boxPicker" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Box Border Color</label><br>
-                            <input type="color" value="#000000" id="borderPicker" autocomplete="off">
-                            <button id="disableBoxBorderColor">X</button>
-                        </div>
-                        <div>
-                            <br>
-                            <label>Image Border Color</label><br>
-                            <input type="color" value="#000000" id="imageBorderColor" autocomplete="off">
-                            <button id="disableImageBorderColor">X</button>
-                        </div>
-                        <div>
-                            <br>
-                            <label>Odometer Up Color</label><br>
-                            <input type="color" value="#000000" id="odometerUp">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Odometer Down Color</label><br>
-                            <input type="color" value="#000000" id="odometerDown">
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="animation" checked><label>Number Animation</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="fastest"><label>Icon For Fastest Channel</label><br>
-                            <input id="fastestIcon" autocomplete="off"><label> (emoji or text)</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="slowest"><label>Icon For Slowest Channel</label><br>
-                            <input id="slowestIcon" autocomplete="off"><label> (emoji or text)</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="showRankings" checked><label>Show Rankings</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="showImages" checked><label>Show Images</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="showNames" checked><label>Show Names</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="showCounts" checked><label>Show Counts</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="prependZeros"><label>Add Leading Zeros to Ranks</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="showBlankSlots" checked><label>Show Blank Slots</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="verticallyCenterRanks"><label>Vertically Center Ranks</label>
-                        </div>
-                        <div>
-                            <br>
-                            <label>Image Border Radius</label><br>
-                            <input type="number" value="50" id="imageBorder" autocomplete="off"><label>%</label>
-                        </div>
-                        <div>
-                            <br>
-                            <label>Box Border Roundness (0-100)</label><br>
-                            <input type="number" value="0" id="boxBorderRadius" autocomplete="off"><label>%</label>
-                        </div>
-                        <div>
-                            <br>
-                            <label>Box Background (gain)</label><br>
-                            <input type="color" value="#f7f5fe" id="boxBGGain" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Box Background (lose)</label><br>
-                            <input type="color" value="#f7f5fe" id="boxBGLose" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Box Background Duration (in seconds)</label><br>
-                            <input type="number" value="1" id="boxBGLength" autocomplete="off"><br>
-                            <label>*Leave at 0 to disable</label>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <label class="bold">Technical Settings:</label>
-                    <div class="boringSettings">
-                        <div>
-                            <br>
-                            <input type="button" id="hideSettings" onclick="hideSettings()"
-                                value="Change Hotkey To Hide Settings"><br><label id="setting">Current: q</label>
-                        </div>
-                        <div>
-                            <br>
-                            <label>Update Interval (in seconds)</label><br>
-                            <input type="number" value="2" id="updateint" autocomplete="off">
-                        </div>
-                        <div>
-                            <br>
-                            <label>Odometer Speed</label><br>
-                            <input type="number" value="2" id="odometerSpeed" autocomplete="off"><label> (in
-                                seconds)</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="abbreviate"><label> Abbreviate Counts</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="allowNegative"><label> Allow Negative Counts</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="randomCountUpdateTime"><label> Random Count Updates</label>
-                        </div>
-                        <div>
-                            <br>
-                            <input type="checkbox" id="waterFallCountUpdateTime"><label> Waterfall Count Updates</label>
-                        </div>
-                    </div><br><br>
-                    <div class="boringSettings">
-                        <div>
-                            <br>
-                            <input type="checkbox" id="showDifferences" checked><label>Show Differences</label>
-                            <br>
-                            <label>Difference Threshold: </label><input type="number" id="differenceThreshold"
-                                autocomplete="off">
-                            <br>
-                            <label>Differences Placing (top): </label><input type="number" step="0.1"
-                                id="topDifferencePlacing" autocomplete="off">
-                            <br>
-                            <label>Differences Placing (left): </label><input type="number" step="0.1"
-                                id="leftDifferencePlacing" autocomplete="off">
-                            <br>
-                            <label>Differences Color: </label><input type="text" id="differenceColor"
-                                autocomplete="off">
-                            <br>
-                            <label>Difference Size: </label>
-                            <input type="number" step="0.1" value="1" id="differenceSize" autocomplete="off">
-                        </div>
-                        <div><br>
-                            <label>Difference Images: </label><input type="checkbox" id="enableDifferenceImages"
-                                autocomplete="off">
-                            <br>
-                            <label>Image Place (top): </label><input type="number" step="0.1"
-                                id="topDifferenceImagePlacing" autocomplete="off">
-                            <br>
-                            <label>Image Placing (left): </label><input type="number" step="0.1"
-                                id="leftDifferenceImagePlacing" autocomplete="off">
-                            <br>
-                            <label>Image Size: </label><input type="number" step="0.1" id="differenceImageSize"
-                                autocomplete="off"><br>
-                            <label>Image Shaking: </label><input type="checkbox" id="enableImageShakes"
-                                autocomplete="off">
-                            <br>
-                            <label>Image: </label><input placeholder="Image"
-                                id="differenceImageUrl"><br><label>or:</label>
-                            <input placeholder="Image" type="file" id="differenceImageFile"><button
-                                onclick="saveImageForDiffs()">Save Image Upload</button>
-                            <br>
-                        </div>
-                    </div><br><hr><br>
-                    <div class="middleBoringSettings">
-                        <div>
-                            <label class="bold">TOP Settings: (BETA)</label><br>
-                            <label>(might be buggy, please report all bugs in the discord!)</label>
-                            <button onclick="saveTopSettings()">Save Top Settings</button>
-                            <br><br>
-                            <label>How many sections?</label><br>
-                            <input type="number" id="totalSections"><label> sections</label><br><br>
-                            <label>Set the order of sizes?</label>
-                            <label>ex: (1, 5, 4, 3) - they are relative to each other</label>
-                            <br>
-                            <label>Sizes: </label><input type="text" id="sizeSections">
-                            <br><br>
-                            <label>How tall should the top part be?</label><br>
-                            <input type="number" id="heightSections"><br><br>
-                            <label>How far apart should the sections be?</label><br>
-                            <input type="number" id="gapSections"><br><br>
-                        </div>
-                        <div>
-                            <strong>For each section, select its purpose: </strong><button onclick="createNewSection()">Create New Section</button><hr>
-                            <div id="sections" style="height: 400px; overflow-y: scroll;"></div>
-                        </div>
-                    </div>
+                    <button onclick="edit()">Edit</button>
+                    <button onclick="deleteChannel()">Delete</button>
+                    <button onclick="downloadChannel()">Export</button>
                 </div>
             </div>
         </div>
-        <hr>
-        <div class="middleBoringSettings">
+        <div id="auditSettings" class="hidden">
+            <h2>Audit Settings</h2>
             <div>
-                <label class="bold">API Update Settings:</label><br><br>
-                <label>API Source Preset: </label><select id="apiSource" autocomplete="off">
-                    <option value="custom">Custom API</option>
-                    <option value="mixerno1">[abbreviated] mixerno.space</option>
-                    <option value="mixerno2">[estimated] mixerno.space</option>
-                </select>
-                <div id="apiSettings">
-                    <label>Make sure the part to include the channel is at the very end and left open OR use
-                        <strong>{{channels}}</strong> to indentify where they should go.</label>
-                    <input id="apiLink"
-                        placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id="><select
-                        autocomplete="off" id="apiType">
-                        <option value="none">Max Channels Per Fetch (1)</option>
-                        <option value="one">1 Channel</option>
-                        <option value="ten">10 Channels</option>
-                        <option value="twentyfive">25 Channels</option>
-                        <option value="fifty">50 Channels</option>
-                        <option value="onehundred">100 Channels</option>
-                        <option value="unlimited">No Limit</option>
-                    </select>
-                    <br>
-                    <label>Loop through (data = root): </label><input id="apiLoop" placeholder="data.items"
-                        autocomplete="off"><br>
-                    <label>Method: <select id="apiMethod" autocomplete="off">
-                            <option value="GET">GET</option>
-                            <option value="POST">POST</option>
-                        </select></label>
-                    <div class="apiExtraStuff">
-                        <div>
-                            <h3>Headers (optional)</h3>
-                            <textarea id="extraCred"
-                                placeholder="Authorization: auth code;&#10Authorization2: auth code2;"
-                                autocomplete="off" class="creds"></textarea><br>
-                        </div>
-                        <div>
-                            <h3>Body: (optional)</h3>
-                            <textarea id="body" placeholder="value1=lol;&#10value2=lol;" autocomplete="off"
-                                class="creds"></textarea><br>
-                        </div>
-                        <div>
-                            <h3>Updates</h3>
-                            <input type="checkbox" id="updateName" autocomplete="off"><label>Name </label><input
-                                id="pathName" placeholder="snippet.title" autocomplete="off"><br>
-                            <input type="checkbox" id="updateImage" autocomplete="off"><label>Image
-                            </label><input id="pathImage" placeholder="snippet.thumbnails.default.url"
-                                autocomplete="off"><br>
-                            <input type="checkbox" id="updateCount" autocomplete="off"><label>Count
-                            </label><input id="pathCount" placeholder="statistics.subscriberCount"
-                                autocomplete="off"><br>
-
-                            <label>ID (Required) </label><input id="pathID" placeholder="id" autocomplete="off"><br>
-                            <input type="checkbox" id="IDIncludes" autocomplete="off"><label> - Enable if ID is part of
-                                another string like: "https://banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"</label>
-                        </div>
-                    </div>
-                    <hr>
-                </div><br>
-                <input id="forceUpdates" type="checkbox" autocomplete="off"><label>Force Updates (even without count
-                    changes)</label><br>
-                <button onclick="apiUpdate()">Update Now</button>
-                <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)" autocomplete="off">
-                <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
-                <button onclick="saveAPIUpdates()" id="saveapi">Save API Update Settings</button><label> Make sure
-                    to do an actual save too</label><br>
-                <strong>MAKE SURE TO SAVE BEFORE ENABLING</strong>
-                <label>this will only update the count if the {count} of the abbreviated number changes</label>
-            </div>
-            <div>
-                <label class="bold">FYSC Stream Hub</label><br>
+                <label>Min Value: <input placeholder="Min" id="auditMin"></label>
+                <label>Max Value: <input placeholder="Max" id="auditMax"></label><br>
+                <label>Audit Every: (in seconds)</label><br>
+                <label>Min Time: <input placeholder="Audit Every (min seconds)" id="auditTimeMin"></label>
+                <label>Max Time: <input placeholder="Audit Every (max seconds)" id="auditTimeMax"></label><br>
+                <button onclick="saveAuditSettings()">Save Audit Settings</button>
+                <button onclick="audit2()" id="audit">Enable Audits</button>
+            </div><br>
+        </div>
+        <div id="designSettings" class="hidden">
+            <label class="bold">Design Settings:</label>
+            <div class="boringSettings">
                 <div>
-                    <label>Min Gain (only for streams):</label>
-                    <input value="-10000" id="min_gain_global" autocomplete="off">
-                    <label> - Max Gain (only for streams): </label><input value="10000" id="max_gain_global"
-                        autocomplete="off">
+                    <br>
+                    <label>Background Color</label><br>
+                    <input type="color" value="#000000" id="backPicker" autocomplete="off">
                 </div>
-                <div id="stream">
+                <div>
+                    <br>
+                    <label>Box Spacing</label><br>
+                    <input type="number" value="0.2" id="boxSpacing" autocomplete="off" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Rank Size</label><br>
+                    <input type="number" value="1" id="rankSize" autocomplete="off" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Name Size</label><br>
+                    <input type="number" value="1" id="nameSize" autocomplete="off" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Name Width</label><br>
+                    <input type="number" value="1" id="nameWidth" autocomplete="off" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Count Size</label><br>
+                    <input type="number" value="1" id="countSize" autocomplete="off" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Image Size</label><br>
+                    <input type="number" value="1" id="imageSize" autocomplete="off" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Rank Box Width</label><br>
+                    <input type="number" id="rankingsWidth" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Card Width</label><br>
+                    <input type="number" value="1" id="cardWidth" autocomplete="off" step="0.1">
+                    <br><label>Card Height</label><br>
+                    <input type="number" value="1" id="cardHeight" autocomplete="off" step="0.1">
+                </div>
+                <div>
+                    <br>
+                    <label>Text Color</label><br>
+                    <input type="color" value="#000000" id="textPicker" autocomplete="off">
+                </div>
+                <div>
+                    <br>
+                    <label>Box Background Color</label><br>
+                    <input type="color" value="#FFFFFF" id="boxPicker" autocomplete="off">
+                </div>
+                <div>
+                    <br>
+                    <label>Box Border Color</label><br>
+                    <input type="color" value="#000000" id="borderPicker" autocomplete="off">
+                    <button id="disableBoxBorderColor">X</button>
+                </div>
+                <div>
+                    <br>
+                    <label>Image Border Color</label><br>
+                    <input type="color" value="#000000" id="imageBorderColor" autocomplete="off">
+                    <button id="disableImageBorderColor">X</button>
+                </div>
+                <div>
+                    <br>
+                    <label>Odometer Up Color</label><br>
+                    <input type="color" value="#000000" id="odometerUp">
+                </div>
+                <div>
+                    <br>
+                    <label>Odometer Down Color</label><br>
+                    <input type="color" value="#000000" id="odometerDown">
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="animation" checked><label>Number Animation</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="fastest"><label>Icon For Fastest Channel</label><br>
+                    <input id="fastestIcon" autocomplete="off"><label> (emoji or text)</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="slowest"><label>Icon For Slowest Channel</label><br>
+                    <input id="slowestIcon" autocomplete="off"><label> (emoji or text)</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="showRankings" checked><label>Show Rankings</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="showImages" checked><label>Show Images</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="showNames" checked><label>Show Names</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="showCounts" checked><label>Show Counts</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="prependZeros"><label>Add Leading Zeros to Ranks</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="showBlankSlots" checked><label>Show Blank Slots</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="verticallyCenterRanks"><label>Vertically Center Ranks</label>
+                </div>
+                <div>
+                    <br>
+                    <label>Image Border Radius</label><br>
+                    <input type="number" value="50" id="imageBorder" autocomplete="off"><label>%</label>
+                </div>
+                <div>
+                    <br>
+                    <label>Box Border Roundness (0-100)</label><br>
+                    <input type="number" value="0" id="boxBorderRadius" autocomplete="off"><label>%</label>
+                </div>
+                <div>
+                    <br>
+                    <label>Box Background (gain)</label><br>
+                    <input type="color" value="#f7f5fe" id="boxBGGain" autocomplete="off">
+                </div>
+                <div>
+                    <br>
+                    <label>Box Background (lose)</label><br>
+                    <input type="color" value="#f7f5fe" id="boxBGLose" autocomplete="off">
+                </div>
+                <div>
+                    <br>
+                    <label>Box Background Duration (in seconds)</label><br>
+                    <input type="number" value="1" id="boxBGLength" autocomplete="off"><br>
+                    <label>*Leave at 0 to disable</label>
+                </div>
+            </div>
+        </div>
+        <div id="technicalSettings" class="hidden">
+            <label class="bold">Technical Settings:</label>
+            <div class="boringSettings">
+                <div>
+                    <br>
+                    <label>Update Interval (in seconds)</label><br>
+                    <input type="number" value="2" id="updateint" autocomplete="off">
+                </div>
+                <div>
+                    <br>
+                    <label>Odometer Speed</label><br>
+                    <input type="number" value="2" id="odometerSpeed" autocomplete="off"><label> (in
+                        seconds)</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="abbreviate"><label> Abbreviate Counts</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="allowNegative"><label> Allow Negative Counts</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="randomCountUpdateTime"><label> Random Count Updates</label>
+                </div>
+                <div>
+                    <br>
+                    <input type="checkbox" id="waterFallCountUpdateTime"><label> Waterfall Count Updates</label>
+                </div>
+            </div>
+        </div>
+        <div id="fireSettings" class="hidden">
+            <div>
+                <h2>Fire Icons (BETA)</h2><br>
+                <label>Enable Fire Icons: <input type="checkbox" id="fireEnabled"></label><button
+                    onclick="importMDMIcons()" style="margin-left: 10px;">Import MDM Icons</button><br>
+                <label>Type: <select id="fireType">
+                        <option value="gain">Gain</option>
+                        <option value="hour">Hour</option>
+                        <option value="total">Total</option>
+                    </select>
+                </label><br>
+                <label>Icon Border Color: <input type="color" value="#000000" id="fireBorderColor"
+                        autocomplete="off"></label><br>
+                <label>Icon Border Width: <input id="fireBorderWidth" placeholder="0" autocomplete="off"></label><br>
+                <label>Icon Position: <select id="firePosition">
+                        <option value="mdm">[MDM] Replace Rank</option>
+                        <option value="replace">Replace Rank Text</option>
+                        <option value="before">Before Rank</option>
+                        <option value="after">After Rank</option>
+                        <option value="above">Above Rank</option>
+                        <option value="below">Below Rank</option>
+                        <option value="left">Left of Name</option>
+                        <option value="right">Right of Name</option>
+                        <option value="replaceName">Replace Name</option>
+                    </select></label>
+                <div id="fireIconsCreate">
+                    <button onclick="addFireIcon()">Add Fire Icon</button>
+                </div>
+                <div id="fireIcons"></div>
+            </div>
+        </div>
+        <div id="differenceSettings" class="hidden">
+            <div class="boringSettings">
+                <div>
+                    <br>
+                    <input type="checkbox" id="showDifferences" checked><label>Show Differences</label>
+                    <br>
+                    <label>Difference Threshold: </label><input type="number" id="differenceThreshold"
+                        autocomplete="off">
+                    <br>
+                    <label>Differences Placing (top): </label><input type="number" step="0.1" id="topDifferencePlacing"
+                        autocomplete="off">
+                    <br>
+                    <label>Differences Placing (left): </label><input type="number" step="0.1"
+                        id="leftDifferencePlacing" autocomplete="off">
+                    <br>
+                    <label>Differences Color: </label><input type="text" id="differenceColor" autocomplete="off">
+                    <br>
+                    <label>Difference Size: </label>
+                    <input type="number" step="0.1" value="1" id="differenceSize" autocomplete="off">
+                </div>
+                <div><br>
+                    <label>Difference Images: </label><input type="checkbox" id="enableDifferenceImages"
+                        autocomplete="off">
+                    <br>
+                    <label>Image Place (top): </label><input type="number" step="0.1" id="topDifferenceImagePlacing"
+                        autocomplete="off">
+                    <br>
+                    <label>Image Placing (left): </label><input type="number" step="0.1" id="leftDifferenceImagePlacing"
+                        autocomplete="off">
+                    <br>
+                    <label>Image Size: </label><input type="number" step="0.1" id="differenceImageSize"
+                        autocomplete="off"><br>
+                    <label>Image Shaking: </label><input type="checkbox" id="enableImageShakes" autocomplete="off">
+                    <br>
+                    <label>Image: </label><input placeholder="Image" id="differenceImageUrl"><br><label>or:</label>
+                    <input placeholder="Image" type="file" id="differenceImageFile"><button
+                        onclick="saveImageForDiffs()">Save Image Upload</button>
+                    <br>
+                </div>
+            </div>
+        </div>
+        <div id="apiSettings" class="hidden">
+            <label class="bold">API Update Settings:</label><br><br>
+            <label>API Source Preset: </label><select id="apiSource" autocomplete="off">
+                <option value="custom">Custom API</option>
+                <option value="mixerno1">[abbreviated] mixerno.space</option>
+                <option value="mixerno2">[estimated] mixerno.space</option>
+            </select>
+            <div id="apiSettings">
+                <label>Make sure the part to include the channel is at the very end and left open OR use
+                    <strong>{{channels}}</strong> to indentify where they should go.</label>
+                <input id="apiLink"
+                    placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id="><select
+                    autocomplete="off" id="apiType">
+                    <option value="none">Max Channels Per Fetch (1)</option>
+                    <option value="one">1 Channel</option>
+                    <option value="ten">10 Channels</option>
+                    <option value="twentyfive">25 Channels</option>
+                    <option value="fifty">50 Channels</option>
+                    <option value="onehundred">100 Channels</option>
+                    <option value="unlimited">No Limit</option>
+                </select>
+                <br>
+                <label>Loop through (data = root): </label><input id="apiLoop" placeholder="data.items"
+                    autocomplete="off"><br>
+                <label>Method: <select id="apiMethod" autocomplete="off">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                    </select></label>
+                <div class="apiExtraStuff">
                     <div>
-                        <p>Add this to the response section of the nightbot command.</p>
-                        <p>This command allows users to be added.</p>
-                        <p>Example Usage: {!add 100/200} 100 is in the min and 200 is the max. You can limit the min
-                            and max.</p>
-                        </p>
-                        <textarea id="connect" autocomplete="off"></textarea>
+                        <h3>Headers (optional)</h3>
+                        <textarea id="extraCred" placeholder="Authorization: auth code;&#10Authorization2: auth code2;"
+                            autocomplete="off" class="creds"></textarea><br>
                     </div>
                     <div>
-                        <p>Add this to the response section of the nightbot command.</p>
-                        <p>This command allows users to be edited.</p>
-                        <p>Example Usage: {!edit 100/200} 100 is in the min and 200 is the max. You can limit the
-                            max and min.</p>
-                        </p>
-                        <textarea id="connect3" autocomplete="off"></textarea>
+                        <h3>Body: (optional)</h3>
+                        <textarea id="body" placeholder="value1=lol;&#10value2=lol;" autocomplete="off"
+                            class="creds"></textarea><br>
                     </div>
                     <div>
-                        <p>Add this to the response section of the nightbot command.</p>
-                        <p>This is an EXAMPLE command that just shows how to add example commands. ?values= shows
-                            the min and the max gains possible.</p>
-                        <textarea id="connect2" autocomplete="off"></textarea>
-                    </div>
-                    <div>
-                        <p>Add this to the response section of the nightbot command.</p>
-                        <p>This is an EXAMPLE command that just shows how to retrieve a user's subscriber count from
-                            this site.</p>
-                        <textarea id="connect4" autocomplete="off"></textarea>
+                        <h3>Updates</h3>
+                        <input type="checkbox" id="updateName" autocomplete="off"><label>Name </label><input
+                            id="pathName" placeholder="snippet.title" autocomplete="off"><br>
+                        <input type="checkbox" id="updateImage" autocomplete="off"><label>Image
+                        </label><input id="pathImage" placeholder="snippet.thumbnails.default.url"
+                            autocomplete="off"><br>
+                        <input type="checkbox" id="updateCount" autocomplete="off"><label>Count
+                        </label><input id="pathCount" placeholder="statistics.subscriberCount" autocomplete="off"><br>
+
+                        <label>ID (Required) </label><input id="pathID" placeholder="id" autocomplete="off"><br>
+                        <input type="checkbox" id="IDIncludes" autocomplete="off"><label> - Enable if ID is part of
+                            another string like: "https://banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA"</label>
                     </div>
                 </div>
                 <hr>
+            </div><br>
+            <input id="forceUpdates" type="checkbox" autocomplete="off"><label>Force Updates (even without count
+                changes)</label><br>
+            <button onclick="apiUpdate()">Update Now</button>
+            <input type="number" id="apiUpdateInt" placeholder="Update Interval (in seconds)" autocomplete="off">
+            <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
+            <button onclick="saveAPIUpdates()" id="saveapi">Save API Update Settings</button><label> Make sure
+                to do an actual save too</label><br>
+            <strong>MAKE SURE TO SAVE BEFORE ENABLING</strong>
+            <label>this will only update the count if the {count} of the abbreviated number changes</label>
+        </div>
+        <div id="fyscSettings" class="hidden">
+            <label class="bold">FYSC Stream Hub</label><br>
+            <div>
+                <label>Min Gain (only for streams):</label>
+                <input value="-10000" id="min_gain_global" autocomplete="off"><br>
+                <label> - Max Gain (only for streams): </label>
+                <input value="10000" id="max_gain_global" autocomplete="off">
+            </div>
+            <div id="stream">
                 <div>
-                    <p>Click the button below to connect to NightBot (gives you access live chat for commands)</p>
-                    <div class="middleBoringSettings">
-                        <div>
-                            <button onclick="connect()" class="discord" id="toConnect">Connect</button><br>
-                            <label>Connected: </label><label id="isconnected">No</label><br>
-                        </div>
-                        <button onclick="custom()" class="discord">Custom Command Maker</button>
-                    </div>
-                    <h3>How to setup NightBot & LCEDIT for streams: <a
-                            href="https://www.youtube.com/watch?v=j40Xs1zZqg4">Tutorial Video</a></h3>
+                    <p>Add this to the response section of the nightbot command.</p>
+                    <p>This command allows users to be added.</p>
+                    <p>Example Usage: {!add 100/200} 100 is in the min and 200 is the max. You can limit the min
+                        and max.</p>
+                    </p>
+                    <textarea id="connect" autocomplete="off"></textarea>
+                </div>
+                <div>
+                    <p>Add this to the response section of the nightbot command.</p>
+                    <p>This command allows users to be edited.</p>
+                    <p>Example Usage: {!edit 100/200} 100 is in the min and 200 is the max. You can limit the
+                        max and min.</p>
+                    </p>
+                    <textarea id="connect3" autocomplete="off"></textarea>
+                </div>
+                <div>
+                    <p>Add this to the response section of the nightbot command.</p>
+                    <p>This is an EXAMPLE command that just shows how to add example commands. ?values= shows
+                        the min and the max gains possible. (p.s. add "&rates=true" to alter a channel's gain rates)</p>
+                    <textarea id="connect2" autocomplete="off"></textarea>
+                </div>
+                <div>
+                    <p>Add this to the response section of the nightbot command.</p>
+                    <p>This is an EXAMPLE command that just shows how to retrieve a user's subscriber count from
+                        this site.</p>
+                    <textarea id="connect4" autocomplete="off"></textarea>
                 </div>
             </div>
+            <hr>
+            <div>
+                <p>Click the button below to connect to NightBot (gives you access live chat for commands)</p>
+                <div class="middleBoringSettings">
+                    <div>
+                        <button onclick="connect()" class="discord" id="toConnect">Connect</button><br>
+                        <label>Connected: </label><label id="isconnected">No</label><br>
+                    </div>
+                    <button onclick="custom()" class="discord">Custom Command Maker</button>
+                </div>
+                <h3>How to setup NightBot & LCEDIT for streams: <a
+                        href="https://www.youtube.com/watch?v=j40Xs1zZqg4">Tutorial Video</a></h3>
+            </div>
         </div>
-        <hr>
+        <div id="topSettings" class="hidden">
+            <div>
+                <label class="bold">TOP Settings: (BETA)</label>
+                <button onclick="saveTopSettings()">Save Top Settings</button><br>
+                <label>(these may be buggy, please report all bugs in the discord!)</label>
+                <br><br>
+                <label>How many sections?</label><br>
+                <input type="number" id="totalSections"><label> sections</label><br><br>
+                <label>Set the order of sizes?</label>
+                <label>ex: (1, 5, 4, 3) - they are relative to each other</label>
+                <br>
+                <label>Sizes: </label><input type="text" id="sizeSections">
+                <br><br>
+                <label>How tall should the top part be?</label><br>
+                <input type="number" id="heightSections"><br><br>
+                <label>How far apart should the sections be?</label><br>
+                <input type="number" id="gapSections"><br><br>
+            </div>
+            <div>
+                <strong>For each section, select its purpose: </strong><button onclick="createNewSection()">Create
+                    New Section</button>
+                <hr>
+                <div id="sections" style="height: 400px; overflow-y: scroll;"></div>
+            </div>
+        </div>
     </div>
+    <hr><br>
     <script src="./index.js"></script>
-    <br>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>
-    </center>
-    </div>
+    </center><br>
     <style id="styles"></style>
+    <ins class="adsbygoogle" style="display:block;" data-ad-format="autorelaxed"
+        data-ad-client="ca-pub-5666487244102554" data-ad-slot="2197125798"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
 </body>
 
 </html>

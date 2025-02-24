@@ -99,6 +99,7 @@ function mergeWithExampleData(imported, example) {
 
 let uuid = uuidGen()
 let example_data = {
+    "settingsEnabled": ["addSettings", "editSettings"],
     "showImages": true,
     "showNames": true,
     "showCounts": true,
@@ -124,6 +125,7 @@ let example_data = {
         "cardHeight": '4.2',
         "imageSize": '3',
         "nameSize": '1',
+        "nameWidth": '10',
         "countSize": '2',
         "rankSize": '15',
     },
@@ -153,7 +155,6 @@ let example_data = {
     "gain_max": 10000,
     "updateInterval": 2000,
     "uuid": uuid,
-    "hideSettings": 'q',
     'offlineGains': false,
     'lastOnline': new Date().getTime(),
     'max': 50,
@@ -161,7 +162,6 @@ let example_data = {
     'pause': false,
     'audits': false,
     'auditStats': [0, 0, 0, 0],
-    "hideSettings": 'q',
     "allowNegative": false,
     "randomCountUpdateTime": false,
     "waterFallCountUpdateTime": false,
@@ -208,56 +208,11 @@ let example_data = {
         'forceUpdates': false
     },
     'headerSettings': {
-        'totalSections': 3,
-        'headerHeight': 100,
-        'boxWidth': '2,2,2',
-        'sectionGap': 10,
-        'items': [ //it's possible to have more items than sections
-            {
-                "name": "Battle",
-                "type": "battle",
-                "attributes": {
-                    "size": 30,
-                    "type": "custom" //custom or closest
-                }
-            },
-            {
-                "name": "Container",
-                "type": "box",
-                "attributes": {
-                    "rows": 2
-                }
-            }, {
-                "name": "Text 1",
-                "type": "text",
-                "childOf": "Container",
-                "attributes": {
-                    "text": "Test Text 1",
-                    "color": "red",
-                    "size": 30,
-                    "scrollTime": 5
-                }
-            }, {
-                "name": "Text 2",
-                "type": "text",
-                "childOf": "Container",
-                "attributes": {
-                    "text": "Test Text 2",
-                    "color": "red",
-                    "size": 30,
-                    "scrollTime": 0,
-                    "valueFrom": "gains" //counts, gains, count[id], gain[id]
-                }
-            }, {
-                "name": "Text 3",
-                "type": "text",
-                "attributes": {
-                    "text": "Test Text 3",
-                    "color": "red",
-                    "size": 30
-                }
-            }
-        ]
+        'totalSections': 0,
+        'headerHeight': 0,
+        'boxWidth': '',
+        'sectionGap': 0,
+        'items': []
     }
 };
 let updateInterval;
@@ -336,7 +291,22 @@ function initLoad(redo) {
             },
         });
     }
-}
+    data.settingsEnabled.forEach(item => {
+        let element = document.getElementById(item);
+        let button = document.getElementById('button_' + item);
+        element.classList.remove("hidden");
+        button.classList.add("enabled");
+    });
+    Array.from(document.getElementById('container').children).forEach(child => {
+        let isActive = !child.classList.contains('hidden');
+        if (isActive) {
+            let place = data.settingsEnabled.indexOf(child.id);
+            child.style.order = place + 1;
+        } else {
+            child.style.order = 'auto';
+        }
+    });
+};
 
 
 function setupDesign(list, sort, order) {
@@ -404,7 +374,6 @@ function setupDesign(list, sort, order) {
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
                 <div class="subgap odometer"></div>
-                <canvas class="chart" id="chart_${cid}"></canvas>
             </div>`;
 
             if (channels[dataIndex]) {
@@ -438,7 +407,6 @@ function setupDesign(list, sort, order) {
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
                 <div class="subgap odometer"></div>
-                <canvas class="chart" id="chart_${cid}"></canvas>
                 </div>`;
                 if (channels[dataIndex]) {
                     if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
@@ -660,7 +628,6 @@ function update(doGains = true) {
                 const interval = data.updateInterval;
                 if (data.randomCountUpdateTime == true) {
                     extraTimeTillUpdate = random(0, interval);
-                    //console.log('Extra time till update: ' + extraTimeTillUpdate);
                 }
                 if (data.waterFallCountUpdateTime == true) {
                     extraTimeTillUpdate = i * 100;
@@ -894,9 +861,6 @@ function update(doGains = true) {
                         element.find('.name').text("" + data.slowestIcon + " " + value.name);
                     }
                 }
-                /*try {
-                    element.find('.subgap').text(getDisplayedCount(value.count - filteredData[ids[i + 1]].count));
-                } catch (e) { }*/
             }
 
             iso.updateSortData();
@@ -1232,6 +1196,11 @@ document.getElementById('imageSize').addEventListener('change', function () {
 
 document.getElementById('nameSize').addEventListener('change', function () {
     data.cardStyles.nameSize = this.value;
+    fix();
+});
+
+document.getElementById('nameWidth').addEventListener('change', function () {
+    data.cardStyles.nameWidth = this.value;
     fix();
 });
 
@@ -1573,6 +1542,7 @@ function fix() {
     document.getElementById('cardStyles').innerText = `
             .name {
                 font-size: ${data.cardStyles.nameSize}vw;
+                max-width: ${data.cardStyles.nameWidth}vw;
             }
             .count {
                 font-size: ${data.cardStyles.countSize}vw;
@@ -1650,7 +1620,6 @@ function fix() {
         })
     }
 
-    document.getElementById('setting').innerText = "Current: " + data.hideSettings + ""
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
         if (card.className.split(' ').includes("selected") == false) {
@@ -1692,6 +1661,7 @@ function fix() {
     document.getElementById('cardWidth').value = data.cardStyles.cardWidth;
     document.getElementById('cardHeight').value = data.cardStyles.cardHeight;
     document.getElementById('nameSize').value = data.cardStyles.nameSize;
+    document.getElementById('nameWidth').value = data.cardStyles.nameWidth;
     document.getElementById('countSize').value = data.cardStyles.countSize;
     document.getElementById('imageSize').value = data.cardStyles.imageSize;
     document.getElementById('textPicker').value = convert3letterhexto6letters(data.textColor);
@@ -1716,20 +1686,16 @@ function fix() {
     }
     let odometerStyles = document.getElementById('odometerStyles')
     odometerStyles.innerText = '';
-    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-up.odometer-animating .odometer-inside, .odometer.odometer-theme-default.odometer-animating-up.odometer-animating .odometer-inside {
-        color: ${data.odometerUp};
-        }`
-    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-inside, .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
-        color: ${data.odometerDown};
-        }`
-
-    odometerStyles.innerText += `.odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner,
+    odometerStyles.innerText += `
+        .odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner,
     .odometer.odometer-theme-default.odometer-animating-up .odometer-ribbon-inner {
         -webkit-transition: -webkit-transform ${data.odometerSpeed}s;
         -moz-transition: -moz-transform ${data.odometerSpeed}s;
         -ms-transition: -ms-transform ${data.odometerSpeed}s;
         -o-transition: -o-transform ${data.odometerSpeed}s;
         transition: transform ${data.odometerSpeed}s;
+        animation: ${data.odometerSpeed}s linear up;
+        animation-iteration-count: 1;
     }
 
     .odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner,
@@ -1739,7 +1705,39 @@ function fix() {
         -ms-transition: -ms-transform ${data.odometerSpeed}s;
         -o-transition: -o-transform ${data.odometerSpeed}s;
         transition: transform ${data.odometerSpeed}s;
-    }`
+        animation: ${data.odometerSpeed}s linear down;
+        animation-iteration-count: 1;
+    }
+
+@keyframes up {
+  0% {
+    color: ${data.textColor};
+  }
+  25% {
+  color: ${data.odometerUp};
+  }
+  75% {
+  color: ${data.odometerUp};
+  }
+  100% {
+    color: ${data.textColor};
+  }
+}
+
+@keyframes down {
+  0% {
+    color: ${data.textColor};
+  }
+  25% {
+    color: ${data.odometerDown};
+  }
+  75% {
+    color: ${data.odometerDown};
+  }
+  100% {
+    color: ${data.textColor};
+  }
+}`
 }
 
 function convert3letterhexto6letters(hex) {
@@ -1838,13 +1836,26 @@ function update2() {
                 if (json.events.length > 0) {
                     for (let i = 0; i < json.events.length; i++) {
                         if (json.events[i].values) {
-                            let id = json.events[i].id;
-                            let min = parseFloat(json.events[i].values[0])
-                            let max = parseFloat(json.events[i].values[1])
-                            for (let i = 0; i < data.data.length; i++) {
-                                if (data.data[i].id == id) {
-                                    let num = Math.floor(Math.random() * (max - min + 1)) + min;
-                                    data.data[i].count += num;
+                            if (json.events[i].rates == true) {
+                                let id = json.events[i].id;
+                                let min = parseFloat(json.events[i].values[0])
+                                let max = parseFloat(json.events[i].values[1])
+                                for (let i = 0; i < data.data.length; i++) {
+                                    if (data.data[i].id == id) {
+                                        let num = Math.floor(Math.random() * (max - min + 1)) + min;
+                                        data.data[i].min_gain += num;
+                                        data.data[i].max_gain += num;
+                                    }
+                                }
+                            } else {
+                                let id = json.events[i].id;
+                                let min = parseFloat(json.events[i].values[0])
+                                let max = parseFloat(json.events[i].values[1])
+                                for (let i = 0; i < data.data.length; i++) {
+                                    if (data.data[i].id == id) {
+                                        let num = Math.floor(Math.random() * (max - min + 1)) + min;
+                                        data.data[i].count += num;
+                                    }
                                 }
                             }
                         }
@@ -1925,18 +1936,45 @@ document.getElementById('max_gain_global').addEventListener('change', function (
 
 function custom() {
     prompt("What is the command name?")
-    let min = prompt("What is the minimum amount of subscribers the channel can gain?")
-    if (isNaN(min)) {
-        alert("Please enter a number.")
+    let type = prompt("1 or 2 - (1) The channel should gain instant subs OR (2) the channel should have their rate changed.")
+    if (type == "1") {
+        let min = prompt("What is the minimum amount of subscribers the channel can gain?")
+        if (!min || isNaN(min)) {
+            alert("Please enter a number.")
+            return;
+        }
+        let max = prompt("What is the maximum amount of subscribers the channel can gain?")
+        if (!max || isNaN(max)) {
+            alert("Please enter a number.")
+            return;
+        }
+        let returnText = prompt("What should the commands response be? (use $(user) for the name and $(query) for any additional text)")
+        if (returnText) {
+            returnText = '&returnText=' + returnText;
+        }
+
+        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
+    } else if (type == "2") {
+        let min = prompt("What is the minimum amount the channel's rate should gain? (we recommend less than 1 (0.1, 0.2, etc))");
+        if (!min || isNaN(min)) {
+            alert("Please enter a number.");
+            return;
+        }
+        let max = prompt("What is the maximum amount the channel's rate should gain? (we recommend less than 1 (0.1, 0.2, etc))");
+        if (!max || isNaN(max)) {
+            alert("Please enter a number.");
+            return;
+        }
+        let returnText = prompt("What should the commands response be? (use $(user) for the name and $(query) for any additional text)")
+        if (returnText) {
+            returnText = '&returnText=' + returnText;
+        }
+
+        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
+    } else {
+        alert("Please enter type (1 or 2)");
         return;
     }
-    let max = prompt("What is the maximum amount of subscribers the channel can gain?")
-    if (isNaN(max)) {
-        alert("Please enter a number.")
-        return;
-    }
-    let returnText = prompt("What should the commands response be? (use $(user) for the name and $(query) for any additional text)")
-    alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + '&returnText=' + returnText + ')')
 }
 
 document.getElementById('connect').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
@@ -2050,27 +2088,6 @@ document.getElementById('odometerDown').addEventListener('change', function () {
 document.getElementById('odometerSpeed').addEventListener('change', function () {
     data.odometerSpeed = document.getElementById('odometerSpeed').value;
     fix()
-})
-
-function hideSettings() {
-    alert("Click what key you want after this alert.")
-    document.addEventListener('keydown', function (e) {
-        data.hideSettings = e.key;
-        alert("Key set to " + e.key)
-        document.getElementById('setting').innerText = "Current: " + e.key + ""
-        this.removeEventListener('keydown', arguments.callee, false);
-    })
-}
-
-document.addEventListener('keydown', function (e) {
-    if (e.target && e.target.tagName === 'INPUT') return;
-    if (e.key == data.hideSettings) {
-        if (document.getElementById('settings').style.display == "none") {
-            document.getElementById('settings').style.display = "block";
-        } else {
-            document.getElementById('settings').style.display = "none";
-        }
-    }
 })
 
 function pause() {
@@ -2638,7 +2655,7 @@ document.getElementById("apiSource").addEventListener('change', function () {
                 },
                 'id': {
                     'IDIncludes': true,
-                    'path': 'user[1].count'
+                    'path': 'user[2].count'
                 }
             }
         }
@@ -2668,7 +2685,7 @@ document.getElementById("apiSource").addEventListener('change', function () {
                 },
                 'id': {
                     'IDIncludes': true,
-                    'path': 'user[1].count'
+                    'path': 'user[2].count'
                 }
             }
         }
@@ -3022,7 +3039,9 @@ function loadHeader() {
             document.getElementById('header').appendChild(div);
         } else {
             const parent = document.getElementById('header_' + item.childOf);
-            parent.appendChild(div);
+            if (parent) {
+                parent.appendChild(div);
+            }
         }
     }
     updateOdo()
@@ -3054,7 +3073,6 @@ function saveTopSettings() {
         };
         parent.children = Array.from(parent.children).forEach(child => {
             if (child.classList && child.classList.contains("header_option")) {
-                console.log(child.classList[0].split('_')[2], child.value)
                 if (child.classList[0].includes('attribute')) {
                     if (child.type == 'number') {
                         item['attributes'][child.classList[0].split('_')[2]] = parseInt(child.value);
@@ -3191,7 +3209,6 @@ function removeTopSetting(name) {
         }
     }
 }
-
 function createNewSection() {
     let item = {
         "attributes": {
@@ -3211,4 +3228,26 @@ function createNewSection() {
     }
     data.headerSettings.items.unshift(item);
     loadTopSettings();
+}
+
+function displaySetting(id, item) {
+    let div = item;
+    if (div.classList.contains("enabled")) {
+        div.classList.remove("enabled");
+        document.getElementById(id).classList.add("hidden");
+        data.settingsEnabled.splice(data.settingsEnabled.indexOf(id), 1);
+    } else {
+        div.classList.add("enabled");
+        document.getElementById(id).classList.remove("hidden");
+        data.settingsEnabled.push(id);
+    }
+    Array.from(document.getElementById('container').children).forEach(child => {
+        let isActive = !child.classList.contains('hidden');
+        if (isActive) {
+            let place = data.settingsEnabled.indexOf(child.id);
+            child.style.order = place + 1;
+        } else {
+            child.style.order = 'auto';
+        }
+    });
 }
