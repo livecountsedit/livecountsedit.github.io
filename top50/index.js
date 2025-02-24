@@ -3036,19 +3036,19 @@ function loadHeader() {
 
                 if (user1) {
                     document.getElementById('battle_name1_' + item.name).innerHTML = user1.name;
-                    document.getElementById('battle_count1_' + item.name).innerHTML = user1.count;
+                    document.getElementById('battle_count1_' + item.name).innerHTML = Math.floor(user1.count);
                     if (!document.getElementById('battle_image1_' + item.name).src == user1.image) {
                         document.getElementById('battle_image1_' + item.name).src = user1.image;
                     }
                 }
                 if (user2) {
                     document.getElementById('battle_name2_' + item.name).innerHTML = user2.name;
-                    document.getElementById('battle_count2_' + item.name).innerHTML = user2.count;
+                    document.getElementById('battle_count2_' + item.name).innerHTML = Math.floor(user2.count);
                     if (!document.getElementById('battle_image2_' + item.name).src == user2.image) {
                         document.getElementById('battle_image2_' + item.name).src = user2.image;
                     }
                 }
-                document.getElementById('battle_difference_' + item.name).innerHTML = Math.abs(user1.count - user2.count);
+                document.getElementById('battle_difference_' + item.name).innerHTML = Math.floor(user1.count - user2.count);
             }, item.attributes.updateInterval));
         }
         if (item.type == 'user') {
