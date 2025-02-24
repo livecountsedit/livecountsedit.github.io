@@ -2977,7 +2977,7 @@ function loadHeader() {
                         let string = "";
                         let array = [];
                         if (item.attributes.valueFrom == 'gains') {
-                            array = [...data.data].sort((a, b) => (a.count - a.last) - (b.count - b.last));
+                            array = [...data.data].sort((a, b) => (a.count - a.lastCount) - (b.count - b.lastCount));
                         } else if (item.attributes.valueFrom == 'counts') {
                             array = [...data.data].sort((a, b) => (a.count) - (b.count));
                         }
@@ -2986,9 +2986,13 @@ function loadHeader() {
                         }
                         array = array.slice(0, item.attributes.length);
                         if (item.attributes.valueFrom == 'counts') {
-                        string = array.map(x => `${x.name}: ${Math.floor(x.count).toLocaleString('en-US')}`);
+                            string = array.map(x => {
+                                console.log(x)
+                            return `${x.name}: ${Math.floor(x.count).toLocaleString('en-US')}`});
                         } else {
-                            string = array.map(x => `${x.name}: ${Math.floor(x.count-x.last).toLocaleString('en-US')}`);
+                            string = array.map(x => {
+                                console.log(x)
+                            return`${x.name}: ${Math.floor(x.count-x.lastCount).toLocaleString('en-US')}`});
                         }
                         const scrollDistance = string.join(', ').length * item.attributes.size;
                         const scrollSpeed = scrollDistance / item.attributes.scrollTime;
