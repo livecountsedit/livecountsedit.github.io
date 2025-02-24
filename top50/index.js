@@ -2985,7 +2985,11 @@ function loadHeader() {
                             array = array.reverse();
                         }
                         array = array.slice(0, item.attributes.length);
-                        string = array.map(x => `${x.name}: ${x.count.toLocaleString('en-US')}`);
+                        if (item.attributes.valueFrom == 'counts') {
+                        string = array.map(x => `${x.name}: ${Math.floor(x.count).toLocaleString('en-US')}`);
+                        } else {
+                            string = array.map(x => `${x.name}: ${Math.floor(x.count-x.last).toLocaleString('en-US')}`);
+                        }
                         const scrollDistance = string.join(', ').length * item.attributes.size;
                         const scrollSpeed = scrollDistance / item.attributes.scrollTime;
                         div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${string.join(', ')}</marquee>`
