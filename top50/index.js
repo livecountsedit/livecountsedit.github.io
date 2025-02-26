@@ -252,7 +252,7 @@ function initLoad(redo) {
     if (data.lastOnline && data.offlineGains == true) {
         const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval;
         for (let i = 0; i < data.data.length; i++) {
-            if (isFinite(data.data[i].std_gain)) {
+            if (isFinite(data.data[i].std_gain) && data.data[i].std_gain != null) {
                 const meanGain = parseFloat(data.data[i].mean_gain) || 0;
                 const stdGain = parseFloat(data.data[i].std_gain) || 0;
 
@@ -277,26 +277,13 @@ function initLoad(redo) {
 
                 const minGain = parseFloat(data.data[i].min_gain) || 0;
                 const maxGain = parseFloat(data.data[i].max_gain) || 0;
+
                 data.data[i].count += randomGaussian(
                     (maxGain + minGain) * intervalsPassed / 2,
                     (maxGain - minGain) * Math.sqrt(intervalsPassed / 12)
                 )
             }
         }
-
-        // const interval = data.updateInterval / 1000;
-        // const secondsPassed = (new Date().getTime() - data.lastOnline) / 1000;
-        // for (let i = 0; i < data.data.length; i++) {
-        //     if (parseFloat(data.mean_gain) > 0) {
-        //         const gain = randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain));
-        //         const gained = gain * (secondsPassed / interval);
-        //         data.data[i].count += gained;
-        //     } else {
-        //         const gain = average(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
-        //         let gained = gain * (secondsPassed / interval);
-        //         data.data[i].count += gained;
-        //     }
-        // }
         data.lastOnline = new Date().getTime();
     }
     let design = setupDesign();
@@ -579,6 +566,7 @@ function setupMDMStyles(undo) {
 function update(doGains = true) {
     let start = new Date().getTime();
     if (data) {
+        data.lastOnline = Date.now();
         let fastest = ""
         let fastestCount = -Infinity;
         let slowest = ""
@@ -1047,6 +1035,7 @@ function edit() {
 
 function save() {
     try {
+        data.lastOnline = Date.now();
         localStorage.setItem("data", JSON.stringify(data));
         document.getElementById("storage-warning").style.display = "none";
         alert("Saved!");
@@ -1058,6 +1047,7 @@ function save() {
 
 function saveData2() {
     try {
+        data.lastOnline = Date.now();
         localStorage.setItem("data", JSON.stringify(data));
         document.getElementById("storage-warning").style.display = "none";
     } catch (error) {
@@ -2095,15 +2085,8 @@ document.getElementById('slowest').addEventListener('click', function () {
     }
 })
 
-let offlineInterval;
-
-function offlineCheck() {
-    data.lastOnline = new Date().getTime();
-}
-
 if (data.offlineGains == true) {
     document.getElementById('offline').checked = true;
-    offlineInterval = setInterval(offlineCheck, 1000);
 } else {
     document.getElementById('offline').checked = false;
 }
@@ -2111,10 +2094,8 @@ if (data.offlineGains == true) {
 document.getElementById('offline').addEventListener('click', function () {
     if (document.getElementById('offline').checked == true) {
         data.offlineGains = true;
-        offlineInterval = setInterval(offlineCheck, 1000);
     } else {
         data.offlineGains = false;
-        clearInterval(offlineInterval);
     }
 })
 
