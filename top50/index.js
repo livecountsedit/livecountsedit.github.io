@@ -286,7 +286,7 @@ function initLoad(redo) {
         }
         data.lastOnline = new Date().getTime();
     }
-    let design = setupDesign();
+    let design = setupDesign(redo);
     document.getElementById('main').innerHTML = design[0].innerHTML;
     document.getElementById('main').style = design[1];
     //document.getElementById('designStyles').innerText = design[2];
@@ -322,25 +322,11 @@ function initLoad(redo) {
 };
 
 
-function setupDesign(list, sort, order) {
+function setupDesign(redo) {
     let c = 1;
     let toReturn = ["", "", ""]
     let main = document.createElement('div');
     let channels = data.data;
-    if (list) {
-        channels = list;
-    }
-    if (sort) {
-        channels = channels.sort(function (a, b) {
-            return b[sort] - a[sort]
-        });
-    }
-    if (order) {
-        if (order == 'asc') {
-            channels = channels.reverse();
-        }
-    }
-
     if ((data.theme.includes('top100')) || (data.theme.includes('top150'))) {
         toReturn[2] = `.image { height: ${(data.showDifferences) ? 1.5 : 2.15}vw; width: ${(data.showDifferences) ? 1.5 : 2.15}vw; }
         .card { height: 2.3vw; }
@@ -369,8 +355,15 @@ function setupDesign(list, sort, order) {
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
 
         if (cards > 50) {
+            if (redo) {
+                data.cardStyles.cardWidth = '9'
+            }
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
-            data.cardStyles.cardWidth = '9'
+        } else if (cards > 25) {
+            if (redo) {
+                data.cardStyles.cardWidth = '19'
+            }
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
         }
 
         for (let l = 1; l <= cards; l++) {
@@ -402,6 +395,19 @@ function setupDesign(list, sort, order) {
         let columns = data.theme == 'top100' ? 10 : 5;
         columns = data.theme == 'top150' ? 10 : columns;
         columns = data.theme == 'top200' ? 10 : columns;
+
+        if (columns > 5) {
+            if (redo) {
+                data.cardStyles.cardWidth = '9'
+            }
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(10, 1fr);";
+        } else if (columns > 3) {
+            if (redo) {
+                data.cardStyles.cardWidth = '19'
+            }
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+        }
+
         for (let l = 1; l <= columns; l++) {
             const htmlcolumn = document.createElement('div');
             htmlcolumn.classList = `column_${l} column`;
@@ -1317,12 +1323,12 @@ document.getElementById('verticallyCenterRanks').addEventListener('change', func
     } else {
         data.verticallyCenterRanks = false;
     }
+    fix();
     if (data.fireIcons.firePosition == 'mdm') {
         setupMDMStyles()
     } else {
         setupMDMStyles(true)
     }
-    fix();
 });
 
 document.getElementById('topDifferencePlacing').addEventListener('change', function () {
@@ -2993,7 +2999,7 @@ function loadHeader() {
                         } else {
                             for (let i = 0; i < array.length; i += 2) {
                                 let endComma = ', '
-                                if (!array[i+1] || !array[i+2]) {
+                                if (!array[i + 1] || !array[i + 2]) {
                                     endComma = '';
                                 }
                                 string += `${array[i].name} vs ${array[i + 1].name}: ${Math.floor(array[i].count - array[i + 1].count).toLocaleString('en-US')}${endComma}`
@@ -3044,20 +3050,20 @@ function loadHeader() {
                 }
 
                 if (user1) {
-                    document.getElementById('battle_name1_' + item.name).innerHTML = user1.name;
-                    document.getElementById('battle_count1_' + item.name).innerHTML = Math.floor(user1.count);
+                    document.getElementById('battle_name1_' + item.name).innerText = user1.name;
+                    document.getElementById('battle_count1_' + item.name).innerText = Math.floor(user1.count);
                     if (document.getElementById('battle_image1_' + item.name).src !== user1.image) {
                         document.getElementById('battle_image1_' + item.name).src = user1.image;
                     }
                 }
                 if (user2) {
-                    document.getElementById('battle_name2_' + item.name).innerHTML = user2.name;
-                    document.getElementById('battle_count2_' + item.name).innerHTML = Math.floor(user2.count);
+                    document.getElementById('battle_name2_' + item.name).innerText = user2.name;
+                    document.getElementById('battle_count2_' + item.name).innerinnerTextHTML = Math.floor(user2.count);
                     if (document.getElementById('battle_image2_' + item.name).src !== user2.image) {
                         document.getElementById('battle_image2_' + item.name).src = user2.image;
                     }
                 }
-                document.getElementById('battle_difference_' + item.name).innerHTML = Math.floor(user1.count - user2.count);
+                document.getElementById('battle_difference_' + item.name).innerText = Math.floor(user1.count - user2.count);
             }, item.attributes.updateInterval * 1000));
         }
         if (item.type == 'user') {
@@ -3078,8 +3084,8 @@ function loadHeader() {
                 }
 
                 if (user1) {
-                    document.getElementById('user_name1_' + item.name).innerHTML = user1.name;
-                    document.getElementById('user_count1_' + item.name).innerHTML = user1.count;
+                    document.getElementById('user_name1_' + item.name).innerText = user1.name;
+                    document.getElementById('user_count1_' + item.name).innerText = Math.floor(user1.count);
                     if (document.getElementById('user_image1_' + item.name).src !== user1.image) {
                         document.getElementById('user_image1_' + item.name).src = user1.image;
                     }

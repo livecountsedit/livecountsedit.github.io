@@ -1,57 +1,98 @@
-[{
-    "name": "Rainbow",
-    "threshold": 100000,
-    "icon": "mdm_gifs/rainbow.gif",
-    "include": [],
-    "method": ">=",
-    "color": "#FFF",
-    "size": "50"
-}, {
-    "name": "Purple",
-    "threshold": 50000,
-    "icon": "mdm_gifs/purple.gif",
-    "include": [],
-    "method": ">=",
-    "color": "#FFF",
-    "size": "50"
-}, {
-    "name": "Blue",
-    "threshold": 20000,
-    "icon": "mdm_gifs/blue.gif",
-    "include": [],
-    "method": ">=",
-    "color": "#FFF",
-    "size": "50"
-}, {
-    "name": "Dark Red",
-    "threshold": 10000,
-    "icon": "mdm_gifs/dark_red.gif",
-    "include": [],
-    "method": ">=",
-    "color": "red",
-    "size": "50"
-}, {
-    "name": "Red",
-    "threshold": 5000,
-    "icon": "mdm_gifs/red.gif",
-    "include": [],
-    "method": ">=",
-    "color": "#FFF",
-    "size": "50"
-}, {
-    "name": "Flame",
-    "threshold": 2000,
-    "icon": "mdm_gifs/flame.gif",
-    "include": [],
-    "method": ">=",
-    "color": "#FFF",
-    "size": "50"
-}, {
-    "name": "Ice",
-    "threshold": 100,
-    "icon": "mdm_gifs/ice.gif",
-    "include": [],
-    "method": "<=",
-    "color": "grey",
-    "size": "50"
-}]
+[
+    {
+        "name": "Rainbow Ring",
+        "threshold": 200000,
+        "icon": "mdm_gifs/rainbow_ring.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Rainbow Fire",
+        "threshold": 100000,
+        "icon": "mdm_gifs/rainbow.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Purple Fire",
+        "threshold": 75000,
+        "icon": "mdm_gifs/purple.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Blue Fire",
+        "threshold": 50000,
+        "icon": "mdm_gifs/blue.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Green Fire",
+        "threshold": 35000,
+        "icon": "mdm_gifs/green_fire.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Red Fire",
+        "threshold": 20000,
+        "icon": "mdm_gifs/red.gif",
+        "include": [],
+        "method": ">=",
+        "color": "red"
+    },
+    {
+        "name": "Yellow Fire",
+        "threshold": 15000,
+        "icon": "mdm_gifs/yellow_fire.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Dark Fire",
+        "threshold": 10000,
+        "icon": "mdm_gifs/dark_red.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Orange Fire",
+        "threshold": 5000,
+        "icon": "mdm_gifs/red.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Full Bar",
+        "threshold": 2000,
+        "icon": "mdm_gifs/full_bar.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Half Bar",
+        "threshold": 1000,
+        "icon": "mdm_gifs/half_bar.gif",
+        "include": [],
+        "method": ">=",
+        "color": "#FFF"
+    },
+    {
+        "name": "Ice",
+        "threshold": 100,
+        "icon": "mdm_gifs/ice.gif",
+        "include": [],
+        "method": "<=",
+        "color": "grey"
+    }
+]
