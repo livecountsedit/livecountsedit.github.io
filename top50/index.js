@@ -2928,18 +2928,6 @@ document.getElementById('disableImageBorderColor').addEventListener('click', fun
     fix();
 });
 
-function importMDMIcons() {
-    fetch('./mdm_gifs/default.json')
-        .then(response => response.json())
-        .then(data2 => {
-            data2.forEach(icon => {
-                data.fireIcons.created.push(icon);
-            });
-            loadFireIcons();
-        })
-        .catch(error => console.error('Error importing MDM icons:', error));
-}
-
 let headerIntervals = [];
 function loadHeader() {
     headerIntervals.forEach(interval => {
