@@ -3046,7 +3046,7 @@ function loadHeader() {
                 }
                 if (user2) {
                     document.getElementById('battle_name2_' + item.name).innerText = user2.name;
-                    document.getElementById('battle_count2_' + item.name).innerinnerTextHTML = Math.floor(user2.count);
+                    document.getElementById('battle_count2_' + item.name).innerText = Math.floor(user2.count);
                     if (document.getElementById('battle_image2_' + item.name).src !== user2.image) {
                         document.getElementById('battle_image2_' + item.name).src = user2.image;
                     }
