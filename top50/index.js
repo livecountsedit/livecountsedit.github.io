@@ -2608,7 +2608,7 @@ function selectorFunction(e) {
                         document.getElementById('edit_min_gain').value = data.data[q].min_gain;
                         document.getElementById('edit_max_gain').value = data.data[q].max_gain;
                         document.getElementById('edit_name').value = data.data[q].name;
-                        document.getElementById('edit_bg_color').value = data.data[q].bg ? data.data[q].bg_color : data.boxColor;
+                        document.getElementById('edit_bg_color').value = data.data[q].bg ? data.data[q].bg : '';
                         document.getElementById('edit_count').value = data.data[q].count;
                         document.getElementById('edit_image1').value = data.data[q].image;
                         document.getElementById('edit_channel_id').innerText = 'ID: ' + data.data[q].id;
@@ -2649,7 +2649,7 @@ function refresh() {
                 document.getElementById('edit_min_gain').value = data.data[q].min_gain;
                 document.getElementById('edit_max_gain').value = data.data[q].max_gain;
                 document.getElementById('edit_name').value = data.data[q].name;
-                document.getElementById('edit_bg_color').value = data.data[q].bg ? data.data[q].bg : data.boxColor;
+                document.getElementById('edit_bg_color').value = data.data[q].bg ? data.data[q].bg : '';
                 document.getElementById('edit_count').value = data.data[q].count;
                 document.getElementById('edit_image1').value = data.data[q].image;
                 document.getElementById('edit_channel_id').innerText = 'ID: ' + data.data[q].id;
