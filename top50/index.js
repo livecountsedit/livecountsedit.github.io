@@ -550,14 +550,6 @@ function setupMDMStyles(undo) {
                             text-align: center;
                         }
 
-                        .num:hover {
-                            background-color: #555;
-                        }
-
-                        .num_text:hover {
-                            background-color: #555;
-                        }
-
                         .num_text span {
                             font-size: 1.2em;
                         }
