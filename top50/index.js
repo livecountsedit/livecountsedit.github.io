@@ -1438,7 +1438,7 @@ document.getElementById('showCounts').addEventListener('change', function () {
 });
 function fix() {
     if (data.audits == true) {
-        auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[4])) * 1000)
+        auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
     }
     document.getElementById('auditMin').value = data.auditStats[0]
     document.getElementById('auditMax').value = data.auditStats[1]
@@ -2210,20 +2210,20 @@ function mean(a, b) {
 
 function audit() {
     nextUpdateAudit = true;
-    auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[4])) * 1000)
+    auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
 }
 
 function saveAuditSettings() {
     data.auditStats[0] = parseFloat(document.getElementById('auditMin').value)
     data.auditStats[1] = parseFloat(document.getElementById('auditMax').value)
     data.auditStats[2] = parseFloat(document.getElementById('auditTimeMin').value)
-    data.auditStats[4] = parseFloat(document.getElementById('auditTimeMax').value)
+    data.auditStats[3] = parseFloat(document.getElementById('auditTimeMax').value)
 }
 
 function audit2() {
     if (data.audits == false) {
         data.audits = true
-        auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[4])) * 1000)
+        auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
         document.getElementById('audit').innerText = "Disable Audits"
     } else {
         data.audits = false
