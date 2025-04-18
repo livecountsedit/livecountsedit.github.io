@@ -2417,7 +2417,9 @@ function apiUpdate(interval) {
                             data.data[r].image = imageUpdate;
                         }
                         if (countUpdate !== undefined) {
-                            if (abb(countUpdate) !== abb(data.data[r].count)) {
+                            if (data.apiUpdates.forceUpdates) {
+                                data.data[r].count = countUpdate;
+                            } else if (abb(countUpdate) !== abb(data.data[r].count)) {
                                 data.data[r].count = countUpdate;
                             }
                         }
