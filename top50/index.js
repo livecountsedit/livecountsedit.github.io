@@ -3020,8 +3020,8 @@ function loadHeader() {
                 </div>
                 </div>`;
             headerIntervals.push(setInterval(function () {
-                let user1 = {};
-                let user2 = {};
+                let user1 = null;
+                let user2 = null;
                 if (item.attributes.type == 'custom') {
                     user1 = data.data.find(u => u.id == item.attributes.id1);
                     user2 = data.data.find(u => u.id == item.attributes.id2);
@@ -3045,7 +3045,9 @@ function loadHeader() {
                         document.getElementById('battle_image2_' + item.name).src = user2.image;
                     }
                 }
-                document.getElementById('battle_difference_' + item.name).innerText = Math.floor(user1.count - user2.count);
+                let count1 = user1 ? user1.count : 0;
+                let count2 = user2 ? user2.count : 0;
+                document.getElementById('battle_difference_' + item.name).innerText = Math.floor(count1 - count2);
             }, item.attributes.updateInterval * 1000));
         }
         if (item.type == 'user') {
@@ -3058,7 +3060,7 @@ function loadHeader() {
                     </div>
                 </div>`;
             headerIntervals.push(setInterval(function () {
-                let user1 = {};
+                let user1 = null;
                 if (item.attributes.type == 'custom') {
                     user1 = data.data.find(u => u.id == item.attributes.id1);
                 } else {
