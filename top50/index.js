@@ -893,7 +893,7 @@ function update(doGains = true) {
                                     }
                                 }
                             } else {
-                                currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
+                                currentCard.children[0].children[0].innerText = num;
                             }
                             if (data.boxBGLength !== '0') {
                                 if (data.data[i].count > data.data[i].lastCount) {
@@ -3344,7 +3344,7 @@ function loadTopSettings(itemName, itemType) {
             <label>Content:</label>
             <input type="text" value="${item.attributes.text || ''}" class="section_attribute_text header_option" /><br>
             <label>Color:</label>
-            <input type="color" class="small_input" value="${item.attributes.color || '#FFF'}" class="section_attribute_color header_option" /><br>
+            <input type="color" class="small_input" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /><br>
             <label>Size:</label>
             <input type="number" class="small_input" value="${item.attributes.size || '20'}" class="section_attribute_size header_option" /><br>
             <label>Scroll Duration: (0 = disabled)</label>
@@ -3389,7 +3389,7 @@ function loadTopSettings(itemName, itemType) {
         `;
         let userSettings = `
             <label>Background Color:</label>
-            <input type="color" class="small_input" value="${item.attributes.bgColor || '#000'}" class="section_attribute_bgColor header_option" /><br>
+            <input type="color" class="small_input" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option" /><br>
             <label>Height:</label>
             <input type="number" class="small_input" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option" /><br>
             <label>Image Size:</label>
