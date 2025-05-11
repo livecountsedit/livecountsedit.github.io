@@ -19,7 +19,6 @@ h2 {
 }
 
 .num {
-  font-family: 'Roboto', roboto;
   float: left;
   font-weight: 900;
   src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
@@ -32,6 +31,13 @@ h2 {
   margin-right: 5px;
 }
 
+.difference_line {
+  position: absolute;
+  bottom: -5px;
+  height: 5px;
+  z-index: -1;
+}
+
 .card {
   height: 45px;
   padding: 5px;
@@ -41,7 +47,6 @@ h2 {
   border: 1px solid #ffffff;
   transition: background-color 0.5s;
   position: relative;
-  font-family: 'Roboto', sans-serif;
 }
 
 .image {
@@ -99,6 +104,7 @@ input[type=checkbox] {
 .subgap {
   float: right;
   font-size: 20px;
+  position: absolute;
 }
 
 #main {
@@ -184,17 +190,17 @@ textarea {
   margin-left: 2.12%;
 }
 
-.subgap {
-  position: absolute;
-}
-
 .gapimg {
   z-index: 1000;
   position: absolute;
 }
 
-.fire_input {
+.medium_input {
   width: 40%;
+}
+
+.small_input {
+  width: 25%;
 }
 
 #fireIcons {
@@ -326,14 +332,15 @@ textarea {
 }
 
 .settingType {
-  color: #000;
+  color: #888;
   padding: 10px;
   border-radius: 15px;
-  background-color: #ccc;
+  background-color: #aaa;
 }
 
 .enabled {
   background-color: #fff;
+  color: #000;
 }
 
 input {
