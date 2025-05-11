@@ -878,7 +878,7 @@ function update(doGains = true) {
                                             currentCard.children[0].style.border = `solid ${data.fireIcons.fireBorderColor} ${data.fireIcons.fireBorderWidth}px`
                                             currentCard.children[0].style.backgroundImage = `url(${escapeHTML(icon)})`;                                            
                                             currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                                            currentCard.children[0].children[0].style.marginTop = data.fireIcons.created[q].margin ? "" : data.fireIcons.created[q].margin + "px";
+                                            currentCard.children[0].children[0].style.marginTop = data.fireIcons.created[q].margin ? data.fireIcons.created[q].margin + "px" : "";
                                         } else {
                                             currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
                                         }
