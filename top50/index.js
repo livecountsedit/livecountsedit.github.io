@@ -150,10 +150,10 @@ let example_data = {
     "differenceThreshold": 100,
     "differenceStyles": {
         "left": "75",
-        "top": "-5",
+        "top": "60",
         "color": "#008000",
         "imageLeft": "10",
-        "imageTop": "-5",
+        "imageTop": "60",
         "imageSize": "50",
         "imageEnabled": false,
         "shakingEnabled": true,
@@ -1658,7 +1658,7 @@ function fix() {
         document.getElementById('hideDifferences').innerText = '';
     } else {
         document.getElementById('showDifferences').checked = false;
-        document.getElementById('hideDifferences').innerText = '.subgap * {display: none;}';
+        document.getElementById('hideDifferences').innerText = '.subgap {display: none;}';
     }
 
     document.getElementById('leftDifferencePlacing').value = data.differenceStyles.left;
