@@ -20,6 +20,7 @@ function escapeHTML(text) {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
     }
+    return "";
 }
 
 function formatRank(rank) {
@@ -429,7 +430,7 @@ function setupDesign(redo) {
                     <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
-                <div class="subgap"><span class="text"></span><span class="odometer"></span></div>
+                <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
                 <div class="difference_line"></div>
             </div>`;
 
@@ -475,7 +476,7 @@ function setupDesign(redo) {
                     <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
-                <div class="subgap"><span class="text"></span><span class="odometer"></span></div>
+                <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
                 <div class="difference_line"></div>
                 </div>`;
                 if (channels[dataIndex]) {
@@ -762,9 +763,7 @@ function update(doGains = true) {
                                 currentCard.children[4].style.visibility = 'hidden'
                                 currentCard.children[5].style.visibility = 'hidden'
                             }
-                            if (selected == data.data[i].id) {
-                                document.getElementById("card_" + selected).style.border = "0.1em solid red";
-                            } else {
+                            if (selected !== data.data[i].id) {
                                 document.getElementById("card_" + data.data[i].id).style.border = "0.1em solid " + data.boxBorder + "";
                             }
                             if (fastest == data.data[i].id) {
@@ -879,6 +878,7 @@ function update(doGains = true) {
                                             currentCard.children[0].style.backgroundImage = `url(${escapeHTML(icon)})`;                                            
                                             currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
                                             currentCard.children[0].children[0].style.marginTop = data.fireIcons.created[q].margin ? data.fireIcons.created[q].margin + "px" : "";
+                                            currentCard.children[0].children[0].style.marginLeft = data.fireIcons.created[q].marginLeft ? data.fireIcons.created[q].marginLeft + "px" : "";
                                         } else {
                                             currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
                                         }
@@ -889,6 +889,7 @@ function update(doGains = true) {
                                             currentCard.children[0].style.backgroundImage = `url('')`;
                                             currentCard.children[0].style.color = `${data.textColor}`;
                                             currentCard.children[0].children[0].style.marginTop = "";
+                                            currentCard.children[0].children[0].style.marginLeft = "";
                                         }
                                     }
                                 }
@@ -896,9 +897,9 @@ function update(doGains = true) {
                                 currentCard.children[0].children[0].innerText = num;
                             }
                             if (data.boxBGLength !== '0') {
-                                if (data.data[i].count > data.data[i].lastCount) {
+                                if (getDisplayedCount(data.data[i].count) > getDisplayedCount(data.data[i].lastCount)) {
                                     currentCard.style.backgroundColor = `${data.boxBGGain}`;
-                                } else if (data.data[i].count < data.data[i].lastCount) {
+                                } else if (getDisplayedCount(data.data[i].count) < getDisplayedCount(data.data[i].lastCount)) {
                                     currentCard.style.backgroundColor = `${data.boxBGLose}`;
                                 }
                                 let user = data.data[i]
@@ -911,7 +912,7 @@ function update(doGains = true) {
                             currentCard.id = 'card_'
                             currentCard.children[0].id = "num_"
                             currentCard.children[1].id = "image_"
-                            if (!currentCard.children[1].src == '../blank.png') {
+                            if (currentCard.children[1].src !== '../blank.png') {
                                 currentCard.children[1].src = "../blank.png"
                             }
                             currentCard.children[2].children[0].id = "name_"
@@ -920,6 +921,11 @@ function update(doGains = true) {
                             currentCard.children[2].children[1].innerText = '0'
                             currentCard.children[4].querySelector(".odometer").innerText = 0;
                             currentCard.children[4].querySelector(".text").innerText = 0;
+                            currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
+                            currentCard.children[0].style.backgroundImage = `url('')`;
+                            currentCard.children[0].style.color = `${data.textColor}`;
+                            currentCard.children[0].children[0].style.marginTop = "";
+                            currentCard.children[0].children[0].style.marginLeft = "";
                         }
                     }
                 }, extraTimeTillUpdate);
@@ -933,9 +939,7 @@ function update(doGains = true) {
                 element.find('.name').text(value.name);
                 element.find('.image').attr('src', value.image);
                 element.find('.count').text(getDisplayedCount(value.count));
-                if (selected == value.id) {
-                    element.css('border', '0.1em solid red');
-                } else {
+                if (selected !== value.id) {
                     element.css('border', '0.1em solid ' + data.boxBorder + '');
                 }
                 if (fastest == value.id) {
@@ -1209,6 +1213,9 @@ function deleteChannel() {
                 }
             }
             selected = null;
+            const selectedCard = document.querySelector(".selected");
+            if (selectedCard) selectedCard.classList.remove("selected");
+            selectedCard.style.border = "solid 0.1em " + data.boxBorder;
             document.getElementById('quickSelect').value = 'select';
             refresh()
         }
@@ -1360,10 +1367,6 @@ document.getElementById('importFromGoogleFonts').addEventListener('change', func
 
 document.getElementById('intervalsPerUpdate').addEventListener('change', function () {
     data.fireIcons.intervalsPerUpdate = Math.max(1, Math.round(this.value));
-})
-
-document.getElementById('gainAverageOf').addEventListener('change', function () {
-    data.gainAverageOf = Math.max(1, Math.round(this.value));
 })
 
 document.getElementById('headerFont').addEventListener('input', function () {
@@ -1860,7 +1863,7 @@ function fix() {
     document.getElementById('counterFontWeight').value = data.counterFontWeight || "400";
     document.getElementById('counterAlignment').value = data.counterAlignment;
 
-    const subCounters = document.getElementsByClassName("count");
+    const subCounters = document.getElementById('main').getElementsByClassName("count");
     for (const subCounter of subCounters) {
         subCounter.style.textAlign = data.counterAlignment;
     }
@@ -1868,7 +1871,7 @@ function fix() {
     document.getElementById('header').style.fontFamily = data.headerFont || "Arial";
     document.getElementById('main').style.fontFamily = data.mainFont || "Roboto";
 
-    const counters = document.getElementsByClassName('odometer');
+    const counters = document.getElementById('main').getElementsByClassName('odometer');
     for (const counter of counters) {
         counter.style.fontWeight = data.counterFontWeight;
     }
@@ -1913,10 +1916,10 @@ function fix() {
         animation-iteration-count: 1;
     }
 
-    .subgap .odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner,
-    .subgap .odometer.odometer-theme-default.odometer-animating-up .odometer-ribbon-inner,
-    .subgap .odometer.odometer-auto-theme.odometer-animating-down .odometer-ribbon-inner,
-    .subgap .odometer.odometer-theme-default.odometer-animating-down .odometer-ribbon-inner {
+    .odometer.odometer-auto-theme.odometer-animating-up.no_color_transition .odometer-ribbon-inner,
+    .odometer.odometer-theme-default.odometer-animating-up.no_color_transition .odometer-ribbon-inner,
+    .odometer.odometer-auto-theme.odometer-animating-down.no_color_transition .odometer-ribbon-inner,
+    .odometer.odometer-theme-default.odometer-animating-down.no_color_transition .odometer-ribbon-inner {
         animation: none;
     }
 
@@ -2764,7 +2767,7 @@ function selectorFunction(e) {
             document.getElementById('quickSelect').value = selected || 'select';
             if (document.getElementById('card_' + selected + '')) {
                 document.getElementById('card_' + selected + '').classList.add('selected');
-                document.getElementById('card_' + selected + '').style.border = "solid 0.1em red"
+                document.getElementById('card_' + selected + '').style.border = "";
                 for (let q = 0; q < data.data.length; q++) {
                     if (data.data[q].id == id) {
                         if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
@@ -2904,7 +2907,7 @@ const addFireIcon = () => {
         div.style.color = '#FFF';
         div.innerHTML = `
             <label>Fire Icon Name: </label><input type="text" id="fireIcon" placeholder="Fire Icon 1"><br>
-            <label>Fire Icon Threshold: </label><input type="text" id="fireIconThreshold" placeholder="1000"><br>
+            <label>Fire Icon Threshold: </label><input type="number" step="any" id="fireIconThreshold" placeholder="1000"><br>
             <label>Fire Icon Threshold Method: </label><select id="fireIconMethod" name="fireIconMethod">
                 <option value=">=">Greater Than (>=)</option>
                 <option value="==">Equal To (==)</option>
@@ -2913,7 +2916,8 @@ const addFireIcon = () => {
             </select><br>
             <label>Fire Icon:</label><input type="text" id="fireIconUrl" placeholder="https://example.com/image.png"><label> or </label><input type="file" id="fireIconFile"><br>
             <label>Rank Color: </label><input type="color" id="fireIconRankColor"><br>
-            <label>Rank Margin Top (px):</label><input type="number" id="fireIconRankMargin" placeholder="Default"><br>
+            <label>Rank Margin Top (px):</label><input type="number" step="any" id="fireIconRankMargin" placeholder="Default"><br>
+            <label>Rank Margin Left (px):</label><input type="number" step="any" id="fireIconRankMarginLeft" placeholder="Default"><br>
             <button onclick="saveFireIcon()">Add</button>
         `
         document.getElementById('fireIconsCreate').appendChild(div);
@@ -2962,11 +2966,12 @@ const saveFireIcon = async () => {
 
     data.fireIcons.created.push({
         name: document.getElementById('fireIcon').value,
-        threshold: document.getElementById('fireIconThreshold').value,
+        threshold: parseFloat(document.getElementById('fireIconThreshold').value),
         icon: file,
         color: document.getElementById('fireIconRankColor').value,
         method: document.getElementById('fireIconMethod').value,
-        margin: document.getElementById('fireIconRankMargin').value
+        margin: document.getElementById('fireIconRankMargin').value,
+        marginLeft: document.getElementById('fireIconRankMarginLeft').value,
     });
 
     document.getElementById('fireIconCreate').remove();
@@ -3008,11 +3013,13 @@ const loadFireIcons = () => {
                         <option ${fireIcon.method == '<=' ? 'selected' : ''} value="<=">Count <=</option>
                         <option ${fireIcon.method == '!=' ? 'selected' : ''} value="!=">Count !=</option>
                     </select>
-                    <input id="new_fire_threshold_${i}" class="small_input" value="${escapeHTML(fireIcon.threshold)}"><br>
+                    <input type="number" step="any" id="new_fire_threshold_${i}" class="small_input" value="${escapeHTML(fireIcon.threshold)}"><br>
                     <label>Rank Color</label>
                     <input type="color" id="new_fire_color_${i}" class="medium_input" value="${escapeHTML(fireIcon.color)}"><br>
                     <label>Rank Margin Top (px)</label>
-                    <input id="new_fire_margin_${i}" class="small_input" placeholder="Default" value="${escapeHTML(fireIcon.margin)}">
+                    <input type="number" id="new_fire_margin_${i}" class="small_input" placeholder="Default" value="${escapeHTML(fireIcon.margin)}"><br>
+                    <label>Rank Margin Left (px)</label>
+                    <input type="number" id="new_fire_marginLeft_${i}" class="small_input" placeholder="Default" value="${escapeHTML(fireIcon.marginLeft)}">
                 </div><br>
                 <div>
                     <div><button onclick="saveFireEdits(${i})">Save</button></div>
@@ -3052,11 +3059,12 @@ const saveFireEdits = (index) => {
 
     data.fireIcons.created[index] = {
         name: document.getElementById('new_fire_name_' + index).value,
-        threshold: parseInt(document.getElementById('new_fire_threshold_' + index).value),
+        threshold: parseFloat(document.getElementById('new_fire_threshold_' + index).value),
         icon: data.fireIcons.created[index].icon,
         method: document.getElementById('new_fire_method_' + index).value,
         color: document.getElementById('new_fire_color_' + index).value,
-        margin: document.getElementById('new_fire_margin_' + index).value
+        margin: document.getElementById('new_fire_margin_' + index).value,
+        marginLeft: document.getElementById('new_fire_marginLeft_' + index).value
     };
 };
 
@@ -3128,6 +3136,7 @@ function loadHeader() {
             div.innerHTML = `<p class="header-text">${item.attributes.text}</p>`;
             div.style.color = item.attributes.color;
             div.style.fontSize = item.attributes.size + "px";
+            div.style.fontWeight = item.attributes.fontWeight || "400";
 
             if (item.attributes.scrollTime > 0) {
                 const scrollDistance = item.attributes.text.length * item.attributes.size;
@@ -3187,24 +3196,26 @@ function loadHeader() {
         if (item.type == 'battle') {
             div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
                 <div class="battle_container">
-                    <img style="float: left; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image1_${item.name}"></img>
+                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image1_${item.name}"></img>
                     <div class="battle_info">
                         <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
-                        <p class="odometer count" id="battle_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
+                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>
                 <div>
-                    <p class="name" style="font-size: ${item.attributes.fontSize}px;">Difference:</p>
-                    <p class="odometer battle_difference count" id="battle_difference_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
+                    <p style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">Difference:</p>
+                    <p class="odometer battle_difference count no_color_transition" id="battle_difference_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">0</p>
                 </div>
                 <div class="reverse battle_container">
                 <div class="battle_info">
                         <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
-                        <p class="odometer count" id="battle_count2_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
+                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count2_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: right;" : ""}">0</p>
                     </div>
-                    <img style="float: right; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image2_${item.name}"></img>
+                    <img style="float: right; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image2_${item.name}"></img>
                 </div>
                 </div>`;
+            div.style.fontWeight = item.attributes.fontWeight || "400";
+            div.style.color = item.attributes.color;
             headerIntervals.push(setInterval(function () {
                 let user1 = null;
                 let user2 = null;
@@ -3213,38 +3224,42 @@ function loadHeader() {
                     user2 = data.data.find(u => u.id == item.attributes.id2);
                 } else {
                     let users = findClosestBattle();
-                    user1 = users.channels[0];
-                    user2 = users.channels[1];
+                    user1 = users?.channels[0];
+                    user2 = users?.channels[1];
                 }
 
-                if (user1) {
-                    document.getElementById('battle_name1_' + item.name).innerText = user1.name;
-                    document.getElementById('battle_count1_' + item.name).innerText = Math.floor(user1.count);
-                    if (document.getElementById('battle_image1_' + item.name).src !== user1.image) {
-                        document.getElementById('battle_image1_' + item.name).src = user1.image;
-                    }
+                let count1 = user1 ? getDisplayedCount(user1.count) : 0;
+                let count2 = user2 ? getDisplayedCount(user2.count) : 0;
+
+                document.getElementById('battle_name1_' + item.name).innerText = user1 ? user1.name : "Loading...";
+                document.getElementById('battle_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
+                if (user1 && document.getElementById('battle_image1_' + item.name).src !== user1.image) {
+                    document.getElementById('battle_image1_' + item.name).src = user1.image;
+                } else if (!user1) {
+                    document.getElementById('battle_image1_' + item.name).src = "../default.png";
                 }
-                if (user2) {
-                    document.getElementById('battle_name2_' + item.name).innerText = user2.name;
-                    document.getElementById('battle_count2_' + item.name).innerText = Math.floor(user2.count);
-                    if (document.getElementById('battle_image2_' + item.name).src !== user2.image) {
-                        document.getElementById('battle_image2_' + item.name).src = user2.image;
-                    }
+
+                document.getElementById('battle_name2_' + item.name).innerText = user2 ? user2.name : "Loading...";
+                document.getElementById('battle_count2_' + item.name).innerText = getDisplayedCount(user2 ? user2.count : 0);
+                if (user1 && document.getElementById('battle_image2_' + item.name).src !== user2.image) {
+                    document.getElementById('battle_image2_' + item.name).src = user2.image;
+                } else if (!user2) {
+                    document.getElementById('battle_image2_' + item.name).src = "../default.png";
                 }
-                let count1 = user1 ? user1.count : 0;
-                let count2 = user2 ? user2.count : 0;
                 document.getElementById('battle_difference_' + item.name).innerText = Math.floor(count1 - count2);
             }, item.attributes.updateInterval * 1000));
         }
         if (item.type == 'user') {
             div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
                 <div class="battle_container">
-                    <img style="float: left; border-radius: ${data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="user_image1_${item.name}"></img>
+                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="user_image1_${item.name}"></img>
                     <div class="battle_info">
                         <p id="user_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
-                        <p class="odometer count" id="user_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
+                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="user_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>`;
+            div.style.fontWeight = item.attributes.fontWeight || "400";
+            div.style.color = item.attributes.color;
             headerIntervals.push(setInterval(function () {
                 let user1 = null;
                 if (item.attributes.type == 'custom') {
@@ -3253,12 +3268,12 @@ function loadHeader() {
                     user1 = findFastestChannel();
                 }
 
-                if (user1) {
-                    document.getElementById('user_name1_' + item.name).innerText = user1.name;
-                    document.getElementById('user_count1_' + item.name).innerText = Math.floor(user1.count);
-                    if (document.getElementById('user_image1_' + item.name).src !== user1.image) {
-                        document.getElementById('user_image1_' + item.name).src = user1.image;
-                    }
+                document.getElementById('user_name1_' + item.name).innerText = user1 ? user1.name : "Loading...";
+                document.getElementById('user_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
+                if (user1 && document.getElementById('user_image1_' + item.name).src !== user1.image) {
+                    document.getElementById('user_image1_' + item.name).src = user1.image;
+                } else if (!user1) {
+                    document.getElementById('user_image1_' + item.name).src = "../default.png";
                 }
             }, item.attributes.updateInterval * 1000));
         }
@@ -3287,7 +3302,7 @@ function findClosestBattle() {
 }
 
 function findFastestChannel() {
-    let toReturn = [...data.data].sort((a, b) => (a.count - a.last) - (b.count - b.last));
+    let toReturn = [...data.data].sort((a, b) => getGain(a.id) - getGain(b.id));
     return toReturn[0];
 }
 
@@ -3301,8 +3316,10 @@ function saveTopSettings() {
         parent.children = Array.from(parent.children).forEach(child => {
             if (child.classList && child.classList.contains("header_option")) {
                 if (child.classList[0].includes('attribute')) {
-                    if (child.type == 'number') {
+                    if (child.type === 'number') {
                         item['attributes'][child.classList[0].split('_')[2]] = parseInt(child.value);
+                    } else if (child.type === 'checkbox') {
+                        item['attributes'][child.classList[0].split('_')[2]] = child.checked;
                     } else {
                         item['attributes'][child.classList[0].split('_')[2]] = child.value;
                     }
@@ -3344,41 +3361,70 @@ function loadTopSettings(itemName, itemType) {
             <label>Content:</label>
             <input type="text" value="${item.attributes.text || ''}" class="section_attribute_text header_option" /><br>
             <label>Color:</label>
-            <input type="color" class="small_input" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /><br>
-            <label>Size:</label>
-            <input type="number" class="small_input" value="${item.attributes.size || '20'}" class="section_attribute_size header_option" /><br>
+            <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option small_input" /><br>
+            <label>Font Size:</label>
+            <input type="number" value="${item.attributes.size || '20'}" class="section_attribute_size header_option small_input" /><br>
+            <label><abbr title="Note: Not all font weights are supported on all fonts.">Font Weight</abbr></label>
+            <select class="section_attribute_fontWeight header_option">
+                <option value="100" ${item.attributes.fontWeight == "100" ? 'selected' : ''}>Thin</option>
+                <option value="200" ${item.attributes.fontWeight == "200" ? 'selected' : ''}>Extra Light</option>
+                <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                <option value="400" ${!item.attributes.fontWeight  || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
+                <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
+                <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
+                <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                <option value="800" ${item.attributes.fontWeight == "800" ? 'selected' : ''}>Extra Bold</option>
+                <option value="900" ${item.attributes.fontWeight == "900" ? 'selected' : ''}>Black</option>
+            </select><br>
             <label>Scroll Duration: (0 = disabled)</label>
-            <input type="number" class="small_input" value="${item.attributes.scrollTime || '0'}" class="section_attribute_scrollTime header_option" /><br>
+            <input type="number" value="${item.attributes.scrollTime || '0'}" class="section_attribute_scrollTime header_option small_input" /><br>
             <br><label>Get Value From:</label>
-            <select class="small_input section_attribute_valueFrom header_option">
+            <select class="section_attribute_valueFrom header_option small_input">
                 <option value="none" ${item.attributes.valueFrom === 'none' ? 'selected' : ''}>Disabled</option>
                 <option value="gains" ${item.attributes.valueFrom === 'gains' ? 'selected' : ''}>Gains</option>
                 <option value="counts" ${item.attributes.valueFrom === 'counts' ? 'selected' : ''}>Counts</option>
                 <option value="gaps" ${item.attributes.valueFrom === 'gaps' ? 'selected' : ''}>Gaps</option>
             </select><br>
             <label>(Above) List Length:</label>
-            <input type="number" value="${item.attributes.length || 0}" class="small_input section_attribute_length header_option" /><br>
+            <input type="number" value="${item.attributes.length || 0}" class="section_attribute_length header_option small_input" /><br>
             <label>(Above) Sort Order:</label>
-            <select class="small_input section_attribute_sortOrder header_option">
+            <select class="section_attribute_sortOrder header_option small_input">
                 <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
                 <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
             </select><br>
             <label>(Above) Update Interval (seconds):</label>
-            <input type="number" class="small_input" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" /><br>
+            <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option small_input" /><br>
             <label>List IDs (separated via a comma) (for gaps it'll collect the first 2, then second 2, etc) to be used (OR leave blank):</label>
             <input type="text" value="${item.attributes?.idList?.toString() || ''}" class="section_attribute_idList header_option" /><br>
         `;
         let battleSettings = `
             <label>Background Color:</label>
-            <input type="color" class="small_input" value="${item.attributes.bgColor || '#000'}" class="section_attribute_bgColor header_option" /><br>
+            <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option small_input" /><br>
+            <label>Color:</label>
+            <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option small_input" /><br>
             <label>Height:</label>
-            <input type="number" class="small_input" value="${item.attributes.boxHeight || '20'}" class="section_attribute_boxHeight header_option" /><br>
+            <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_boxHeight header_option small_input" /><br>
             <label>Image Size:</label>
-            <input type="number" class="small_input" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option" /><br>
+            <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /><br>
             <label>Font Size:</label>
-            <input type="number" class="small_input" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option" /><br>
+            <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /><br>
+            <label><abbr title="Note: Not all font weights are supported on all fonts.">Font Weight</abbr></label>
+            <select class="section_attribute_fontWeight header_option">
+                <option value="100" ${item.attributes.fontWeight == "100" ? 'selected' : ''}>Thin</option>
+                <option value="200" ${item.attributes.fontWeight == "200" ? 'selected' : ''}>Extra Light</option>
+                <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                <option value="400" ${!item.attributes.fontWeight  || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
+                <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
+                <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
+                <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                <option value="800" ${item.attributes.fontWeight == "800" ? 'selected' : ''}>Extra Bold</option>
+                <option value="900" ${item.attributes.fontWeight == "900" ? 'selected' : ''}>Black</option>
+            </select><br>
+            <input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Apply odometer up/down colors</label><br>
+            <input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatars</label><br>
+            <input type="checkbox" ${item.attributes.battleAlign ? "checked" : ""} class="section_attribute_battleAlign header_option"><label>Align counters to sides</label><br>
             <label>(Above) Update Interval (seconds):</label>
-            <input type="number" class="small_input" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" />
+            <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" /><br>
             <label>Type:</label>
             <select class="section_attribute_type header_option">
                 <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest (in difference, IDs are ignored)</option>
@@ -3389,15 +3435,31 @@ function loadTopSettings(itemName, itemType) {
         `;
         let userSettings = `
             <label>Background Color:</label>
-            <input type="color" class="small_input" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option" /><br>
+            <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option small_input" /><br>
+            <label>Color:</label>
+            <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option small_input" /><br>
             <label>Height:</label>
-            <input type="number" class="small_input" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option" /><br>
+            <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option small_input" /><br>
             <label>Image Size:</label>
-            <input type="number" class="small_input" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option" /><br>
+            <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /><br>
             <label>Font Size:</label>
-            <input type="number" class="small_input" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option" /><br>
+            <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /><br>
+            <label><abbr title="Note: Not all font weights are supported on all fonts.">Font Weight</abbr></label>
+            <select class="section_attribute_fontWeight header_option">
+                <option value="100" ${item.attributes.fontWeight == "100" ? 'selected' : ''}>Thin</option>
+                <option value="200" ${item.attributes.fontWeight == "200" ? 'selected' : ''}>Extra Light</option>
+                <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                <option value="400" ${!item.attributes.fontWeight  || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
+                <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
+                <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
+                <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                <option value="800" ${item.attributes.fontWeight == "800" ? 'selected' : ''}>Extra Bold</option>
+                <option value="900" ${item.attributes.fontWeight == "900" ? 'selected' : ''}>Black</option>
+            </select><br>
+            <input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Apply odometer up/down colors</label><br>
+            <input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatar</label><br>
             <label>Update Interval:</label>
-            <input type="number" class="small_input" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option" /><br>
+            <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" /><br>
             <label>Type:</label>
             <select class="section_attribute_type header_option">
                 <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest (ID is ignored)</option>
@@ -3407,7 +3469,7 @@ function loadTopSettings(itemName, itemType) {
             `;
         let boxSettings = `
             <label>Rows:</label>
-            <input type="number" value="${item.attributes.rows || 0}" class="small_input section_attribute_rows header_option" /><br>
+            <input type="number" value="${item.attributes.rows || 0}" class="section_attribute_rows header_option small_input" /><br>
         `;
         div.innerHTML = `<br>
             <label>Name: </label><input type="text" value="${item.name}" class="section_option_name header_option" /><br>
@@ -3453,6 +3515,10 @@ function createNewSection() {
             "length": 0,
             "sortOrder": "asc",
             "updateInterval": 2,
+            "roundAvatars": false,
+            "battleAlign": false,
+            "odometerColors": true,
+            "fontWeight": "400",
             "id1": "",
             "id2": ""
         },
@@ -3513,4 +3579,8 @@ function fixSettings() {
             child.style.order = 'auto';
         }
     });
+}
+
+function saveGainRateOption() {
+    data.gainAverageOf = Math.max(1, Math.round(document.getElementById('gainAverageOf').value));
 }

@@ -81,7 +81,7 @@ h2 {
 .selected {
   background-color: #ccc;
   transition: color 2s;
-  border: solid 1px red;
+  border: solid 0.1em red;
 }
 
 input,

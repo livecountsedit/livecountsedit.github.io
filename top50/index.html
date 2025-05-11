@@ -4,7 +4,7 @@
 <head>
     <title>Livecountsedit - Fake Top 50</title>
     <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css?v=7.4.0-fix1" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.4.1" rel="stylesheet" type="text/css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -430,9 +430,9 @@
                 </div>
                 <div>
                     <br>
-                    <strong>WARNING: Pause before editing this option</strong><br>
                     <label>Note: Gain data is <strong>NOT</strong> saved after reloading</label><br>
                     <label>Base Gain Rate Off: Average of <input class="small_input" type="number" id="gainAverageOf" value="1"></label><br>
+                    <button onclick="saveGainRateOption()">Save This Option</button>
                     <button onclick="clearGainData()">Clear Gain Data</button><br>
                 </div>
                 <div>
@@ -677,7 +677,7 @@
         </div>
     </div>
     <hr><br>
-    <script src="./index.js?v=7.4.0-fix2"></script>
+    <script src="./index.js?v=7.4.1"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>
