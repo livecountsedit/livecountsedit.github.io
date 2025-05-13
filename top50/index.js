@@ -580,7 +580,7 @@ function setupMDMStyles(undo) {
         return;
     }
     let stylesToAppend = `<style id="mdm-styles">
-                        .card {
+                        .main {
                             display: grid;
                             grid-template-columns: 1fr 2fr 5fr;
                         }
