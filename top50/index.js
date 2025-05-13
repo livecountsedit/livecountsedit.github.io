@@ -569,8 +569,8 @@ function create() {
 
 let appendedMDMStyles = false;
 
-function setupMDMStyles(undo) {
-    if (undo) {
+function setupMDMStyles() {
+    if (data.fireIcons.firePosition !== 'mdm' || !data.fireIcons.enabled) {
         appendedMDMStyles = false;
         document.getElementById('mdm-styles').remove();
         document.querySelectorAll('.num').forEach(item => {
@@ -579,10 +579,23 @@ function setupMDMStyles(undo) {
         })
         return;
     }
+
+    let cardSpacings;
+
+    if (!data.showImages && data.showRankings) {
+        cardSpacings = "1fr 7fr";
+    } else if (data.showImages && !data.showRankings) {
+        cardSpacings = "2fr 6fr";
+    } else if (!data.showImages && !data.showRankings) {
+        cardSpacings = "8fr";
+    } else {
+        cardSpacings = "1fr 2fr 5fr";
+    }
+
     let stylesToAppend = `<style id="mdm-styles">
-                        .main {
+                        .card {
                             display: grid;
-                            grid-template-columns: 1fr 2fr 5fr;
+                            grid-template-columns: ${cardSpacings};
                         }
     
                         .num {
@@ -1432,11 +1445,7 @@ document.getElementById('verticallyCenterRanks').addEventListener('change', func
         data.verticallyCenterRanks = false;
     }
     fix();
-    if (data.fireIcons.firePosition == 'mdm') {
-        setupMDMStyles()
-    } else {
-        setupMDMStyles(true)
-    }
+    setupMDMStyles()
 });
 
 document.getElementById('topDifferencePlacing').addEventListener('change', function () {
@@ -1536,6 +1545,7 @@ document.getElementById('showDifferences').addEventListener('change', function (
 document.getElementById('showRankings').addEventListener('change', function () {
     data.showRankings = document.getElementById('showRankings').checked;
     fix()
+    setupMDMStyles();
 });
 
 
@@ -1558,6 +1568,7 @@ document.getElementById('showImages').addEventListener('change', function () {
         data.showImages = false;
     }
     fix()
+    setupMDMStyles();
 });
 document.getElementById('showCounts').addEventListener('change', function () {
     if (document.getElementById('showCounts').checked) {
@@ -3078,11 +3089,7 @@ document.getElementById('fireType').addEventListener('change', function () {
 
 document.getElementById('firePosition').addEventListener('change', function () {
     data.fireIcons.firePosition = document.getElementById('firePosition').value;
-    if (data.fireIcons.firePosition == 'mdm') {
-        setupMDMStyles()
-    } else {
-        setupMDMStyles(true)
-    }
+    setupMDMStyles();
 });
 
 document.getElementById('fireBorderColor').addEventListener('change', function () {
