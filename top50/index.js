@@ -1193,7 +1193,7 @@ function save2(public = false) {
     if (public || confirm("PLEASE READ: You are exporting a private save file. This means that the save file will include things like any API keys you have put in. If you do not wish for this data to be in your save file, export a public save that is safe to share publicly instead. Be sure to NEVER share the private save file with anyone you do not trust!")) {
         let data3 = JSON.stringify(data2);
         let a = document.createElement('a');
-        let file = new Blob([data3], { type: 'text/json' });
+        let file = new Blob([data3], { type: 'text/plain' });
         a.href = URL.createObjectURL(file);
         a.download = public ? 'data.json' : 'data-PRIVATE.json';
         a.click();
@@ -1244,7 +1244,7 @@ function downloadChannel() {
             if (data.data[i].id == id) {
                 let data2 = JSON.stringify(data.data[i]);
                 let a = document.createElement('a');
-                let file = new Blob([data2], { type: 'text/json' });
+                let file = new Blob([data2], { type: 'text/plain' });
                 a.href = URL.createObjectURL(file);
                 a.download = data.data[i].id + '.json';
                 a.click();

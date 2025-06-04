@@ -614,7 +614,7 @@ function saveData() {
 }
 
 function exportData() {
-	let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(user));
+	let dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(user));
 	let dlAnchorElem = document.createElement("a");
 	dlAnchorElem.setAttribute("href", dataStr);
 	dlAnchorElem.setAttribute("download", "data.json");

@@ -398,7 +398,7 @@ function exportToJSON(private = false) {
     }
     const a = document.createElement('a');
     saveData.lastSaved = Date.now()
-    const file = new Blob([saveToJSON(private)], { type: 'text/json' });
+    const file = new Blob([saveToJSON(private)], { type: 'text/plain' });
     a.href = URL.createObjectURL(file);
     a.download = `${saveData.title}${private ? '-PRIVATE' : ''}.json`;
     a.click();
