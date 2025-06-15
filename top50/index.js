@@ -2847,8 +2847,10 @@ function selectorFunction(e) {
         }
     } else {
         if (selected != null) {
+            try {
             document.getElementById('card_' + selected + '').classList.remove('selected');
             document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
+            } catch {}
         }
         if (!id || id == selected) {
             document.getElementById('quickSelect').value = 'select';
