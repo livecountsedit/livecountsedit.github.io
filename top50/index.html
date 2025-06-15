@@ -33,7 +33,8 @@
     </script>
     <script src="./odometer.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js"></script>
+    <script src="https://npmcdn.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
+    <script src="https://npmcdn.com/isotope-masonry-horizontal@2/masonry-horizontal.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
     <style id="designStyles"></style>
@@ -80,7 +81,6 @@
                         <option value="top100H">Theme: Top 100 (Horizontal Columns)</option>
                         <option value="top150H">Theme: Top 150 (Horizontal Columns)</option>
                         <option value="top200H">Theme: Top 200 (Horizontal Columns)</option>
-                        <option value="top10A">Theme: Top 10 (Animated [BETA])</option>
                     </select>
                 </div>
                 <div>
@@ -120,6 +120,10 @@
                 <div>
                     <label>Load Save (From YT Studio)</label><br>
                     <input type="file" id="loadData2" autocomplete="off">
+                </div>
+                <div>
+                    <label>Load Save (Channels Only)</label><br>
+                    <input type="file" id="loadData3" autocomplete="off">
                 </div>
             </div>
             <hr>
@@ -232,6 +236,16 @@
                     <br>
                     <label>Background Color</label><br>
                     <input type="color" value="#000000" id="backPicker" autocomplete="off">
+                </div>
+                <div>
+                    <br>
+                    <label>Main Container Height <a href="https://www.w3schools.com/cssref/css_units.php">(vh)</a></label><br>
+                    <input type="number" value="100" id="containerHeight" autocomplete="off" step="1">
+                </div>
+                <div>
+                    <br>
+                    <label>Main Container Width <a href="https://www.w3schools.com/cssref/css_units.php">(vw)</a></label><br>
+                    <input type="number" value="100" id="containerWidth" autocomplete="off" step="1">
                 </div>
                 <div>
                     <br>
@@ -418,6 +432,17 @@
         <div id="technicalSettings" class="hidden">
             <label class="bold">Technical Settings:</label>
             <div class="boringSettings">
+                
+                <div>
+                    <br>
+                    <input type="checkbox" id="animatedCardChanges"><label> [BETA] Animated Card Changes</label>
+                </div>
+                <div>
+                    <br>
+                    <label>[BETA] Animated Card Changes Duration (in seconds)</label><br>
+                    <input class="medium_input" type="number" value="0.5" id="animatedCardChangesDuration" autocomplete="off">
+                </div>
+
                 <div>
                     <br>
                     <label>Update Interval (in seconds)</label><br>
