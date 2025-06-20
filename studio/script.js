@@ -1,7 +1,8 @@
 window.odometerOptions = {
 	animation: "byDigit",
-	removeLeadingZeros: true
-}
+	removeLeadingZeros: true,
+	format: '(,ddd)'
+};
 
 let cmm = 0;
 let raw = 0;
@@ -21,11 +22,6 @@ const setMarginTopOfCount = function () {
 	countElement.style.marginTop = `${value}px`;
 }
 
-const selectElement = document.getElementById('selectcomma');
-const comma1Element = document.getElementById('comma1a');
-const comma2Element = document.getElementById('comma2a');
-const comma3Element = document.getElementById('comma3a');
-
 let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : {
 	name: "Livecountsedit",
 	image: "../default.png",
@@ -43,7 +39,7 @@ let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user"
 	dropdownBottomText: "Live Data",
 	id: uuidGen(),
 	autosave: true,
-	//unsed by studio
+	commaFormat: '(,ddd)', 
 	banner: "",
 	textColor: "#000",
 	odometerUp: "#000",
@@ -56,12 +52,22 @@ let user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user"
 	std_gain: 0,
 	abbreviate: false,
 };
+
+if (typeof user.commaFormat === 'undefined') {
+    user.commaFormat = '(,ddd)';
+}
+window.odometerOptions.format = user.commaFormat;
+
+
 if (!user.count) {
 	user.count = user.subscribers || 0;
 }
 
 function render() {
-	document.querySelector('.odometer').innerText = Math.round(user.count);
+    const countElement = document.getElementById('count');
+    if (countElement) {
+        countElement.innerText = Math.round(user.count);
+    }
 }
 
 if (user.graphType == "live") {
@@ -90,7 +96,6 @@ const chart = new Highcharts.chart({
 			fontFamily: "Roboto",
 		},
 		height: (9 / 16 * 30) + '%',
-		spacingLeft: -10,
 		spacingLeft: -10,
 		marginRight: 65
 	},
@@ -196,8 +201,8 @@ function submit() {
 		reader.readAsDataURL(file);
 		reader.onload = function () {
 			user.image = reader.result
+			document.getElementById('image').src = user.image;
 		};
-		document.getElementById('image').src = user.image
 	} else {
 		user.image = document.getElementById("image_input").value
 		document.getElementById('image').src = user.image
@@ -213,8 +218,6 @@ let interval;
 function update() {
 	gain = random(user.min_gain, user.max_gain)
 	user.count += gain
-	cmm = spl(user.count)
-	raw = user.count
 	if (user.graphType == "live") {
 		if (chart.series[0].data.length > user.maxPoints) {
 			chart.series[0].data[0].remove()
@@ -245,8 +248,7 @@ function submit2() {
 		user.graphValues = values.split(',')
 		let graphDates = []
 		for (let i = 0; i < user.graphDates.length; i++) {
-			user.graphDates[i] = user.graphDates[i]
-			graphDates[i] = new Date(user.graphDates[i]).getTime()
+			graphDates[i] = new Date(user.graphDates[i].trim()).getTime()
 		}
 		for (let i = 0; i < user.graphValues.length; i++) {
 			user.graphValues[i] = parseFloat(user.graphValues[i]);
@@ -313,6 +315,10 @@ function importData() {
 				return;
 			} else {
 				user = res;
+                if (typeof user.commaFormat === 'undefined') {
+                    user.commaFormat = '(,ddd)';
+                }
+                window.odometerOptions.format = user.commaFormat;
 			}
 			localStorage.setItem("user", JSON.stringify(user))
 			location.reload()
@@ -328,25 +334,24 @@ function importData() {
 function pickChannel(channels) {
 	document.getElementById('settingsMenu').innerHTML = "";
 	for (let q = 0; q < channels.data.length; q++) {
-		let channel = channels.data[q];
+		let channelData = channels.data[q];
 		document.getElementById('settingsMenu').innerHTML += `
 		<div>
-		<img src="${channel.image}">
-		<h1>${channel.name}</h1>
-		<h2>${channel.count.toLocaleString()}</h2>
-		<p>${channel.id}</p>
-		<button onclick="selectThing('${channel.id}')">Select</button>
+		<img src="${channelData.image}">
+		<h1>${channelData.name}</h1>
+		<h2>${channelData.count.toLocaleString()}</h2>
+		<p>${channelData.id}</p>
+		<button onclick="selectThing('${channelData.id}')">Select</button>
 		<hr>
 		</div><br>`
 	}
-	document.body.appendChild(div);
 }
 
 function selectThing(id) {
 	for (let q = 0; q < importedChannels.data.length; q++) {
 		if (id == importedChannels.data[q].id) {
 			let thing = importedChannels.data[q];
-			let channel = {
+			let selectedChannel = {
 				name: thing.name,
 				count: thing.count,
 				image: thing.image,
@@ -362,7 +367,7 @@ function selectThing(id) {
 				graphDates: thing.graphDates ? thing.graphDates : [],
 				graphValues: thing.graphValues ? thing.graphValues : [],
 				liveGraph: thing.liveGraph ? thing.liveGraph : [],
-				maxPoints: thing.maxPoints ? thing.maxPoints : 1000,
+				maxPoints: thing.maxPoints ? thing.maxPoints : 100,
 				dropdownTopText: thing.dropdownTopText ? thing.dropdownTopText : "All Time",
 				dropdownBottomText: thing.dropdownBottomText ? thing.dropdownBottomText : "Live Data",
 				banner: thing.banner ? thing.banner : "",
@@ -373,12 +378,57 @@ function selectThing(id) {
 				graphColor: thing.graphColor ? thing.graphColor : "#000",
 				boxColor: thing.boxColor ? thing.boxColor : "#000",
 				bgColor: thing.bgColor ? thing.bgColor : "#000",
-			}
-			localStorage.setItem("user", JSON.stringify(channel))
+                commaFormat: thing.commaFormat || '(,ddd)'
+			};
+			localStorage.setItem("user", JSON.stringify(selectedChannel))
 			location.reload()
 		}
 	}
 }
+
+const selectCommaElement = document.getElementById('selectcomma');
+
+function applyCommaFormatAndUpdate() {
+    if (!selectCommaElement) return;
+    const selectedValue = selectCommaElement.value;
+    let newFormat = '(,ddd)'; 
+
+    if (selectedValue === 'comma1') {
+        newFormat = '(,ddd)';
+    } else if (selectedValue === 'comma2') {
+        newFormat = '(.ddd)';
+    } else if (selectedValue === 'comma3') {
+        newFormat = '( ddd)';
+    }
+
+    window.odometerOptions.format = newFormat;
+    user.commaFormat = newFormat; 
+
+    const countElement = document.getElementById('count');
+    if (countElement && countElement.odometer) {
+        countElement.odometer.options.format = newFormat;
+        countElement.odometer.update(Math.round(user.count));
+    } else {
+        render(); 
+    }
+}
+
+if (selectCommaElement) {
+    if (user.commaFormat === '(,ddd)') {
+        selectCommaElement.value = 'comma1';
+    } else if (user.commaFormat === '(.ddd)') {
+        selectCommaElement.value = 'comma2';
+    } else if (user.commaFormat === '( ddd)') {
+        selectCommaElement.value = 'comma3';
+    } else {
+        selectCommaElement.value = 'comma1'; 
+        user.commaFormat = '(,ddd)';
+        window.odometerOptions.format = '(,ddd)'; 
+    }
+
+    selectCommaElement.addEventListener('change', applyCommaFormatAndUpdate);
+}
+
 
 if (localStorage.getItem("user")) {
 	console.log(user)
@@ -391,16 +441,25 @@ if (localStorage.getItem("user")) {
 	document.getElementById('max_subs').value = user.max_gain
 	document.getElementById('updateInterval').value = user.updateInterval / 1000
 	document.getElementById('graph_type').value = user.graphType
-	document.getElementById('graph_dates').innerHTML = user.graphDates
-	document.getElementById('graph_values').innerHTML = user.graphValues
+	document.getElementById('graph_dates').innerHTML = user.graphDates.join(', ') 
+	document.getElementById('graph_values').innerHTML = user.graphValues.join(', ') 
 	document.getElementById('dropdownTopText').value = user.dropdownTopText
 	document.getElementById('dropdownBottomText').value = user.dropdownBottomText
 	document.getElementById('maxPoints').value = user.maxPoints
 	submit()
 	submit1()
 	submit2()
+    const countElem = document.getElementById('count');
+    if (countElem && countElem.odometer && countElem.odometer.options.format !== user.commaFormat) {
+        countElem.odometer.options.format = user.commaFormat;
+        countElem.odometer.update(Math.round(user.count));
+    } else if (countElem && !countElem.odometer) {
+        render();
+    }
+
+
 } else {
-	render()
+	render(); 
 }
 
 document.getElementById('autosave').onclick = function () {
