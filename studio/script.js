@@ -484,6 +484,326 @@ if (user.autosave == true) {
 function resetData() {
 	if (confirm("Are you sure you want to reset all data? This cannot be undone.")) {
 		localStorage.removeItem("user")
+		localStorage.removeItem("studio-apiUpdates")
 		location.reload()
 	}
+}
+
+// API Updates
+let apiInterval;
+let apiUpdates = localStorage.getItem('studio-apiUpdates') ? JSON.parse(localStorage.getItem('studio-apiUpdates')) : {
+    enabled: false,
+    url: '',
+    interval: 10000,
+    method: 'GET',
+    body: {},
+    headers: {},
+    channelID: '',
+    response: {
+        loop: 'data',
+        name: { enabled: false, path: '' },
+        count: { enabled: false, path: '' },
+        image: { enabled: false, path: '' },
+        id: { path: 'id', IDIncludes: false }
+    },
+    forceUpdates: false
+};
+
+function abb(count) {
+    const negative = count < 0;
+    count = Math.round(Math.abs(count));
+    if (count < 1000) {
+        return negative ? `-${count}` : count.toString();
+    } else {
+        const abbreviations = "KMBT";
+        const a = Math.floor(Math.log10(count)/3);
+        return (negative ? "-" : "") + (count / (1000 ** a)).toFixed(1) + abbreviations[a-1];
+    }
+}
+
+function saveAPIUpdates() {
+    apiUpdates.channelID = document.getElementById('api-channelID').value;
+    apiUpdates.url = document.getElementById('api-url').value;
+    apiUpdates.method = document.getElementById('api-method').value;
+    apiUpdates.forceUpdates = document.getElementById('api-forceUpdates').checked;
+    
+    let headers = document.getElementById('api-headers').value.toString().split(';').filter(x => x.trim());
+    let newHeaders = {};
+    for (let i = 0; i < headers.length; i++) {
+        let header = headers[i].split(':').map(x => x.trim());
+        if (header[1]) {
+            newHeaders[header[0]] = header[1];
+        }
+    }
+    apiUpdates.headers = newHeaders;
+    
+    let body = document.getElementById('api-body').value.toString().split(';').filter(x => x.trim());
+    let newBody = {};
+    for (let i = 0; i < body.length; i++) {
+        let b = body[i].split(':').map(x => x.trim());
+        if (b[1]) {
+            newBody[b[0]] = b[1];
+        }
+    }
+    apiUpdates.body = newBody;
+    
+    apiUpdates.response = {
+        loop: document.getElementById('api-loop').value || 'data',
+        name: {
+            enabled: document.getElementById('api-updateName').checked,
+            path: document.getElementById('api-pathName').value
+        },
+        count: {
+            enabled: document.getElementById('api-updateCount').checked,
+            path: document.getElementById('api-pathCount').value
+        },
+        image: {
+            enabled: document.getElementById('api-updateImage').checked,
+            path: document.getElementById('api-pathImage').value
+        },
+        id: {
+            IDIncludes: document.getElementById('api-IDIncludes').checked,
+            path: document.getElementById('api-pathID').value
+        }
+    };
+    
+    const intervalValue = parseFloat(document.getElementById('api-interval').value);
+    apiUpdates.interval = intervalValue ? intervalValue * 1000 : 10000;
+    
+    localStorage.setItem('studio-apiUpdates', JSON.stringify(apiUpdates));
+    alert('API Update Settings Saved');
+    loadAPIUpdates();
+}
+
+function loadAPIUpdates() {
+    if (document.getElementById('api-channelID')) document.getElementById('api-channelID').value = apiUpdates.channelID || '';
+    if (document.getElementById('api-url')) document.getElementById('api-url').value = apiUpdates.url || '';
+    if (document.getElementById('api-method')) document.getElementById('api-method').value = apiUpdates.method || 'GET';
+    if (document.getElementById('api-loop')) document.getElementById('api-loop').value = apiUpdates.response.loop || 'data';
+    if (document.getElementById('api-updateName')) document.getElementById('api-updateName').checked = apiUpdates.response.name.enabled || false;
+    if (document.getElementById('api-pathName')) document.getElementById('api-pathName').value = apiUpdates.response.name.path || '';
+    if (document.getElementById('api-updateCount')) document.getElementById('api-updateCount').checked = apiUpdates.response.count.enabled || false;
+    if (document.getElementById('api-pathCount')) document.getElementById('api-pathCount').value = apiUpdates.response.count.path || '';
+    if (document.getElementById('api-updateImage')) document.getElementById('api-updateImage').checked = apiUpdates.response.image.enabled || false;
+    if (document.getElementById('api-pathImage')) document.getElementById('api-pathImage').value = apiUpdates.response.image.path || '';
+    if (document.getElementById('api-pathID')) document.getElementById('api-pathID').value = apiUpdates.response.id.path || 'id';
+    if (document.getElementById('api-IDIncludes')) document.getElementById('api-IDIncludes').checked = apiUpdates.response.id.IDIncludes || false;
+    if (document.getElementById('api-forceUpdates')) document.getElementById('api-forceUpdates').checked = apiUpdates.forceUpdates || false;
+    
+    let headers = '';
+    for (let key in apiUpdates.headers) {
+        headers += key + ': ' + apiUpdates.headers[key] + ';\n';
+    }
+    if (document.getElementById('api-headers')) document.getElementById('api-headers').value = headers;
+    
+    let body = '';
+    for (let key in apiUpdates.body) {
+        body += key + ': ' + apiUpdates.body[key] + ';\n';
+    }
+    if (document.getElementById('api-body')) document.getElementById('api-body').value = body;
+    
+    if (document.getElementById('api-interval')) {
+        document.getElementById('api-interval').value = apiUpdates.interval ? (apiUpdates.interval / 1000) : 10;
+    }
+    
+    if (document.getElementById('enableApiUpdate')) {
+        document.getElementById('enableApiUpdate').innerText = apiUpdates.enabled ? 'Disable API Updates' : 'Enable API Updates';
+    }
+}
+
+function enableApiUpdate() {
+    clearInterval(apiInterval);
+    if (!apiUpdates.enabled) {
+        if (!apiUpdates.channelID || !apiUpdates.url) {
+            alert('Please configure API settings and channel ID first!');
+            return;
+        }
+        apiUpdates.enabled = true;
+        if (document.getElementById('enableApiUpdate')) {
+            document.getElementById('enableApiUpdate').innerText = 'Disable API Updates';
+        }
+        apiInterval = setInterval(() => { apiUpdate(true); }, apiUpdates.interval);
+        apiUpdate(true);
+    } else {
+        apiUpdates.enabled = false;
+        if (document.getElementById('enableApiUpdate')) {
+            document.getElementById('enableApiUpdate').innerText = 'Enable API Updates';
+        }
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = '--';
+            document.getElementById('apiStatusIndicator').style.color = '#ffffff';
+        }
+    }
+    localStorage.setItem('studio-apiUpdates', JSON.stringify(apiUpdates));
+}
+
+async function apiUpdate(bypass = false) {
+    if (!apiUpdates.enabled) {
+        if (!bypass) return alert("You need to enable API updates first.");
+        return;
+    }
+    
+    if (!apiUpdates.channelID || !apiUpdates.url) {
+        if (!bypass) return alert("Please configure API URL and Channel ID first!");
+        return;
+    }
+    
+    try {
+        let url = apiUpdates.url;
+        url = url.includes('{{channelID}}') ? url.replace('{{channelID}}', apiUpdates.channelID) : url + apiUpdates.channelID;
+        
+        let fetchOptions = {
+            method: apiUpdates.method || 'GET'
+        };
+        
+        if (Object.keys(apiUpdates.headers).length > 0) {
+            fetchOptions.headers = apiUpdates.headers;
+        }
+        
+        if (apiUpdates.method === 'POST' && Object.keys(apiUpdates.body).length > 0) {
+            fetchOptions.body = JSON.stringify(apiUpdates.body);
+        }
+        
+        const response = await fetch(url, fetchOptions);
+        const json = await response.json();
+        
+        let data = json;
+        if (apiUpdates.response.loop !== 'data') {
+            const loopPath = apiUpdates.response.loop.split('data.')[1];
+            if (loopPath) {
+                const parts = loopPath.split('.');
+                for (const part of parts) {
+                    data = data[part];
+                }
+            }
+        }
+        
+        if (!Array.isArray(data)) {
+            data = [data];
+        }
+        
+        if (data.length === 0) {
+            throw new Error('No data returned from API');
+        }
+        
+        const item = data[0];
+        let nameUpdate, countUpdate, imageUpdate, idUpdate;
+        
+        if (apiUpdates.response.name.enabled) {
+            const pathParts = apiUpdates.response.name.path.split('.');
+            let result = item;
+            for (const part of pathParts) {
+                if (part.includes('[')) {
+                    const [arrName, index] = part.split('[');
+                    const idx = parseInt(index.split(']')[0]);
+                    result = result[arrName][idx];
+                } else {
+                    result = result[part];
+                }
+            }
+            nameUpdate = result;
+        }
+        
+        if (apiUpdates.response.count.enabled) {
+            const pathParts = apiUpdates.response.count.path.split('.');
+            let result = item;
+            for (const part of pathParts) {
+                if (part.includes('[')) {
+                    const [arrName, index] = part.split('[');
+                    const idx = parseInt(index.split(']')[0]);
+                    result = result[arrName][idx];
+                } else {
+                    result = result[part];
+                }
+            }
+            countUpdate = parseFloat(result);
+        }
+        
+        if (apiUpdates.response.image.enabled) {
+            const pathParts = apiUpdates.response.image.path.split('.');
+            let result = item;
+            for (const part of pathParts) {
+                if (part.includes('[')) {
+                    const [arrName, index] = part.split('[');
+                    const idx = parseInt(index.split(']')[0]);
+                    result = result[arrName][idx];
+                } else {
+                    result = result[part];
+                }
+            }
+            imageUpdate = result;
+        }
+        
+        const idPathParts = apiUpdates.response.id.path.split('.');
+        let idResult = item;
+        for (const part of idPathParts) {
+            if (part.includes('[')) {
+                const [arrName, index] = part.split('[');
+                const idx = parseInt(index.split(']')[0]);
+                idResult = idResult[arrName][idx];
+            } else {
+                idResult = idResult[part];
+            }
+        }
+        idUpdate = idResult;
+        
+        if (apiUpdates.response.id.IDIncludes) {
+            if (idUpdate && idUpdate.includes(apiUpdates.channelID)) {
+                if (nameUpdate !== undefined) {
+                    user.name = nameUpdate;
+                    document.getElementById('name').innerHTML = user.name;
+                    document.getElementById('name_input').value = user.name;
+                }
+                if (imageUpdate !== undefined) {
+                    user.image = imageUpdate;
+                    document.getElementById('image').src = user.image;
+                    document.getElementById('image_input').value = user.image;
+                }
+                if (countUpdate !== undefined) {
+                    if (apiUpdates.forceUpdates || abb(countUpdate) !== abb(user.count)) {
+                        user.count = countUpdate;
+                        render();
+                    }
+                }
+            }
+        } else {
+            if (idUpdate === apiUpdates.channelID) {
+                if (nameUpdate !== undefined) {
+                    user.name = nameUpdate;
+                    document.getElementById('name').innerHTML = user.name;
+                    document.getElementById('name_input').value = user.name;
+                }
+                if (imageUpdate !== undefined) {
+                    user.image = imageUpdate;
+                    document.getElementById('image').src = user.image;
+                    document.getElementById('image_input').value = user.image;
+                }
+                if (countUpdate !== undefined) {
+                    if (apiUpdates.forceUpdates || abb(countUpdate) !== abb(user.count)) {
+                        user.count = countUpdate;
+                        render();
+                    }
+                }
+            }
+        }
+        
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = 'OK';
+            document.getElementById('apiStatusIndicator').style.color = '#00ff00';
+        }
+    } catch (e) {
+        console.error(e);
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = 'Error';
+            document.getElementById('apiStatusIndicator').style.color = '#ff0000';
+        }
+    }
+}
+
+// Load API updates on page load
+if (localStorage.getItem("user")) {
+    loadAPIUpdates();
+    if (apiUpdates.enabled) {
+        apiInterval = setInterval(() => { apiUpdate(true); }, apiUpdates.interval);
+    }
 }

@@ -105,7 +105,71 @@
             <div class="option">
                 <span><input type="checkbox" id="options-chart" checked>Show Chart</span>
             </div><br>
-
+            <hr>
+            <h3>API Updates</h3>
+            <div class="option">
+                <label for="api-channelID">Channel ID</label><br>
+                <input type="text" placeholder="Channel ID (e.g., UC...)" class="option-input" id="api-channelID">
+            </div>
+            <div class="option">
+                <label for="api-url">API URL</label><br>
+                <input type="text" placeholder="https://api.example.com/{{channelID}}" class="option-input" id="api-url">
+                <label>Use {{channelID}} where channel ID should be inserted</label>
+            </div>
+            <div class="option">
+                <label for="api-method">Method</label><br>
+                <select class="option-input" id="api-method">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                </select>
+            </div>
+            <div class="option">
+                <label for="api-loop">Loop through (data = root)</label><br>
+                <input type="text" placeholder="data" class="option-input" id="api-loop">
+            </div>
+            <div class="option">
+                <span><input type="checkbox" id="api-updateName">Update Name</span><br>
+                <input type="text" placeholder="Name path (e.g., snippet.title)" class="option-input" id="api-pathName">
+            </div>
+            <div class="option">
+                <span><input type="checkbox" id="api-updateImage">Update Image</span><br>
+                <input type="text" placeholder="Image path (e.g., snippet.thumbnails.default.url)" class="option-input" id="api-pathImage">
+            </div>
+            <div class="option">
+                <span><input type="checkbox" id="api-updateCount">Update Count</span><br>
+                <input type="text" placeholder="Count path (e.g., statistics.subscriberCount)" class="option-input" id="api-pathCount">
+            </div>
+            <div class="option">
+                <label for="api-pathID">ID Path (Required)</label><br>
+                <input type="text" placeholder="id" class="option-input" id="api-pathID">
+            </div>
+            <div class="option">
+                <span><input type="checkbox" id="api-IDIncludes">ID Includes (Enable if ID is part of another string)</span>
+            </div>
+            <div class="option">
+                <label for="api-headers">Headers (optional, format: HeaderName: value;)</label><br>
+                <textarea class="option-input" id="api-headers" rows="3"></textarea>
+            </div>
+            <div class="option">
+                <label for="api-body">Body (optional, for POST, format: key: value;)</label><br>
+                <textarea class="option-input" id="api-body" rows="3"></textarea>
+            </div>
+            <div class="option">
+                <label for="api-interval">Update Interval (seconds)</label><br>
+                <input type="number" placeholder="10" class="option-input" id="api-interval" min="1">
+            </div>
+            <div class="option">
+                <span><input type="checkbox" id="api-forceUpdates">Force Updates (even without count changes)</span>
+            </div>
+            <div class="option">
+                <button onclick="saveAPIUpdates()">Save API Update Settings</button>
+                <button onclick="apiUpdate()">Update Now</button>
+                <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
+            </div>
+            <div class="option">
+                <label>Status: <span id="apiStatusIndicator">--</span></label>
+            </div>
+            <hr>
             <h3>Disclaimer</h3>
             <p>This page is a parody of the <a href="https://socialblade.com/youtube/realtime">original Social Blade realtime counter</a>. All credit goes to <a href="https://socialblade.com/">Social Blade LLC</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
         </div>

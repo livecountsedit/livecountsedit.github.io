@@ -59,6 +59,10 @@ window.onload = function () {
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         })
+        loadAPIUpdates();
+        if (saveData.apiUpdates && saveData.apiUpdates.enabled) {
+            apiInterval = setInterval(() => { apiUpdate(true); }, saveData.apiUpdates.interval);
+        }
         updateStuff();
     }).catch(error => {
         console.error(error);
@@ -104,47 +108,324 @@ function submit() {
     }
 }
 
-function submitAPI() {
-    const result = LCEDIT.util.submitForms(document.querySelectorAll("form.api-form"), new Save().api);
-    if (result.success) {
-        clearInterval(saveData.api.updater);
-        saveData.api = result.data;
-        saveInBrowser();
-        if (saveData.api.ytAPIEnabled) {
-            saveData.api.updater = setInterval(() => {updateAPI(true)}, saveData.api.apiInterval * 1000);
-            updateAPI(true);
-        } else {
-            clearInterval(saveData.api.updater);
-            counter.lastAPICount = null;
-            document.querySelector("#apiStatusIndicator").innerText = "--"
-            document.querySelector("#apiStatusIndicator").style.color = "#ffffff"
-        }
+let apiInterval;
+
+function abb(count) {
+    const negative = count < 0;
+    count = Math.round(Math.abs(count));
+    if (count < 1000) {
+        return negative ? `-${count}` : count.toString();
     } else {
-        document.getElementById(result.problematicForm.id.replace('settingsForm','tab-link')).click();
-        result.problematicForm.reportValidity()
+        const abbreviations = "KMBT";
+        const a = Math.floor(Math.log10(count)/3);
+        return (negative ? "-" : "") + (count / (1000 ** a)).toFixed(1) + abbreviations[a-1];
     }
 }
 
-async function updateAPI(bypass = false) {
-    if (saveData.api.ytAPIEnabled) {
-        try {
-            const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&key=${saveData.api.ytAPIKey}&id=${saveData.api.ytChannelID}`;
-            const a = await fetch(url);
-            const b = await a.json();
-            const apiCount = parseInt(b.items[0].statistics.subscriberCount);
-            counter.leeway = saveData.api.leeway;
-            counter.lastAPICount = apiCount;
-            console.log("API updated")
-            document.querySelector("#apiStatusIndicator").innerText = "OK"
-            document.querySelector("#apiStatusIndicator").style.color = "#00ff00"
-        } catch (e) {
-            console.error(e);
-            document.querySelector("#apiStatusIndicator").innerText = "Error"
-            document.querySelector("#apiStatusIndicator").style.color = "#ff0000"
-        }
-    } else {
-        if (!bypass) return alert("You need to enable API updates first. Make sure you press the Save API settings button after checking the box.")
+function saveAPIUpdates() {
+    if (!saveData.apiUpdates) {
+        saveData.apiUpdates = {
+            enabled: false,
+            url: '',
+            interval: 10000,
+            method: 'GET',
+            body: {},
+            headers: {},
+            channelID: '',
+            response: {
+                loop: 'data',
+                name: { enabled: false, path: '' },
+                count: { enabled: false, path: '' },
+                image: { enabled: false, path: '' },
+                id: { path: 'id', IDIncludes: false }
+            },
+            forceUpdates: false
+        };
     }
+    
+    saveData.apiUpdates.channelID = document.getElementById('channelID').value;
+    saveData.apiUpdates.url = document.getElementById('apiURL').value;
+    saveData.apiUpdates.method = document.getElementById('apiMethod').value;
+    saveData.apiUpdates.forceUpdates = document.getElementById('forceUpdates').checked;
+    
+    let headers = document.getElementById('extraCred').value.toString().split(';').filter(x => x.trim());
+    let newHeaders = {};
+    for (let i = 0; i < headers.length; i++) {
+        let header = headers[i].split(':').map(x => x.trim());
+        if (header[1]) {
+            newHeaders[header[0]] = header[1];
+        }
+    }
+    saveData.apiUpdates.headers = newHeaders;
+    
+    let body = document.getElementById('body').value.toString().split(';').filter(x => x.trim());
+    let newBody = {};
+    for (let i = 0; i < body.length; i++) {
+        let b = body[i].split(':').map(x => x.trim());
+        if (b[1]) {
+            newBody[b[0]] = b[1];
+        }
+    }
+    saveData.apiUpdates.body = newBody;
+    
+    saveData.apiUpdates.response = {
+        loop: document.getElementById('apiLoop').value || 'data',
+        name: {
+            enabled: document.getElementById('updateName').checked,
+            path: document.getElementById('pathName').value
+        },
+        count: {
+            enabled: document.getElementById('updateCount').checked,
+            path: document.getElementById('pathCount').value
+        },
+        image: {
+            enabled: document.getElementById('updateImage').checked,
+            path: document.getElementById('pathImage').value
+        },
+        id: {
+            IDIncludes: document.getElementById('IDIncludes').checked,
+            path: document.getElementById('pathID').value
+        }
+    };
+    
+    const intervalValue = parseFloat(document.getElementById('apiUpdateInt').value);
+    saveData.apiUpdates.interval = intervalValue ? intervalValue * 1000 : 10000;
+    
+    saveInBrowser();
+    alert('API Update Settings Saved');
+    loadAPIUpdates();
+}
+
+function loadAPIUpdates() {
+    if (!saveData.apiUpdates) {
+        saveData.apiUpdates = {
+            enabled: false,
+            url: '',
+            interval: 10000,
+            method: 'GET',
+            body: {},
+            headers: {},
+            channelID: '',
+            response: {
+                loop: 'data',
+                name: { enabled: false, path: '' },
+                count: { enabled: false, path: '' },
+                image: { enabled: false, path: '' },
+                id: { path: 'id', IDIncludes: false }
+            },
+            forceUpdates: false
+        };
+    }
+    
+    if (document.getElementById('channelID')) document.getElementById('channelID').value = saveData.apiUpdates.channelID || '';
+    if (document.getElementById('apiURL')) document.getElementById('apiURL').value = saveData.apiUpdates.url || '';
+    if (document.getElementById('apiMethod')) document.getElementById('apiMethod').value = saveData.apiUpdates.method || 'GET';
+    if (document.getElementById('apiLoop')) document.getElementById('apiLoop').value = saveData.apiUpdates.response.loop || 'data';
+    if (document.getElementById('updateName')) document.getElementById('updateName').checked = saveData.apiUpdates.response.name.enabled || false;
+    if (document.getElementById('pathName')) document.getElementById('pathName').value = saveData.apiUpdates.response.name.path || '';
+    if (document.getElementById('updateCount')) document.getElementById('updateCount').checked = saveData.apiUpdates.response.count.enabled || false;
+    if (document.getElementById('pathCount')) document.getElementById('pathCount').value = saveData.apiUpdates.response.count.path || '';
+    if (document.getElementById('updateImage')) document.getElementById('updateImage').checked = saveData.apiUpdates.response.image.enabled || false;
+    if (document.getElementById('pathImage')) document.getElementById('pathImage').value = saveData.apiUpdates.response.image.path || '';
+    if (document.getElementById('pathID')) document.getElementById('pathID').value = saveData.apiUpdates.response.id.path || 'id';
+    if (document.getElementById('IDIncludes')) document.getElementById('IDIncludes').checked = saveData.apiUpdates.response.id.IDIncludes || false;
+    if (document.getElementById('forceUpdates')) document.getElementById('forceUpdates').checked = saveData.apiUpdates.forceUpdates || false;
+    
+    let headers = '';
+    for (let key in saveData.apiUpdates.headers) {
+        headers += key + ': ' + saveData.apiUpdates.headers[key] + ';\n';
+    }
+    if (document.getElementById('extraCred')) document.getElementById('extraCred').value = headers;
+    
+    let body = '';
+    for (let key in saveData.apiUpdates.body) {
+        body += key + ': ' + saveData.apiUpdates.body[key] + ';\n';
+    }
+    if (document.getElementById('body')) document.getElementById('body').value = body;
+    
+    if (document.getElementById('apiUpdateInt')) {
+        document.getElementById('apiUpdateInt').value = saveData.apiUpdates.interval ? (saveData.apiUpdates.interval / 1000) : 10;
+    }
+    
+    if (document.getElementById('enableApiUpdate')) {
+        document.getElementById('enableApiUpdate').innerText = saveData.apiUpdates.enabled ? 'Disable API Updates' : 'Enable API Updates';
+    }
+}
+
+function enableApiUpdate() {
+    clearInterval(apiInterval);
+    if (!saveData.apiUpdates || !saveData.apiUpdates.enabled) {
+        if (!saveData.apiUpdates || !saveData.apiUpdates.channelID || !saveData.apiUpdates.url) {
+            alert('Please configure API settings and channel ID first!');
+            return;
+        }
+        saveData.apiUpdates.enabled = true;
+        if (document.getElementById('enableApiUpdate')) {
+            document.getElementById('enableApiUpdate').innerText = 'Disable API Updates';
+        }
+        apiInterval = setInterval(() => { apiUpdate(true); }, saveData.apiUpdates.interval);
+        apiUpdate(true);
+    } else {
+        saveData.apiUpdates.enabled = false;
+        if (document.getElementById('enableApiUpdate')) {
+            document.getElementById('enableApiUpdate').innerText = 'Enable API Updates';
+        }
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = '--';
+            document.getElementById('apiStatusIndicator').style.color = '#ffffff';
+        }
+    }
+    saveInBrowser();
+}
+
+async function apiUpdate(bypass = false) {
+    if (!saveData.apiUpdates || !saveData.apiUpdates.enabled) {
+        if (!bypass) return alert("You need to enable API updates first.");
+        return;
+    }
+    
+    if (!saveData.apiUpdates.channelID || !saveData.apiUpdates.url) {
+        if (!bypass) return alert("Please configure API URL and Channel ID first!");
+        return;
+    }
+    
+    try {
+        let url = saveData.apiUpdates.url;
+        url = url.includes('{{channelID}}') ? url.replace('{{channelID}}', saveData.apiUpdates.channelID) : url + saveData.apiUpdates.channelID;
+        
+        let fetchOptions = {
+            method: saveData.apiUpdates.method || 'GET'
+        };
+        
+        if (Object.keys(saveData.apiUpdates.headers).length > 0) {
+            fetchOptions.headers = saveData.apiUpdates.headers;
+        }
+        
+        if (saveData.apiUpdates.method === 'POST' && Object.keys(saveData.apiUpdates.body).length > 0) {
+            fetchOptions.body = JSON.stringify(saveData.apiUpdates.body);
+        }
+        
+        const response = await fetch(url, fetchOptions);
+        const json = await response.json();
+        
+        let data = json;
+        if (saveData.apiUpdates.response.loop !== 'data') {
+            const loopPath = saveData.apiUpdates.response.loop.split('data.')[1];
+            if (loopPath) {
+                const parts = loopPath.split('.');
+                for (const part of parts) {
+                    data = data[part];
+                }
+            }
+        }
+        
+        if (!Array.isArray(data)) {
+            data = [data];
+        }
+        
+        if (data.length === 0) {
+            throw new Error('No data returned from API');
+        }
+        
+        const item = data[0];
+        let nameUpdate, countUpdate, imageUpdate, idUpdate;
+        
+        if (saveData.apiUpdates.response.name.enabled) {
+            const pathParts = saveData.apiUpdates.response.name.path.split('.');
+            let result = item;
+            for (const part of pathParts) {
+                if (part.includes('[')) {
+                    const [arrName, index] = part.split('[');
+                    const idx = parseInt(index.split(']')[0]);
+                    result = result[arrName][idx];
+                } else {
+                    result = result[part];
+                }
+            }
+            nameUpdate = result;
+        }
+        
+        if (saveData.apiUpdates.response.count.enabled) {
+            const pathParts = saveData.apiUpdates.response.count.path.split('.');
+            let result = item;
+            for (const part of pathParts) {
+                if (part.includes('[')) {
+                    const [arrName, index] = part.split('[');
+                    const idx = parseInt(index.split(']')[0]);
+                    result = result[arrName][idx];
+                } else {
+                    result = result[part];
+                }
+            }
+            countUpdate = parseFloat(result);
+        }
+        
+        if (saveData.apiUpdates.response.image.enabled) {
+            const pathParts = saveData.apiUpdates.response.image.path.split('.');
+            let result = item;
+            for (const part of pathParts) {
+                if (part.includes('[')) {
+                    const [arrName, index] = part.split('[');
+                    const idx = parseInt(index.split(']')[0]);
+                    result = result[arrName][idx];
+                } else {
+                    result = result[part];
+                }
+            }
+            imageUpdate = result;
+        }
+        
+        const idPathParts = saveData.apiUpdates.response.id.path.split('.');
+        let idResult = item;
+        for (const part of idPathParts) {
+            if (part.includes('[')) {
+                const [arrName, index] = part.split('[');
+                const idx = parseInt(index.split(']')[0]);
+                idResult = idResult[arrName][idx];
+            } else {
+                idResult = idResult[part];
+            }
+        }
+        idUpdate = idResult;
+        
+        if (saveData.apiUpdates.response.id.IDIncludes) {
+            if (idUpdate && idUpdate.includes(saveData.apiUpdates.channelID)) {
+                if (nameUpdate !== undefined) counter.settings.title = nameUpdate;
+                if (imageUpdate !== undefined) counter.settings.imageURL = imageUpdate;
+                if (countUpdate !== undefined) {
+                    if (saveData.apiUpdates.forceUpdates || abb(countUpdate) !== abb(counter.getApparentCount())) {
+                        counter.setCount(countUpdate);
+                    }
+                }
+            }
+        } else {
+            if (idUpdate === saveData.apiUpdates.channelID) {
+                if (nameUpdate !== undefined) counter.settings.title = nameUpdate;
+                if (imageUpdate !== undefined) counter.settings.imageURL = imageUpdate;
+                if (countUpdate !== undefined) {
+                    if (saveData.apiUpdates.forceUpdates || abb(countUpdate) !== abb(counter.getApparentCount())) {
+                        counter.setCount(countUpdate);
+                    }
+                }
+            }
+        }
+        
+        updateStuff();
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = 'OK';
+            document.getElementById('apiStatusIndicator').style.color = '#00ff00';
+        }
+    } catch (e) {
+        console.error(e);
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = 'Error';
+            document.getElementById('apiStatusIndicator').style.color = '#ff0000';
+        }
+    }
+}
+
+function submitAPI() {
+    saveAPIUpdates();
 }
 
 function updateStuff() {
@@ -186,12 +467,15 @@ function updateCounter(addGain = true) {
 function reset(bypass = false) {
     if (bypass || confirm("Are you sure you want to reset everything?")) {
         clearInterval(saveData.updater);
-        clearInterval(saveData.api.updater);
-        document.querySelector("#apiStatusIndicator").innerText = "--"
-        document.querySelector("#apiStatusIndicator").style.color = "#ffffff"
+        clearInterval(apiInterval);
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = "--"
+            document.getElementById('apiStatusIndicator').style.color = "#ffffff"
+        }
         saveData = new Save(saveType)
         saveData.counters[0] = counter = new Counter(1);
         fillForms()
+        loadAPIUpdates()
         updateStuff()
         setPaused(false)
     }
@@ -253,16 +537,18 @@ function setPaused(paused) {
         saveData.paused = true
         document.querySelector('#pause-button').innerText = 'Unpause'
         clearInterval(saveData.updater)
-        clearInterval(saveData.api.updater)
-        document.querySelector("#apiStatusIndicator").innerText = "--"
-        document.querySelector("#apiStatusIndicator").style.color = "#ffffff"
+        clearInterval(apiInterval)
+        if (document.getElementById('apiStatusIndicator')) {
+            document.getElementById('apiStatusIndicator').innerText = "--"
+            document.getElementById('apiStatusIndicator').style.color = "#ffffff"
+        }
     } else {
         saveData.paused = false;
         document.querySelector('#pause-button').innerText = 'Pause'
         updateStuff();
-        if (saveData.api.ytAPIEnabled) {
-            saveData.api.updater = setInterval(() => { updateAPI(true) }, saveData.api.apiInterval * 1000);
-            updateAPI(true);
+        if (saveData.apiUpdates && saveData.apiUpdates.enabled) {
+            apiInterval = setInterval(() => { apiUpdate(true) }, saveData.apiUpdates.interval);
+            apiUpdate(true);
         }
     }
 }
@@ -302,7 +588,7 @@ function importFromJSON(data, bypass=false) {
             data.saveType = saveType;
             data.version = LCEDIT.saveVersion;
             clearInterval(saveData.updater);
-            clearInterval(saveData.api.updater);
+            clearInterval(apiInterval);
             for (i = 0; i < Object.keys(data).length; i++) {
                 let key = Object.keys(data)[i]
                 if (saveData[key] != undefined) {
@@ -323,6 +609,10 @@ function importFromJSON(data, bypass=false) {
                 saveData.counters.push(new Counter().fromJSON(data.counters[i]))
             }
             counter = saveData.counters[0];
+            loadAPIUpdates();
+            if (saveData.apiUpdates && saveData.apiUpdates.enabled) {
+                apiInterval = setInterval(() => { apiUpdate(true); }, saveData.apiUpdates.interval);
+            }
             updateStuff()
             fillForms();
             if (!bypass) {

@@ -2,6 +2,7 @@ let currentIndex = 0;
 let auditTimeout;
 let saveInterval;
 let chart;
+let charts = {}; // Store chart instances by channel ID
 let nextUpdateAudit = false;
 let specificChannels = [];
 let pickingChannels = false;
@@ -10,133 +11,6 @@ let odometers = [];
 let iso;
 let data = {};
 let gainTable = {};
-function escapeHTML(text) {
-    if (text != null) {
-        text = text.toString();
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-    return "";
-}
-
-function formatRank(rank) {
-    if (!data.prependZeros) return rank;
-    let totalNums = document.querySelectorAll('.num').length;
-    if (totalNums < 100) {
-        if (rank < 10) return "0" + rank;
-        return rank;
-    } else {
-        if (rank < 10) return "00" + rank;
-        if (rank < 100) return "0" + rank;
-        return rank;
-    }
-}
-
-function getGain(counterId) {
-    let entry = gainTable[counterId];
-    if (!entry || entry.length < 2) return 0;
-    return (entry[entry.length - 1] - entry[0]) / (entry.length - 1);
-}
-
-function clearGainData() {
-    if (confirm("Are you sure you want to clear the gain data?")) {
-        gainTable = {};
-    }
-}
-
-function abb(n) {
-    let s = Math.sign(n);
-    n = Math.abs(n);
-    if (n < 1) return 0;
-    else return Math.floor(s * Math.floor(n / (10 ** (Math.floor(Math.log10(n)) - 2))) * (10 ** (Math.floor(Math.log10(n)) - 2)))
-}
-
-function abbs(n) {
-    let s = Math.sign(n);
-    n = Math.abs(n);
-    if (n < 1) return '0';
-    let l = Math.floor(Math.log10(n) / 3);
-    let d = 10 ** Math.floor(Math.log10(n) - 2);
-    let r = Math.floor(n / d) * d;
-    let result = (s * r) / (1000 ** l) + (l > 5 ? "?" : " KMBTQ"[l]);
-    if (result.endsWith(" ")) return result.slice(0, -1);
-    return result;
-}
-
-function getDisplayedCount(n) {
-    if (!isFinite(n)) n = 0;
-    if (!data.allowNegative && n < 0) n = 0;
-    if (data.abbreviate) return abb(n);
-    else return Math.floor(n);
-}
-const uuidGen = function () {
-    let a = function () {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    };
-    return a() + a() + '-' + a() + '-' + a() + '-' + a() + '-' + a() + a() + a();
-}
-function randomGen() {
-    var S4 = function () {
-        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    };
-    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-}
-function avg(a, b) {
-    return (a + b) / 2
-}
-function random(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-function adjustColors() {
-    let c = document.body.style.backgroundColor;
-    if (!c) return;
-    let r, g, b;
-    if (c.startsWith('#')) {
-        c = c.replace('#', '');
-        const color = parseInt(c, 16);
-        r = (color >> 16);
-        g = (color >> 8) & 0xff;
-        b = color & 0xff;
-    } else {
-        c = c.replace('rgb(', '');
-        const color = c.split(',').map(x => parseInt(x, 10));
-        r = color[0];
-        g = color[1];
-        b = color[2];
-    }
-    const brightness = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-    const textLabels = document.querySelectorAll("label,h1,h2,h3,h4,h5,h6,p,strong,input[type=file]");
-    if (brightness < 0.5) {
-        for (i = 0; i < textLabels.length; i++) {
-            if (!textLabels[i].classList.contains('subgap')) {
-                textLabels[i].style.color = '#fff';
-            }
-        }
-    } else {
-        for (i = 0; i < textLabels.length; i++) {
-            if (!textLabels[i].classList.contains('subgap')) {
-                textLabels[i].style.color = '#000';
-            }
-        }
-    }
-}
-
-function mergeWithExampleData(imported, example) {
-    if (typeof imported !== 'object' || imported === null) return example;
-    for (let key in example) {
-        if (!imported.hasOwnProperty(key)) {
-            imported[key] = example[key];
-        } else if (typeof example[key] === 'object' && !Array.isArray(example[key])) {
-            imported[key] = mergeWithExampleData(imported[key], example[key]);
-        }
-    }
-
-    return imported;
-}
 
 let uuid = uuidGen()
 let example_data = {
@@ -173,7 +47,9 @@ let example_data = {
         "countSize": '2',
         "rankSize": '15',
         "containerHeight": 95,
-        "containerWidth": 100
+        "containerWidth": 100,
+        "showChart": true,
+        "chartLineColor": "#000000",
     },
     "bgColor": "#141414",
     "textColor": "#000",
@@ -244,6 +120,7 @@ let example_data = {
         'headers': {},
         'custom': false,
         'maxChannelsPerFetch': 'one',
+        'customAPIList': [],
         'response': {
             'loop': 'data',
             'name': {
@@ -271,13 +148,15 @@ let example_data = {
         'boxWidth': '',
         'sectionGap': 0,
         'items': []
-    }
+    },
+    'scripts': [],
+    'customCSS': ''
 };
 let updateInterval;
 let apiInterval;
 
 initLoad()
-function initLoad(redo) {
+function initLoad(redo, previousTheme) {
     let storedData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : null;
 
     if (!redo) {
@@ -286,6 +165,46 @@ function initLoad(redo) {
         } else {
             data = example_data;
         }
+    }
+    
+    // Ensure headerSettings exists and filter out undefined items
+    if (!data.headerSettings) {
+        data.headerSettings = {
+            totalSections: 0,
+            headerHeight: 0,
+            boxWidth: '',
+            sectionGap: 10,
+            footerHeight: 0,
+            footerGap: 10,
+            items: []
+        };
+    }
+    if (data.headerSettings.footerHeight == null) data.headerSettings.footerHeight = 0;
+    if (data.headerSettings.footerGap == null) data.headerSettings.footerGap = 10;
+    if (!data.headerSettings.items) {
+        data.headerSettings.items = [];
+    }
+    // Filter out items with undefined or "undefined" names; default placement to 'header'
+    data.headerSettings.items = data.headerSettings.items.filter(item => 
+        item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
+    );
+    data.headerSettings.items.forEach(item => { if (item.placement == null) item.placement = 'header'; });
+    
+    // Reset sizes if switching away from top1
+    if (redo && previousTheme && previousTheme.includes('top1') && !data.theme.includes('top1')) {
+        const defaultCardWidth = 19;
+        const defaultCardHeight = 3.6;
+        const defaultImageSize = 3;
+        const defaultNameSize = 1;
+        const defaultCountSize = 2;
+        const defaultRankSize = 15;
+        
+        data.cardStyles.cardWidth = String(defaultCardWidth);
+        data.cardStyles.cardHeight = String(defaultCardHeight);
+        data.cardStyles.imageSize = String(defaultImageSize);
+        data.cardStyles.nameSize = String(defaultNameSize);
+        data.cardStyles.countSize = String(defaultCountSize);
+        data.cardStyles.rankSize = String(defaultRankSize);
     }
 
     if (data.animatedCards.enabled) {
@@ -313,16 +232,61 @@ function initLoad(redo) {
     }
     if (data.theme.includes('top100')) {
         data.max = 100;
-    } else if (data.theme.includes('top25')) {
-        data.max = 25;
-    } else if (data.theme.includes('top50')) {
-        data.max = 50;
-    } else if (data.theme.includes('top10')) {
-        data.max = 10;
     } else if (data.theme.includes('top150')) {
         data.max = 150;
     } else if (data.theme.includes('top200')) {
         data.max = 200;
+    } else if (data.theme.includes('top50')) {
+        data.max = 50;
+    } else if (data.theme.includes('top25')) {
+        data.max = 25;
+    } else if (data.theme.includes('top15')) {
+        data.max = 15;
+    } else if (data.theme.includes('top10')) {
+        data.max = 10;
+    } else if (data.theme.includes('top1')) {
+        data.max = 1;
+        // Increase sizes by default for single channel display (only if not already increased)
+        // Check if sizes are still at default values (approximately)
+        const defaultCardWidth = 19;
+        const defaultCardHeight = 3.6;
+        const defaultImageSize = 3;
+        const defaultNameSize = 1;
+        const defaultCountSize = 2;
+        const defaultRankSize = 15;
+        
+        const currentCardWidth = parseFloat(data.cardStyles.cardWidth || defaultCardWidth);
+        const currentCardHeight = parseFloat(data.cardStyles.cardHeight || defaultCardHeight);
+        const currentImageSize = parseFloat(data.cardStyles.imageSize || defaultImageSize);
+        const currentNameSize = parseFloat(data.cardStyles.nameSize || defaultNameSize);
+        const currentCountSize = parseFloat(data.cardStyles.countSize || defaultCountSize);
+        const currentRankSize = parseFloat(data.cardStyles.rankSize || defaultRankSize);
+        
+        // Only increase if sizes are close to default (within 30% tolerance) and not already increased
+        const tolerance = 0.3;
+        const isNearDefault = Math.abs(currentCardWidth - defaultCardWidth) / defaultCardWidth < tolerance &&
+            Math.abs(currentCardHeight - defaultCardHeight) / defaultCardHeight < tolerance &&
+            Math.abs(currentImageSize - defaultImageSize) / defaultImageSize < tolerance &&
+            Math.abs(currentNameSize - defaultNameSize) / defaultNameSize < tolerance &&
+            Math.abs(currentCountSize - defaultCountSize) / defaultCountSize < tolerance &&
+            Math.abs(currentRankSize - defaultRankSize) / defaultRankSize < tolerance;
+        
+        // Check if sizes are already increased (more than 2x default)
+        const isAlreadyIncreased = currentCardWidth > defaultCardWidth * 2 ||
+            currentCardHeight > defaultCardHeight * 2 ||
+            currentImageSize > defaultImageSize * 2 ||
+            currentNameSize > defaultNameSize * 2 ||
+            currentCountSize > defaultCountSize * 2 ||
+            currentRankSize > defaultRankSize * 2;
+        
+        if (isNearDefault && !isAlreadyIncreased) {
+            data.cardStyles.cardWidth = String(defaultCardWidth * 3);
+            data.cardStyles.cardHeight = String(defaultCardHeight * 3);
+            data.cardStyles.imageSize = String(defaultImageSize * 3);
+            data.cardStyles.nameSize = String(defaultNameSize * 3);
+            data.cardStyles.countSize = String(defaultCountSize * 3);
+            data.cardStyles.rankSize = String(defaultRankSize * 3);
+        }
     }
     data.pause = false;
     if (data.lastOnline && data.offlineGains == true) {
@@ -377,7 +341,11 @@ function initLoad(redo) {
     if (!data.uuid) {
         data.uuid = uuidGen();
     }
-    document.body.style.backgroundColor = data.bgColor;
+    if (!data.bgColor.startsWith('http') && !data.bgColor.startsWith('data')) {
+        document.body.style.backgroundColor = data.bgColor;
+    } else {
+        document.body.style.backgroundImage = 'url(' + data.bgColor + ')';
+    }
     document.body.style.color = data.textColor;
     adjustColors();
     fix();
@@ -391,7 +359,6 @@ function initLoad(redo) {
     });
     fixSettings();
 };
-
 
 function setupDesign(redo) {
     let c = 1;
@@ -420,6 +387,9 @@ function setupDesign(redo) {
                 data.cardStyles.cardWidth = '19'
             }
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
+        } else if (cards === 1) {
+            // Single channel - use single column layout
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(1, 1fr);";
         }
 
         for (let l = 1; l <= cards; l++) {
@@ -436,6 +406,7 @@ function setupDesign(redo) {
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
                 <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
                 <div class="difference_line"></div>
+                <div class="chart" id="chart_${cid}"></div>
             </div>`;
 
             if (channels[dataIndex]) {
@@ -451,8 +422,13 @@ function setupDesign(redo) {
         let columns = data.theme == 'top100' ? 10 : 5;
         columns = data.theme == 'top150' ? 10 : columns;
         columns = data.theme == 'top200' ? 10 : columns;
+        columns = data.theme == 'top1' ? 1 : columns;
+        columns = data.theme == 'top15' ? 5 : columns;
 
-        if (columns > 5) {
+        if (columns === 1) {
+            // Single channel - use single column layout
+            toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(1, 1fr);";
+        } else if (columns > 5) {
             if (redo) {
                 data.cardStyles.cardWidth = '9'
             }
@@ -482,6 +458,7 @@ function setupDesign(redo) {
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
                 <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
                 <div class="difference_line"></div>
+                <div class="chart" id="chart_${cid}"></div>
                 </div>`;
                 if (channels[dataIndex]) {
                     if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
@@ -502,9 +479,171 @@ function setupDesign(redo) {
         toReturn[1] = 'height: 90vh'
         toReturn[2] = '.card {margin: 5px;}'
     }
+
+    document.getElementById('customCSSOverrides').innerHTML = data['customCSS'] || '';
+    document.getElementById('customCSS').value = data['customCSS'] || '';
+    
+        // Initialize charts if showChart is enabled
+        if (data.cardStyles.showChart && typeof Highcharts !== 'undefined') {
+            setTimeout(initializeCharts, 200);
+        }
+    
     return toReturn;
 }
 
+function initializeCharts() {
+    if (typeof Highcharts === 'undefined') {
+        console.warn('Highcharts not loaded, charts will not be displayed');
+        return;
+    }
+    
+    data.data.forEach(function(channel) {
+        if (!channel || !channel.id) return;
+        
+        const chartElement = document.getElementById('chart_' + channel.id);
+        if (!chartElement) return;
+        
+        // Ensure chart element is visible before creating chart
+        if (chartElement.style.display === 'none') {
+            return;
+        }
+        
+        // Destroy existing chart if it exists
+        if (charts[channel.id]) {
+            try {
+                charts[channel.id].destroy();
+            } catch(e) {
+                // Ignore errors when destroying
+            }
+        }
+        
+        // Initialize chart data from gainTable or create empty array
+        let chartData = [];
+        if (gainTable[channel.id] && gainTable[channel.id].length > 0) {
+            const now = Date.now();
+            const dataPoints = gainTable[channel.id];
+            chartData = dataPoints.map((value, index) => {
+                // Create timestamps going back in time
+                const timeOffset = (dataPoints.length - index - 1) * data.updateInterval;
+                return [now - timeOffset, parseFloat(value) || 0];
+            });
+        } else {
+            // Start with current count - add at least 2 points so line is visible
+            const now = Date.now();
+            const count = parseFloat(channel.count) || 0;
+            chartData = [
+                [now - data.updateInterval, count],
+                [now, count]
+            ];
+        }
+        
+        try {
+            // Create chart using Highcharts Stock
+            charts[channel.id] = Highcharts.stockChart('chart_' + channel.id, {
+                chart: {
+                    backgroundColor: 'transparent',
+                    height: 60,
+                    margin: [0, 0, 0, 0]
+                },
+                credits: {
+                    enabled: false
+                },
+                title: {
+                    text: ''
+                },
+                legend: {
+                    enabled: false
+                },
+                rangeSelector: {
+                    enabled: false
+                },
+                navigator: {
+                    enabled: false
+                },
+                scrollbar: {
+                    enabled: false
+                },
+                xAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    lineWidth: 0,
+                    tickWidth: 0
+                },
+                yAxis: {
+                    labels: {
+                        enabled: false
+                    },
+                    gridLineWidth: 0,
+                    title: {
+                        text: ''
+                    }
+                },
+                series: [{
+                    name: 'Count',
+                    data: chartData,
+                    type: 'line',
+                    color: data.cardStyles.chartLineColor || data.textColor || '#000',
+                    lineWidth: 2,
+                    marker: {
+                        enabled: false
+                    },
+                    enableMouseTracking: false
+                }],
+                tooltip: {
+                    enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        animation: false
+                    }
+                }
+            });
+            
+            // Ensure chart is properly rendered
+            setTimeout(function() {
+                if (charts[channel.id]) {
+                    try {
+                        charts[channel.id].reflow();
+                    } catch(e) {
+                        // Ignore reflow errors
+                    }
+                }
+            }, 50);
+        } catch(e) {
+            console.error('Error creating chart for channel ' + channel.id + ':', e);
+        }
+    });
+}
+
+function updateCharts() {
+    if (typeof Highcharts === 'undefined' || !data.cardStyles.showChart) return;
+    
+    data.data.forEach(function(channel) {
+        if (!channel || !channel.id || !charts[channel.id]) return;
+        
+        try {
+            const chart = charts[channel.id];
+            const series = chart.series[0];
+            
+            if (series) {
+                const now = Date.now();
+                const count = parseFloat(channel.count) || 0;
+                
+                // Add new point
+                series.addPoint([now, count], true, true);
+                
+                // Keep only last 50 points for performance
+                if (series.data.length > 50) {
+                    series.data[0].remove(false);
+                }
+            }
+        } catch(e) {
+            // Ignore errors when updating charts
+            console.warn('Error updating chart for channel ' + channel.id + ':', e);
+        }
+    });
+}
 
 function create() {
     let addMinGain = document.getElementById('add_min_gain').value;
@@ -997,6 +1136,12 @@ function update(doGains = true) {
         }
     }
     data.intervalCount++;
+    
+    // Update charts if enabled
+    if (data.cardStyles.showChart) {
+        updateCharts();
+    }
+    
     console.timeEnd(`Update #${intervalNumber + 1} took`);
 }
 
@@ -1132,29 +1277,6 @@ function edit() {
         }
     } else {
         alert("Please select a card by clicking it.");
-    }
-}
-
-function save() {
-    try {
-        data.lastOnline = Date.now();
-        localStorage.setItem("data", JSON.stringify(data));
-        document.getElementById("storage-warning").style.display = "none";
-        alert("Saved!");
-    } catch (error) {
-        alert(`Error: ${error}`)
-        document.getElementById("storage-warning").style.display = "block";
-    }
-}
-
-function saveData2() {
-    try {
-        data.lastOnline = Date.now();
-        localStorage.setItem("data", JSON.stringify(data));
-        document.getElementById("storage-warning").style.display = "none";
-    } catch (error) {
-        console.error(error);
-        document.getElementById("storage-warning").style.display = "block";
     }
 }
 
@@ -1316,6 +1438,28 @@ document.getElementById('backPicker').addEventListener('change', function () {
     adjustColors();
 });
 
+document.getElementById('backPickerUrl').addEventListener('change', function () {
+    document.body.style.backgroundColor = 'url(' + this.value + ')';
+    data.bgColor = this.value;
+    adjustColors();
+});
+
+function saveImageForBG() {
+    let image = document.getElementById('backgroundImgPicker').files[0];
+    if (image) {
+        let url = URL.createObjectURL(image);
+        let reader = new FileReader();
+        reader.onload = function (e) {
+            let base64 = e.target.result;
+            document.body.style.backgroundImage = 'url(' + base64 + ')';
+            data.bgColor = base64;
+            document.getElementById('backgroundImgPicker').value = '';
+        };
+        reader.readAsDataURL(image);
+        URL.revokeObjectURL(url);
+    }
+};
+
 document.getElementById('containerHeight').addEventListener('change', function () {
     data.cardStyles.containerHeight = this.value;
     fix();
@@ -1401,7 +1545,7 @@ document.getElementById('animatedCardChanges').addEventListener('change', functi
         } else {
             data.animatedCards.enabled = false;
         }
-        save();
+        saveData(true);
         location.reload();
     }
 });
@@ -1625,6 +1769,42 @@ document.getElementById('showRankings').addEventListener('change', function () {
     setupMDMStyles();
 });
 
+document.getElementById('showChart').addEventListener('change', function () {
+    data.cardStyles.showChart = document.getElementById('showChart').checked;
+    if (data.cardStyles.showChart) {
+        // Initialize charts when enabled
+        if (typeof Highcharts !== 'undefined') {
+            setTimeout(initializeCharts, 200);
+        }
+    } else {
+        // Destroy all charts when disabled
+        Object.keys(charts).forEach(function(channelId) {
+            if (charts[channelId]) {
+                charts[channelId].destroy();
+                delete charts[channelId];
+            }
+        });
+    }
+    fix()
+});
+
+document.getElementById('chartLineColor').addEventListener('change', function () {
+    data.cardStyles.chartLineColor = this.value;
+    // Update all existing charts with the new color
+    if (typeof Highcharts !== 'undefined' && data.cardStyles.showChart) {
+        Object.keys(charts).forEach(function(channelId) {
+            if (charts[channelId] && charts[channelId].series && charts[channelId].series[0]) {
+                try {
+                    charts[channelId].series[0].update({
+                        color: data.cardStyles.chartLineColor || data.textColor || '#000'
+                    }, false);
+                } catch(e) {
+                    console.warn('Error updating chart color for channel ' + channelId + ':', e);
+                }
+            }
+        });
+    }
+});
 
 document.getElementById('rankingsWidth').addEventListener('change', function () {
     data.rankingsWidth = document.getElementById('rankingsWidth').value;
@@ -1720,7 +1900,7 @@ function fix() {
     }
     if (data.autosave == true) {
         document.getElementById('autosave').checked = true;
-        saveInterval = setInterval(saveData2, 15000);
+        saveInterval = setInterval(saveData(false), 15000);
     } else {
         document.getElementById('autosave').checked = false;
     }
@@ -1734,6 +1914,28 @@ function fix() {
         document.querySelectorAll('.num').forEach(function (card) {
             card.style.display = "none";
         })
+    }
+    if (data.cardStyles.showChart == true) {
+        document.getElementById('showChart').checked = true;
+        document.querySelectorAll('.chart').forEach(function (card) {
+            card.style.display = "block";
+        })
+        // Initialize charts if Highcharts is available
+        if (typeof Highcharts !== 'undefined') {
+            setTimeout(initializeCharts, 200);
+        }
+    } else {
+        document.getElementById('showChart').checked = false;
+        document.querySelectorAll('.chart').forEach(function (card) {
+            card.style.display = "none";
+        })
+        // Destroy all charts when disabled
+        Object.keys(charts).forEach(function(channelId) {
+            if (charts[channelId]) {
+                charts[channelId].destroy();
+                delete charts[channelId];
+            }
+        });
     }
     if (data.showBlankSlots) {
         document.getElementById('showBlankSlots').checked = true;
@@ -1923,7 +2125,11 @@ function fix() {
         }
         
         `;
-    document.getElementById('backPicker').value = convert3letterhexto6letters(data.bgColor);
+    if (data.bgColor.startsWith('http')) {
+        document.getElementById('backPickerUrl').value = (data.bgColor);
+    } else if (!data.bgColor.startsWith('data')) {
+        document.getElementById('backPicker').value = convert3letterhexto6letters(data.bgColor);
+    }
     document.getElementById('boxSpacing').value = data.boxSpacing;
     document.getElementById('containerHeight').value = data.cardStyles.containerHeight;
     document.getElementById('containerWidth').value = data.cardStyles.containerWidth;
@@ -1940,6 +2146,7 @@ function fix() {
     document.getElementById('borderPicker').value = convert3letterhexto6letters(data.boxBorder);
     document.getElementById('odometerUp').value = data.odometerUp;
     document.getElementById('odometerDown').value = data.odometerDown;
+    document.getElementById('chartLineColor').value = convert3letterhexto6letters(data.cardStyles.chartLineColor || data.textColor || '#000000');
     document.getElementById('odometerSpeed').value = data.odometerSpeed;
     document.getElementById('animatedCardChangesDuration').value = data.animatedCards.duration;
     document.getElementById('imageBorder').value = data.imageBorder;
@@ -1964,6 +2171,8 @@ function fix() {
     }
 
     document.getElementById('header').style.fontFamily = data.headerFont || "Arial";
+    const footerEl = document.getElementById('footer');
+    if (footerEl) footerEl.style.fontFamily = data.headerFont || "Arial";
     document.getElementById('main').style.fontFamily = data.mainFont || "Roboto";
 
     const counters = document.getElementById('main').getElementsByClassName('odometer');
@@ -2069,7 +2278,7 @@ function connect() {
     if (window.location.href.includes('?code=')) {
         window.location.href = window.location.href.split('?code=')[0];
     } else {
-        saveData2()
+        saveData(false)
         window.location.href = window.location.href + "?code=" + code;
     }
 }
@@ -2082,7 +2291,7 @@ if (connected == true) {
 }
 
 function update2() {
-    fetch('https://api.lcedit.com/' + code + '')
+    fetch('http://localhost:1112/' + code + '')
         .then(response => response.json())
         .then(json => {
             if (json.users) {
@@ -2181,7 +2390,30 @@ function update2() {
                                     set = data.data[a].count;
                                 }
                             }
-                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/user?subs=' + set + '&name=' + username + '')
+                            fetch('http://localhost:1112/' + code + '/' + json.system[i].id + '/user?subs=' + set + '&name=' + username + '')
+                        }
+                        if (json.system[i].type == "gains") {
+                            let username = "";
+                            let gains = [];
+                            for (let a = 0; a < data.data.length; a++) {
+                                if (data.data[a].id == json.system[i].id) {
+                                    username = data.data[a].name;
+                                    gains[0] = data.data[a].min_gain;
+                                    gains[1] = data.data[a].max_gain;
+                                }
+                            }
+                            fetch('http://localhost:1112/' + code + '/' + json.system[i].id + '/gains?gains=' + gains[0] + ',' + gains[1] + '&name=' + username + '')
+                        }
+                        if (json.system[i].type == "rank") {
+                            let username = "";
+                            let rank = 0;
+                            for (let a = 0; a < data.data.length; a++) {
+                                if (data.data[a].id == json.system[i].id) {
+                                    username = data.data[a].name;
+                                    rank = a + 1;
+                                }
+                            }
+                            fetch('http://localhost:1112/' + code + '/' + json.system[i].id + '/rank?rank=' + rank + '&name=' + username + '')
                         }
                     }
                 }
@@ -2189,13 +2421,13 @@ function update2() {
                 alert("You are no longer connected.");
                 clearInterval(update2Hold);
                 document.getElementById('isconnected').innerText = "No";
-                fetch('https://api.lcedit.com/create?code=' + code + '', {
+                fetch('http://localhost:1112/create?code=' + code + '', {
                     method: 'POST'
                 })
                     .then(response => response.text())
                     .then(json => {
                         if (json == "done") {
-                            saveData2()
+                            saveData(false)
                             location.reload();
                         }
                     })
@@ -2205,7 +2437,7 @@ function update2() {
 
 document.getElementById('autosave').addEventListener('change', function () {
     if (document.getElementById('autosave').checked == true) {
-        saveInterval = setInterval(saveData2, 15000);
+        saveInterval = setInterval(saveData(false), 15000);
         data.autosave = true;
     } else {
         clearInterval(saveInterval);
@@ -2262,7 +2494,7 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
+        alert('$(urlfetch http://localhost:1112/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
     } else if (type == "2") {
         let min = prompt("What is the minimum amount the channel's rate should gain? (we recommend less than 1 (0.1, 0.2, etc))");
         if (!min || isNaN(min)) {
@@ -2279,17 +2511,19 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
+        alert('$(urlfetch http://localhost:1112/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
     } else {
         alert("Please enter type (1 or 2)");
         return;
     }
 }
 
-document.getElementById('connect').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
-document.getElementById('connect2').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
-document.getElementById('connect3').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
-document.getElementById('connect4').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/user)';
+document.getElementById('connect').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
+document.getElementById('connect2').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
+document.getElementById('connect3').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
+document.getElementById('connect4').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/user)';
+document.getElementById('connect5').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/gains)';
+document.getElementById('connect6').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/rank)';
 
 document.getElementById('animation').addEventListener('click', function (event) {
     if (event.target.checked) {
@@ -2320,16 +2554,22 @@ document.getElementById('abbreviate').addEventListener('click', function () {
 })
 
 document.getElementById('theme').addEventListener('change', function () {
+    // Store previous theme before changing
+    const previousTheme = data.theme;
     data.theme = document.getElementById('theme').value;
-    themeChanger();
+    themeChanger(previousTheme);
 })
 
-function themeChanger() {
+function themeChanger(previousTheme) {
     if (confirm('Are you sure you want to change the theme?') == true) {
         clearInterval(updateInterval);
         clearInterval(auditTimeout);
         document.getElementById('main').innerHTML = "";
-        initLoad('redo');
+        initLoad('redo', previousTheme);
+    } else {
+        // Revert theme selection if user cancels
+        data.theme = previousTheme;
+        document.getElementById('theme').value = previousTheme;
     }
 }
 
@@ -2393,7 +2633,7 @@ document.getElementById('odometerSpeed').addEventListener('change', function () 
 document.getElementById('animatedCardChangesDuration').addEventListener('change', function () {
     if (confirm('This will refresh the page.')) {
         data.animatedCards.duration = document.getElementById('animatedCardChangesDuration').value;
-        save();
+        saveData(true);
         location.reload();
     }
 })
@@ -2411,17 +2651,6 @@ function pause() {
     }
 }
 
-function randomGaussian(mean, stdev) {
-    let a = 0, b = 0;
-    while (!a) a = Math.random();
-    while (!b) b = Math.random();
-    return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b) * stdev + mean;
-}
-
-function average(num1, num2) {
-    return (num1 + num2) / 2
-}
-
 function createDummyChannels(count, min, max) {
     for (let i = 0; i < count; i++) {
         data.data.push({
@@ -2433,63 +2662,6 @@ function createDummyChannels(count, min, max) {
             id: uuidGen()
         })
     }
-}
-
-function getSubs(id) {
-    for (let i = 0; i < data.data.length; i++) {
-        if (data.data[i].id == id) {
-            return data.data[i].count;
-        }
-    }
-    return 0;
-}
-
-function getMinGain(id) {
-    for (let i = 0; i < data.data.length; i++) {
-        if (data.data[i].id == id) {
-            return data.data[i].min_gain;
-        }
-    }
-    return 0;
-}
-
-function getName(id) {
-    for (let i = 0; i < data.data.length; i++) {
-        if (data.data[i].id == id) {
-            return data.data[i].name;
-        }
-    }
-    return '';
-}
-
-function getImage(id) {
-    for (let i = 0; i < data.data.length; i++) {
-        if (data.data[i].id == id) {
-            return data.data[i].image;
-        }
-    }
-    return '../default.png';
-}
-
-function getMaxGain(id) {
-    for (let i = 0; i < data.data.length; i++) {
-        if (data.data[i].id == id) {
-            return data.data[i].max_gain;
-        }
-    }
-    return 0;
-}
-
-function randomColor() {
-    let color = '#'
-    for (let i = 0; i < 6; i++) {
-        color += Math.floor(Math.random() * 16).toString(16)
-    }
-    return color
-}
-
-function mean(a, b) {
-    return (a + b) / 2
 }
 
 function audit() {
@@ -2523,53 +2695,37 @@ function apiUpdate(interval) {
             document.getElementById('enableApiUpdate').innerText = "Enable API Updates"
         }
     }
+
     let url = data.apiUpdates.url;
     let groups = []
     let channels = ''
-    for (let i = 0; i < data.data.length; i++) {
-        channels += data.data[i].id + ','
-    }
-    channels = channels.slice(0, -1)
-    if ((data.apiUpdates.maxChannelsPerFetch == 'one')) {
-        groups = channels.split(',').map(function (item) {
-            return [item];
-        });
-    } else if ((data.apiUpdates.maxChannelsPerFetch == 'ten')) {
-        groups = channels.split(',').map(function (item, index) {
-            return index % 10 === 0 ? channels.slice(index, index + 10) : null;
-        }).filter(function (item) {
-            return item;
-        });
-    } else if ((data.apiUpdates.maxChannelsPerFetch == 'twentyfive')) {
-        groups = channels.split(',').map(function (item, index) {
-            return index % 25 === 0 ? channels.slice(index, index + 25) : null;
-        }).filter(function (item) {
-            return item;
-        });
-    } else if ((data.apiUpdates.maxChannelsPerFetch == 'fifty')) {
-        groups = channels.split(',').map(function (item, index) {
-            return index % 50 === 0 ? channels.slice(index, index + 50) : null;
-        }).filter(function (item) {
-            return item;
-        });
-    } else if ((data.apiUpdates.maxChannelsPerFetch == 'onehundred')) {
-        groups = channels.split(',').map(function (item, index) {
-            return index % 100 === 0 ? channels.slice(index, index + 100) : null;
-        }).filter(function (item) {
-            return item;
-        });
-    }
-    if (url.includes('{{channels}}')) {
-        for (let i = 0; i < groups.length; i++) {
-            let newUrl = url.replace('{{channels}}', groups[i])
-            fetchNext(newUrl)
-        }
+
+    // Check for customAPIList filter
+    let customList = data.apiUpdates.customAPIList || [];
+    let allChannels = data.data.map(item => item.id);
+
+    // Filter channels if customAPIList is not empty
+    let targetChannels = (customList.length > 0)
+        ? allChannels.filter(id => customList.includes(id))
+        : allChannels;
+
+    channels = targetChannels.join(',');
+
+    // Handle "one" fetch mode
+    if (data.apiUpdates.maxChannelsPerFetch == 'one') {
+        groups = targetChannels.map(item => [item]);
     } else {
-        for (let i = 0; i < groups.length; i++) {
-            let newUrl = url + groups[i]
-            fetchNext(newUrl)
-        }
+        groups = [targetChannels];
     }
+
+    // Build and fetch URLs
+    for (let i = 0; i < groups.length; i++) {
+        let newUrl = url.includes('{{channels}}')
+            ? url.replace('{{channels}}', groups[i])
+            : url + groups[i];
+        fetchNext(newUrl);
+    }
+
     function fetchNext(url) {
         if (data.apiUpdates.method == 'GET') {
             if (Object.keys(data.apiUpdates.headers).filter(x => x).length) {
@@ -2577,16 +2733,12 @@ function apiUpdate(interval) {
                     method: data.apiUpdates.method,
                     headers: data.apiUpdates.headers,
                 }).then(response => response.json())
-                    .then(json => {
-                        doStuff(json)
-                    })
+                    .then(json => { doStuff(json) });
             } else {
                 fetch(url, {
                     method: data.apiUpdates.method
                 }).then(response => response.json())
-                    .then(json => {
-                        doStuff(json)
-                    })
+                    .then(json => { doStuff(json) });
             }
         } else {
             fetch(url, {
@@ -2594,11 +2746,10 @@ function apiUpdate(interval) {
                 headers: data.apiUpdates.headers,
                 body: JSON.stringify(data.apiUpdates.body)
             }).then(response => response.json())
-                .then(json => {
-                    doStuff(json)
-                })
+                .then(json => { doStuff(json) });
         }
     }
+
     function doStuff(json) {
         let channels = json;
         if (data.apiUpdates.response.loop !== 'data') {
@@ -2607,14 +2758,12 @@ function apiUpdate(interval) {
         if (!Array.isArray(channels)) {
             channels = [channels];
         }
+
         for (let i = 0; i < channels.length; i++) {
-            let nameUpdate = undefined;
-            let countUpdate = undefined;
-            let imageUpdate = undefined;
-            let idUpdate = undefined;
+            let nameUpdate, countUpdate, imageUpdate, idUpdate;
+
             if (data.apiUpdates.response.name.enabled === true) {
-                let propertyNames = data.apiUpdates.response.name.path.split('.');
-                propertyNames = propertyNames.map(prop => {
+                let propertyNames = data.apiUpdates.response.name.path.split('.').map(prop => {
                     if (prop.includes('[')) {
                         const split = prop.split('[');
                         const index = parseInt(split[1].split(']')[0]);
@@ -2622,15 +2771,18 @@ function apiUpdate(interval) {
                     }
                     return prop;
                 }).flat();
+
                 let result = channels[i];
                 for (const propName of propertyNames) {
+                    console.log(propName)
                     result = result[propName];
                 }
                 nameUpdate = result;
+
             }
+
             if (data.apiUpdates.response.count.enabled === true) {
-                let propertyNames = data.apiUpdates.response.count.path.split('.');
-                propertyNames = propertyNames.map(prop => {
+                let propertyNames = data.apiUpdates.response.count.path.split('.').map(prop => {
                     if (prop.includes('[')) {
                         const split = prop.split('[');
                         const index = parseInt(split[1].split(']')[0]);
@@ -2639,14 +2791,12 @@ function apiUpdate(interval) {
                     return prop;
                 }).flat();
                 let result = channels[i];
-                for (const propName of propertyNames) {
-                    result = result[propName];
-                }
+                for (const propName of propertyNames) result = result[propName];
                 countUpdate = result;
             }
+
             if (data.apiUpdates.response.image.enabled === true) {
-                let propertyNames = data.apiUpdates.response.image.path.split('.');
-                propertyNames = propertyNames.map(prop => {
+                let propertyNames = data.apiUpdates.response.image.path.split('.').map(prop => {
                     if (prop.includes('[')) {
                         const split = prop.split('[');
                         const index = parseInt(split[1].split(']')[0]);
@@ -2655,13 +2805,11 @@ function apiUpdate(interval) {
                     return prop;
                 }).flat();
                 let result = channels[i];
-                for (const propName of propertyNames) {
-                    result = result[propName];
-                }
+                for (const propName of propertyNames) result = result[propName];
                 imageUpdate = result;
             }
-            let propertyNames = data.apiUpdates.response.id.path.split('.');
-            propertyNames = propertyNames.map(prop => {
+
+            let propertyNames = data.apiUpdates.response.id.path.split('.').map(prop => {
                 if (prop.includes('[')) {
                     const split = prop.split('[');
                     const index = parseInt(split[1].split(']')[0]);
@@ -2670,40 +2818,26 @@ function apiUpdate(interval) {
                 return prop;
             }).flat();
             let result = channels[i];
-            for (const propName of propertyNames) {
-                result = result[propName];
-            }
+            for (const propName of propertyNames) result = result[propName];
             idUpdate = result;
 
             for (let r = 0; r < data.data.length; r++) {
                 if (data.apiUpdates.response.id.IDIncludes === true) {
                     if (idUpdate.includes(data.data[r].id)) {
-                        if (nameUpdate !== undefined) {
-                            data.data[r].name = nameUpdate;
-                        }
-                        if (imageUpdate !== undefined) {
-                            data.data[r].image = imageUpdate;
-                        }
+                        if (nameUpdate !== undefined) data.data[r].name = nameUpdate;
+                        if (imageUpdate !== undefined) data.data[r].image = imageUpdate;
                         if (countUpdate !== undefined) {
-                            if (data.apiUpdates.forceUpdates) {
-                                data.data[r].count = countUpdate;
-                            } else if (abb(countUpdate) !== abb(data.data[r].count)) {
+                            if (data.apiUpdates.forceUpdates || abb(countUpdate) !== abb(data.data[r].count)) {
                                 data.data[r].count = countUpdate;
                             }
                         }
                     }
                 } else {
                     if (data.data[r].id === idUpdate) {
-                        if (nameUpdate !== undefined) {
-                            data.data[r].name = nameUpdate;
-                        }
-                        if (imageUpdate !== undefined) {
-                            data.data[r].image = imageUpdate;
-                        }
+                        if (nameUpdate !== undefined) data.data[r].name = nameUpdate;
+                        if (imageUpdate !== undefined) data.data[r].image = imageUpdate;
                         if (countUpdate !== undefined) {
-                            if (data.apiUpdates.forceUpdates) {
-                                data.data[r].count = countUpdate;
-                            } else if (abb(countUpdate) !== abb(data.data[r].count)) {
+                            if (data.apiUpdates.forceUpdates || abb(countUpdate) !== abb(data.data[r].count)) {
                                 data.data[r].count = countUpdate;
                             }
                         }
@@ -2712,8 +2846,8 @@ function apiUpdate(interval) {
             }
         }
     }
-
 }
+
 
 function enableApiUpdate() {
     clearInterval(apiInterval)
@@ -2732,7 +2866,8 @@ function enableApiUpdate() {
 
 function saveAPIUpdates() {
     data.apiUpdates.url = document.getElementById('apiLink').value
-    data.apiUpdates.maxChannelsPerFetch = (document.getElementById('apiType').value == 'none') ? 'one' : document.getElementById('apiType').value
+    data.apiUpdates.maxChannelsPerFetch = (document.getElementById('apiType').value == 'none') ? 'one' : document.getElementById('apiType').value;
+    data.apiUpdate.customAPIList = document.getElementById('customAPIList').value.split(',');
     data.apiUpdates.method = document.getElementById('apiMethod').value;
     data.apiUpdates.forceUpdates = document.getElementById('forceUpdates').checked;
     let headers = document.getElementById('extraCred').value.toString().split(';&#10;').join(';\n').split(';\n')
@@ -2778,6 +2913,7 @@ function saveAPIUpdates() {
 function loadAPIUpdates() {
     document.getElementById('apiLink').value = data.apiUpdates.url
     document.getElementById('apiType').value = data.apiUpdates.maxChannelsPerFetch
+    document.getElementById('customAPIList').value = data.apiUpdates.customAPIList.join(',')
     document.getElementById('apiMethod').value = data.apiUpdates.method
     let headers = ''
     for (let i = 0; i < Object.keys(data.apiUpdates.headers).length; i++) {
@@ -2848,9 +2984,9 @@ function selectorFunction(e) {
     } else {
         if (selected != null) {
             try {
-            document.getElementById('card_' + selected + '').classList.remove('selected');
-            document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
-            } catch {}
+                document.getElementById('card_' + selected + '').classList.remove('selected');
+                document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
+            } catch { }
         }
         if (!id || id == selected) {
             document.getElementById('quickSelect').value = 'select';
@@ -2948,6 +3084,7 @@ document.getElementById("apiSource").addEventListener('change', function () {
             'body': '',
             'headers': '',
             'maxChannelsPerFetch': 'one',
+            'customAPIList': [],
             'custom': false,
             'response': {
                 'loop': 'data',
@@ -2978,6 +3115,7 @@ document.getElementById("apiSource").addEventListener('change', function () {
             'body': '',
             'headers': '',
             'maxChannelsPerFetch': 'one',
+            'customAPIList': [],
             'custom': false,
             'response': {
                 'loop': 'data',
@@ -3233,26 +3371,87 @@ function loadHeader() {
         clearInterval(interval);
     });
     headerIntervals = [];
-    document.getElementById('header').innerHTML = '';
-    document.getElementById('header').style.height = data.headerSettings.headerHeight + 'px';
-    document.getElementById('header').style.gridTemplateColumns = data.headerSettings.boxWidth.split(',').map(x => x.trim() + 'fr').join(' ');
-    document.getElementById('header').style.gap = data.headerSettings.sectionGap + "px";
+    const headerEl = document.getElementById('header');
+    const footerEl = document.getElementById('footer');
+    headerEl.innerHTML = '';
+    if (footerEl) footerEl.innerHTML = '';
+
+    // Ensure headerSettings exists and has required properties
+    if (!data.headerSettings) {
+        data.headerSettings = {
+            totalSections: 0,
+            headerHeight: 0,
+            boxWidth: '',
+            sectionGap: 10,
+            footerHeight: 0,
+            footerGap: 10,
+            items: []
+        };
+    }
+    if (!data.headerSettings.items) {
+        data.headerSettings.items = [];
+    }
+    
+    // Filter out items with undefined or "undefined" names
+    data.headerSettings.items = data.headerSettings.items.filter(item => 
+        item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
+    );
+
+    headerEl.style.height = (data.headerSettings.headerHeight || 0) + 'px';
+    if (data.headerSettings.boxWidth && data.headerSettings.boxWidth.trim() !== '') {
+        headerEl.style.gridTemplateColumns = data.headerSettings.boxWidth.split(',').map(x => x.trim() + 'fr').join(' ');
+    }
+    headerEl.style.gap = (data.headerSettings.sectionGap || 10) + "px";
+
+    if (footerEl) {
+        footerEl.style.height = (data.headerSettings.footerHeight ?? 0) + 'px';
+        if (data.headerSettings.boxWidth && data.headerSettings.boxWidth.trim() !== '') {
+            footerEl.style.gridTemplateColumns = data.headerSettings.boxWidth.split(',').map(x => x.trim() + 'fr').join(' ');
+        }
+        footerEl.style.gap = (data.headerSettings.footerGap ?? 10) + "px";
+    }
 
     for (let i = 0; i < data.headerSettings.items.length; i++) {
         const item = data.headerSettings.items[i];
+        const placement = item.placement || 'header';
+        const container = (placement === 'footer' && footerEl) ? footerEl : headerEl;
+        // Skip items without valid names
+        if (!item || !item.name || item.name === 'undefined' || item.name === undefined) {
+            continue;
+        }
         const div = document.createElement('div');
         div.classList.add('header_child')
         div.id = 'header_' + item.name;
         if (item.type == 'text') {
-            div.innerHTML = `<p class="header-text">${item.attributes.text}</p>`;
+            let displayText = replaceHeaderVariables(item.attributes.text || '');
             div.style.color = item.attributes.color;
             div.style.fontSize = item.attributes.size + "px";
             div.style.fontWeight = item.attributes.fontWeight || "400";
 
-            if (item.attributes.scrollTime > 0) {
-                const scrollDistance = item.attributes.text.length * item.attributes.size;
-                const scrollSpeed = scrollDistance / item.attributes.scrollTime;
-                div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${item.attributes.text}</marquee>`
+            // Function to update the displayed text
+            const updateDisplayText = () => {
+                displayText = replaceHeaderVariables(item.attributes.text || '');
+                if (item.attributes.scrollTime > 0 && parseFloat(item.attributes.scrollTime) > 0) {
+                    const scrollDirection = item.attributes.scrollDirection || 'left';
+                    const directionClass = scrollDirection === 'right' ? 'scroll-right' : 'scroll-left';
+                    // Calculate animation duration: scrollTime is in seconds, convert to milliseconds
+                    const animationDuration = parseFloat(item.attributes.scrollTime) * 1000;
+                    // Duplicate content for seamless scrolling - duplicate multiple times for smooth loop
+                    const separator = ' • ';
+                    const duplicatedText = `${displayText}${separator}${displayText}${separator}`;
+                    div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms; animation-name: ${directionClass === 'scroll-left' ? 'scroll-left' : 'scroll-right'}; animation-timing-function: linear; animation-iteration-count: infinite;">${duplicatedText}${duplicatedText}</span></div>`;
+                } else {
+                    div.innerHTML = `<p class="header-text">${displayText}</p>`;
+                }
+            };
+
+            // Initial display
+            updateDisplayText();
+
+            // Update text with variables periodically if variables are used
+            if (item.attributes.text && (item.attributes.text.includes('$name') || item.attributes.text.includes('$hourly') || item.attributes.text.includes('$count') || item.attributes.text.includes('$rank') || item.attributes.text.includes('$repeat'))) {
+                const updateInterval = (item.attributes.updateInterval || data.updateInterval || 2) * 1000;
+                headerIntervals.push(setInterval(updateDisplayText, updateInterval));
             }
 
             if (item.attributes.valueFrom && item.attributes.valueFrom != 'none') {
@@ -3293,13 +3492,17 @@ function loadHeader() {
                                 string += `${array[i].name} vs ${array[i + 1].name}: ${Math.floor(array[i].count - array[i + 1].count).toLocaleString('en-US')}${endComma}`
                             }
                         }
-                        if (item.attributes.scrollTime != '0') {
-                            const scrollDistance = string.join(', ').length * item.attributes.size;
-                            const scrollSpeed = scrollDistance / item.attributes.scrollTime;
-                            div.innerHTML = `<marquee scrollamount="${scrollSpeed}" direction="${item.attributes.scrollDirection}" behavior="scroll" loop="infinite">${string.join(', ')}</marquee>`
-                        } else[
-                            div.innerHTML = `<p class="header-text">${string}</p>`
-                        ]
+                        if (item.attributes.scrollTime != '0' && item.attributes.scrollTime > 0) {
+                            const scrollText = string.join(', ');
+                            const scrollDirection = item.attributes.scrollDirection || 'left';
+                            const directionClass = scrollDirection === 'right' ? 'scroll-right' : 'scroll-left';
+                            const animationDuration = item.attributes.scrollTime * 1000;
+                            // Duplicate content for seamless scrolling
+                            const duplicatedText = `${scrollText} • ${scrollText} • `;
+                            div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms;">${duplicatedText}${duplicatedText}</span></div>`;
+                        } else {
+                            div.innerHTML = `<p class="header-text">${string.join(', ')}</p>`;
+                        }
                     }, item.attributes.updateInterval * 1000));
                 }
             }
@@ -3307,7 +3510,7 @@ function loadHeader() {
         if (item.type == 'battle') {
             div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
                 <div class="battle_container">
-                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image1_${item.name}"></img>
+                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image1_${item.name}"></img>
                     <div class="battle_info">
                         <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
@@ -3322,7 +3525,7 @@ function loadHeader() {
                         <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count2_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: right;" : ""}">0</p>
                     </div>
-                    <img style="float: right; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="battle_image2_${item.name}"></img>
+                    <img style="float: right; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image2_${item.name}"></img>
                 </div>
                 </div>`;
             div.style.fontWeight = item.attributes.fontWeight || "400";
@@ -3389,13 +3592,18 @@ function loadHeader() {
             }, item.attributes.updateInterval * 1000));
         }
         if (!item.childOf) {
-            document.getElementById('header').appendChild(div);
+            container.appendChild(div);
         } else {
             const parent = document.getElementById('header_' + item.childOf);
-            if (parent) {
+            if (parent && container.contains(parent)) {
                 parent.appendChild(div);
+            } else {
+                container.appendChild(div);
             }
         }
+    }
+    if (footerEl) {
+        footerEl.style.fontFamily = data.headerFont || "Arial";
     }
     updateOdo()
 }
@@ -3419,47 +3627,74 @@ function findFastestChannel() {
 
 function saveTopSettings() {
     let items = [];
-    document.querySelector("#sections").children = Array.from(document.querySelector("#sections").children).forEach(parent => {
+    Array.from(document.querySelector("#sections").children).forEach(parent => {
         let item = {
-            "attributes": {
-            }
+            "attributes": {}
         };
-        parent.children = Array.from(parent.children).forEach(child => {
+        // Use querySelectorAll to find all header_option elements within the parent, not just direct children
+        const options = parent.querySelectorAll(".header_option");
+        options.forEach(child => {
             if (child.classList && child.classList.contains("header_option")) {
-                if (child.classList[0].includes('attribute')) {
+                const className = child.classList[0];
+                if (className && className.includes('attribute')) {
+                    const attrName = className.split('_')[2];
+                    if (attrName) {
                     if (child.type === 'number') {
-                        item['attributes'][child.classList[0].split('_')[2]] = parseInt(child.value);
+                        item['attributes'][attrName] = child.value ? parseInt(child.value) : 0;
                     } else if (child.type === 'checkbox') {
-                        item['attributes'][child.classList[0].split('_')[2]] = child.checked;
+                        item['attributes'][attrName] = child.checked;
                     } else {
-                        item['attributes'][child.classList[0].split('_')[2]] = child.value;
+                        // Handles text, textarea, select, etc.
+                        item['attributes'][attrName] = child.value || '';
                     }
-                } else {
-                    item[child.classList[0].split('_')[2]] = child.value;
+                    }
+                } else if (className && className.includes('option')) {
+                    const optionName = className.split('_')[2];
+                    if (optionName) {
+                        item[optionName] = child.value || '';
+                    }
                 }
             }
         });
-        items.push(item);
+        // Only add items with valid names
+        if (item.name && item.name !== 'undefined' && item.name.trim() !== '') {
+            items.push(item);
+        }
     });
     data.headerSettings = {
-        totalSections: document.getElementById("totalSections").value,
-        headerHeight: document.getElementById("heightSections").value,
-        boxWidth: document.getElementById("sizeSections").value,
-        sectionGap: document.getElementById("gapSections").value,
+        totalSections: document.getElementById("totalSections").value || 0,
+        headerHeight: document.getElementById("heightSections").value || 0,
+        boxWidth: document.getElementById("sizeSections").value || '',
+        sectionGap: document.getElementById("gapSections").value || 10,
+        footerHeight: document.getElementById("footerHeightSections") ? (document.getElementById("footerHeightSections").value || 0) : 0,
+        footerGap: document.getElementById("footerGapSections") ? (document.getElementById("footerGapSections").value || 10) : 10,
         items: items
     }
-    save()
+    saveData(true);
     loadHeader()
 }
 
 function loadTopSettings(itemName, itemType) {
     if (!itemType) {
-        document.getElementById("totalSections").value = data.headerSettings.totalSections;
-        document.getElementById("heightSections").value = data.headerSettings.headerHeight;
-        document.getElementById("sizeSections").value = data.headerSettings.boxWidth;
-        document.getElementById("gapSections").value = data.headerSettings.sectionGap;
+        document.getElementById("totalSections").value = data.headerSettings.totalSections || '';
+        document.getElementById("heightSections").value = data.headerSettings.headerHeight || 0;
+        document.getElementById("sizeSections").value = data.headerSettings.boxWidth || '';
+        document.getElementById("gapSections").value = data.headerSettings.sectionGap || 10;
+        if (document.getElementById("footerHeightSections")) {
+            document.getElementById("footerHeightSections").value = data.headerSettings.footerHeight ?? 0;
+        }
+        if (document.getElementById("footerGapSections")) {
+            document.getElementById("footerGapSections").value = data.headerSettings.footerGap ?? 10;
+        }
     }
     document.getElementById("sections").innerHTML = ``;
+    // Filter out items with undefined or "undefined" names
+    if (!data.headerSettings.items) {
+        data.headerSettings.items = [];
+    }
+    data.headerSettings.items = data.headerSettings.items.filter(item => 
+        item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
+    );
     data.headerSettings.items.forEach(item => {
         if (item.name == itemName) {
             item.type = itemType;
@@ -3469,135 +3704,171 @@ function loadTopSettings(itemName, itemType) {
         div.className = "headerItem";
         div.id = `headerItem_${item.name}`;
         let textSettings = `
-            <label>Content:</label>
-            <input type="text" value="${item.attributes.text || ''}" class="section_attribute_text header_option" /><br>
-            <label>Color:</label>
-            <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option small_input" /><br>
-            <label>Font Size:</label>
-            <input type="number" value="${item.attributes.size || '20'}" class="section_attribute_size header_option small_input" /><br>
-            <label><abbr title="Note: Not all font weights are supported on all fonts.">Font Weight</abbr></label>
-            <select class="section_attribute_fontWeight header_option">
-                <option value="100" ${item.attributes.fontWeight == "100" ? 'selected' : ''}>Thin</option>
-                <option value="200" ${item.attributes.fontWeight == "200" ? 'selected' : ''}>Extra Light</option>
-                <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
-                <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
-                <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
-                <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                <option value="800" ${item.attributes.fontWeight == "800" ? 'selected' : ''}>Extra Bold</option>
-                <option value="900" ${item.attributes.fontWeight == "900" ? 'selected' : ''}>Black</option>
-            </select><br>
-            <label>Scroll Duration: (0 = disabled)</label>
-            <input type="number" value="${item.attributes.scrollTime || '0'}" class="section_attribute_scrollTime header_option small_input" /><br>
-            <br><label>Get Value From:</label>
-            <select class="section_attribute_valueFrom header_option small_input">
-                <option value="none" ${item.attributes.valueFrom === 'none' ? 'selected' : ''}>Disabled</option>
-                <option value="gains" ${item.attributes.valueFrom === 'gains' ? 'selected' : ''}>Gains</option>
-                <option value="counts" ${item.attributes.valueFrom === 'counts' ? 'selected' : ''}>Counts</option>
-                <option value="gaps" ${item.attributes.valueFrom === 'gaps' ? 'selected' : ''}>Gaps</option>
-            </select><br>
-            <label>(Above) List Length:</label>
-            <input type="number" value="${item.attributes.length || 0}" class="section_attribute_length header_option small_input" /><br>
-            <label>(Above) Sort Order:</label>
-            <select class="section_attribute_sortOrder header_option small_input">
-                <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
-                <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
-            </select><br>
-            <label>(Above) Update Interval (seconds):</label>
-            <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option small_input" /><br>
-            <label>List IDs (separated via a comma) (for gaps it'll collect the first 2, then second 2, etc) to be used (OR leave blank):</label>
-            <input type="text" value="${item.attributes?.idList?.toString() || ''}" class="section_attribute_idList header_option" /><br>
+            <div class="section-basic-options">
+                <div style="grid-column: 1 / -1;"><label><strong>Text Content:</strong></label><br>
+                <textarea rows="3" class="section_attribute_text header_option" placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)">${item.attributes.text || ''}</textarea>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                    <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $rank<br>
+                    <strong>Repeat:</strong> $repeat(start-end, part1, part2, ...) - Repeats template for each rank in range<br>
+                    <strong>Example:</strong> "$name(1) gains $hourly(1) per hour" or "$repeat(1-10, $rank. $name - $count)"
+                </p></div>
+                <div><label><strong>Text Color:</strong></label><br>
+                <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /></div>
+                <div><label><strong>Font Size:</strong></label><br>
+                <input type="number" value="${item.attributes.size || '20'}" class="section_attribute_size header_option small_input" placeholder="20" /></div>
+            </div>
+            <details class="section-advanced-options" style="margin-top: 10px;">
+                <summary><strong>Advanced Options</strong></summary>
+                <div style="margin-top: 10px;">
+                    <label>Font Weight:</label>
+                    <select class="section_attribute_fontWeight header_option small_input">
+                        <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
+                        <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                        <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                        <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
+                        <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
+                    </select><br>
+                    <label>Auto-scroll Duration (0 = disabled):</label>
+                    <input type="number" value="${item.attributes.scrollTime || '0'}" class="section_attribute_scrollTime header_option small_input" /><br>
+                    <label>Scroll Direction:</label>
+                    <select class="section_attribute_scrollDirection header_option small_input">
+                        <option value="left" ${!item.attributes.scrollDirection || item.attributes.scrollDirection === 'left' ? 'selected' : ''}>Left</option>
+                        <option value="right" ${item.attributes.scrollDirection === 'right' ? 'selected' : ''}>Right</option>
+                    </select><br>
+<br>
+                    <label>List Length:</label>
+                    <input type="number" value="${item.attributes.length || 0}" class="section_attribute_length header_option small_input" /><br>
+                    <label>Sort Order:</label>
+                    <select class="section_attribute_sortOrder header_option small_input">
+                        <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
+                        <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
+                    </select><br>
+                    <label>Update Interval (seconds):</label>
+                    <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option small_input" /><br>
+                </div>
+            </details>
         `;
         let battleSettings = `
-            <label>Background Color:</label>
-            <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option small_input" /><br>
-            <label>Color:</label>
-            <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option small_input" /><br>
-            <label>Height:</label>
-            <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_boxHeight header_option small_input" /><br>
-            <label>Image Size:</label>
-            <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /><br>
-            <label>Font Size:</label>
-            <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /><br>
-            <label><abbr title="Note: Not all font weights are supported on all fonts.">Font Weight</abbr></label>
-            <select class="section_attribute_fontWeight header_option">
-                <option value="100" ${item.attributes.fontWeight == "100" ? 'selected' : ''}>Thin</option>
-                <option value="200" ${item.attributes.fontWeight == "200" ? 'selected' : ''}>Extra Light</option>
-                <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
-                <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
-                <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
-                <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                <option value="800" ${item.attributes.fontWeight == "800" ? 'selected' : ''}>Extra Bold</option>
-                <option value="900" ${item.attributes.fontWeight == "900" ? 'selected' : ''}>Black</option>
-            </select><br>
-            <input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Apply odometer up/down colors</label><br>
-            <input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatars</label><br>
-            <input type="checkbox" ${item.attributes.battleAlign ? "checked" : ""} class="section_attribute_battleAlign header_option"><label>Align counters to sides</label><br>
-            <label>(Above) Update Interval (seconds):</label>
-            <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" /><br>
-            <label>Type:</label>
-            <select class="section_attribute_type header_option">
-                <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest (in difference, IDs are ignored)</option>
-                <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom (specify IDs below)</option>
-            </select><br>
-            <label>User 1 ID:</label><input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option" /><br>
-            <label>User 2 ID:</label><input value="${item.attributes.id2 || ""}" class="section_attribute_id2 header_option" /><br>
+            <div class="section-basic-options">
+                <div><label><strong>Battle Type:</strong></label><br>
+                <select class="section_attribute_type header_option">
+                    <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest Battle (auto)</option>
+                    <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom Users</option>
+                </select></div>
+                <div><label><strong>Update Every:</strong></label><br>
+                <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" placeholder="2" /> seconds</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <label><strong>User 1 ID:</strong></label><br>
+                <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option" placeholder="Leave blank for closest battle" /><br>
+                <label><strong>User 2 ID:</strong></label><br>
+                <input value="${item.attributes.id2 || ""}" class="section_attribute_id2 header_option" placeholder="Leave blank for closest battle" />
+            </div>
+            <details class="section-advanced-options" style="margin-top: 10px;">
+                <summary><strong>Styling Options</strong></summary>
+                <div style="margin-top: 10px;">
+                    <div><label>Background Color:</label>
+                    <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option" /></div>
+                    <div><label>Text Color:</label>
+                    <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /></div>
+                    <div><label>Height:</label>
+                    <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_boxHeight header_option small_input" /></div>
+                    <div><label>Image Size:</label>
+                    <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /></div>
+                    <div><label>Font Size:</label>
+                    <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /></div>
+                    <div><label>Font Weight:</label>
+                    <select class="section_attribute_fontWeight header_option small_input">
+                        <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
+                        <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                        <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                    </select></div>
+                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
+                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatars</label></div>
+                    <div><input type="checkbox" ${item.attributes.battleAlign ? "checked" : ""} class="section_attribute_battleAlign header_option"><label>Align counters to sides</label></div>
+                </div>
+            </details>
         `;
         let userSettings = `
-            <label>Background Color:</label>
-            <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option small_input" /><br>
-            <label>Color:</label>
-            <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option small_input" /><br>
-            <label>Height:</label>
-            <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option small_input" /><br>
-            <label>Image Size:</label>
-            <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /><br>
-            <label>Font Size:</label>
-            <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /><br>
-            <label><abbr title="Note: Not all font weights are supported on all fonts.">Font Weight</abbr></label>
-            <select class="section_attribute_fontWeight header_option">
-                <option value="100" ${item.attributes.fontWeight == "100" ? 'selected' : ''}>Thin</option>
-                <option value="200" ${item.attributes.fontWeight == "200" ? 'selected' : ''}>Extra Light</option>
-                <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
-                <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
-                <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
-                <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                <option value="800" ${item.attributes.fontWeight == "800" ? 'selected' : ''}>Extra Bold</option>
-                <option value="900" ${item.attributes.fontWeight == "900" ? 'selected' : ''}>Black</option>
-            </select><br>
-            <input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Apply odometer up/down colors</label><br>
-            <input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatar</label><br>
-            <label>Update Interval:</label>
-            <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" /><br>
-            <label>Type:</label>
-            <select class="section_attribute_type header_option">
-                <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest (ID is ignored)</option>
-                <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom (specify ID below)</option>
-            </select><br>
-            <label>User 1 ID:</label><input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option" /><br>
-            `;
-        let boxSettings = `
-            <label>Rows:</label>
-            <input type="number" value="${item.attributes.rows || 0}" class="section_attribute_rows header_option small_input" /><br>
+            <div class="section-basic-options">
+                <div><label><strong>User Type:</strong></label><br>
+                <select class="section_attribute_type header_option">
+                    <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Growing</option>
+                    <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Specific User</option>
+                </select></div>
+                <div><label><strong>Update Every:</strong></label><br>
+                <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" placeholder="2" /> seconds</div>
+            </div>
+            <div style="margin-top: 10px;">
+                <label><strong>User ID:</strong></label><br>
+                <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option" placeholder="Leave blank for fastest growing" />
+            </div>
+            <details class="section-advanced-options" style="margin-top: 10px;">
+                <summary><strong>Styling Options</strong></summary>
+                <div style="margin-top: 10px;">
+                    <div><label>Background Color:</label>
+                    <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option" /></div>
+                    <div><label>Text Color:</label>
+                    <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /></div>
+                    <div><label>Height:</label>
+                    <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option small_input" /></div>
+                    <div><label>Image Size:</label>
+                    <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /></div>
+                    <div><label>Font Size:</label>
+                    <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /></div>
+                    <div><label>Font Weight:</label>
+                    <select class="section_attribute_fontWeight header_option small_input">
+                        <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
+                        <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                        <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                    </select></div>
+                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
+                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatar</label></div>
+                </div>
+            </details>
         `;
-        div.innerHTML = `<br>
-            <label>Name: </label><input type="text" value="${item.name}" class="section_option_name header_option" /><br>
-            <strong>Type: </strong><select class="section_option_type header_option small_input" value="${item.type}" onchange="loadTopSettings('${item.name}', this.value)" onchange="loadTopSettings('${item.name}', this.value)" />
-                <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
-                <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
-                <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
-                <option value="box" ${item.type === "box" ? "selected" : ""}>Box</option>
-            </select><br>
-            <label>Child of (enter name of parent box): </label><input type="text" value="${item.childOf || ""}" class="section_option_childOf header_option" placeholder="or leave blank :)" />
-            <br><br>
-            ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings : item.type == 'box' ? boxSettings : ''}
-            <br>
-            <button type="button" onclick="removeTopSetting('${item.name}')">Delete</button>
-            <button type="button" onclick="reorderTopSetting('${item.name}', 'up')">Move Up</button>
-            <button type="button" onclick="reorderTopSetting('${item.name}', 'down')">Move Down</button>
-            <br><hr>
+        let boxSettings = `
+            <div class="section-basic-options">
+                <div><label><strong>Number of Rows:</strong></label><br>
+                <input type="number" value="${item.attributes.rows || 0}" class="section_attribute_rows header_option small_input" placeholder="0" /></div>
+            </div>
+            <p style="margin-top: 10px; color: #666;">Boxes are containers that can hold other sections. Use "Child of" below to nest sections inside boxes.</p>
+        `;
+        div.innerHTML = `
+            <div style="padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 2px solid #ddd;">
+                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div><label><strong>Section Name:</strong></label><br>
+                    <input type="text" value="${item.name}" class="section_option_name header_option" placeholder="My Section" /></div>
+                    <div><label><strong>Place in:</strong></label><br>
+                    <select class="section_option_placement header_option">
+                        <option value="header" ${(item.placement || 'header') === 'header' ? 'selected' : ''}>Header</option>
+                        <option value="footer" ${(item.placement || 'header') === 'footer' ? 'selected' : ''}>Footer</option>
+                    </select></div>
+                    <div><label><strong>Section Type:</strong></label><br>
+                    <select class="section_option_type header_option" value="${item.type}" onchange="loadTopSettings('${item.name}', this.value)">
+                        <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
+                        <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
+                        <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
+                        <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
+                    </select></div>
+                </div>
+                <details class="section-nesting-option" style="margin-bottom: 10px;">
+                    <summary><strong>Nesting (Advanced)</strong></summary>
+                    <div style="margin-top: 10px;">
+                        <label>Parent Box Name:</label>
+                        <input type="text" value="${item.childOf || ""}" class="section_option_childOf header_option" placeholder="Leave blank for top level" />
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Enter the name of a box section to nest this inside it.</p>
+                    </div>
+                </details>
+                <hr style="margin: 15px 0;">
+                ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings : item.type == 'box' ? boxSettings : ''}
+                <hr style="margin: 15px 0;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" onclick="removeTopSetting('${item.name}')" style="background-color: #dc3545;">Delete</button>
+                    <button type="button" onclick="reorderTopSetting('${item.name}', 'up')">↑ Move Up</button>
+                    <button type="button" onclick="reorderTopSetting('${item.name}', 'down')">↓ Move Down</button>
+                </div>
+            </div>
             `;
         document.getElementById("sections").appendChild(div);
     });
@@ -3615,6 +3886,7 @@ function removeTopSetting(name) {
         }
     }
 }
+
 function createNewSection() {
     let item = {
         "attributes": {
@@ -3635,7 +3907,8 @@ function createNewSection() {
         },
         "name": "Item " + data.headerSettings.items.length,
         "type": "text",
-        "childOf": ""
+        "childOf": "",
+        "placement": "header"
     }
     data.headerSettings.items.unshift(item);
     loadTopSettings();
@@ -3692,6 +3965,8 @@ function fixSettings() {
     });
 }
 
-function saveGainRateOption() {
-    data.gainAverageOf = Math.max(1, Math.round(document.getElementById('gainAverageOf').value));
+function saveCustomCSS() {
+    const css = document.getElementById('customCSS').value;
+    document.getElementById('customCSSOverrides').innerHTML = css;
+    data['customCSS'] = css;
 }

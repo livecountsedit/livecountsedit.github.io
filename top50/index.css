@@ -34,7 +34,7 @@ h2 {
 .difference_line {
   position: absolute;
   bottom: -5px;
-  height: 5px;
+  height: 15px;
   z-index: -1;
 }
 
@@ -47,6 +47,17 @@ h2 {
   border: 1px solid #ffffff;
   transition: background-color 0.5s;
   position: relative;
+}
+
+.chart {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  width: 100%;
+  z-index: 1;
+  display: none;
 }
 
 .image {
@@ -112,14 +123,74 @@ input[type=checkbox] {
   grid-template-columns: repeat(5, 1fr);
   width: 99vw;
   max-width: 98vw;
+  margin-left: 20px !important;
+  margin-right: 20px;
 }
 
 .topSettings {
   margin-top: 0px;
-  border: 1px dashed #000;
-  border-bottom: none;
+  margin-bottom: 4px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
   display: flex;
   gap: 5px;
+  padding: 4px 8px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+#settings .topSettings:last-of-type {
+  margin-bottom: 0;
+}
+
+.topSettings > div {
+  flex: 0 1 auto;
+  min-width: auto;
+  display: flex;
+  align-items: center;
+}
+
+.topSettings > div select,
+.topSettings > div button {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  width: auto;
+  min-width: auto;
+}
+
+.topSettings > div select {
+  padding-right: 25px;
+}
+
+.topSettings > div label {
+  margin: 0 5px 0 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Compact load-save row: label + input on one line */
+.topSettings-load > div {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.topSettings-load > div label {
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+#settings .topSettings > div input[type="file"] {
+  max-width: 160px;
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+.topSettings > div input[type="checkbox"] {
+  margin: 0 5px 0 0;
+  width: 16px;
+  height: 16px;
 }
 
 .userActions {
@@ -131,42 +202,235 @@ input[type=checkbox] {
 .middleBoringSettings {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 15px 0;
+}
+
+.middleBoringSettings > div {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .boringSettings {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   flex-wrap: wrap;
-  text-align: center;
+  text-align: left;
+  padding: 15px 0;
+}
+
+.boringSettings > div {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  min-width: 200px;
+  flex: 1 1 auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.boringSettings > div:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  border-color: #bbb;
+}
+
+.boringSettings > div label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.boringSettings > div input,
+.boringSettings > div select {
+  width: 100%;
+  margin-bottom: 5px;
 }
 
 .bold {
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #ddd;
+  margin: 25px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+#settings hr {
+  margin: 8px 0;
 }
 
 #apiLink {
   width: 50%;
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+#apiLink:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .creds {
   width: 95%;
   height: 30%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.creds:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .apiExtraStuff {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   width: 90%;
+  gap: 20px;
+  padding: 15px 0;
+}
+
+.apiExtraStuff > div {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.apiExtraStuff > div h3 {
+  margin-top: 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 15px;
 }
 
 #stream {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  text-align: center;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.fysc-gain-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.fysc-command-card {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.fysc-command-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  border-color: #bbb;
+}
+
+.fysc-command-card h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+  font-size: 16px;
+}
+
+.fysc-command-card p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.fysc-example {
+  padding: 8px;
+  border-radius: 3px;
+  font-size: 12px !important;
+}
+
+.fysc-example code {
+  background-color: #e0e0e0;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.fysc-command-card label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.fysc-command-card textarea {
+  width: 100%;
+  resize: vertical;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.fysc-command-card textarea:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.fysc-connection-section {
+  margin-top: 20px;
+  padding: 20px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.fysc-connection-section h3 {
+  margin-top: 0;
 }
 
 textarea {
   width: 95%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .discord {
@@ -175,6 +439,11 @@ textarea {
 
 #storage-warning {
   display: none;
+}
+
+#settings #storage-warning {
+  margin: 4px 0;
+  font-size: 13px;
 }
 
 .fireIcon {
@@ -254,7 +523,8 @@ textarea {
   }
 }
 
-#header {
+#header,
+#footer {
   display: grid;
 }
 
@@ -321,6 +591,11 @@ textarea {
   margin: 0px;
 }
 
+.header_child .header-scrolling-text {
+  width: 100%;
+  overflow: hidden;
+}
+
 .hidden {
   display: none;
 }
@@ -328,60 +603,277 @@ textarea {
 #container {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 50px;
+  gap: 30px;
+  padding: 20px 0;
+}
+
+#container > div {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+#container > div:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #bbb;
+}
+
+#container > div h2,
+#container > div h3 {
+  margin-top: 0;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+#container > div p {
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+#container > div label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+#container > div br {
+  line-height: 1.8;
 }
 
 .settingType {
   color: #888;
-  padding: 10px;
-  border-radius: 15px;
-  background-color: #aaa;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  margin: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settingType:hover {
+  border-color: #999;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
 .enabled {
-  background-color: #fff;
   color: #000;
+  border-color: #333;
+  border-width: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-weight: 600;
 }
 
 input {
   width: 85%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+input:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 button {
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #007bff;
-  color: #fff;
+  padding: 10px 20px;
+  border: 2px solid #333;
+  border-radius: 6px;
+  color: #000;
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 button:hover {
-  background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+  border-color: #000;
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 select {
   width: 80%;
-  padding: 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+select:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
   margin-top: 5px;
+  cursor: pointer;
+  accent-color: #333;
+  border: 2px solid #ddd;
+  border-radius: 4px;
 }
 
 input[type="checkbox"]:checked {
-  background-color: #007bff;
+  border-color: #333;
+}
+
+label {
+  font-weight: 500;
+  margin-bottom: 5px;
+  display: inline-block;
+}
+
+label + input,
+label + select,
+label + textarea {
+  margin-top: 5px;
 }
 
 #fireIcons {
   resize: vertical;
   height: 200px;
+}
+
+#scriptList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+#customCSS {
+  height: 250px;
+}
+
+/* Header Settings - Simplified Layout */
+.header-basic-settings,
+.section-basic-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+textarea.header_option {
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: bold;
+  list-style: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Center element styling */
+center {
+  display: block;
+  text-align: center;
+  padding: 20px 0;
+  margin: 20px 0;
+}
+
+#settings center {
+  padding: 6px 0;
+  margin: 6px 0;
+}
+
+center .settingType {
+  display: inline-block;
+  margin: 3px;
+}
+
+/* Additional improvements */
+#container > div > div {
+  margin-bottom: 15px;
+}
+
+#container > div > div:last-child {
+  margin-bottom: 0;
+}
+
+.small_input,
+.medium_input {
+  padding: 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.small_input:focus,
+.medium_input:focus {
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Scrolling text animation */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.header-scrolling-text {
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  position: relative;
+  max-width: 100%;
+}
+
+.header-scrolling-text .scroll-content {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.header-scrolling-text.scroll-left .scroll-content {
+  animation-name: scroll-left;
+}
+
+.header-scrolling-text.scroll-right .scroll-content {
+  animation-name: scroll-right;
 }

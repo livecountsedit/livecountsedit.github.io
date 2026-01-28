@@ -66,6 +66,45 @@ class LivecountseditInterface {
         this.setFooter4 = function () {
             document.getElementById("footer4").innerHTML = document.getElementById("options.counter.footer4").value
         }
+        this.toggleThumbnail = function () {
+            var checkbox = document.getElementById("options.visibility.thumbnail");
+            var avatar = document.querySelector(".avatar");
+            if (avatar) {
+                if (checkbox.checked) {
+                    // Remove inline style to restore CSS defaults and centering
+                    avatar.style.display = "";
+                } else {
+                    avatar.style.display = "none";
+                }
+            }
+        }
+        this.toggleLikes = function () {
+            var checkbox = document.getElementById("options.visibility.likes");
+            var counter2 = document.getElementById("counter2");
+            var footer2 = document.getElementById("footer2");
+            var parentDiv = counter2 ? counter2.parentElement : null;
+            if (parentDiv) {
+                parentDiv.style.display = checkbox.checked ? "block" : "none";
+            }
+        }
+        this.toggleDislikes = function () {
+            var checkbox = document.getElementById("options.visibility.dislikes");
+            var counter3 = document.getElementById("counter3");
+            var footer3 = document.getElementById("footer3");
+            var parentDiv = counter3 ? counter3.parentElement : null;
+            if (parentDiv) {
+                parentDiv.style.display = checkbox.checked ? "block" : "none";
+            }
+        }
+        this.toggleComments = function () {
+            var checkbox = document.getElementById("options.visibility.comments");
+            var counter4 = document.getElementById("counter4");
+            var footer4 = document.getElementById("footer4");
+            var parentDiv = counter4 ? counter4.parentElement : null;
+            if (parentDiv) {
+                parentDiv.style.display = checkbox.checked ? "block" : "none";
+            }
+        }
         var rate1 = 0;
         var rate2 = 0;
         var rate3 = 0;
@@ -319,6 +358,11 @@ this.mainCounterColor = function () {
 const Interface = new LivecountseditInterface()
 window.onload = function () {
     if (document.getElementById('tabs.0')) document.getElementById('tabs.0').click();
+    // Initialize visibility based on checkbox states
+    Interface.toggleThumbnail();
+    Interface.toggleLikes();
+    Interface.toggleDislikes();
+    Interface.toggleComments();
 }
 function submit1() {
     Interface.setValue1()
@@ -340,6 +384,10 @@ document.getElementById("options.counter.footer2").addEventListener('input', Int
 document.getElementById("options.counter.footer3").addEventListener('input', Interface.setFooter3)
 document.getElementById("options.counter.footer4").addEventListener('input', Interface.setFooter4)
 
+document.getElementById("options.visibility.thumbnail").addEventListener('change', Interface.toggleThumbnail)
+document.getElementById("options.visibility.likes").addEventListener('change', Interface.toggleLikes)
+document.getElementById("options.visibility.dislikes").addEventListener('change', Interface.toggleDislikes)
+document.getElementById("options.visibility.comments").addEventListener('change', Interface.toggleComments)
 
 document.getElementById("options.counter.rates.basicMinimum0").addEventListener('input', Interface.setMin0)
 document.getElementById("options.counter.rates.basicMaximum0").addEventListener('input', Interface.setMax0)

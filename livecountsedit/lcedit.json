@@ -644,12 +644,74 @@
                     "id": "settingsForm-4",
                     "elements": [
                         {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Channel ID",
+                                    "id": "channelID",
+                                    "info": "The channel ID to check (e.g., UC... for YouTube). This will be used in the API URL.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text",
+                                    "inputRequired": true
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "API URL",
+                                    "id": "apiURL",
+                                    "info": "API URL. Use {{channelID}} where the channel ID should be inserted, or append it at the end.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text",
+                                    "placeholder": "https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=KEY&id={{channelID}}"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Method",
+                                    "id": "apiMethod",
+                                    "type": "option",
+                                    "tag": "select",
+                                    "selectOptions": [
+                                        ["GET", "GET"],
+                                        ["POST", "POST"]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Loop through (data = root)",
+                                    "id": "apiLoop",
+                                    "info": "Path to loop through in response. Leave as 'data' if response is directly an object, or use like 'data.items' for arrays.",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text",
+                                    "placeholder": "data"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "html",
+                            "elements": [
+                                "<h4>Updates</h4>"
+                            ]
+                        },
+                        {
                             "type": "checkbox",
                             "elements": [
                                 {
-                                    "label": "Enable YouTube API updates",
-                                    "id": "ytAPIEnabled",
-                                    "info": "This will update the counter if the abbreviated subscriber count does not match what is given in the API.",
+                                    "label": "Update Name",
+                                    "id": "updateName",
                                     "type": "checkbox"
                                 }
                             ]
@@ -658,16 +720,23 @@
                             "type": "section",
                             "elements": [
                                 {
-                                    "label": "YouTube channel ID",
-                                    "id": "ytChannelID",
-                                    "info": "This is not the same as a YouTube handle or username. Use the tool linked below to help you easily find the YouTube channel ID. YouTube channel IDs are 24 characters long and begin with &quot;UC&quot;.",
-                                    "link": [
-                                        "https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/",
-                                        "YouTube channel ID finder"
-                                    ],
+                                    "label": "Name Path",
+                                    "id": "pathName",
+                                    "info": "Path to name in response (e.g., snippet.title)",
                                     "type": "option",
                                     "tag": "input",
-                                    "inputType": "text"
+                                    "inputType": "text",
+                                    "placeholder": "snippet.title"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Update Image",
+                                    "id": "updateImage",
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -675,16 +744,23 @@
                             "type": "section",
                             "elements": [
                                 {
-                                    "label": "YouTube Data API v3 key",
-                                    "id": "ytAPIKey",
-                                    "info": "Read the article linked below if you are unsure of how to get one. Your YouTube API key should begin with &quot;AIzaSy&quot;. Do NOT share this key with anyone.",
-                                    "link": [
-                                        "https://blog.hubspot.com/website/how-to-get-youtube-api-key",
-                                        "A tutorial on how to get one"
-                                    ],
+                                    "label": "Image Path",
+                                    "id": "pathImage",
+                                    "info": "Path to image in response (e.g., snippet.thumbnails.default.url)",
                                     "type": "option",
                                     "tag": "input",
-                                    "inputType": "password"
+                                    "inputType": "text",
+                                    "placeholder": "snippet.thumbnails.default.url"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "Update Count",
+                                    "id": "updateCount",
+                                    "type": "checkbox"
                                 }
                             ]
                         },
@@ -692,31 +768,88 @@
                             "type": "section",
                             "elements": [
                                 {
-                                    "label": "API update interval",
-                                    "id": "apiInterval",
-                                    "info": "The amount of time in seconds it takes before the API is checked again. YouTube API keys by default have very limited quota, so it is recommended that you set this to at least 10.",
+                                    "label": "Count Path",
+                                    "id": "pathCount",
+                                    "info": "Path to count in response (e.g., statistics.subscriberCount)",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text",
+                                    "placeholder": "statistics.subscriberCount"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "ID Path (Required)",
+                                    "id": "pathID",
+                                    "info": "Path to ID in response (e.g., id)",
+                                    "type": "option",
+                                    "tag": "input",
+                                    "inputType": "text",
+                                    "placeholder": "id",
+                                    "inputRequired": true
+                                }
+                            ]
+                        },
+                        {
+                            "type": "checkbox",
+                            "elements": [
+                                {
+                                    "label": "ID Includes (Enable if ID is part of another string)",
+                                    "id": "IDIncludes",
+                                    "type": "checkbox"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Headers (optional)",
+                                    "id": "extraCred",
+                                    "info": "Format: HeaderName: value;",
+                                    "type": "option",
+                                    "tag": "textarea",
+                                    "placeholder": "Authorization: Bearer token;"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Body (optional, for POST)",
+                                    "id": "body",
+                                    "info": "Format: key: value;",
+                                    "type": "option",
+                                    "tag": "textarea",
+                                    "placeholder": "key1: value1;"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "section",
+                            "elements": [
+                                {
+                                    "label": "Update Interval (seconds)",
+                                    "id": "apiUpdateInt",
                                     "type": "option",
                                     "tag": "input",
                                     "inputType": "number",
                                     "inputNumberMin": 1,
-                                    "inputNumberMax": 2147483.647,
                                     "inputNumberStep": "any"
                                 }
                             ]
-                        }, 
+                        },
                         {
-                            "type": "section",
+                            "type": "checkbox",
                             "elements": [
                                 {
-                                    "label": "Overestimation leeway in percent",
-                                    "id": "leeway",
-                                    "info": "The amount that the count is brought down if it overestimates the abbreviated API count. Example: setting this to 10 and overestimating 12.3M and 123M will result in the count being brought to 12.39M and 123.9M, respectively.",
-                                    "type": "option",
-                                    "tag": "input",
-                                    "inputType": "number",
-                                    "inputNumberMin": 0,
-                                    "inputNumberMax": 100,
-                                    "inputNumberStep": "any"
+                                    "label": "Force Updates (even without count changes)",
+                                    "id": "forceUpdates",
+                                    "type": "checkbox"
                                 }
                             ]
                         }
@@ -724,10 +857,11 @@
                 }
             ],
             "trailingHTML": [
-                "<button class=\"btn btn-primary\" onclick=\"submitAPI()\">Save API settings</button>",
+                "<button class=\"btn btn-primary\" onclick=\"saveAPIUpdates()\">Save API Update Settings</button>",
                 "<br>",
-                "<button class=\"btn btn-primary\" onclick=\"updateAPI()\">Update now</button>",
-                "<h5>Note: API settings are saved separately from the other settings.</h5>",
+                "<button class=\"btn btn-primary\" onclick=\"apiUpdate()\">Update Now</button>",
+                "<br>",
+                "<button class=\"btn btn-secondary\" onclick=\"enableApiUpdate()\" id=\"enableApiUpdate\">Enable API Updates</button>",
                 "<br>",
                 "<h5>Status indicator: <span id=\"apiStatusIndicator\">--</span></h5>"
             ]

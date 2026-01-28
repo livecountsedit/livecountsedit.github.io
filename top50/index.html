@@ -28,6 +28,7 @@
         crossorigin="anonymous"></script>
 
     <script src="../jquery.js"></script>
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
     <script>
         window.odometerOptions = { auto: false };
     </script>
@@ -45,11 +46,13 @@
     <style id="rankSizeStyles"></style>
     <style id="differenceStyling"></style>
     <style id="cardStyles"></style>
+    <style id="customCSSOverrides"></style>
 </head>
 
 <body>
     <div id="header"></div>
-    <div class="main" id="main"></div>
+    <div class="main" id="main" style="margin-left: 20px;"></div>
+    <div id="footer"></div>
     <hr>
     <div class="other" id="settings">
         <div>
@@ -69,12 +72,16 @@
                 </div>
                 <div>
                     <select id="theme" autocomplete="off">
+                        <option value="top1">Theme: Top 1 (Vertical Columns)</option>
+                        <option value="top15">Theme: Top 15 (Vertical Columns)</option>
                         <option value="top10">Theme: Top 10 (Vertical Columns)</option>
                         <option value="top25">Theme: Top 25 (Vertical Columns)</option>
                         <option value="top50">Theme: Top 50 (Vertical Columns)</option>
                         <option value="top100">Theme: Top 100 (Vertical Columns)</option>
                         <option value="top150">Theme: Top 150 (Vertical Columns)</option>
                         <option value="top200">Theme: Top 200 (Vertical Columns)</option>
+                        <option value="top1H">Theme: Top 1 (Horizontal Columns)</option>
+                        <option value="top15H">Theme: Top 15 (Horizontal Columns)</option>
                         <option value="top10H">Theme: Top 10 (Horizontal Columns)</option>
                         <option value="top25H">Theme: Top 25 (Horizontal Columns)</option>
                         <option value="top50H">Theme: Top 50 (Horizontal Columns)</option>
@@ -112,17 +119,17 @@
                     be the result of your save file being too large. Learn more about this error in <a
                         href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/Problems-with-Local-Storage">this
                         article</a>.</strong></p>
-            <div class="topSettings">
+            <div class="topSettings topSettings-load">
                 <div>
-                    <label>Load Save (From Top 50 Save)</label><br>
+                    <label>Load Save (From Top 50 Save)</label>
                     <input type="file" id="loadData1" autocomplete="off">
                 </div>
                 <div>
-                    <label>Load Save (From YT Studio)</label><br>
+                    <label>Load Save (From YT Studio)</label>
                     <input type="file" id="loadData2" autocomplete="off">
                 </div>
                 <div>
-                    <label>Load Save (Channels Only)</label><br>
+                    <label>Load Save (Channels Only)</label>
                     <input type="file" id="loadData3" autocomplete="off">
                 </div>
             </div>
@@ -148,8 +155,12 @@
                 Settings</button>
             <button class="settingType" id="button_fyscSettings" onclick="displaySetting('fyscSettings', this)">FYSC
                 Settings</button>
-            <button class="settingType" id="button_topSettings" onclick="displaySetting('topSettings', this)">Header
+            <button class="settingType" id="button_topSettings" onclick="displaySetting('topSettings', this)">Header/Footer
                 Settings</button>
+            <button class="settingType" id="button_scriptSettings"
+                onclick="displaySetting('scriptSettings', this)">Scripts</button>
+            <button class="settingType" id="button_CSSSettings"
+                onclick="displaySetting('CSSSettings', this)">CSS</button>
         </center>
     </div>
     <hr>
@@ -223,8 +234,10 @@
                 <label>Min Value: <input type="number" class="small_input" placeholder="Min" id="auditMin"></label>
                 <label>Max Value: <input type="number" class="small_input" placeholder="Max" id="auditMax"></label><br>
                 <label>Audit Every: (in seconds)</label><br>
-                <label>Min Time: <input type="number" class="small_input" placeholder="Audit Every (min seconds)" id="auditTimeMin"></label>
-                <label>Max Time: <input type="number" class="small_input" placeholder="Audit Every (max seconds)" id="auditTimeMax"></label><br>
+                <label>Min Time: <input type="number" class="small_input" placeholder="Audit Every (min seconds)"
+                        id="auditTimeMin"></label>
+                <label>Max Time: <input type="number" class="small_input" placeholder="Audit Every (max seconds)"
+                        id="auditTimeMax"></label><br>
                 <button onclick="saveAuditSettings()">Save Audit Settings</button>
                 <button onclick="audit2()" id="audit">Enable Audits</button>
             </div><br>
@@ -235,16 +248,20 @@
                 <div>
                     <br>
                     <label>Background Color</label><br>
-                    <input type="color" value="#000000" id="backPicker" autocomplete="off">
+                    <input type="color" value="#000000" id="backPicker" autocomplete="off"><br>
+                    <label>Or an image:</label><input type="file" id="backgroundImgPicker" autocomplete="off"><button onclick="saveImageForBG()">Save</button><br>
+                    <label>Or an image url:</label><input placeholder="https://..." id="backPickerUrl" autocomplete="off">
                 </div>
                 <div>
                     <br>
-                    <label>Main Container Height <a href="https://www.w3schools.com/cssref/css_units.php">(vh)</a></label><br>
+                    <label>Main Container Height <a
+                            href="https://www.w3schools.com/cssref/css_units.php">(vh)</a></label><br>
                     <input type="number" value="100" id="containerHeight" autocomplete="off" step="1">
                 </div>
                 <div>
                     <br>
-                    <label>Main Container Width <a href="https://www.w3schools.com/cssref/css_units.php">(vw)</a></label><br>
+                    <label>Main Container Width <a
+                            href="https://www.w3schools.com/cssref/css_units.php">(vw)</a></label><br>
                     <input type="number" value="100" id="containerWidth" autocomplete="off" step="1">
                 </div>
                 <div>
@@ -341,6 +358,15 @@
                 </div>
                 <div>
                     <br>
+                    <input type="checkbox" id="showChart" checked><label>Show Chart</label>
+                </div>
+                <div>
+                    <br>
+                    <label>Chart Line Color</label><br>
+                    <input type="color" value="#000000" id="chartLineColor" autocomplete="off">
+                </div>
+                <div>
+                    <br>
                     <input type="checkbox" id="showImages" checked><label>Show Images</label>
                 </div>
                 <div>
@@ -366,12 +392,14 @@
                 <div>
                     <br>
                     <label>Image Border Radius</label><br>
-                    <input class="small_input" type="number" value="50" id="imageBorder" autocomplete="off"><label>%</label>
+                    <input class="small_input" type="number" value="50" id="imageBorder"
+                        autocomplete="off"><label>%</label>
                 </div>
                 <div>
                     <br>
                     <label>Box Border Roundness (0-100)</label><br>
-                    <input class="small_input" type="number" value="0" id="boxBorderRadius" autocomplete="off"><label>%</label>
+                    <input class="small_input" type="number" value="0" id="boxBorderRadius"
+                        autocomplete="off"><label>%</label>
                 </div>
                 <div>
                     <br>
@@ -410,7 +438,8 @@
                 </div>
                 <div>
                     <br>
-                    <label><abbr title="Note: Not all font weights are supported on all fonts.">Counter Font Weight</abbr></label>
+                    <label><abbr title="Note: Not all font weights are supported on all fonts.">Counter Font
+                            Weight</abbr></label>
                     <select id="counterFontWeight">
                         <option value="100">Thin</option>
                         <option value="200">Extra Light</option>
@@ -432,7 +461,7 @@
         <div id="technicalSettings" class="hidden">
             <label class="bold">Technical Settings:</label>
             <div class="boringSettings">
-                
+
                 <div>
                     <br>
                     <input type="checkbox" id="animatedCardChanges"><label> [BETA] Animated Card Changes</label>
@@ -440,7 +469,8 @@
                 <div>
                     <br>
                     <label>[BETA] Animated Card Changes Duration (in seconds)</label><br>
-                    <input class="medium_input" type="number" value="0.5" id="animatedCardChangesDuration" autocomplete="off">
+                    <input class="medium_input" type="number" value="0.5" id="animatedCardChangesDuration"
+                        autocomplete="off">
                 </div>
 
                 <div>
@@ -456,7 +486,8 @@
                 <div>
                     <br>
                     <label>Note: Gain data is <strong>NOT</strong> saved after reloading</label><br>
-                    <label>Base Gain Rate Off: Average of <input class="small_input" type="number" id="gainAverageOf" value="1"></label><br>
+                    <label>Base Gain Rate Off: Average of <input class="small_input" type="number" id="gainAverageOf"
+                            value="1"></label><br>
                     <button onclick="saveGainRateOption()">Save This Option</button>
                     <button onclick="clearGainData()">Clear Gain Data</button><br>
                 </div>
@@ -482,7 +513,8 @@
             <div>
                 <h2>Fire Icons (BETA)</h2><br>
                 <label>Enable Fire Icons: <input type="checkbox" id="fireEnabled"></label><br>
-                <label>Update Fire Icons Every <input class="small_input" type="number" id="intervalsPerUpdate" value="1"> Update Interval(s)</label><br>
+                <label>Update Fire Icons Every <input class="small_input" type="number" id="intervalsPerUpdate"
+                        value="1"> Update Interval(s)</label><br>
                 <label>Type: <select id="fireType">
                         <option value="gain">Gain</option>
                         <option value="hour">Hour</option>
@@ -491,7 +523,8 @@
                 </label><br>
                 <label>Icon Border Color: <input class="small_input" type="color" value="#000000" id="fireBorderColor"
                         autocomplete="off"></label><br>
-                <label>Icon Border Width: <input id="fireBorderWidth" class="small_input" placeholder="0" autocomplete="off"></label><br>
+                <label>Icon Border Width: <input id="fireBorderWidth" class="small_input" placeholder="0"
+                        autocomplete="off"></label><br>
                 <label>Icon Position: <select id="firePosition">
                         <option value="mdm">[MDM] Replace Rank</option>
                         <option value="replace">Replace Rank Text</option>
@@ -521,8 +554,8 @@
                     <label>Difference Placing (top): </label><input type="number" step="0.1" id="topDifferencePlacing"
                         autocomplete="off">
                     <br>
-                    <label>Difference Placing (left): </label><input type="number" step="0.1"
-                        id="leftDifferencePlacing" autocomplete="off">
+                    <label>Difference Placing (left): </label><input type="number" step="0.1" id="leftDifferencePlacing"
+                        autocomplete="off">
                     <br>
                     <label>Difference Color: </label><input type="color" id="differenceColor">
                     <br>
@@ -535,14 +568,14 @@
                     <label>Difference Images: </label><input type="checkbox" id="enableDifferenceImages"
                         autocomplete="off">
                     <br>
-                    <label>Image Place (top): </label><input type="number" class="medium_input" step="0.1" id="topDifferenceImagePlacing"
-                        autocomplete="off">
+                    <label>Image Place (top): </label><input type="number" class="medium_input" step="0.1"
+                        id="topDifferenceImagePlacing" autocomplete="off">
                     <br>
-                    <label>Image Placing (left): </label><input type="number" class="medium_input" step="0.1" id="leftDifferenceImagePlacing"
-                        autocomplete="off">
+                    <label>Image Placing (left): </label><input type="number" class="medium_input" step="0.1"
+                        id="leftDifferenceImagePlacing" autocomplete="off">
                     <br>
-                    <label>Image Size: </label><input type="number" class="medium_input" step="0.1" id="differenceImageSize"
-                        autocomplete="off"><br>
+                    <label>Image Size: </label><input type="number" class="medium_input" step="0.1"
+                        id="differenceImageSize" autocomplete="off"><br>
                     <label>Image Shaking: </label><input type="checkbox" id="enableImageShakes" autocomplete="off">
                     <br>
                     <label>Image: </label><input placeholder="Image" id="differenceImageUrl"><br><label>or:</label>
@@ -567,16 +600,14 @@
                 <label>Make sure the part to include the channel is at the very end and left open OR use
                     <strong>{{channels}}</strong> to indentify where they should go.</label>
                 <input id="apiLink"
-                    placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id="><select
-                    autocomplete="off" id="apiType">
-                    <option value="none">Max Channels Per Fetch (1)</option>
-                    <option value="one">1 Channel</option>
-                    <option value="ten">10 Channels</option>
-                    <option value="twentyfive">25 Channels</option>
-                    <option value="fifty">50 Channels</option>
-                    <option value="onehundred">100 Channels</option>
-                    <option value="unlimited">No Limit</option>
-                </select>
+                    placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id="><br>
+                <label>Max Channels:</label>
+                <select autocomplete="off" id="apiType">
+                    <option value="one">Max Channels Per Fetch (1)</option>
+                    <option value="unlimited">All</option>
+                </select><br>
+                <label>Only Fetch Certain Channels:</label><input id="customAPIList"
+                    placeholder="UCA,UCB,UCB">
                 <br>
                 <label>Loop through (data = root): </label><input id="apiLoop" placeholder="data.items"
                     autocomplete="off"><br>
@@ -624,85 +655,165 @@
             <label>this will only update the count if the {count} of the abbreviated number changes</label>
         </div>
         <div id="fyscSettings" class="hidden">
-            <label class="bold">FYSC Stream Hub</label><br>
-            <div>
-                <label>Min Gain (only for streams):</label>
-                <input value="-10000" id="min_gain_global" autocomplete="off"><br>
-                <label> - Max Gain (only for streams): </label>
-                <input value="10000" id="max_gain_global" autocomplete="off">
-            </div>
-            <div id="stream">
+            <h2>FYSC Stream Hub</h2>
+            
+            <div class="fysc-gain-settings">
                 <div>
-                    <p>Add this to the response section of the nightbot command.</p>
-                    <p>This command allows users to be added.</p>
-                    <p>Example Usage: {!add 100/200} 100 is in the min and 200 is the max. You can limit the min
-                        and max.</p>
-                    </p>
-                    <textarea id="connect" autocomplete="off"></textarea>
+                    <label><strong>Min Gain (for streams):</strong></label><br>
+                    <input value="-10000" id="min_gain_global" autocomplete="off" class="small_input">
                 </div>
                 <div>
-                    <p>Add this to the response section of the nightbot command.</p>
-                    <p>This command allows users to be edited.</p>
-                    <p>Example Usage: {!edit 100/200} 100 is in the min and 200 is the max. You can limit the
-                        max and min.</p>
-                    </p>
-                    <textarea id="connect3" autocomplete="off"></textarea>
-                </div>
-                <div>
-                    <p>Add this to the response section of the nightbot command.</p>
-                    <p>This is an EXAMPLE command that just shows how to add example commands. ?values= shows
-                        the min and the max gains possible. (p.s. add "&rates=true" to alter a channel's gain rates)</p>
-                    <textarea id="connect2" autocomplete="off"></textarea>
-                </div>
-                <div>
-                    <p>Add this to the response section of the nightbot command.</p>
-                    <p>This is an EXAMPLE command that just shows how to retrieve a user's subscriber count from
-                        this site.</p>
-                    <textarea id="connect4" autocomplete="off"></textarea>
+                    <label><strong>Max Gain (for streams):</strong></label><br>
+                    <input value="10000" id="max_gain_global" autocomplete="off" class="small_input">
                 </div>
             </div>
+            
             <hr>
-            <div>
-                <p>Click the button below to connect to NightBot (gives you access live chat for commands)</p>
+            
+            <h3>NightBot Commands</h3>
+            <p>Copy these commands into your NightBot command responses. Each command serves a specific purpose for managing your stream leaderboard.</p>
+            
+            <div id="stream">
+                <div class="fysc-command-card">
+                    <h4>Add User Command</h4>
+                    <p>Allows users to add themselves to the leaderboard.</p>
+                    <p class="fysc-example"><strong>Example:</strong> <code>{!add 100/200}</code> - 100 is min gain, 200 is max gain</p>
+                    <label><strong>Command Response:</strong></label>
+                    <textarea id="connect" autocomplete="off" rows="4" placeholder="Paste NightBot command response here..."></textarea>
+                </div>
+                
+                <div class="fysc-command-card">
+                    <h4>Edit User Command</h4>
+                    <p>Allows users to edit their gain rates.</p>
+                    <p class="fysc-example"><strong>Example:</strong> <code>{!edit 100/200}</code> - Updates min/max gains</p>
+                    <label><strong>Command Response:</strong></label>
+                    <textarea id="connect3" autocomplete="off" rows="4" placeholder="Paste NightBot command response here..."></textarea>
+                </div>
+                
+                <div class="fysc-command-card">
+                    <h4>Example Command</h4>
+                    <p>Shows how to create custom commands with gain values.</p>
+                    <p class="fysc-example"><strong>Tip:</strong> Add <code>&rates=true</code> to alter channel gain rates</p>
+                    <label><strong>Command Response:</strong></label>
+                    <textarea id="connect2" autocomplete="off" rows="4" placeholder="Paste NightBot command response here..."></textarea>
+                </div>
+                
+                <div class="fysc-command-card">
+                    <h4>Get Subscriber Count</h4>
+                    <p>Retrieves a user's current subscriber count.</p>
+                    <p class="fysc-example">Returns the subscriber count for the specified user</p>
+                    <label><strong>Command Response:</strong></label>
+                    <textarea id="connect4" autocomplete="off" rows="4" placeholder="Paste NightBot command response here..."></textarea>
+                </div>
+                
+                <div class="fysc-command-card">
+                    <h4>Get User Gains</h4>
+                    <p>Retrieves a user's current gain rate.</p>
+                    <p class="fysc-example">Returns the gain rate for the specified user</p>
+                    <label><strong>Command Response:</strong></label>
+                    <textarea id="connect5" autocomplete="off" rows="4" placeholder="Paste NightBot command response here..."></textarea>
+                </div>
+                
+                <div class="fysc-command-card">
+                    <h4>Get User Rank</h4>
+                    <p>Retrieves a user's current rank on the leaderboard.</p>
+                    <p class="fysc-example">Returns the rank position for the specified user</p>
+                    <label><strong>Command Response:</strong></label>
+                    <textarea id="connect6" autocomplete="off" rows="4" placeholder="Paste NightBot command response here..."></textarea>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div class="fysc-connection-section">
+                <h3>NightBot Connection</h3>
+                <p>Connect to NightBot to enable live chat commands for your stream.</p>
                 <div class="middleBoringSettings">
                     <div>
-                        <button onclick="connect()" class="discord" id="toConnect">Connect</button><br>
-                        <label>Connected: </label><label id="isconnected">No</label><br>
+                        <button onclick="connect()" class="discord" id="toConnect">Connect to NightBot</button><br>
+                        <label><strong>Status:</strong></label> <label id="isconnected">Not Connected</label>
                     </div>
                     <button onclick="custom()" class="discord">Custom Command Maker</button>
                 </div>
-                <h3>How to setup NightBot & LCEDIT for streams: <a
-                        href="https://www.youtube.com/watch?v=j40Xs1zZqg4">Tutorial Video</a></h3>
+                <p style="margin-top: 15px;">
+                    <strong>Need help?</strong> Watch the <a href="https://www.youtube.com/watch?v=j40Xs1zZqg4" target="_blank">tutorial video</a> on how to setup NightBot & LCEDIT for streams.
+                </p>
             </div>
         </div>
         <div id="topSettings" class="hidden">
             <div>
-                <label class="bold">Header Settings: (BETA)</label>
-                <button onclick="saveTopSettings()">Save Top Settings</button><br>
-                <label>(these may be buggy, please report all bugs in the discord!)</label>
-                <br><br>
-                <label>How many sections?</label><br>
-                <input type="number" class="small_input" id="totalSections"><label> sections</label><br><br>
-                <label>Set the order of sizes?</label>
-                <label>ex: (1, 5, 4, 3) - they are relative to each other</label>
+                <h2>Header/Footer Settings</h2>
+                <div class="header-basic-settings">
+                    <div>
+                        <label><strong>Header Height:</strong></label><br>
+                        <input type="number" class="small_input" id="heightSections" placeholder="100" value="100">
+                        <label> pixels</label>
+                    </div>
+                    <div>
+                        <label><strong>Header Section Spacing:</strong></label><br>
+                        <input type="number" class="small_input" id="gapSections" placeholder="10" value="10">
+                        <label> pixels</label>
+                    </div>
+                    <div>
+                        <label><strong>Footer Height:</strong></label><br>
+                        <input type="number" class="small_input" id="footerHeightSections" placeholder="100" value="100">
+                        <label> pixels</label>
+                    </div>
+                    <div>
+                        <label><strong>Footer Section Spacing:</strong></label><br>
+                        <input type="number" class="small_input" id="footerGapSections" placeholder="10" value="10">
+                        <label> pixels</label>
+                    </div>
+                </div>
                 <br>
-                <label>Sizes: </label><input type="text" id="sizeSections">
-                <br><br>
-                <label>How tall should the top part be? (100 should be good)</label><br>
-                <input type="number" class="small_input" id="heightSections"><br><br>
-                <label>How far apart should the sections be?</label><br>
-                <input type="number" class="small_input" id="gapSections"><br><br>
+                <details class="header-advanced-settings">
+                    <summary><strong>Advanced Layout Settings</strong> (Optional)</summary>
+                    <div style="margin-top: 10px;">
+                        <label>Number of Sections:</label><br>
+                        <input type="number" class="small_input" id="totalSections" placeholder="Auto">
+                        <label> (leave blank for auto)</label><br><br>
+                        <label>Section Widths:</label><br>
+                        <input type="text" id="sizeSections" placeholder="1, 1, 1" style="width: 200px;">
+                        <label> (comma-separated, e.g., "1, 2, 1" for relative sizes)</label>
+                    </div>
+                </details>
+                <br>
+                <button onclick="saveTopSettings()" style="font-size: 16px; padding: 10px 20px;">Save Header/Footer Settings</button>
+                <hr>
             </div>
             <div>
-                <strong>For each section, select its purpose: </strong><button onclick="createNewSection()">Create
-                    New Section</button>
+                <h3>Header/Footer Sections</h3>
+                <p>Add sections to display in the header or footer. Use "Place in" to choose Header or Footer for each section.</p>
+                <button onclick="createNewSection()" style="font-size: 14px; padding: 8px 16px; margin-bottom: 15px;">+ Add New Section</button>
+                <div id="sections" style="max-height: 500px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 5px;"></div>
+            </div>
+        </div>
+
+        <div id="scriptSettings" class="hidden">
+            <div>
+                <h1>Scripts</h1>
+                <p id="loadedScripts"></p>
                 <hr>
-                <div id="sections" style="height: 400px; overflow-y: scroll;"></div>
+                <div id="scriptList">
+
+                </div>
+            </div>
+        </div>
+
+        <div id="CSSSettings" class="hidden">
+            <div>
+                <h1>Custom CSS</h1>
+                <p>Input your custom css below:</p>
+                <hr>
+                <textarea id="customCSS"></textarea>
+                <button onclick="saveCustomCSS()">Save CSS</button>
             </div>
         </div>
     </div>
     <hr><br>
+    <script src="./js/utils.js?v=7.4.4.1"></script>
     <script src="./index.js?v=7.4.4.1"></script>
+    <script src="./js/scripts.js?v=7.4.4.1"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>
