@@ -1,8 +1,10 @@
+let apiurl = window.location.href.includes('lcedit.com') ? apiurl : 'http://localhost:1112/';
 let currentIndex = 0;
 let auditTimeout;
 let saveInterval;
 let chart;
 let charts = {}; // Store chart instances by channel ID
+const BLANK_IMAGE_URL = new URL('../blank.png', document.baseURI).href;
 let nextUpdateAudit = false;
 let specificChannels = [];
 let pickingChannels = false;
@@ -166,7 +168,7 @@ function initLoad(redo, previousTheme) {
             data = example_data;
         }
     }
-    
+
     // Ensure headerSettings exists and filter out undefined items
     if (!data.headerSettings) {
         data.headerSettings = {
@@ -185,11 +187,11 @@ function initLoad(redo, previousTheme) {
         data.headerSettings.items = [];
     }
     // Filter out items with undefined or "undefined" names; default placement to 'header'
-    data.headerSettings.items = data.headerSettings.items.filter(item => 
+    data.headerSettings.items = data.headerSettings.items.filter(item =>
         item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
     );
     data.headerSettings.items.forEach(item => { if (item.placement == null) item.placement = 'header'; });
-    
+
     // Reset sizes if switching away from top1
     if (redo && previousTheme && previousTheme.includes('top1') && !data.theme.includes('top1')) {
         const defaultCardWidth = 19;
@@ -198,7 +200,7 @@ function initLoad(redo, previousTheme) {
         const defaultNameSize = 1;
         const defaultCountSize = 2;
         const defaultRankSize = 15;
-        
+
         data.cardStyles.cardWidth = String(defaultCardWidth);
         data.cardStyles.cardHeight = String(defaultCardHeight);
         data.cardStyles.imageSize = String(defaultImageSize);
@@ -254,14 +256,14 @@ function initLoad(redo, previousTheme) {
         const defaultNameSize = 1;
         const defaultCountSize = 2;
         const defaultRankSize = 15;
-        
+
         const currentCardWidth = parseFloat(data.cardStyles.cardWidth || defaultCardWidth);
         const currentCardHeight = parseFloat(data.cardStyles.cardHeight || defaultCardHeight);
         const currentImageSize = parseFloat(data.cardStyles.imageSize || defaultImageSize);
         const currentNameSize = parseFloat(data.cardStyles.nameSize || defaultNameSize);
         const currentCountSize = parseFloat(data.cardStyles.countSize || defaultCountSize);
         const currentRankSize = parseFloat(data.cardStyles.rankSize || defaultRankSize);
-        
+
         // Only increase if sizes are close to default (within 30% tolerance) and not already increased
         const tolerance = 0.3;
         const isNearDefault = Math.abs(currentCardWidth - defaultCardWidth) / defaultCardWidth < tolerance &&
@@ -270,7 +272,7 @@ function initLoad(redo, previousTheme) {
             Math.abs(currentNameSize - defaultNameSize) / defaultNameSize < tolerance &&
             Math.abs(currentCountSize - defaultCountSize) / defaultCountSize < tolerance &&
             Math.abs(currentRankSize - defaultRankSize) / defaultRankSize < tolerance;
-        
+
         // Check if sizes are already increased (more than 2x default)
         const isAlreadyIncreased = currentCardWidth > defaultCardWidth * 2 ||
             currentCardHeight > defaultCardHeight * 2 ||
@@ -278,7 +280,7 @@ function initLoad(redo, previousTheme) {
             currentNameSize > defaultNameSize * 2 ||
             currentCountSize > defaultCountSize * 2 ||
             currentRankSize > defaultRankSize * 2;
-        
+
         if (isNearDefault && !isAlreadyIncreased) {
             data.cardStyles.cardWidth = String(defaultCardWidth * 3);
             data.cardStyles.cardHeight = String(defaultCardHeight * 3);
@@ -482,12 +484,12 @@ function setupDesign(redo) {
 
     document.getElementById('customCSSOverrides').innerHTML = data['customCSS'] || '';
     document.getElementById('customCSS').value = data['customCSS'] || '';
-    
-        // Initialize charts if showChart is enabled
-        if (data.cardStyles.showChart && typeof Highcharts !== 'undefined') {
-            setTimeout(initializeCharts, 200);
-        }
-    
+
+    // Initialize charts if showChart is enabled
+    if (data.cardStyles.showChart && typeof Highcharts !== 'undefined') {
+        setTimeout(initializeCharts, 200);
+    }
+
     return toReturn;
 }
 
@@ -496,27 +498,27 @@ function initializeCharts() {
         console.warn('Highcharts not loaded, charts will not be displayed');
         return;
     }
-    
-    data.data.forEach(function(channel) {
+
+    data.data.forEach(function (channel) {
         if (!channel || !channel.id) return;
-        
+
         const chartElement = document.getElementById('chart_' + channel.id);
         if (!chartElement) return;
-        
+
         // Ensure chart element is visible before creating chart
         if (chartElement.style.display === 'none') {
             return;
         }
-        
+
         // Destroy existing chart if it exists
         if (charts[channel.id]) {
             try {
                 charts[channel.id].destroy();
-            } catch(e) {
+            } catch (e) {
                 // Ignore errors when destroying
             }
         }
-        
+
         // Initialize chart data from gainTable or create empty array
         let chartData = [];
         if (gainTable[channel.id] && gainTable[channel.id].length > 0) {
@@ -536,7 +538,7 @@ function initializeCharts() {
                 [now, count]
             ];
         }
-        
+
         try {
             // Create chart using Highcharts Stock
             charts[channel.id] = Highcharts.stockChart('chart_' + channel.id, {
@@ -599,18 +601,18 @@ function initializeCharts() {
                     }
                 }
             });
-            
+
             // Ensure chart is properly rendered
-            setTimeout(function() {
+            setTimeout(function () {
                 if (charts[channel.id]) {
                     try {
                         charts[channel.id].reflow();
-                    } catch(e) {
+                    } catch (e) {
                         // Ignore reflow errors
                     }
                 }
             }, 50);
-        } catch(e) {
+        } catch (e) {
             console.error('Error creating chart for channel ' + channel.id + ':', e);
         }
     });
@@ -618,27 +620,27 @@ function initializeCharts() {
 
 function updateCharts() {
     if (typeof Highcharts === 'undefined' || !data.cardStyles.showChart) return;
-    
-    data.data.forEach(function(channel) {
+
+    data.data.forEach(function (channel) {
         if (!channel || !channel.id || !charts[channel.id]) return;
-        
+
         try {
             const chart = charts[channel.id];
             const series = chart.series[0];
-            
+
             if (series) {
                 const now = Date.now();
                 const count = parseFloat(channel.count) || 0;
-                
+
                 // Add new point
                 series.addPoint([now, count], true, true);
-                
+
                 // Keep only last 50 points for performance
                 if (series.data.length > 50) {
                     series.data[0].remove(false);
                 }
             }
-        } catch(e) {
+        } catch (e) {
             // Ignore errors when updating charts
             console.warn('Error updating chart for channel ' + channel.id + ':', e);
         }
@@ -1077,8 +1079,8 @@ function update(doGains = true) {
                         currentCard.id = 'card_'
                         currentCard.children[0].id = "num_"
                         currentCard.children[1].id = "image_"
-                        if (currentCard.children[1].src !== '../blank.png') {
-                            currentCard.children[1].src = "../blank.png"
+                        if (currentCard.children[1].src !== BLANK_IMAGE_URL) {
+                            currentCard.children[1].src = BLANK_IMAGE_URL
                         }
                         currentCard.children[2].children[0].id = "name_"
                         currentCard.children[2].children[0].innerText = 'Loading...'
@@ -1136,12 +1138,12 @@ function update(doGains = true) {
         }
     }
     data.intervalCount++;
-    
+
     // Update charts if enabled
     if (data.cardStyles.showChart) {
         updateCharts();
     }
-    
+
     console.timeEnd(`Update #${intervalNumber + 1} took`);
 }
 
@@ -1778,7 +1780,7 @@ document.getElementById('showChart').addEventListener('change', function () {
         }
     } else {
         // Destroy all charts when disabled
-        Object.keys(charts).forEach(function(channelId) {
+        Object.keys(charts).forEach(function (channelId) {
             if (charts[channelId]) {
                 charts[channelId].destroy();
                 delete charts[channelId];
@@ -1792,13 +1794,13 @@ document.getElementById('chartLineColor').addEventListener('change', function ()
     data.cardStyles.chartLineColor = this.value;
     // Update all existing charts with the new color
     if (typeof Highcharts !== 'undefined' && data.cardStyles.showChart) {
-        Object.keys(charts).forEach(function(channelId) {
+        Object.keys(charts).forEach(function (channelId) {
             if (charts[channelId] && charts[channelId].series && charts[channelId].series[0]) {
                 try {
                     charts[channelId].series[0].update({
                         color: data.cardStyles.chartLineColor || data.textColor || '#000'
                     }, false);
-                } catch(e) {
+                } catch (e) {
                     console.warn('Error updating chart color for channel ' + channelId + ':', e);
                 }
             }
@@ -1930,7 +1932,7 @@ function fix() {
             card.style.display = "none";
         })
         // Destroy all charts when disabled
-        Object.keys(charts).forEach(function(channelId) {
+        Object.keys(charts).forEach(function (channelId) {
             if (charts[channelId]) {
                 charts[channelId].destroy();
                 delete charts[channelId];
@@ -2291,7 +2293,7 @@ if (connected == true) {
 }
 
 function update2() {
-    fetch('https://api.lcedit.com/' + code + '')
+    fetch(apiurl + code + '')
         .then(response => response.json())
         .then(json => {
             if (json.users) {
@@ -2319,14 +2321,11 @@ function update2() {
                         }
                         if (hasID == false) {
                             fetch('https://mixerno.space/api/youtube-channel-counter/user/' + json.users[i].id + '')
-                                .then(response => response.json())
+                                .then(response => response.text())
                                 .then(json2 => {
-                                    let count = 0;
-                                    let name = json2.user[0].count;
-                                    let image = json2.user[1].count;
+                                    let id = json.users[i].id;
                                     let min = json.users[i].min;
-                                    let max = json.users[i].max;
-                                    if (min > data.gain_max) {
+                                    let max = json.users[i].max; if (min > data.gain_max) {
                                         min = data.gain_max;
                                     } else if (min < data.gain_min) {
                                         min = data.gain_min;
@@ -2336,17 +2335,33 @@ function update2() {
                                     } else if (max < data.gain_min) {
                                         max = data.gain_min;
                                     }
-                                    let id = json.users[i].id
-                                    data.data.push({
-                                        "name": name,
-                                        "count": parseFloat(count),
-                                        "image": image,
-                                        "min_gain": min,
-                                        "max_gain": max,
-                                        "id": id,
-                                        "lastCount": 0
-                                    });
-                                    fix()
+
+                                    if (json2 == "null") {
+                                        data.data.push({
+                                            "name": 'User ' + (data.data.length + 1),
+                                            "count": 0,
+                                            "image": BLANK_IMAGE_URL,
+                                            "min_gain": min,
+                                            "max_gain": max,
+                                            "id": id,
+                                            "lastCount": 0
+                                        });
+                                        fix();
+                                    } else {
+                                        json2 = JSON.parse(json2);
+                                        let name = json2.user[0].count;
+                                        let image = json2.user[1].count;
+                                        data.data.push({
+                                            "name": name,
+                                            "count": 0,
+                                            "image": image,
+                                            "min_gain": min,
+                                            "max_gain": max,
+                                            "id": id,
+                                            "lastCount": 0
+                                        });
+                                        fix();
+                                    }
                                 })
                         }
                     }
@@ -2390,7 +2405,7 @@ function update2() {
                                     set = data.data[a].count;
                                 }
                             }
-                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/user?subs=' + set + '&name=' + username + '')
+                            fetch(apiurl + code + '/' + json.system[i].id + '/user?subs=' + set + '&name=' + username + '')
                         }
                         if (json.system[i].type == "gains") {
                             let username = "";
@@ -2402,7 +2417,7 @@ function update2() {
                                     gains[1] = data.data[a].max_gain;
                                 }
                             }
-                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/gains?gains=' + gains[0] + ',' + gains[1] + '&name=' + username + '')
+                            fetch(apiurl + code + '/' + json.system[i].id + '/gains?gains=' + gains[0] + ',' + gains[1] + '&name=' + username + '')
                         }
                         if (json.system[i].type == "rank") {
                             let username = "";
@@ -2413,7 +2428,7 @@ function update2() {
                                     rank = a + 1;
                                 }
                             }
-                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/rank?rank=' + rank + '&name=' + username + '')
+                            fetch(apiurl + code + '/' + json.system[i].id + '/rank?rank=' + rank + '&name=' + username + '')
                         }
                     }
                 }
@@ -2421,7 +2436,7 @@ function update2() {
                 alert("You are no longer connected.");
                 clearInterval(update2Hold);
                 document.getElementById('isconnected').innerText = "No";
-                fetch('https://api.lcedit.com/create?code=' + code + '', {
+                fetch(apiurl + 'create?code=' + code + '', {
                     method: 'POST'
                 })
                     .then(response => response.text())
@@ -2494,7 +2509,7 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
+        alert('$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
     } else if (type == "2") {
         let min = prompt("What is the minimum amount the channel's rate should gain? (we recommend less than 1 (0.1, 0.2, etc))");
         if (!min || isNaN(min)) {
@@ -2511,19 +2526,19 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
+        alert('$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
     } else {
         alert("Please enter type (1 or 2)");
         return;
     }
 }
 
-document.getElementById('connect').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
-document.getElementById('connect2').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
-document.getElementById('connect3').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
-document.getElementById('connect4').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/user)';
-document.getElementById('connect5').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/gains)';
-document.getElementById('connect6').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/rank)';
+document.getElementById('connect').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
+document.getElementById('connect2').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
+document.getElementById('connect3').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
+document.getElementById('connect4').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/user)';
+document.getElementById('connect5').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/gains)';
+document.getElementById('connect6').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/rank)';
 
 document.getElementById('animation').addEventListener('click', function (event) {
     if (event.target.checked) {
@@ -3391,9 +3406,9 @@ function loadHeader() {
     if (!data.headerSettings.items) {
         data.headerSettings.items = [];
     }
-    
+
     // Filter out items with undefined or "undefined" names
-    data.headerSettings.items = data.headerSettings.items.filter(item => 
+    data.headerSettings.items = data.headerSettings.items.filter(item =>
         item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
     );
 
@@ -3639,14 +3654,14 @@ function saveTopSettings() {
                 if (className && className.includes('attribute')) {
                     const attrName = className.split('_')[2];
                     if (attrName) {
-                    if (child.type === 'number') {
-                        item['attributes'][attrName] = child.value ? parseInt(child.value) : 0;
-                    } else if (child.type === 'checkbox') {
-                        item['attributes'][attrName] = child.checked;
-                    } else {
-                        // Handles text, textarea, select, etc.
-                        item['attributes'][attrName] = child.value || '';
-                    }
+                        if (child.type === 'number') {
+                            item['attributes'][attrName] = child.value ? parseInt(child.value) : 0;
+                        } else if (child.type === 'checkbox') {
+                            item['attributes'][attrName] = child.checked;
+                        } else {
+                            // Handles text, textarea, select, etc.
+                            item['attributes'][attrName] = child.value || '';
+                        }
                     }
                 } else if (className && className.includes('option')) {
                     const optionName = className.split('_')[2];
@@ -3692,7 +3707,7 @@ function loadTopSettings(itemName, itemType) {
     if (!data.headerSettings.items) {
         data.headerSettings.items = [];
     }
-    data.headerSettings.items = data.headerSettings.items.filter(item => 
+    data.headerSettings.items = data.headerSettings.items.filter(item =>
         item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
     );
     data.headerSettings.items.forEach(item => {

@@ -371,7 +371,7 @@ hr {
 }
 
 .fysc-example code {
-  background-color: #e0e0e0;
+  border: 1px solid #ddd;
   padding: 2px 6px;
   border-radius: 3px;
   font-family: monospace;
