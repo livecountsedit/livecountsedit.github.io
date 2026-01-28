@@ -54,12 +54,12 @@ function loadScripts() {
                             const script = await fetch(`https://raw.githubusercontent.com/livecountsedit/scripts/refs/heads/main/listings/${object.id}/index.lcscript`).then(r => r.text());
                             eval(script);
                             data.scripts.push(object.id);
-                            saveData(true); // or reload the affected item
+                            saveData(false); // or reload the affected item
                             button.innerHTML = 'Uninstall'
                         }
                     } else {
                         data.scripts = data.scripts.filter(id => id !== object.id);
-                        saveData(true);
+                        saveData(false);
                         location.reload();
                     }
                 });

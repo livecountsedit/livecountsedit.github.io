@@ -254,16 +254,16 @@ function mergeWithExampleData(imported, example) {
     return imported;
 }
 
-function saveData(alert) {
+function saveData(alert2) {
     try {
         data.lastOnline = Date.now();
         localStorage.setItem("data", JSON.stringify(data));
         document.getElementById("storage-warning").style.display = "none";
-        if (alert) {
+        if (alert2) {
             alert("Saved!");
         }
     } catch (error) {
-        if (alert) {
+        if (alert2) {
             alert(`Error: ${error}`);
         }
         document.getElementById("storage-warning").style.display = "block";
