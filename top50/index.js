@@ -2291,7 +2291,7 @@ if (connected == true) {
 }
 
 function update2() {
-    fetch('http://localhost:1112/' + code + '')
+    fetch('https://api.lcedit.com/' + code + '')
         .then(response => response.json())
         .then(json => {
             if (json.users) {
@@ -2390,7 +2390,7 @@ function update2() {
                                     set = data.data[a].count;
                                 }
                             }
-                            fetch('http://localhost:1112/' + code + '/' + json.system[i].id + '/user?subs=' + set + '&name=' + username + '')
+                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/user?subs=' + set + '&name=' + username + '')
                         }
                         if (json.system[i].type == "gains") {
                             let username = "";
@@ -2402,7 +2402,7 @@ function update2() {
                                     gains[1] = data.data[a].max_gain;
                                 }
                             }
-                            fetch('http://localhost:1112/' + code + '/' + json.system[i].id + '/gains?gains=' + gains[0] + ',' + gains[1] + '&name=' + username + '')
+                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/gains?gains=' + gains[0] + ',' + gains[1] + '&name=' + username + '')
                         }
                         if (json.system[i].type == "rank") {
                             let username = "";
@@ -2413,7 +2413,7 @@ function update2() {
                                     rank = a + 1;
                                 }
                             }
-                            fetch('http://localhost:1112/' + code + '/' + json.system[i].id + '/rank?rank=' + rank + '&name=' + username + '')
+                            fetch('https://api.lcedit.com/' + code + '/' + json.system[i].id + '/rank?rank=' + rank + '&name=' + username + '')
                         }
                     }
                 }
@@ -2421,7 +2421,7 @@ function update2() {
                 alert("You are no longer connected.");
                 clearInterval(update2Hold);
                 document.getElementById('isconnected').innerText = "No";
-                fetch('http://localhost:1112/create?code=' + code + '', {
+                fetch('https://api.lcedit.com/create?code=' + code + '', {
                     method: 'POST'
                 })
                     .then(response => response.text())
@@ -2494,7 +2494,7 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch http://localhost:1112/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
+        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
     } else if (type == "2") {
         let min = prompt("What is the minimum amount the channel's rate should gain? (we recommend less than 1 (0.1, 0.2, etc))");
         if (!min || isNaN(min)) {
@@ -2511,19 +2511,19 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch http://localhost:1112/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
+        alert('$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
     } else {
         alert("Please enter type (1 or 2)");
         return;
     }
 }
 
-document.getElementById('connect').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
-document.getElementById('connect2').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
-document.getElementById('connect3').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
-document.getElementById('connect4').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/user)';
-document.getElementById('connect5').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/gains)';
-document.getElementById('connect6').innerHTML = '$(urlfetch http://localhost:1112/' + code + '/$(userid)/rank)';
+document.getElementById('connect').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
+document.getElementById('connect2').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
+document.getElementById('connect3').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
+document.getElementById('connect4').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/user)';
+document.getElementById('connect5').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/gains)';
+document.getElementById('connect6').innerHTML = '$(urlfetch https://api.lcedit.com/' + code + '/$(userid)/rank)';
 
 document.getElementById('animation').addEventListener('click', function (event) {
     if (event.target.checked) {
