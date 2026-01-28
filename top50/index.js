@@ -1,4 +1,4 @@
-let apiurl = window.location.href.includes('lcedit.com') ? apiurl : 'http://localhost:1112/';
+let apiurl = window.location.href.includes('lcedit.com') ? "https://api.lcedit.com/" : 'http://localhost:1112/';
 let currentIndex = 0;
 let auditTimeout;
 let saveInterval;
