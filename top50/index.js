@@ -291,7 +291,7 @@ function initLoad(redo, previousTheme) {
         }
     }
     data.pause = false;
-    if (data.lastOnline && data.offlineGains == true) {
+    if (data.lastOnline && data.offlineGains) {
         const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval;
         for (let i = 0; i < data.data.length; i++) {
             if (isFinite(data.data[i].std_gain) && data.data[i].std_gain != null) {
@@ -817,7 +817,7 @@ function update(doGains = true) {
                     slowest = data.data[i].id;
                 }
             }
-            if (nextUpdateAudit == true && doGains) {
+            if (nextUpdateAudit && doGains) {
                 let update = random(data.auditStats[0], data.auditStats[1])
                 data.data[i].count = data.data[i].count + update
             }
@@ -825,7 +825,7 @@ function update(doGains = true) {
                 nextUpdateAudit = false
             }
             if (data.data[i].count < 0) {
-                if (data.allowNegative == false) {
+                if (!data.allowNegative) {
                     data.data[i].count = 0;
                 }
             }
@@ -873,10 +873,10 @@ function update(doGains = true) {
         for (let i = 0; i < data.max; i++) {
             let extraTimeTillUpdate = 0;
             const interval = data.updateInterval;
-            if (data.randomCountUpdateTime == true) {
+            if (data.randomCountUpdateTime) {
                 extraTimeTillUpdate = random(0, interval);
             }
-            if (data.waterFallCountUpdateTime == true) {
+            if (data.waterFallCountUpdateTime) {
                 extraTimeTillUpdate = i * 100;
             }
             setTimeout(function () {
@@ -934,12 +934,12 @@ function update(doGains = true) {
                             document.getElementById("card_" + data.data[i].id).style.border = "0.1em solid " + data.boxBorder + "";
                         }
                         if (fastest == data.data[i].id) {
-                            if (data.fastest == true) {
+                            if (data.fastest) {
                                 document.getElementById("card_" + fastest).children[2].children[0].innerText = "" + data.fastestIcon + " " + data.data[i].name
                             }
                         }
                         if (slowest == data.data[i].id) {
-                            if (data.slowest == true) {
+                            if (data.slowest) {
                                 document.getElementById("card_" + slowest).children[2].children[0].innerText = "" + data.slowestIcon + " " + data.data[i].name
                             }
                         }
@@ -1840,7 +1840,7 @@ document.getElementById('showCounts').addEventListener('change', function () {
 function fix() {
     document.getElementById('main').style.height = data.cardStyles.containerHeight + "vh";
     document.getElementById('main').style.width = data.cardStyles.containerWidth + "vw";
-    if (data.audits == true) {
+    if (data.audits) {
         auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
     }
     document.getElementById('auditMin').value = data.auditStats[0]
@@ -1855,58 +1855,58 @@ function fix() {
     if ((!data.slowest) && (data.slowest !== false)) {
         data.slowest = true;
     }
-    if (data.animation == true) {
+    if (data.animation) {
         document.getElementById('animation').checked = true;
     } else {
         document.getElementById('animation').checked = false;
     }
-    if (data.allowNegative == true) {
+    if (data.allowNegative) {
         document.getElementById('allowNegative').checked = true;
     } else {
         document.getElementById('allowNegative').checked = false;
     }
-    if (data.animatedCards.enabled == true) {
+    if (data.animatedCards.enabled) {
         document.getElementById('animatedCardChanges').checked = true;
     } else {
         document.getElementById('animatedCardChanges').checked = false;
     }
-    if (data.randomCountUpdateTime == true) {
+    if (data.randomCountUpdateTime) {
         document.getElementById('randomCountUpdateTime').checked = true;
     } else {
         document.getElementById('randomCountUpdateTime').checked = false;
     }
-    if (data.waterFallCountUpdateTime == true) {
+    if (data.waterFallCountUpdateTime) {
         document.getElementById('waterFallCountUpdateTime').checked = true;
     } else {
         document.getElementById('waterFallCountUpdateTime').checked = false;
     }
-    if (data.fastest == true) {
+    if (data.fastest) {
         document.getElementById('fastest').checked = true;
     } else {
         document.getElementById('fastest').checked = false;
     }
-    if (data.slowest == true) {
+    if (data.slowest) {
         document.getElementById('slowest').checked = true;
     } else {
         document.getElementById('slowest').checked = false;
     }
-    if (data.abbreviate == true) {
+    if (data.abbreviate) {
         document.getElementById('abbreviate').checked = true;
     } else {
         document.getElementById('abbreviate').checked = false;
     }
-    if (data.offlineGains == true) {
+    if (data.offlineGains) {
         document.getElementById('offline').checked = true;
     } else {
         document.getElementById('offline').checked = false;
     }
-    if (data.autosave == true) {
+    if (data.autosave) {
         document.getElementById('autosave').checked = true;
         saveInterval = setInterval(saveData(false), 15000);
     } else {
         document.getElementById('autosave').checked = false;
     }
-    if (data.showRankings == true) {
+    if (data.showRankings) {
         document.getElementById('showRankings').checked = true;
         document.querySelectorAll('.num').forEach(function (card) {
             card.style.display = "";
@@ -1917,7 +1917,7 @@ function fix() {
             card.style.display = "none";
         })
     }
-    if (data.cardStyles.showChart == true) {
+    if (data.cardStyles.showChart) {
         document.getElementById('showChart').checked = true;
         document.querySelectorAll('.chart').forEach(function (card) {
             card.style.display = "block";
@@ -2059,7 +2059,7 @@ function fix() {
             index++;
         })
     }
-    if (data.showNames == true) {
+    if (data.showNames) {
         document.getElementById('showNames').checked = true;
         document.querySelectorAll('.name').forEach(function (card) {
             card.style.display = "";
@@ -2070,7 +2070,7 @@ function fix() {
             card.style.display = "none";
         })
     }
-    if (data.showImages == true) {
+    if (data.showImages) {
         document.getElementById('showImages').checked = true;
         document.querySelectorAll('.image').forEach(function (card) {
             card.style.display = "";
@@ -2081,7 +2081,7 @@ function fix() {
             card.style.display = "none";
         })
     }
-    if (data.showCounts == true) {
+    if (data.showCounts) {
         document.getElementById('showCounts').checked = true;
         document.querySelectorAll('.count').forEach(function (card) {
             card.style.display = "";
@@ -2095,7 +2095,7 @@ function fix() {
 
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
-        if (card.className.split(' ').includes('selected') == false) {
+        if (!card.className.split(' ').includes('selected')) {
             card.style.border = "solid 0.1em " + data.boxBorder;
         }
         if (["top100", "top150", "top200", "top100H", "top150H", "top200H"].includes(data.theme)) {
@@ -2285,7 +2285,7 @@ function connect() {
     }
 }
 let update2Hold;
-if (connected == true) {
+if (connected) {
     update2()
     update2Hold = setInterval(update2, 2500);
     document.getElementById('isconnected').innerText = "Yes";
@@ -2319,7 +2319,7 @@ function update2() {
                                 hasID = true;
                             }
                         }
-                        if (hasID == false) {
+                        if (!hasID) {
                             fetch('https://mixerno.space/api/youtube-channel-counter/user/' + json.users[i].id + '')
                                 .then(response => response.text())
                                 .then(json2 => {
@@ -2369,7 +2369,7 @@ function update2() {
                 if (json.events.length > 0) {
                     for (let i = 0; i < json.events.length; i++) {
                         if (json.events[i].values) {
-                            if (json.events[i].rates == true) {
+                            if (json.events[i].rates) {
                                 let id = json.events[i].id;
                                 let min = parseFloat(json.events[i].values[0])
                                 let max = parseFloat(json.events[i].values[1])
@@ -2451,7 +2451,7 @@ function update2() {
 }
 
 document.getElementById('autosave').addEventListener('change', function () {
-    if (document.getElementById('autosave').checked == true) {
+    if (document.getElementById('autosave').checked) {
         saveInterval = setInterval(saveData(false), 15000);
         data.autosave = true;
     } else {
@@ -2561,7 +2561,7 @@ function updateOdo() {
 }
 
 document.getElementById('abbreviate').addEventListener('click', function () {
-    if (document.getElementById('abbreviate').checked == true) {
+    if (document.getElementById('abbreviate').checked) {
         data.abbreviate = true;
     } else {
         data.abbreviate = false;
@@ -2576,7 +2576,7 @@ document.getElementById('theme').addEventListener('change', function () {
 })
 
 function themeChanger(previousTheme) {
-    if (confirm('Are you sure you want to change the theme?') == true) {
+    if (confirm('Are you sure you want to change the theme?')) {
         clearInterval(updateInterval);
         clearInterval(auditTimeout);
         document.getElementById('main').innerHTML = "";
@@ -2589,7 +2589,7 @@ function themeChanger(previousTheme) {
 }
 
 document.getElementById('fastest').addEventListener('click', function () {
-    if (document.getElementById('fastest').checked == true) {
+    if (document.getElementById('fastest').checked) {
         data.fastest = true;
     } else {
         data.fastest = false;
@@ -2607,21 +2607,21 @@ document.getElementById('slowestIcon').addEventListener('change', function () {
 })
 
 document.getElementById('slowest').addEventListener('click', function () {
-    if (document.getElementById('slowest').checked == true) {
+    if (document.getElementById('slowest').checked) {
         data.slowest = true;
     } else {
         data.slowest = false;
     }
 })
 
-if (data.offlineGains == true) {
+if (data.offlineGains) {
     document.getElementById('offline').checked = true;
 } else {
     document.getElementById('offline').checked = false;
 }
 
 document.getElementById('offline').addEventListener('click', function () {
-    if (document.getElementById('offline').checked == true) {
+    if (document.getElementById('offline').checked) {
         data.offlineGains = true;
     } else {
         data.offlineGains = false;
@@ -2654,7 +2654,7 @@ document.getElementById('animatedCardChangesDuration').addEventListener('change'
 })
 
 function pause() {
-    if (data.pause == false) {
+    if (!data.pause) {
         data.pause = true;
         document.getElementById('pauseB').innerText = "Resume"
         clearInterval(updateInterval);
@@ -2692,7 +2692,7 @@ function saveAuditSettings() {
 }
 
 function audit2() {
-    if (data.audits == false) {
+    if (!data.audits) {
         data.audits = true
         auditTimeout = setTimeout(audit, (random(data.auditStats[2], data.auditStats[3])) * 1000)
         document.getElementById('audit').innerText = "Disable Audits"
@@ -2705,7 +2705,7 @@ function audit2() {
 
 function apiUpdate(interval) {
     if (interval) {
-        if (data.apiUpdates.enabled == false) {
+        if (!data.apiUpdates.enabled) {
             clearInterval(apiInterval)
             document.getElementById('enableApiUpdate').innerText = "Enable API Updates"
         }
@@ -2748,12 +2748,14 @@ function apiUpdate(interval) {
                     method: data.apiUpdates.method,
                     headers: data.apiUpdates.headers,
                 }).then(response => response.json())
-                    .then(json => { doStuff(json) });
+                    .then(json => { doStuff(json) })
+                    .catch(() => {});
             } else {
                 fetch(url, {
                     method: data.apiUpdates.method
                 }).then(response => response.json())
-                    .then(json => { doStuff(json) });
+                    .then(json => { doStuff(json) })
+                    .catch(() => {});
             }
         } else {
             fetch(url, {
@@ -2761,11 +2763,13 @@ function apiUpdate(interval) {
                 headers: data.apiUpdates.headers,
                 body: JSON.stringify(data.apiUpdates.body)
             }).then(response => response.json())
-                .then(json => { doStuff(json) });
+                .then(json => { doStuff(json) })
+                .catch(() => {});
         }
     }
 
     function doStuff(json) {
+        if (!json) return;
         let channels = json;
         if (data.apiUpdates.response.loop !== 'data') {
             channels = channels[data.apiUpdates.response.loop.split('data.')[1]];
@@ -2777,7 +2781,7 @@ function apiUpdate(interval) {
         for (let i = 0; i < channels.length; i++) {
             let nameUpdate, countUpdate, imageUpdate, idUpdate;
 
-            if (data.apiUpdates.response.name.enabled === true) {
+            if (data.apiUpdates.response.name.enabled) {
                 let propertyNames = data.apiUpdates.response.name.path.split('.').map(prop => {
                     if (prop.includes('[')) {
                         const split = prop.split('[');
@@ -2796,7 +2800,7 @@ function apiUpdate(interval) {
 
             }
 
-            if (data.apiUpdates.response.count.enabled === true) {
+            if (data.apiUpdates.response.count.enabled) {
                 let propertyNames = data.apiUpdates.response.count.path.split('.').map(prop => {
                     if (prop.includes('[')) {
                         const split = prop.split('[');
@@ -2810,7 +2814,7 @@ function apiUpdate(interval) {
                 countUpdate = result;
             }
 
-            if (data.apiUpdates.response.image.enabled === true) {
+            if (data.apiUpdates.response.image.enabled) {
                 let propertyNames = data.apiUpdates.response.image.path.split('.').map(prop => {
                     if (prop.includes('[')) {
                         const split = prop.split('[');
@@ -2837,7 +2841,7 @@ function apiUpdate(interval) {
             idUpdate = result;
 
             for (let r = 0; r < data.data.length; r++) {
-                if (data.apiUpdates.response.id.IDIncludes === true) {
+                if (data.apiUpdates.response.id.IDIncludes) {
                     if (idUpdate.includes(data.data[r].id)) {
                         if (nameUpdate !== undefined) data.data[r].name = nameUpdate;
                         if (imageUpdate !== undefined) data.data[r].image = imageUpdate;
@@ -2866,7 +2870,7 @@ function apiUpdate(interval) {
 
 function enableApiUpdate() {
     clearInterval(apiInterval)
-    if (data.apiUpdates.enabled == false) {
+    if (!data.apiUpdates.enabled) {
         data.apiUpdates.enabled = true
         document.getElementById('enableApiUpdate').innerText = "Disable API Updates"
         apiInterval = setInterval(function () {
@@ -2882,7 +2886,7 @@ function enableApiUpdate() {
 function saveAPIUpdates() {
     data.apiUpdates.url = document.getElementById('apiLink').value
     data.apiUpdates.maxChannelsPerFetch = (document.getElementById('apiType').value == 'none') ? 'one' : document.getElementById('apiType').value;
-    data.apiUpdate.customAPIList = document.getElementById('customAPIList').value.split(',');
+    data.apiUpdates.customAPIList = document.getElementById('customAPIList').value ? document.getElementById('customAPIList').value.split(',') : [];
     data.apiUpdates.method = document.getElementById('apiMethod').value;
     data.apiUpdates.forceUpdates = document.getElementById('forceUpdates').checked;
     let headers = document.getElementById('extraCred').value.toString().split(';&#10;').join(';\n').split(';\n')
@@ -2950,12 +2954,12 @@ function loadAPIUpdates() {
     document.getElementById('IDIncludes').checked = data.apiUpdates.response.id.IDIncludes
     document.getElementById('pathID').value = data.apiUpdates.response.id.path
     document.getElementById('apiUpdateInt').value = data.apiUpdates.interval / 1000;
-    document.getElementById('enableApiUpdate').innerText = data.apiUpdates.enabled == true ? 'Disable API Updates' : 'Enable API Updates'
+    document.getElementById('enableApiUpdate').innerText = data.apiUpdates.enabled ? 'Disable API Updates' : 'Enable API Updates'
 }
 loadAPIUpdates()
 
 function selectSpecificChannels() {
-    if (pickingChannels == true) {
+    if (pickingChannels) {
         pause()
         document.getElementById('selectSpecific').innerText = 'Select Specific Channels'
         document.getElementById('main').removeEventListener('click', selectorFunction)
@@ -2986,7 +2990,7 @@ function selectorFunction(e) {
         if (!target) return;
     }
     let id = target.id?.split('_').slice(1).join('_')
-    if (pickingChannels == true) {
+    if (pickingChannels) {
         if (specificChannels.includes(id)) {
             specificChannels.splice(specificChannels.indexOf(id), 1)
             document.getElementById('card_' + id).style.border = 'solid 0.1em ' + data.boxBorder
