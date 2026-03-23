@@ -254,6 +254,7 @@ function mergeWithExampleData(imported, example) {
 }
 
 function saveData(alert2) {
+    console.log("Attempting to save...")
     try {
         data.lastOnline = Date.now();
         localStorage.setItem("data", JSON.stringify(data));
@@ -261,10 +262,12 @@ function saveData(alert2) {
         if (alert2) {
             alert("Saved!");
         }
+        console.log("Saved in browser.");
     } catch (error) {
         if (alert2) {
             alert(`Error: ${error}`);
         }
+        console.error("Failed to save in browser: " + error)
         document.getElementById("storage-warning").style.display = "block";
     }
 }

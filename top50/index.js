@@ -1902,7 +1902,9 @@ function fix() {
     }
     if (data.autosave) {
         document.getElementById('autosave').checked = true;
-        saveInterval = setInterval(saveData(false), 15000);
+        clearInterval(saveInterval);
+        saveData(false);
+        saveInterval = setInterval(() => {saveData(false)}, 15000);
     } else {
         document.getElementById('autosave').checked = false;
     }
@@ -2452,7 +2454,9 @@ function update2() {
 
 document.getElementById('autosave').addEventListener('change', function () {
     if (document.getElementById('autosave').checked) {
-        saveInterval = setInterval(saveData(false), 15000);
+        clearInterval(saveInterval);
+        saveData(false);
+        saveInterval = setInterval(() => {saveData(false)}, 15000);
         data.autosave = true;
     } else {
         clearInterval(saveInterval);
