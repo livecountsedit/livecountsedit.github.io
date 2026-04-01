@@ -877,3 +877,22 @@ center .settingType {
 .header-scrolling-text.scroll-right .scroll-content {
   animation-name: scroll-right;
 }
+
+#removeFeature.active {
+  font-weight: bold;
+  background-color: pink;
+}
+
+.fade-out {
+  animation: fadeOut ease 0.5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
