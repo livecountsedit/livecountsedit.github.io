@@ -16,7 +16,7 @@ let gainTable = {};
 
 let uuid = uuidGen()
 let example_data = {
-    "settingsEnabled": ["addSettings", "editSettings"],
+    "settingsTab": "addSettings",
     "showImages": true,
     "showNames": true,
     "showCounts": true,
@@ -349,17 +349,15 @@ function initLoad(redo, previousTheme) {
         document.body.style.backgroundImage = 'url(' + data.bgColor + ')';
     }
     document.body.style.color = data.textColor;
-    adjustColors();
     fix();
+    document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
+    adjustColors();
     updateOdo();
     updateInterval = setInterval(update, data.updateInterval);
-    data.settingsEnabled.forEach(item => {
-        let element = document.getElementById(item);
-        let button = document.getElementById('button_' + item);
-        element.classList.remove("hidden");
-        button.classList.add("enabled");
-    });
-    fixSettings();
+    let element = document.getElementById(data.settingsTab);
+    let button = document.getElementById('button_' + data.settingsTab);
+    element.classList.remove("hidden");
+    button.classList.add("enabled");
 };
 
 function setupDesign(redo) {
@@ -402,7 +400,7 @@ function setupDesign(redo) {
                 <div class="num" id="num_${cid}"><div class="num_text">${c}</div></div>
                 <img src="../blank.png" alt="" id="image_${cid}" class="image">
                 <div>
-                    <div class="name" id="name_${cid}">Loading...</div>
+                    <div class="name" id="name_${cid}">\u200b</div>
                     <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
@@ -415,7 +413,7 @@ function setupDesign(redo) {
                 if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
                     htmlcard.querySelector('.image').src = channels[dataIndex].image || '../default.png'
                 }
-                htmlcard.querySelector('.name').innerText = channels[dataIndex].name || 'Loading...'
+                htmlcard.querySelector('.name').innerText = channels[dataIndex].name || '\u200b'
             }
             c += 1;
             main.innerHTML += htmlcard.innerHTML;
@@ -454,7 +452,7 @@ function setupDesign(redo) {
                 <div class="num" id="num_${cid}"><div class="num_text">${c}</div></div>
                 <img src="../blank.png" alt="" id="image_${cid}" class="image">
                 <div>
-                    <div class="name" id="name_${cid}">Loading...</div>
+                    <div class="name" id="name_${cid}">\u200b</div>
                     <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
                 </div>
                 <img src="${data.differenceStyles.differenceImage}" class="gapimg">
@@ -466,7 +464,7 @@ function setupDesign(redo) {
                     if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
                         htmlcard.querySelector('.image').src = channels[dataIndex].image || '../default.png'
                     }
-                    htmlcard.querySelector('.name').innerText = channels[dataIndex].name || 'Loading...'
+                    htmlcard.querySelector('.name').innerText = channels[dataIndex].name || '\u200b'
                 }
                 htmlcolumn.innerHTML += htmlcard.innerHTML;
                 c += 1;
@@ -519,11 +517,12 @@ function initializeCharts() {
             }
         }
 
+
         // Initialize chart data from gainTable or create empty array
         let chartData = [];
         if (gainTable[channel.id] && gainTable[channel.id].length > 0) {
             const now = Date.now();
-            const dataPoints = gainTable[channel.id];
+            const dataPoints = gainTable[channel.id].slice(-51, -1);
             chartData = dataPoints.map((value, index) => {
                 // Create timestamps going back in time
                 const timeOffset = (dataPoints.length - index - 1) * data.updateInterval;
@@ -620,6 +619,7 @@ function initializeCharts() {
 
 function updateCharts() {
     if (typeof Highcharts === 'undefined' || !data.cardStyles.showChart) return;
+    initializeCharts();
 
     data.data.forEach(function (channel) {
         if (!channel || !channel.id || !charts[channel.id]) return;
@@ -629,10 +629,11 @@ function updateCharts() {
             const series = chart.series[0];
 
             if (series) {
+
                 const now = Date.now();
                 const count = parseFloat(channel.count) || 0;
 
-                // Add new point
+                //Add new point
                 series.addPoint([now, count], true, true);
 
                 // Keep only last 50 points for performance
@@ -722,7 +723,8 @@ let appendedMDMStyles = false;
 function setupMDMStyles() {
     if (data.fireIcons.firePosition !== 'mdm' || !data.fireIcons.enabled) {
         appendedMDMStyles = false;
-        document.getElementById('mdm-styles').remove();
+        const mdmStyles = document.getElementById('mdm-styles');
+        if (mdmStyles) mdmStyles.remove();
         document.querySelectorAll('.num').forEach(item => {
             item.style.backgroundImage = '';
             item.style.border = '';
@@ -835,8 +837,9 @@ function update(doGains = true) {
             if (!gainTable[data.data[i].id]) {
                 gainTable[data.data[i].id] = [];
             }
+            const chartEntries = 50;
             gainTable[data.data[i].id].push(getDisplayedCount(data.data[i].count));
-            gainTable[data.data[i].id] = gainTable[data.data[i].id].slice(-(data.gainAverageOf + 1));
+            gainTable[data.data[i].id] = gainTable[data.data[i].id].slice(-(Math.max(chartEntries, data.gainAverageOf) + 1));
         }
         document.getElementById('quickSelect').innerHTML = selections.join("");
         document.getElementById('quickSelect').value = past || 'select';
@@ -930,6 +933,7 @@ function update(doGains = true) {
                             currentCard.children[4].style.visibility = 'hidden';
                             currentCard.children[5].style.visibility = 'hidden';
                         }
+                        currentCard.children[6].id = "chart_" + data.data[i].id;
                         if (selected !== data.data[i].id) {
                             document.getElementById("card_" + data.data[i].id).style.border = "0.1em solid " + data.boxBorder + "";
                         }
@@ -1083,7 +1087,7 @@ function update(doGains = true) {
                             currentCard.children[1].src = BLANK_IMAGE_URL
                         }
                         currentCard.children[2].children[0].id = "name_"
-                        currentCard.children[2].children[0].innerText = 'Loading...'
+                        currentCard.children[2].children[0].innerText = '\u200b'
                         currentCard.children[2].children[1].id = "count_"
                         currentCard.children[2].children[1].innerText = '0'
                         currentCard.children[4].querySelector(".odometer").innerText = 0;
@@ -1436,12 +1440,13 @@ function downloadChannel() {
 
 document.getElementById('backPicker').addEventListener('change', function () {
     document.body.style.backgroundColor = this.value;
+    document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = this.value);
     data.bgColor = this.value;
     adjustColors();
 });
 
 document.getElementById('backPickerUrl').addEventListener('change', function () {
-    document.body.style.backgroundColor = 'url(' + this.value + ')';
+    document.body.style.backgroundImage = 'url(' + this.value + ')';
     data.bgColor = this.value;
     adjustColors();
 });
@@ -1459,7 +1464,12 @@ function saveImageForBG() {
         };
         reader.readAsDataURL(image);
         URL.revokeObjectURL(url);
+    } else {
+        data.bgColor = document.getElementById('backPicker').value;
+        document.body.style.backgroundImage = '';
     }
+    document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
+    adjustColors();
 };
 
 document.getElementById('containerHeight').addEventListener('change', function () {
@@ -1605,12 +1615,12 @@ document.getElementById('intervalsPerUpdate').addEventListener('change', functio
     data.fireIcons.intervalsPerUpdate = Math.max(1, Math.round(this.value));
 })
 
-document.getElementById('headerFont').addEventListener('input', function () {
+document.getElementById('headerFont').addEventListener('change', function () {
     data.headerFont = this.value;
     fix();
 })
 
-document.getElementById('mainFont').addEventListener('input', function () {
+document.getElementById('mainFont').addEventListener('change', function () {
     data.mainFont = this.value;
     fix();
 })
@@ -1775,6 +1785,7 @@ document.getElementById('showChart').addEventListener('change', function () {
     data.cardStyles.showChart = document.getElementById('showChart').checked;
     if (data.cardStyles.showChart) {
         // Initialize charts when enabled
+        fix()
         if (typeof Highcharts !== 'undefined') {
             setTimeout(initializeCharts, 200);
         }
@@ -1786,8 +1797,8 @@ document.getElementById('showChart').addEventListener('change', function () {
                 delete charts[channelId];
             }
         });
+        fix()
     }
-    fix()
 });
 
 document.getElementById('chartLineColor').addEventListener('change', function () {
@@ -1904,7 +1915,7 @@ function fix() {
         document.getElementById('autosave').checked = true;
         clearInterval(saveInterval);
         saveData(false);
-        saveInterval = setInterval(() => {saveData(false)}, 15000);
+        saveInterval = setInterval(() => { saveData(false) }, 15000);
     } else {
         document.getElementById('autosave').checked = false;
     }
@@ -2129,9 +2140,9 @@ function fix() {
         }
         
         `;
-    if (data.bgColor.startsWith('http')) {
+    if (data.bgColor.startsWith('http') || data.bgColor.startsWith('data:')) {
         document.getElementById('backPickerUrl').value = (data.bgColor);
-    } else if (!data.bgColor.startsWith('data')) {
+    } else {
         document.getElementById('backPicker').value = convert3letterhexto6letters(data.bgColor);
     }
     document.getElementById('boxSpacing').value = data.boxSpacing;
@@ -2152,7 +2163,7 @@ function fix() {
     document.getElementById('odometerDown').value = data.odometerDown;
     document.getElementById('chartLineColor').value = convert3letterhexto6letters(data.cardStyles.chartLineColor || data.textColor || '#000000');
     document.getElementById('odometerSpeed').value = data.odometerSpeed;
-    document.getElementById('animatedCardChangesDuration').value = data.animatedCards.duration;
+    document.getElementById('animatedCardChangesDuration').value = data.animatedCards.duration / 1000;
     document.getElementById('imageBorder').value = data.imageBorder;
     document.getElementById('imageBorderColor').value = data.imageBorderColor;
     document.getElementById('rankingsWidth').value = data.rankingsWidth;
@@ -2456,7 +2467,7 @@ document.getElementById('autosave').addEventListener('change', function () {
     if (document.getElementById('autosave').checked) {
         clearInterval(saveInterval);
         saveData(false);
-        saveInterval = setInterval(() => {saveData(false)}, 15000);
+        saveInterval = setInterval(() => { saveData(false) }, 15000);
         data.autosave = true;
     } else {
         clearInterval(saveInterval);
@@ -2651,7 +2662,7 @@ document.getElementById('odometerSpeed').addEventListener('change', function () 
 
 document.getElementById('animatedCardChangesDuration').addEventListener('change', function () {
     if (confirm('This will refresh the page.')) {
-        data.animatedCards.duration = document.getElementById('animatedCardChangesDuration').value;
+        data.animatedCards.duration = document.getElementById('animatedCardChangesDuration').value * 1000;
         saveData(true);
         location.reload();
     }
@@ -2753,13 +2764,13 @@ function apiUpdate(interval) {
                     headers: data.apiUpdates.headers,
                 }).then(response => response.json())
                     .then(json => { doStuff(json) })
-                    .catch(() => {});
+                    .catch(() => { });
             } else {
                 fetch(url, {
                     method: data.apiUpdates.method
                 }).then(response => response.json())
                     .then(json => { doStuff(json) })
-                    .catch(() => {});
+                    .catch(() => { });
             }
         } else {
             fetch(url, {
@@ -2768,7 +2779,7 @@ function apiUpdate(interval) {
                 body: JSON.stringify(data.apiUpdates.body)
             }).then(response => response.json())
                 .then(json => { doStuff(json) })
-                .catch(() => {});
+                .catch(() => { });
         }
     }
 
@@ -3172,21 +3183,21 @@ const addFireIcon = () => {
         div.id = 'fireIconCreate';
         div.style.color = '#FFF';
         div.innerHTML = `
-            <label>Fire Icon Name: </label><input type="text" id="fireIcon" placeholder="Fire Icon 1"><br>
-            <label>Fire Icon Threshold: </label><input type="number" step="any" id="fireIconThreshold" placeholder="1000"><br>
-            <label>Fire Icon Threshold Method: </label><select id="fireIconMethod" name="fireIconMethod">
-                <option value=">=">Greater Than (>=)</option>
-                <option value="==">Equal To (==)</option>
-                <option value="<=">Less Than (<=)</option>
-                <option value="!=">Not Equal To (!=)</option>
-            </select><br>
-            <label>Fire Icon:</label><input type="text" id="fireIconUrl" placeholder="https://example.com/image.png"><label> or </label><input type="file" id="fireIconFile"><br>
-            <label>Rank Color: </label><input type="color" id="fireIconRankColor"><br>
-            <label>Rank Margin Top (px):</label><input type="number" step="any" id="fireIconRankMargin" placeholder="Default"><br>
-            <label>Rank Margin Left (px):</label><input type="number" step="any" id="fireIconRankMarginLeft" placeholder="Default"><br>
+            <label>Fire icon name:<br><input type="text" class="l-width" id="fireIcon" placeholder="Fire Icon 1"></label>
+            <label>Fire icon threshold: </label><input type="number" class="s-width" step="any" id="fireIconThreshold" placeholder="1000"><br>
+            <label>Fire icon threshold method: <select class="m-width" id="fireIconMethod" name="fireIconMethod">
+                <option value=">=">Greater than (≥)</option>
+                <option value="==">Equal to (=)</option>
+                <option value="<=">Less than (≤)</option>
+                <option value="!=">Not equal to (≠)</option>
+            </select></label>
+            <label>Fire icon: <input type="text" class="l-wodth" id="fireIconUrl" placeholder="https://example.com/image.png"><label> or </label><input type="file" id="fireIconFile"></label>
+            <label>Rank color: </label><input type="color" id="fireIconRankColor"><br>
+            <label>Rank margin (top, left) in pixels:<br><span class="no-wrap"><input class="s-width" type="number" step="any" id="fireIconRankMargin" placeholder="Default">, 
+            <input class="s-width" type="number" step="any" id="fireIconRankMarginLeft" placeholder="Default"></span></label>
             <button onclick="saveFireIcon()">Add</button>
         `
-        document.getElementById('fireIconsCreate').appendChild(div);
+        document.getElementById('addFireMenu').appendChild(div);
     }
 }
 
@@ -3274,40 +3285,39 @@ const loadFireIcons = () => {
         if (icon) {
             icon = `<img src="${escapeHTML(icon)}" style="height: 1.5em; width: 1.5em;">`
         }
+        if (i != 0) {
+            div.innerHTML += "<hr>";
+        }
         let html = `
             <div style="display: flex; color: #FFF; padding: 0.5em; margin: 0.5em 0; border-radius: 0.2em;">
                 <div style="align-items: center;">
                     <div style="color: #FFF; padding: 0.2em; border-radius: 0.2em;">${icon}</div><br>
-                    <label>Name</label>
-                    <input style="width: 70%;" placeholder="Name" value="${escapeHTML(fireIcon.name)}" id="new_fire_name_${i}"><br>
-                    <label>Condition</label>
-                    <select id="new_fire_method_${i}" class="medium_input">
-                        <option ${fireIcon.method == '>=' ? 'selected' : ''} value=">=">Count >=</option>
-                        <option ${fireIcon.method == '==' ? 'selected' : ''} value="==">Count ==</option>
-                        <option ${fireIcon.method == '<=' ? 'selected' : ''} value="<=">Count <=</option>
-                        <option ${fireIcon.method == '!=' ? 'selected' : ''} value="!=">Count !=</option>
-                    </select>
-                    <input type="number" step="any" id="new_fire_threshold_${i}" class="small_input" value="${escapeHTML(fireIcon.threshold)}"><br>
-                    <label>Rank Color</label>
-                    <input type="color" id="new_fire_color_${i}" class="medium_input" value="${escapeHTML(fireIcon.color)}"><br>
-                    <label>Rank Margin Top (px)</label>
-                    <input type="number" id="new_fire_margin_${i}" class="small_input" placeholder="Default" value="${escapeHTML(fireIcon.margin)}"><br>
-                    <label>Rank Margin Left (px)</label>
-                    <input type="number" id="new_fire_marginLeft_${i}" class="small_input" placeholder="Default" value="${escapeHTML(fireIcon.marginLeft)}">
+                    <label>Name:<br><input class="m-width" placeholder="Name" value="${escapeHTML(fireIcon.name)}" id="new_fire_name_${i}"></label>
+                    <label>Condition:<br><span class="no-wrap"><select id="new_fire_method_${i}" class="s-width">
+                        <option ${fireIcon.method == '>=' ? 'selected' : ''} value=">=">Count ≥</option>
+                        <option ${fireIcon.method == '==' ? 'selected' : ''} value="==">Count =</option>
+                        <option ${fireIcon.method == '<=' ? 'selected' : ''} value="<=">Count ≤</option>
+                        <option ${fireIcon.method == '!=' ? 'selected' : ''} value="!=">Count ≠</option>
+                    </select><input type="number" step="any" id="new_fire_threshold_${i}" class="s-width" value="${escapeHTML(fireIcon.threshold)}"><br></span></label>
+                    <label>Rank color: <input type="color" id="new_fire_color_${i}" value="${escapeHTML(fireIcon.color)}"></label>
+                    <label>Rank margin (top, left) (px):<br><span class="no-wrap">
+                    <input type="number" id="new_fire_margin_${i}" class="s-width" placeholder="Default" value="${escapeHTML(fireIcon.margin)}"></span>,
+                    <input type="number" id="new_fire_marginLeft_${i}" class="s-width" placeholder="Default" value="${escapeHTML(fireIcon.marginLeft)}">
+                    </label>
                 </div><br>
-                <div>
-                    <div><button onclick="saveFireEdits(${i})">Save</button></div>
-                    <div><button onclick="deleteFireIcon(${i})">Delete</button></div>
-                    <div><button onclick="reOrderFire('up',${i})">Up</button></div>
-                    <div><button onclick="reOrderFire('down',${i})">Down</button></div>
-                    <div><button onclick="reOrderFire('top',${i})">Top</button></div>
-                    <div><button onclick="reOrderFire('bottom',${i})">Bottom</button></div>
+                <div class="fire-list-controls">
+                    <div><button onclick="saveFireEdits(${i})" title="Save"><span class="material-symbols-outlined">save</span></button></div>
+                    <div><button onclick="deleteFireIcon(${i})" title="Delete" ><span class="material-symbols-outlined">delete</span></button></div>
+                    <div><button onclick="reOrderFire('up',${i})" title="Move up"><span class="material-symbols-outlined">keyboard_arrow_up</span></button></div>
+                    <div><button onclick="reOrderFire('down',${i})" title="Move down"><span class="material-symbols-outlined">keyboard_arrow_down</span></button></button></div>
+                    <div><button onclick="reOrderFire('top',${i})" title="Move to top"><span class="material-symbols-outlined">keyboard_double_arrow_up</span></button></button></div>
+                    <div><button onclick="reOrderFire('bottom',${i})" title="Move to bottom"><span class="material-symbols-outlined">keyboard_double_arrow_down</span></button></button></div>
                 </div>
             </div>`
         div.innerHTML += html;
     }
     if (data.fireIcons.created.length == 0) {
-        div.innerHTML = 'No fire icons created.'
+        div.innerHTML = '<p>No fire icons created.</p>'
     }
     document.getElementById('fireEnabled').checked = data.fireIcons.enabled || false;
     document.getElementById('fireType').value = data.fireIcons.type || 'gain';
@@ -3535,7 +3545,7 @@ function loadHeader() {
                 <div class="battle_container">
                     <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image1_${item.name}"></img>
                     <div class="battle_info">
-                        <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
+                        <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">\u200b</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>
@@ -3545,7 +3555,7 @@ function loadHeader() {
                 </div>
                 <div class="reverse battle_container">
                 <div class="battle_info">
-                        <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
+                        <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">\u200b</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count2_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: right;" : ""}">0</p>
                     </div>
                     <img style="float: right; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image2_${item.name}"></img>
@@ -3568,7 +3578,7 @@ function loadHeader() {
                 let count1 = user1 ? getDisplayedCount(user1.count) : 0;
                 let count2 = user2 ? getDisplayedCount(user2.count) : 0;
 
-                document.getElementById('battle_name1_' + item.name).innerText = user1 ? user1.name : "Loading...";
+                document.getElementById('battle_name1_' + item.name).innerText = user1 ? user1.name : "\u200b";
                 document.getElementById('battle_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
                 if (user1 && document.getElementById('battle_image1_' + item.name).src !== user1.image) {
                     document.getElementById('battle_image1_' + item.name).src = user1.image;
@@ -3576,7 +3586,7 @@ function loadHeader() {
                     document.getElementById('battle_image1_' + item.name).src = "../default.png";
                 }
 
-                document.getElementById('battle_name2_' + item.name).innerText = user2 ? user2.name : "Loading...";
+                document.getElementById('battle_name2_' + item.name).innerText = user2 ? user2.name : "\u200b";
                 document.getElementById('battle_count2_' + item.name).innerText = getDisplayedCount(user2 ? user2.count : 0);
                 if (user1 && document.getElementById('battle_image2_' + item.name).src !== user2.image) {
                     document.getElementById('battle_image2_' + item.name).src = user2.image;
@@ -3591,7 +3601,7 @@ function loadHeader() {
                 <div class="battle_container">
                     <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="user_image1_${item.name}"></img>
                     <div class="battle_info">
-                        <p id="user_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">Loading...</p>
+                        <p id="user_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">\u200b</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="user_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>`;
@@ -3605,7 +3615,7 @@ function loadHeader() {
                     user1 = findFastestChannel();
                 }
 
-                document.getElementById('user_name1_' + item.name).innerText = user1 ? user1.name : "Loading...";
+                document.getElementById('user_name1_' + item.name).innerText = user1 ? user1.name : "\u200b";
                 document.getElementById('user_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
                 if (user1 && document.getElementById('user_image1_' + item.name).src !== user1.image) {
                     document.getElementById('user_image1_' + item.name).src = user1.image;
@@ -3728,171 +3738,256 @@ function loadTopSettings(itemName, itemType) {
         div.id = `headerItem_${item.name}`;
         let textSettings = `
             <div class="section-basic-options">
-                <div style="grid-column: 1 / -1;"><label><strong>Text Content:</strong></label><br>
-                <textarea rows="3" class="section_attribute_text header_option" placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)">${item.attributes.text || ''}</textarea>
-                <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                    <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $rank<br>
-                    <strong>Repeat:</strong> $repeat(start-end, part1, part2, ...) - Repeats template for each rank in range<br>
-                    <strong>Example:</strong> "$name(1) gains $hourly(1) per hour" or "$repeat(1-10, $rank. $name - $count)"
-                </p></div>
-                <div><label><strong>Text Color:</strong></label><br>
-                <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /></div>
-                <div><label><strong>Font Size:</strong></label><br>
-                <input type="number" value="${item.attributes.size || '20'}" class="section_attribute_size header_option small_input" placeholder="20" /></div>
+                <div style="grid-column: 1 / -1;"><label><strong>Text content:</strong></label><br>
+                    <textarea rows="3" class="section_attribute_text header_option"
+                        placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)">${item.attributes.text || ''}</textarea>
+                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                        <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $rank<br>
+                        <strong>Repeat:</strong> $repeat(start-end, part1, part2, ...) - Repeats template for each rank in range<br>
+                        <strong>Example:</strong> "$name(1) gains $hourly(1) per hour" or "$repeat(1-10, $rank. $name - $count)"
+                    </p>
+                </div>
+                <div class="header-option-group">
+                    <div><label><strong>Text color:</strong></label>
+                        <input type="color" value="${item.attributes.color || '#ffffff'}"
+                            class="section_attribute_color header_option" />
+                    </div>
+                    <div><label><strong>Font size:</strong></label>
+                        <input type="number" value="${item.attributes.size || '20'}"
+                            class="section_attribute_size header_option xs-width" placeholder="20" />
+                    </div>
+                </div>
             </div>
             <details class="section-advanced-options" style="margin-top: 10px;">
                 <summary><strong>Advanced Options</strong></summary>
-                <div style="margin-top: 10px;">
-                    <label>Font Weight:</label>
-                    <select class="section_attribute_fontWeight header_option small_input">
-                        <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
-                        <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                        <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                        <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
-                        <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
-                    </select><br>
-                    <label>Auto-scroll Duration (0 = disabled):</label>
-                    <input type="number" value="${item.attributes.scrollTime || '0'}" class="section_attribute_scrollTime header_option small_input" /><br>
-                    <label>Scroll Direction:</label>
-                    <select class="section_attribute_scrollDirection header_option small_input">
-                        <option value="left" ${!item.attributes.scrollDirection || item.attributes.scrollDirection === 'left' ? 'selected' : ''}>Left</option>
-                        <option value="right" ${item.attributes.scrollDirection === 'right' ? 'selected' : ''}>Right</option>
-                    </select><br>
-<br>
-                    <label>List Length:</label>
-                    <input type="number" value="${item.attributes.length || 0}" class="section_attribute_length header_option small_input" /><br>
-                    <label>Sort Order:</label>
-                    <select class="section_attribute_sortOrder header_option small_input">
-                        <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
-                        <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
-                    </select><br>
-                    <label>Update Interval (seconds):</label>
-                    <input type="number" value="${item.attributes.updateInterval || 0}" class="section_attribute_updateInterval header_option small_input" /><br>
+                <div style="margin-top: 10px;" class="header-option-group">
+                    <div>
+                        <label>Font weight:</label>
+                        <select class="section_attribute_fontWeight header_option ms-width">
+                            <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''
+            }>Regular</option>
+                            <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                            <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                            <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
+                            <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Auto-scroll duration (seconds) (0 = disabled):</label>
+                        <input type="number" value="${item.attributes.scrollTime || '0'}"
+                            class="section_attribute_scrollTime header_option xs-width" /><br>
+                    </div>
+                    <div>
+                        <label>Scroll direction:</label>
+                        <select class="section_attribute_scrollDirection header_option s-width">
+                            <option value="left" ${!item.attributes.scrollDirection || item.attributes.scrollDirection === 'left'
+                ? 'selected' : ''}>Left</option>
+                            <option value="right" ${item.attributes.scrollDirection === 'right' ? 'selected' : ''}>Right</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="header-option-group">
+                    <div>
+                        <label>List length:</label>
+                        <input type="number" value="${item.attributes.length || 0}"
+                            class="section_attribute_length header_option xs-width" /><br>
+                    </div>
+                    <div>
+                        <label>Sort order:</label>
+                        <select class="section_attribute_sortOrder header_option ms-width">
+                            <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
+                            <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Update interval (seconds):</label>
+                        <input type="number" value="${item.attributes.updateInterval || 0}"
+                            class="section_attribute_updateInterval header_option xs-width" />
+                    </div>
                 </div>
             </details>
         `;
         let battleSettings = `
-            <div class="section-basic-options">
-                <div><label><strong>Battle Type:</strong></label><br>
-                <select class="section_attribute_type header_option">
-                    <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest Battle (auto)</option>
-                    <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom Users</option>
-                </select></div>
-                <div><label><strong>Update Every:</strong></label><br>
-                <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" placeholder="2" /> seconds</div>
+            <div class="section-basic-options header-option-group">
+                <div><label><strong>Battle type:</strong></label>
+                    <select class="section_attribute_type header_option m-width">
+                        <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest Battle (auto)
+                        </option>
+                        <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom Users</option>
+                    </select>
+                </div>
+                <div><label><strong>Update interval (seconds):</strong></label>
+                    <input type="number" value="${item.attributes.updateInterval || 2}"
+                        class="section_attribute_updateInterval header_option xs-width" placeholder="2" />
+                </div>
             </div>
-            <div style="margin-top: 10px;">
-                <label><strong>User 1 ID:</strong></label><br>
-                <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option" placeholder="Leave blank for closest battle" /><br>
-                <label><strong>User 2 ID:</strong></label><br>
-                <input value="${item.attributes.id2 || ""}" class="section_attribute_id2 header_option" placeholder="Leave blank for closest battle" />
+            <div style="margin-top: 10px;" class="header-option-group">
+                <div>
+                    <label><strong>User 1 ID:</strong></label>
+                    <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option l-width"
+                        placeholder="Leave blank for closest battle" /><br>
+                </div>
+                <div>
+                    <label><strong>User 2 ID:</strong></label>
+                    <input value="${item.attributes.id2 || ""}" class="section_attribute_id2 header_option l-width"
+                        placeholder="Leave blank for closest battle" />
+                </div>
             </div>
             <details class="section-advanced-options" style="margin-top: 10px;">
                 <summary><strong>Styling Options</strong></summary>
-                <div style="margin-top: 10px;">
-                    <div><label>Background Color:</label>
-                    <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option" /></div>
-                    <div><label>Text Color:</label>
-                    <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /></div>
+                <div style="margin-top: 10px;" class="header-option-group">
+                    <div><label>Background color:</label>
+                        <input type="color" value="${item.attributes.bgColor || '#000000'}"
+                            class="section_attribute_bgColor header_option" />
+                    </div>
+                    <div><label>Text color:</label>
+                        <input type="color" value="${item.attributes.color || '#ffffff'}"
+                            class="section_attribute_color header_option" />
+                    </div>
                     <div><label>Height:</label>
-                    <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_boxHeight header_option small_input" /></div>
-                    <div><label>Image Size:</label>
-                    <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /></div>
-                    <div><label>Font Size:</label>
-                    <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /></div>
-                    <div><label>Font Weight:</label>
-                    <select class="section_attribute_fontWeight header_option small_input">
-                        <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
-                        <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                        <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                    </select></div>
-                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
-                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatars</label></div>
-                    <div><input type="checkbox" ${item.attributes.battleAlign ? "checked" : ""} class="section_attribute_battleAlign header_option"><label>Align counters to sides</label></div>
+                        <input type="number" value="${item.attributes.boxHeight || '20'}"
+                            class="section_attribute_boxHeight header_option xs-width" />
+                    </div>
+                    <div><label>Image size:</label>
+                        <input type="number" value="${item.attributes.imageSize || '15'}"
+                            class="section_attribute_imageSize header_option xs-width" />
+                    </div>
+                    <div><label>Font size:</label>
+                        <input type="number" value="${item.attributes.fontSize || '15'}"
+                            class="section_attribute_fontSize header_option xs-width" />
+                    </div>
+                    <div><label>Font weight:</label>
+                        <select class="section_attribute_fontWeight header_option s-width">
+                            <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''
+            }>Regular</option>
+                            <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                            <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="header-option-group">
+                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""}
+                            class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
+                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""}
+                            class="section_attribute_roundAvatars header_option"><label>Round avatars</label></div>
+                    <div><input type="checkbox" ${item.attributes.battleAlign ? "checked" : ""}
+                            class="section_attribute_battleAlign header_option"><label>Align counters to sides</label></div>
                 </div>
             </details>
         `;
         let userSettings = `
-            <div class="section-basic-options">
+            <div class="section-basic-options header-option-group">
                 <div><label><strong>User Type:</strong></label><br>
-                <select class="section_attribute_type header_option">
-                    <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Growing</option>
-                    <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Specific User</option>
-                </select></div>
-                <div><label><strong>Update Every:</strong></label><br>
-                <input type="number" value="${item.attributes.updateInterval || 2}" class="section_attribute_updateInterval header_option small_input" placeholder="2" /> seconds</div>
+                    <select class="section_attribute_type header_option m-width">
+                        <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Growing</option>
+                        <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Specific User</option>
+                    </select>
+                </div>
+                <div><label><strong>Update interval (seconds):</strong></label><br>
+                    <input type="number" value="${item.attributes.updateInterval || 2}"
+                        class="section_attribute_updateInterval header_option xs-width" placeholder="2" />
+                </div>
             </div>
             <div style="margin-top: 10px;">
                 <label><strong>User ID:</strong></label><br>
-                <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option" placeholder="Leave blank for fastest growing" />
+                <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option l-width"
+                    placeholder="Leave blank for fastest growing" />
             </div>
             <details class="section-advanced-options" style="margin-top: 10px;">
                 <summary><strong>Styling Options</strong></summary>
-                <div style="margin-top: 10px;">
-                    <div><label>Background Color:</label>
-                    <input type="color" value="${item.attributes.bgColor || '#000000'}" class="section_attribute_bgColor header_option" /></div>
-                    <div><label>Text Color:</label>
-                    <input type="color" value="${item.attributes.color || '#ffffff'}" class="section_attribute_color header_option" /></div>
+                <div style="margin-top: 10px;" class="header-option-group">
+                    <div><label>Background color:</label>
+                        <input type="color" value="${item.attributes.bgColor || '#000000'}"
+                            class="section_attribute_bgColor header_option" />
+                    </div>
+                    <div><label>Text color:</label>
+                        <input type="color" value="${item.attributes.color || '#ffffff'}"
+                            class="section_attribute_color header_option" />
+                    </div>
                     <div><label>Height:</label>
-                    <input type="number" value="${item.attributes.boxHeight || '20'}" class="section_attribute_size header_option small_input" /></div>
-                    <div><label>Image Size:</label>
-                    <input type="number" value="${item.attributes.imageSize || '15'}" class="section_attribute_imageSize header_option small_input" /></div>
-                    <div><label>Font Size:</label>
-                    <input type="number" value="${item.attributes.fontSize || '15'}" class="section_attribute_fontSize header_option small_input" /></div>
-                    <div><label>Font Weight:</label>
-                    <select class="section_attribute_fontWeight header_option small_input">
-                        <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''}>Regular</option>
-                        <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                        <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                    </select></div>
-                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""} class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
-                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round avatar</label></div>
+                        <input type="number" value="${item.attributes.boxHeight || '20'}"
+                            class="section_attribute_size header_option xs-width" />
+                    </div>
+                    <div><label>Image size:</label>
+                        <input type="number" value="${item.attributes.imageSize || '15'}"
+                            class="section_attribute_imageSize header_option xs-width" />
+                    </div>
+                    <div><label>Font size:</label>
+                        <input type="number" value="${item.attributes.fontSize || '15'}"
+                            class="section_attribute_fontSize header_option xs-width" />
+                    </div>
+                    <div><label>Font weight:</label>
+                        <select class="section_attribute_fontWeight header_option ms-width">
+                            <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''
+            }>Regular</option>
+                            <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
+                            <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="header-option-group">
+                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""}
+                            class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
+                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""}
+                            class="section_attribute_roundAvatars header_option"><label>Round avatar</label></div>
                 </div>
             </details>
         `;
         let boxSettings = `
             <div class="section-basic-options">
-                <div><label><strong>Number of Rows:</strong></label><br>
-                <input type="number" value="${item.attributes.rows || 0}" class="section_attribute_rows header_option small_input" placeholder="0" /></div>
+                <div><label><strong>Number of rows:</strong></label><br>
+                    <input type="number" value="${item.attributes.rows || 0}" class="section_attribute_rows header_option xs-width"
+                        placeholder="0" />
+                </div>
             </div>
-            <p style="margin-top: 10px; color: #666;">Boxes are containers that can hold other sections. Use "Child of" below to nest sections inside boxes.</p>
-        `;
+            <p style="margin-top: 10px; color: #666;">Boxes are containers that can hold other sections. Use "Child of" below to
+                nest sections inside boxes.</p>
+            `;
         div.innerHTML = `
             <div style="padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 2px solid #ddd;">
                 <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-                    <div><label><strong>Section Name:</strong></label><br>
-                    <input type="text" value="${item.name}" class="section_option_name header_option" placeholder="My Section" /></div>
+                    <div><label><strong>Section name:</strong></label><br>
+                        <input type="text" value="${item.name}" class="section_option_name header_option l-width"
+                            placeholder="My Section" />
+                    </div>
                     <div><label><strong>Place in:</strong></label><br>
-                    <select class="section_option_placement header_option">
-                        <option value="header" ${(item.placement || 'header') === 'header' ? 'selected' : ''}>Header</option>
-                        <option value="footer" ${(item.placement || 'header') === 'footer' ? 'selected' : ''}>Footer</option>
-                    </select></div>
-                    <div><label><strong>Section Type:</strong></label><br>
-                    <select class="section_option_type header_option" value="${item.type}" onchange="loadTopSettings('${item.name}', this.value)">
-                        <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
-                        <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
-                        <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
-                        <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
-                    </select></div>
+                        <select class="section_option_placement header_option m-width">
+                            <option value="header" ${(item.placement || 'header') === 'header' ? 'selected' : ''}>Header</option>
+                            <option value="footer" ${(item.placement || 'header') === 'footer' ? 'selected' : ''}>Footer</option>
+                        </select>
+                    </div>
+                    <div><label><strong>Section type:</strong></label><br>
+                        <select class="section_option_type header_option m-width" value="${item.type}"
+                            onchange="loadTopSettings('${item.name}', this.value)">
+                            <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
+                            <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
+                            <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
+                            <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
+                        </select>
+                    </div>
                 </div>
                 <details class="section-nesting-option" style="margin-bottom: 10px;">
-                    <summary><strong>Nesting (Advanced)</strong></summary>
+                    <summary><strong>Nesting (advanced)</strong></summary>
                     <div style="margin-top: 10px;">
-                        <label>Parent Box Name:</label>
-                        <input type="text" value="${item.childOf || ""}" class="section_option_childOf header_option" placeholder="Leave blank for top level" />
-                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Enter the name of a box section to nest this inside it.</p>
+                        <label>Parent box name:</label>
+                        <input type="text" value="${item.childOf || ""}" class="section_option_childOf header_option l-width"
+                            placeholder="Leave blank for top level" />
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Enter the name of a box section to nest this
+                            inside it.</p>
                     </div>
                 </details>
                 <hr style="margin: 15px 0;">
-                ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings : item.type == 'box' ? boxSettings : ''}
+                ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings :
+                item.type == 'box' ? boxSettings : ''}
                 <hr style="margin: 15px 0;">
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" onclick="removeTopSetting('${item.name}')" style="background-color: #dc3545;">Delete</button>
+                    <button type="button" onclick="removeTopSetting('${item.name}')"
+                        style="background-color: #dc3545;">Delete</button>
                     <button type="button" onclick="reorderTopSetting('${item.name}', 'up')">↑ Move Up</button>
                     <button type="button" onclick="reorderTopSetting('${item.name}', 'down')">↓ Move Down</button>
                 </div>
             </div>
-            `;
+        `;
         document.getElementById("sections").appendChild(div);
     });
     adjustColors();
@@ -3938,17 +4033,11 @@ function createNewSection() {
 }
 
 function displaySetting(id, item) {
-    let div = item;
-    if (div.classList.contains("enabled")) {
-        div.classList.remove("enabled");
-        document.getElementById(id).classList.add("hidden");
-        data.settingsEnabled.splice(data.settingsEnabled.indexOf(id), 1);
-    } else {
-        div.classList.add("enabled");
-        document.getElementById(id).classList.remove("hidden");
-        data.settingsEnabled.push(id);
-    }
-    fixSettings();
+    document.getElementById(data.settingsTab).classList.add("hidden");
+    document.getElementById("button_" + data.settingsTab).classList.remove("enabled");
+    data.settingsTab = id;
+    document.getElementById(id).classList.remove("hidden");
+    item.classList.add("enabled");
 }
 
 function reorderTopSetting(item, direction) {
@@ -3976,20 +4065,33 @@ function reorderTopSetting(item, direction) {
     loadTopSettings();
 }
 
-function fixSettings() {
-    Array.from(document.getElementById('container').children).forEach(child => {
-        let isActive = !child.classList.contains('hidden');
-        if (isActive) {
-            let place = data.settingsEnabled.indexOf(child.id);
-            child.style.order = place + 1;
-        } else {
-            child.style.order = 'auto';
-        }
-    });
-}
-
 function saveCustomCSS() {
     const css = document.getElementById('customCSS').value;
     document.getElementById('customCSSOverrides').innerHTML = css;
     data['customCSS'] = css;
 }
+
+document.getElementById('settingsSearch').addEventListener('input', (e) => {
+    const query = e.target.value;
+    const searchResultsDiv = document.querySelector(".search-results")
+    searchResultsDiv.replaceChildren()
+    searchResultsDiv.innerText = "";
+    if (query) {
+        const results = searchSettings(query);
+        if (results.length) {
+            for (const result of results) {
+                const p = document.createElement('p');
+                p.innerText = result[0];
+                const id = result[1];
+                const button = document.getElementById('button_' + id).cloneNode(true);
+                button.classList.add("enabled");
+                button.id = "";
+                p.appendChild(button);
+                searchResultsDiv.appendChild(p);
+            }
+        } else {
+            searchResultsDiv.innerHTML = "<p>No results found.</p>";
+        }
+    }
+    adjustColors();
+})

@@ -25,9 +25,11 @@ function formatRank(rank) {
 }
 
 function getGain(counterId) {
+
     let entry = gainTable[counterId];
     if (!entry || entry.length < 2) return 0;
-    return (entry[entry.length - 1] - entry[0]) / (entry.length - 1);
+    let slicedEntry = entry.slice(-(data.gainAverageOf + 1));
+    return (slicedEntry[slicedEntry.length - 1] - slicedEntry[0]) / (slicedEntry.length - 1);
 }
 
 function getHourlyGain(counterId) {
@@ -38,15 +40,15 @@ function getHourlyGain(counterId) {
 
 function replaceHeaderVariables(text) {
     if (!text || typeof text !== 'string') return text;
-    
+
     // Get sorted leaderboard by gain (descending - highest first)
     const sortedData = [...data.data].sort((a, b) => getGain(b.id) - getGain(a.id));
-    
+
     // Helper function to replace variables for a specific rank
     const replaceVariablesForRank = (template, rank) => {
         let result = template;
         const index = rank - 1; // Convert to 0-based index
-        
+
         // Replace $name (without number) with name at this rank
         result = result.replace(/\$name(?!\d|\(|\()/g, () => {
             if (index >= 0 && index < sortedData.length && sortedData[index]) {
@@ -54,7 +56,7 @@ function replaceHeaderVariables(text) {
             }
             return 'N/A';
         });
-        
+
         // Replace $hourly (without number) with hourly gain at this rank
         result = result.replace(/\$hourly(?!\d|\(|\()/g, () => {
             if (index >= 0 && index < sortedData.length && sortedData[index]) {
@@ -63,7 +65,7 @@ function replaceHeaderVariables(text) {
             }
             return '0';
         });
-        
+
         // Replace $count (without number) with count at this rank
         result = result.replace(/\$count(?!\d|\(|\()/g, () => {
             if (index >= 0 && index < sortedData.length && sortedData[index]) {
@@ -71,28 +73,28 @@ function replaceHeaderVariables(text) {
             }
             return '0';
         });
-        
+
         // Replace $rank with the rank number itself
         result = result.replace(/\$rank(?!\d|\(|\()/g, () => {
             return rank.toString();
         });
-        
+
         return result;
     };
-    
+
     let result = text;
-    
+
     // Process $repeat(start-end, template) first
     result = result.replace(/\$repeat\((\d+)-(\d+),\s*([^)]+)\)/g, (match, start, end, template) => {
         const startNum = parseInt(start);
         const endNum = parseInt(end);
         const parts = [];
-        
+
         // Parse template - split by commas but preserve quoted strings
         const templateParts = [];
         let currentPart = '';
         let inQuotes = false;
-        
+
         for (let i = 0; i < template.length; i++) {
             const char = template[i];
             if (char === '"' || char === "'") {
@@ -110,16 +112,16 @@ function replaceHeaderVariables(text) {
         if (currentPart.trim()) {
             templateParts.push(currentPart.trim());
         }
-        
+
         // Generate output for each rank in range
         for (let rank = startNum; rank <= endNum; rank++) {
             const rankParts = templateParts.map(part => replaceVariablesForRank(part, rank));
             parts.push(rankParts.join(' ')); // Join parts with spaces
         }
-        
+
         return parts.join('\n'); // Join each rank's output with newlines
     });
-    
+
     // Match patterns like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1)
     // Supports both formats: $name1 and $name(1)
     result = result.replace(/\$name\((\d+)\)|\$name(\d+)/g, (match, rankParen, rankDirect) => {
@@ -130,7 +132,7 @@ function replaceHeaderVariables(text) {
         }
         return 'N/A';
     });
-    
+
     result = result.replace(/\$hourly\((\d+)\)|\$hourly(\d+)/g, (match, rankParen, rankDirect) => {
         const rank = rankParen || rankDirect;
         const index = parseInt(rank) - 1;
@@ -140,7 +142,7 @@ function replaceHeaderVariables(text) {
         }
         return '0';
     });
-    
+
     result = result.replace(/\$count\((\d+)\)|\$count(\d+)/g, (match, rankParen, rankDirect) => {
         const rank = rankParen || rankDirect;
         const index = parseInt(rank) - 1;
@@ -149,7 +151,7 @@ function replaceHeaderVariables(text) {
         }
         return '0';
     });
-    
+
     return result;
 }
 
@@ -207,7 +209,7 @@ function random(min, max) {
 }
 
 function adjustColors() {
-    let c = document.body.style.backgroundColor;
+    let c = document.getElementById("backPicker")?.value || document.body.style.backgroundColor;
     if (!c) return;
     let r, g, b;
     if (c.startsWith('#')) {
@@ -225,17 +227,24 @@ function adjustColors() {
     }
     const brightness = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
     const textLabels = document.querySelectorAll("label,h1,h2,h3,h4,h5,h6,p,strong,input[type=file]");
+    const links = document.querySelectorAll("a:link");
     if (brightness < 0.5) {
         for (i = 0; i < textLabels.length; i++) {
             if (!textLabels[i].classList.contains('subgap')) {
                 textLabels[i].style.color = '#fff';
             }
         }
+        for (i = 0; i < links.length; i++) {
+            links[i].style.color = 'cyan';
+        }
     } else {
         for (i = 0; i < textLabels.length; i++) {
             if (!textLabels[i].classList.contains('subgap')) {
                 textLabels[i].style.color = '#000';
             }
+        }
+        for (i = 0; i < links.length; i++) {
+            links[i].style.color = 'blue';
         }
     }
 }
@@ -342,4 +351,31 @@ function randomColor() {
 
 function mean(a, b) {
     return (a + b) / 2
+}
+
+function searchSettings(str) {
+    results = []
+    const settingContainers = document.getElementsByClassName("settings-container");
+    for (const container of settingContainers) {
+        const labels = container.querySelectorAll("label");
+        for (const label of labels) {
+            hasInputChild = false;
+            for (const child of label.children) {
+                if (["INPUT", "SELECT", "TEXTAREA"].includes(child.tagName)) {
+                    hasInputChild = true;
+                    break;
+                }
+            }
+            if (hasInputChild) {
+                const labelText = Array.from(label.childNodes)
+                    .filter(node => node.nodeType === Node.TEXT_NODE)
+                    .map(node => node.textContent.trim())
+                    .join(' ');
+                if (labelText.toLowerCase().includes(str.toLowerCase())) {
+                    results.push([labelText, container.parentElement.id || container.parentElement.parentElement.id]);
+                }
+            }
+        }
+    }
+    return results;
 }

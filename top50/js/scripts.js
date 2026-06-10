@@ -35,7 +35,6 @@ function loadScripts() {
 
                 const div = document.createElement('div');
                 //div.style.color = data.textColor;
-                div.style.width = '200px';
                 div.innerHTML = `
     <h2>${object.title}</h2>
     <p>${object.desc}</p>
@@ -44,7 +43,7 @@ function loadScripts() {
     <a href="${object.url}">URL</a>
     <a href="https://github.com/livecountsedit/scripts/tree/main/listings/${object.id}">Source</a><br><br>
     <img style="width: 200px; height: 100px;" src="https://raw.githubusercontent.com/livecountsedit/scripts/refs/heads/main/listings/${object.id}/image.png"><br>
-    <button>${data.scripts.includes(object.id) ? 'Uninstall' : 'Install'}</button><hr>
+    <button>${data.scripts.includes(object.id) ? 'Uninstall' : 'Install'}</button>
   `;
 
                 const button = div.querySelector('button');
@@ -67,7 +66,11 @@ function loadScripts() {
                 container.appendChild(div);
 
                 if (data.scripts.includes(object.id)) {
-                    document.getElementById('loadedScripts').innerText += ` ${object.title},`;
+                    if (document.getElementById('loadedScripts').innerText == "Installed:") {
+                        document.getElementById('loadedScripts').innerText += " " + object.title;
+                    } else {
+                        document.getElementById('loadedScripts').innerText += `, ${object.title}`;
+                    }
                 }
             });
             adjustColors();
