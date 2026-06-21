@@ -38,7 +38,8 @@ let example_data = {
         "differenceSize": '2',
         "lineEnabled": false,
         "lineColor": "#808080",
-        "abbDifferences": false
+        "abbDifferences": false,
+        "showDifferenceWhen": "always"
     },
     "cardStyles": {
         "cardWidth": '19',
@@ -917,7 +918,24 @@ function update(doGains = true) {
                         currentCard.setAttribute('data-count', data.data[i].count)
                         //HERE
                         if (data.data[i + 1]) {
-                            if (data.data[i].count - data.data[i + 1].count < parseInt(data.differenceThreshold)) {
+                            let condition = true;
+                            const topGain = isFinite(data.data[i].mean_gain) ? data.data[i].mean_gain : average(data.data[i].min_gain, data.data[i].max_gain);
+                            const bottomGain = isFinite(data.data[i+1].mean_gain) ? data.data[i+1].mean_gain : average(data.data[i+1].min_gain, data.data[i+1].max_gain);
+                            switch (data.differenceStyles.showDifferenceWhen) {
+                                case 'bottomFasterSet':
+                                    if (bottomGain < topGain) condition = false;
+                                    break;
+                                case 'topFasterSet':
+                                    if (topGain < bottomGain) condition = false;
+                                    break;
+                                case 'bottomFasterObserved':
+                                    if (getGain(data.data[i + 1].id) < getGain(data.data[i].id)) condition = false;
+                                    break;
+                                case 'topFasterObserved':
+                                    if (getGain(data.data[i].id) < getGain(data.data[i + 1].id)) condition = false;
+                                    break;
+                            } 
+                            if (condition && data.data[i].count - data.data[i + 1].count < parseInt(data.differenceThreshold)) {
                                 currentCard.children[4].querySelector(".text").innerText = abbs(getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count));
                                 currentCard.children[4].querySelector(".odometer").innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
                                 currentCard.children[3].style.visibility = 'visible';
@@ -1080,6 +1098,7 @@ function update(doGains = true) {
                             }, parseInt(data.boxBGLength * 1000), currentCard, user);
                         }
                     } else {
+                        const id = currentCard.id;
                         currentCard.id = 'card_'
                         currentCard.children[0].id = "num_"
                         currentCard.children[1].id = "image_"
@@ -1097,6 +1116,11 @@ function update(doGains = true) {
                         currentCard.children[0].style.color = `${data.textColor}`;
                         currentCard.children[0].children[0].style.marginTop = "";
                         currentCard.children[0].children[0].style.marginLeft = "";
+                        if (charts[id]) {
+                            charts[id].destroy();
+                            delete charts[id];
+                        }
+                        currentCard.children[6].id = "chart_";
                     }
                 }
             }, extraTimeTillUpdate);
@@ -1395,7 +1419,24 @@ function zero() {
         for (i = 0; i < data.data.length; i++) {
             data.data[i].count = 0;
         }
-        update(false)
+        update(false);
+    }
+}
+
+function deleteAllChannels() {
+    if (confirm("Are you sure you want to delete all channels?")) {
+        data.data = [];
+        const selectedCard = document.querySelector(".selected");
+        if (selectedCard) {
+            selectedCard.classList.remove("selected");
+            selectedCard.style.border = "solid 0.1em " + data.boxBorder;
+            document.getElementById('quickSelect').value = 'select';
+        }
+        refresh();
+        for (const key of Object.keys(charts)) {
+            charts[key].destroy();
+            delete charts[key];
+        }
     }
 }
 
@@ -1711,6 +1752,11 @@ document.getElementById('showDifferenceLines').addEventListener('change', functi
     fix();
 });
 
+document.getElementById('showDifferenceWhen').addEventListener('change', function () {
+    data.differenceStyles.showDifferenceWhen = this.value;
+    fix();
+})
+
 document.getElementById('abbDifferences').addEventListener('change', function () {
     data.differenceStyles.abbDifferences = this.checked;
     fix();
@@ -1983,6 +2029,7 @@ function fix() {
     document.getElementById('showDifferenceLines').checked = data.differenceStyles.lineEnabled;
     document.getElementById('abbDifferences').checked = data.differenceStyles.abbDifferences;
     document.getElementById('differenceLineColor').value = data.differenceStyles.lineColor;
+    document.getElementById('showDifferenceWhen').value = data.differenceStyles.showDifferenceWhen;
 
     const diffs = document.getElementsByClassName("subgap");
     for (const diff of diffs) {

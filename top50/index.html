@@ -101,6 +101,9 @@
                     <button onclick="zero()">Zero all counters</button>
                 </div>
                 <div>
+                    <button onclick="deleteAllChannels()">Delete all channels</button>
+                </div>
+                <div>
                     <button onclick="saveData(true)">Save (In Browser)</button>
                 </div>
                 <div>
@@ -440,6 +443,13 @@
                     <label>Abbreviate differences (MDM): <input type="checkbox" id="abbDifferences" checked></label>
                     <label>Show difference lines: <input type="checkbox" id="showDifferenceLines" checked></label>
                     <label>Difference line color: <input type="color" id="differenceLineColor"></label>
+                    <label>Show difference when: <select class="l-width" id="showDifferenceWhen">
+                        <option value="always">Always</option>
+                        <option value="bottomFasterSet">Bottom faster (set gain)</option>
+                        <option value="bottomFasterObserved">Bottom faster (observed gain)</option>
+                        <option value="topFasterSet">Top faster (set gain)</option>
+                        <option value="topFasterObserved">Top faster (observed gain)</option>
+                    </select></label>
                 </div>
                 <div class="half-column">
                     <label>Show difference image: <input type="checkbox" id="enableDifferenceImages"></label>
@@ -453,8 +463,8 @@
                     <label>Difference image size: <input class="xs-width" type="number" step="0.1"
                             id="differenceImageSize" autocomplete="off"></label>
                     <label>Difference image shaking animation: <input type="checkbox" id="enableImageShakes"></label>
-                    <label>Difference image: <input class="l-width" placeholder="Image" id="differenceImageUrl"> or
-                        <input placeholder="Image" type="file" id="differenceImageFile"></label>
+                    <label>Difference image: <input class="l-width" placeholder="Image" id="differenceImageUrl"><br>or
+                        <input placeholder="Image" type="file" id="differenceImageFile" class="l-width"></label>
                     <button onclick="saveImageForDiffs()">Save Image Upload</button>
                 </div>
             </div>
@@ -679,7 +689,7 @@
     </div>
     <hr><br>
     <script src="./js/utils.js?v=7.6"></script>
-    <script src="./index.js?v=7.6"></script>
+    <script src="./index.js?v=7.6.1"></script>
     <script src="./js/scripts.js?v=7.6"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
