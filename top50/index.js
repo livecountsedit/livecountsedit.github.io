@@ -2066,7 +2066,6 @@ function fix() {
         }
 
         .gapimg {
-            width: ${data.differenceStyles.imageSize}px;
             height: ${data.differenceStyles.imageSize}px;
             ${data.differenceStyles.imageEnabled ? "" : "display: none"};
             left: ${data.differenceStyles.imageLeft}%;
