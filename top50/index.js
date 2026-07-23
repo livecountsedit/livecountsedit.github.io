@@ -3700,7 +3700,7 @@ function findClosestBattle() {
 }
 
 function findFastestChannel() {
-    let toReturn = [...data.data].sort((a, b) => getGain(a.id) - getGain(b.id));
+    let toReturn = [...data.data].sort((a, b) => getGain(b.id) - getGain(a.id));
     return toReturn[0];
 }
 
