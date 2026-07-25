@@ -21,7 +21,7 @@ function loadScripts() {
                 }
             });
             document.getElementById('scriptList').innerHTML = '';
-            document.getElementById('loadedScripts').innerHTML = 'Installed:';
+            document.getElementById('loadedScripts').innerHTML = 'Installed: none';
 
             if (!data.scripts) {
                 data.scripts = [];
@@ -53,6 +53,15 @@ function loadScripts() {
                             const script = await fetch(`https://raw.githubusercontent.com/livecountsedit/scripts/refs/heads/main/listings/${object.id}/index.lcscript`).then(r => r.text());
                             eval(script);
                             data.scripts.push(object.id);
+
+                            if (data.scripts.includes(object.id)) {
+                                if (document.getElementById('loadedScripts').innerText == "Installed: none") {
+                                    document.getElementById('loadedScripts').innerText = "Installed: " + object.title;
+                                } else {
+                                    document.getElementById('loadedScripts').innerText += `, ${object.title}`;
+                                }
+                            }
+
                             saveData(false); // or reload the affected item
                             button.innerHTML = 'Uninstall'
                         }
@@ -66,12 +75,13 @@ function loadScripts() {
                 container.appendChild(div);
 
                 if (data.scripts.includes(object.id)) {
-                    if (document.getElementById('loadedScripts').innerText == "Installed:") {
-                        document.getElementById('loadedScripts').innerText += " " + object.title;
+                    if (document.getElementById('loadedScripts').innerText == "Installed: none") {
+                        document.getElementById('loadedScripts').innerText = "Installed: " + object.title;
                     } else {
                         document.getElementById('loadedScripts').innerText += `, ${object.title}`;
                     }
                 }
+
             });
             adjustColors();
 
@@ -85,7 +95,7 @@ function initScripts() {
             .then(res => res.text())
             .then(script => {
                 eval(script);
-                console.log('loaded script: ' + scriptId)
+                if (data.debugMode) console.log('loaded script: ' + scriptId)
             })
     })
 }

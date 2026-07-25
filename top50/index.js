@@ -153,7 +153,9 @@ let example_data = {
         'items': []
     },
     'scripts': [],
-    'customCSS': ''
+    'customCSS': '',
+    'debugMode': false,
+    'streamerMode': false,
 };
 let updateInterval;
 let apiInterval;
@@ -291,8 +293,14 @@ function initLoad(redo, previousTheme) {
             data.cardStyles.rankSize = String(defaultRankSize * 3);
         }
     }
-    data.pause = false;
-    if (data.lastOnline && data.offlineGains) {
+    if (data.pause) {
+        document.getElementById("pauseB").innerText = "Resume";
+    }
+    if (data.streamerMode) {
+        document.getElementById("streamerModeB").innerText = "Disable Streamer Mode";
+        document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'flex');
+    }
+    if (data.lastOnline && data.offlineGains && !data.pause) {
         const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval;
         for (let i = 0; i < data.data.length; i++) {
             if (isFinite(data.data[i].std_gain) && data.data[i].std_gain != null) {
@@ -354,7 +362,7 @@ function initLoad(redo, previousTheme) {
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
     updateOdo();
-    updateInterval = setInterval(update, data.updateInterval);
+    if (!data.pause) updateInterval = setInterval(update, data.updateInterval);
     let element = document.getElementById(data.settingsTab);
     let button = document.getElementById('button_' + data.settingsTab);
     element.classList.remove("hidden");
@@ -494,7 +502,7 @@ function setupDesign(redo) {
 
 function initializeCharts() {
     if (typeof Highcharts === 'undefined') {
-        console.warn('Highcharts not loaded, charts will not be displayed');
+        if (data.debugMode) console.warn('Highcharts not loaded, charts will not be displayed');
         return;
     }
 
@@ -613,7 +621,7 @@ function initializeCharts() {
                 }
             }, 50);
         } catch (e) {
-            console.error('Error creating chart for channel ' + channel.id + ':', e);
+            if (data.debugMode) console.error('Error creating chart for channel ' + channel.id + ':', e);
         }
     });
 }
@@ -644,7 +652,7 @@ function updateCharts() {
             }
         } catch (e) {
             // Ignore errors when updating charts
-            console.warn('Error updating chart for channel ' + channel.id + ':', e);
+            if (data.debugMode) console.warn('Error updating chart for channel ' + channel.id + ':', e);
         }
     });
 }
@@ -781,7 +789,7 @@ function setupMDMStyles() {
 
 function update(doGains = true) {
     let intervalNumber = data.intervalCount;
-    console.time(`Update #${intervalNumber + 1} took`)
+    if (data.debugMode) console.time(`Update #${intervalNumber + 1} took`)
     if (data) {
         data.lastOnline = Date.now();
         let fastest = ""
@@ -1172,7 +1180,7 @@ function update(doGains = true) {
         updateCharts();
     }
 
-    console.timeEnd(`Update #${intervalNumber + 1} took`);
+    if (data.debugMode) console.timeEnd(`Update #${intervalNumber + 1} took`);
 }
 
 let selected = null;
@@ -1337,6 +1345,7 @@ function addNewChannels() {
         document.getElementById('loadData3').files[0].text().then(function (data2) {
             const newChannels = JSON.parse(data2).data;
             newChannels.forEach((item, index) => {
+                if (!item.id) item.id = uuidGen();
                 const has = data.data.some(channel => channel.id === item.id);
                 if (has) {
                     stats.failed++;
@@ -1858,7 +1867,7 @@ document.getElementById('chartLineColor').addEventListener('change', function ()
                         color: data.cardStyles.chartLineColor || data.textColor || '#000'
                     }, false);
                 } catch (e) {
-                    console.warn('Error updating chart color for channel ' + channelId + ':', e);
+                    if (data.debugMode) console.warn('Error updating chart color for channel ' + channelId + ':', e);
                 }
             }
         });
@@ -1870,28 +1879,16 @@ document.getElementById('rankingsWidth').addEventListener('change', function () 
     fix()
 });
 document.getElementById('showNames').addEventListener('change', function () {
-    if (document.getElementById('showNames').checked) {
-        data.showNames = true;
-    } else {
-        data.showNames = false;
-    }
+    data.showNames = document.getElementById('showNames').checked;
     fix()
 });
 document.getElementById('showImages').addEventListener('change', function () {
-    if (document.getElementById('showImages').checked) {
-        data.showImages = true;
-    } else {
-        data.showImages = false;
-    }
+    data.showImages = document.getElementById('showImages').checked;
     fix()
     setupMDMStyles();
 });
 document.getElementById('showCounts').addEventListener('change', function () {
-    if (document.getElementById('showCounts').checked) {
-        data.showCounts = true;
-    } else {
-        data.showCounts = false;
-    }
+    data.showCounts = document.getElementById('showCounts').checked;
     fix()
 });
 function fix() {
@@ -2253,6 +2250,7 @@ function fix() {
     document.getElementById('boxBorderRadius').value = data.boxBorderRadius;
     document.getElementById('fastestIcon').value = data.fastestIcon || '🔥';
     document.getElementById('slowestIcon').value = data.slowestIcon || '⌛️';
+    document.getElementById('debugMode').checked = !!data.debugMode;
     if (data.updateInterval) {
         document.getElementById('updateint').value = (data.updateInterval / 1000).toString()
     }
@@ -2570,7 +2568,9 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')')
+        const result = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')'
+        navigator.clipboard.writeText(result);
+        alert("Copied command to clipboard!")
     } else if (type == "2") {
         let min = prompt("What is the minimum amount the channel's rate should gain? (we recommend less than 1 (0.1, 0.2, etc))");
         if (!min || isNaN(min)) {
@@ -2587,19 +2587,21 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        alert('$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true');
+        const result = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true';
+        navigator.clipboard.writeText(result);
+        alert("Copied command to clipboard!")
     } else {
         alert("Please enter type (1 or 2)");
         return;
     }
 }
 
-document.getElementById('connect').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
-document.getElementById('connect2').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
-document.getElementById('connect3').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
-document.getElementById('connect4').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/user)';
-document.getElementById('connect5').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/gains)';
-document.getElementById('connect6').innerHTML = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/rank)';
+document.getElementById('connect').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
+document.getElementById('connect2').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
+document.getElementById('connect3').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
+document.getElementById('connect4').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/user)';
+document.getElementById('connect5').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/gains)';
+document.getElementById('connect6').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/rank)';
 
 document.getElementById('animation').addEventListener('click', function (event) {
     if (event.target.checked) {
@@ -2724,6 +2726,22 @@ function pause() {
         document.getElementById('pauseB').innerText = "Pause"
         updateInterval = setInterval(update, data.updateInterval);
         update()
+    }
+}
+
+function toggleStreamerMode() {
+    if (!data.streamerMode) {
+        data.streamerMode = true;
+        document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'flex');
+        alert('Streamer Mode enabled.')
+    } else {
+        if (confirm('Are you sure you want to disable Streamer Mode?')) {
+            data.streamerMode = false;
+            document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'none');
+            alert('Streamer Mode disabled.')
+        } else {
+            alert('Action cancelled.')
+        }
     }
 }
 
@@ -2854,7 +2872,6 @@ function apiUpdate(interval) {
 
                 let result = channels[i];
                 for (const propName of propertyNames) {
-                    console.log(propName)
                     result = result[propName];
                 }
                 nameUpdate = result;
@@ -3019,29 +3036,6 @@ function loadAPIUpdates() {
 }
 loadAPIUpdates()
 
-function selectSpecificChannels() {
-    if (pickingChannels) {
-        pause()
-        document.getElementById('selectSpecific').innerText = 'Select Specific Channels'
-        document.getElementById('main').removeEventListener('click', selectorFunction)
-        pickingChannels = false;
-        alert("Saved")
-    } else {
-        if (confirm('This will reset the previous list of SELECTED channels.')) {
-            quickSelecting = false;
-            document.getElementById('quickSelectButton').style.border = ""
-            document.getElementById('main').removeEventListener('click', selectorFunction, { once: true })
-            specificChannels = [];
-            alert('Click on the channels you want to add to the list. Click the button again to stop. Counters will pause while selecting channels.')
-            document.getElementById('main').addEventListener('click', selectorFunction)
-            document.getElementById('selectSpecific').innerText = 'Stop Selecting Channels'
-            pause()
-            pickingChannels = true;
-
-        }
-    }
-}
-
 function selectorFunction(e) {
     let target = e.target;
     if (quickSelecting || pickingChannels) {
@@ -3116,6 +3110,7 @@ function selectorFunction(e) {
     }
     quickSelecting = false;
     document.getElementById('quickSelectButton').style.border = ""
+    updateEditHourlyEstimates();
 }
 
 function refresh() {
@@ -3444,6 +3439,10 @@ document.getElementById('disableImageBorderColor').addEventListener('click', fun
     fix();
 });
 
+document.getElementById('debugMode').addEventListener('click', function () {
+    data.debugMode = document.getElementById('debugMode').checked;
+})
+
 let headerIntervals = [];
 function loadHeader() {
     headerIntervals.forEach(interval => {
@@ -3518,9 +3517,9 @@ function loadHeader() {
                     // Duplicate content for seamless scrolling - duplicate multiple times for smooth loop
                     const separator = ' • ';
                     const duplicatedText = `${displayText}${separator}${displayText}${separator}`;
-                    div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms; animation-name: ${directionClass === 'scroll-left' ? 'scroll-left' : 'scroll-right'}; animation-timing-function: linear; animation-iteration-count: infinite;">${duplicatedText}${duplicatedText}</span></div>`;
+                    div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms; animation-name: ${directionClass === 'scroll-left' ? 'scroll-left' : 'scroll-right'}; animation-timing-function: linear; animation-iteration-count: infinite;">${escapeHTML(duplicatedText + duplicatedText)}</span></div>`;
                 } else {
-                    div.innerHTML = `<p class="header-text">${displayText}</p>`;
+                    div.innerHTML = `<p class="header-text">${escapeHTML(displayText)}</p>`;
                 }
             };
 
@@ -3528,13 +3527,14 @@ function loadHeader() {
             updateDisplayText();
 
             // Update text with variables periodically if variables are used
-            if (item.attributes.text && (item.attributes.text.includes('$name') || item.attributes.text.includes('$hourly') || item.attributes.text.includes('$count') || item.attributes.text.includes('$rank') || item.attributes.text.includes('$repeat'))) {
+            
+            if (item.attributes.text && includesAtLeastOneOf(item.attributes.text, '$name', '$hourly', '$count', '$rank', '$repeat', '$abbhourly', '$abbcount')) {
                 const updateInterval = (item.attributes.updateInterval || data.updateInterval || 2) * 1000;
                 headerIntervals.push(setInterval(updateDisplayText, updateInterval));
             }
 
             if (item.attributes.valueFrom && item.attributes.valueFrom != 'none') {
-                if (item.attributes.updateInterval != 0) {
+                if (item.attributes.updateInterval > 0) {
                     headerIntervals.push(setInterval(function () {
                         let string = "";
                         let array = [];
@@ -3571,16 +3571,16 @@ function loadHeader() {
                                 string += `${array[i].name} vs ${array[i + 1].name}: ${Math.floor(array[i].count - array[i + 1].count).toLocaleString('en-US')}${endComma}`
                             }
                         }
-                        if (item.attributes.scrollTime != '0' && item.attributes.scrollTime > 0) {
-                            const scrollText = string.join(', ');
+                        if (parseFloat(item.attributes.scrollTime) > 0) {
+                            const scrollText = string;
                             const scrollDirection = item.attributes.scrollDirection || 'left';
                             const directionClass = scrollDirection === 'right' ? 'scroll-right' : 'scroll-left';
                             const animationDuration = item.attributes.scrollTime * 1000;
                             // Duplicate content for seamless scrolling
                             const duplicatedText = `${scrollText} • ${scrollText} • `;
-                            div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms;">${duplicatedText}${duplicatedText}</span></div>`;
+                            div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms;">${escapeHTML(duplicatedText + duplicatedText)}</span></div>`;
                         } else {
-                            div.innerHTML = `<p class="header-text">${string.join(', ')}</p>`;
+                            div.innerHTML = `<p class="header-text">${escapeHTML(string)}</p>`;
                         }
                     }, item.attributes.updateInterval * 1000));
                 }
@@ -3788,7 +3788,7 @@ function loadTopSettings(itemName, itemType) {
                     <textarea rows="3" class="section_attribute_text header_option"
                         placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)">${item.attributes.text || ''}</textarea>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $rank<br>
+                        <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $abbhourly(rank), $abbcount(rank), $rank<br>
                         <strong>Repeat:</strong> $repeat(start-end, part1, part2, ...) - Repeats template for each rank in range<br>
                         <strong>Example:</strong> "$name(1) gains $hourly(1) per hour" or "$repeat(1-10, $rank. $name - $count)"
                     </p>
@@ -4127,7 +4127,7 @@ document.getElementById('settingsSearch').addEventListener('input', (e) => {
         if (results.length) {
             for (const result of results) {
                 const p = document.createElement('p');
-                p.innerText = result[0];
+                p.innerText = result[0].replace(/\s+/g, ' ');
                 const id = result[1];
                 const button = document.getElementById('button_' + id).cloneNode(true);
                 button.classList.add("enabled");
@@ -4141,3 +4141,66 @@ document.getElementById('settingsSearch').addEventListener('input', (e) => {
     }
     adjustColors();
 })
+
+document.getElementById('runSnippet').addEventListener('click', () => {
+    const result = prompt("⚠️ PLEASE READ!!! Make sure you know what you're doing before using this. NEVER paste in code from an untrusted source. If anything happens because of something you pasted in here IT IS 100% ON YOU! Please type I UNDERSTAND in all caps before proceeding.");
+    if (result === "I UNDERSTAND") {
+        const code = prompt("Paste in your code here. ⚠️ NEVER EVER paste in code from an untrusted source!");
+        if (code) {
+            const response = prompt("Are you REALLY sure you wanna run this? Type YES in all caps to confirm. Again, if anything happens cause of what you pasted in here, IT'S 100% ON YOU!");
+            if (response === "YES") {
+                try {
+                    eval(code);
+                    alert("Success!")
+                } catch (err) {
+                    alert(`An error occurred: ${err}`)
+                }
+            } else {
+                alert("Action cancelled.");
+            }
+        } else {
+            alert("Action cancelled.")
+        }
+    } else {
+        alert("Action cancelled.")
+    }
+})
+
+function updateAddHourlyEstimates() {
+    const addMinGain = parseFloat(document.getElementById("add_min_gain").value) || 0;
+    const addMaxGain = parseFloat(document.getElementById("add_max_gain").value) || 0;
+    const addMeanGain = parseFloat(document.getElementById("add_mean_gain").value);
+    const addStdGain = parseFloat(document.getElementById("add_std_gain").value) || 0;
+    const usingMeanGain = isFinite(addMeanGain);
+
+    // Minimum practical interval is 4 ms
+    const updateIntervals = 3.6e6 / Math.max(4,data.updateInterval);
+    const mean = updateIntervals * (usingMeanGain ? addMeanGain : (addMinGain + addMaxGain) / 2);
+    const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? addStdGain : (addMinGain - addMaxGain / Math.sqrt(12))));
+    document.getElementById("addHourlyMean").innerText = Math.abs(mean) > 10 ? Math.round(mean).toLocaleString('en-US') : mean.toLocaleString('en-US', {maximumSignificantDigits: 2});
+    document.getElementById("addHourlyStDev").innerText = stdev > 10 ? Math.round(stdev).toLocaleString('en-US') : stdev.toLocaleString('en-US', {maximumSignificantDigits: 2});
+}
+
+function updateEditHourlyEstimates() {
+    const editMinGain = parseFloat(document.getElementById("edit_min_gain").value) || 0;
+    const editMaxGain = parseFloat(document.getElementById("edit_max_gain").value) || 0;
+    const editMeanGain = parseFloat(document.getElementById("edit_mean_gain").value);
+    const editStdGain = parseFloat(document.getElementById("edit_std_gain").value) || 0;
+    const usingMeanGain = isFinite(editMeanGain);
+
+    // Minimum practical interval is 4 ms
+    const updateIntervals = 3.6e6 / Math.max(4,data.updateInterval);
+    const mean = updateIntervals * (usingMeanGain ? editMeanGain : (editMinGain + editMaxGain) / 2);
+    const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? editStdGain : (editMinGain - editMaxGain / Math.sqrt(12))));
+    document.getElementById("editHourlyMean").innerText = Math.abs(mean) > 10 ? Math.round(mean).toLocaleString('en-US') : mean.toLocaleString('en-US', {maximumSignificantDigits: 2});
+    document.getElementById("editHourlyStDev").innerText = stdev > 10 ? Math.round(stdev).toLocaleString('en-US') : stdev.toLocaleString('en-US', {maximumSignificantDigits: 2});
+}
+
+document.getElementById("add_min_gain").addEventListener('input', updateAddHourlyEstimates);
+document.getElementById("add_max_gain").addEventListener('input', updateAddHourlyEstimates);
+document.getElementById("add_mean_gain").addEventListener('input', updateAddHourlyEstimates);
+document.getElementById("add_std_gain").addEventListener('input', updateAddHourlyEstimates);
+document.getElementById("edit_min_gain").addEventListener('input', updateEditHourlyEstimates);
+document.getElementById("edit_max_gain").addEventListener('input', updateEditHourlyEstimates);
+document.getElementById("edit_mean_gain").addEventListener('input', updateEditHourlyEstimates);
+document.getElementById("edit_std_gain").addEventListener('input', updateEditHourlyEstimates);

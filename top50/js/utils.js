@@ -57,11 +57,28 @@ function replaceHeaderVariables(text) {
             return 'N/A';
         });
 
+        // Replace $abbhourly with abbreviated hourly gain
+        result = result.replace(/\$abbhourly(?!\d|\(|\()/g, () => {
+            if (index >= 0 && index < sortedData.length && sortedData[index]) {
+                const hourly = getHourlyGain(sortedData[index].id);
+                return abbs(Math.floor(hourly));
+            }
+            return '0';
+        });
+
         // Replace $hourly (without number) with hourly gain at this rank
         result = result.replace(/\$hourly(?!\d|\(|\()/g, () => {
             if (index >= 0 && index < sortedData.length && sortedData[index]) {
                 const hourly = getHourlyGain(sortedData[index].id);
                 return Math.floor(hourly).toLocaleString('en-US');
+            }
+            return '0';
+        });
+
+        // Replace $abbcount with abbreviated count
+        result = result.replace(/\$abbcount(?!\d|\(|\()/g, () => {
+            if (index >= 0 && index < sortedData.length && sortedData[index]) {
+                return abbs(Math.floor(sortedData[index].count || 0));
             }
             return '0';
         });
@@ -133,12 +150,31 @@ function replaceHeaderVariables(text) {
         return 'N/A';
     });
 
+    result = result.replace(/\$abbhourly\((\d+)\)|\$abbhourly(\d+)/g, (match, rankParen, rankDirect) => {
+        const rank = rankParen || rankDirect;
+        const index = parseInt(rank) - 1;
+        if (index >= 0 && index < sortedData.length && sortedData[index]) {
+            const hourly = getHourlyGain(sortedData[index].id);
+            return abbs(Math.floor(hourly));
+        }
+        return '0';
+    });
+
     result = result.replace(/\$hourly\((\d+)\)|\$hourly(\d+)/g, (match, rankParen, rankDirect) => {
         const rank = rankParen || rankDirect;
         const index = parseInt(rank) - 1;
         if (index >= 0 && index < sortedData.length && sortedData[index]) {
             const hourly = getHourlyGain(sortedData[index].id);
             return Math.floor(hourly).toLocaleString('en-US');
+        }
+        return '0';
+    });
+
+    result = result.replace(/\$abbcount\((\d+)\)|\$abbcount(\d+)/g, (match, rankParen, rankDirect) => {
+        const rank = rankParen || rankDirect;
+        const index = parseInt(rank) - 1;
+        if (index >= 0 && index < sortedData.length && sortedData[index]) {
+            return abbs(Math.floor(sortedData[index].count || 0));
         }
         return '0';
     });
@@ -263,7 +299,7 @@ function mergeWithExampleData(imported, example) {
 }
 
 function saveData(alert2) {
-    console.log("Attempting to save...")
+    if (data.debugMode) console.log("Attempting to save...")
     try {
         data.lastOnline = Date.now();
         localStorage.setItem("data", JSON.stringify(data));
@@ -271,12 +307,12 @@ function saveData(alert2) {
         if (alert2) {
             alert("Saved!");
         }
-        console.log("Saved in browser.");
+        if (data.debugMode) console.log("Saved in browser.");
     } catch (error) {
         if (alert2) {
             alert(`Error: ${error}`);
         }
-        console.error("Failed to save in browser: " + error)
+        if (data.debugMode) console.error("Failed to save in browser: " + error)
         document.getElementById("storage-warning").style.display = "block";
     }
 }
@@ -359,17 +395,11 @@ function searchSettings(str) {
     for (const container of settingContainers) {
         const labels = container.querySelectorAll("label");
         for (const label of labels) {
-            hasInputChild = false;
-            for (const child of label.children) {
-                if (["INPUT", "SELECT", "TEXTAREA"].includes(child.tagName)) {
-                    hasInputChild = true;
-                    break;
-                }
-            }
+            let hasInputChild = !!label.querySelectorAll("input,textarea,select").length;
             if (hasInputChild) {
                 const labelText = Array.from(label.childNodes)
-                    .filter(node => node.nodeType === Node.TEXT_NODE)
-                    .map(node => node.textContent.trim())
+                    .filter(node => node.nodeType === Node.TEXT_NODE || node.nodeName === 'ABBR')
+                    .map(node => node.textContent.trim().replace(/\s+/g, ' '))
                     .join(' ');
                 if (labelText.toLowerCase().includes(str.toLowerCase())) {
                     results.push([labelText, container.parentElement.id || container.parentElement.parentElement.id]);
@@ -379,3 +409,24 @@ function searchSettings(str) {
     }
     return results;
 }
+
+function includesAtLeastOneOf(str, ...substrs) {
+    for (const substr of substrs) {
+        if (str.includes(substr)) return true;
+    }
+    return false;
+}
+
+function initializeCopyButtons() {
+    document.querySelectorAll('[copy]').forEach(x => {
+        x.onclick = () => {
+            const elem = document.getElementById(x.getAttribute("copy"));
+            if (elem && elem.value) {
+                navigator.clipboard.writeText(elem.value);
+                alert("Copied!")
+            }
+        }
+    })
+}
+
+initializeCopyButtons();

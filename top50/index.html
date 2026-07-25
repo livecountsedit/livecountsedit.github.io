@@ -4,7 +4,7 @@
 <head>
     <title>Livecountsedit - Fake Top 50</title>
     <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css?v=7.6" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.6.4" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
@@ -113,6 +113,9 @@
                     <button onclick="save2()">Export Private Save (In File)</button>
                 </div>
                 <div>
+                    <button id="streamerModeB" onclick="toggleStreamerMode()">Enable Streamer Mode</button>
+                </div>
+                <div>
                     <input type="checkbox" id="autosave" autocomplete="off"><label>Autosave (15s)</label>
                 </div>
                 <div>
@@ -187,6 +190,7 @@
                     <label>If filled in then min/max is ignored.</label><br>
                     <input placeholder="Mean Gain" id="add_mean_gain" class="l-width"><br>
                     <input placeholder="Range From Mean (Standard Deviation)" id="add_std_gain" class="l-width"><br>
+                    <p>Estimated gains: <span id="addHourlyMean">0</span>/hr ± <span id="addHourlyStDev">0</span> (1σ)</p>
                     <br>
                     <input placeholder="Card Background" id="add_bg_color" class="l-width">
                     <br><label>For a gradient, put "linear-gradient(red, yellow)" <a
@@ -221,6 +225,7 @@
                     <input id="edit_mean_gain_check" type="checkbox" checked><br>
                     <input placeholder="Range From Mean (Standard Deviation)" id="edit_std_gain" class="l-width">
                     <input id="edit_std_gain_check" type="checkbox" checked><br>
+                    <p>Estimated gains: <span id="editHourlyMean">0</span>/hr ± <span id="editHourlyStDev">0</span> (1σ)</p>
                     <br>
                     <input placeholder="Card Background" id="edit_bg_color" class="l-width"><input
                         id="edit_bg_color_check" type="checkbox" checked><br><br>
@@ -381,6 +386,7 @@
                     <button onclick="saveGainRateOption()">Save This Option</button>
                     <button onclick="clearGainData()">Clear Gain Data</button><br>
                     <label>Note: Gain data is <strong>NOT</strong> saved after reloading</label>
+                    <label>Debug mode: <input type="checkbox" id="debugMode"></label>
                 </div>
             </div>
         </div>
@@ -478,8 +484,13 @@
                             <option value="mixerno1">[abbreviated] mixerno.space</option>
                             <option value="mixerno2">[estimated] mixerno.space</option>
                         </select></label>
-                    <label>API request URL:<br><input class="xxl-width" id="apiLink"
-                            placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id="></label>
+                    <label>API request URL:<br>
+                        <div class="streamer-mode-wrapper">
+                            <input class="xxl-width" id="apiLink"
+                            placeholder="https://www.googleapis.com/youtube/v3/channels?part=statistics,snippet&key=key&id=">
+                            <div class="streamer-mode">Turn off Streamer Mode to view this!</div>
+                        </div>
+                        </label>
                     <p>Make sure the part to include the channel is at the very end and left open<br>OR use
                         <strong>{{channels}}</strong> to indentify where they should go.
                     </p>
@@ -494,12 +505,22 @@
                             <option value="GET">GET</option>
                             <option value="POST">POST</option>
                         </select></label>
-                    <label>HTTP request headers (optional):<br><textarea class="xxl-width" id="extraCred"
-                            placeholder="Authorization: auth code;&#10Authorization2: auth code2;" autocomplete="off"
-                            class="creds"></textarea></label>
-                    <label>HTTP request body (optional):<br><textarea class="xxl-width" id="body"
-                            placeholder="value1=lol;&#10value2=lol;" autocomplete="off"
-                            class="creds"></textarea></label>
+                    <label>HTTP request headers (optional):<br>
+                        <div class="streamer-mode-wrapper">
+                            <textarea class="xxl-width" id="extraCred"
+                                placeholder="Authorization: auth code;&#10Authorization2: auth code2;" autocomplete="off"
+                                class="creds"></textarea>
+                            <div class="streamer-mode">Turn off Streamer Mode to view this!</div>
+                        </div>
+                    </label>
+                    <label>HTTP request body (optional):<br>
+                        <div class="streamer-mode-wrapper">
+                            <textarea class="xxl-width" id="body"
+                                placeholder="value1=lol;&#10value2=lol;" autocomplete="off"
+                                class="creds"></textarea>
+                            <div class="streamer-mode">Turn off Streamer Mode to view this!</div>
+                        </div>
+                    </label>
                 </div>
                 <div class="half-column">
                     <label>Loop through (data = root JSON object):<br>
@@ -559,8 +580,11 @@
                     <p class="fysc-example"><strong>Example:</strong> <code>{!add 100/200}</code> - 100 is min gain, 200
                         is max gain</p>
                     <label><strong>Command Response:</strong></label>
+                    <div class="streamer-mode-wrapper" style="width: 100%">
                     <textarea id="connect" autocomplete="off" rows="4"
                         placeholder="Paste NightBot command response here..."></textarea>
+                        <div class="streamer-mode" copy="connect">Turn off Streamer Mode to view.<br>Click to copy.</div>
+                    </div>
                 </div>
 
                 <div class="fysc-command-card">
@@ -569,8 +593,11 @@
                     <p class="fysc-example"><strong>Example:</strong> <code>{!edit 100/200}</code> - Updates min/max
                         gains</p>
                     <label><strong>Command Response:</strong></label>
+                    <div class="streamer-mode-wrapper" style="width: 100%">
                     <textarea id="connect3" autocomplete="off" rows="4"
                         placeholder="Paste NightBot command response here..."></textarea>
+                        <div class="streamer-mode" copy="connect3">Turn off Streamer Mode to view.<br>Click to copy.</div>
+                    </div>
                 </div>
 
                 <div class="fysc-command-card">
@@ -579,8 +606,11 @@
                     <p class="fysc-example"><strong>Tip:</strong> Add <code>&rates=true</code> to the end of the url to
                         alter channel gain rates</p>
                     <label><strong>Command Response:</strong></label>
+                    <div class="streamer-mode-wrapper" style="width: 100%">
                     <textarea id="connect2" autocomplete="off" rows="4"
                         placeholder="Paste NightBot command response here..."></textarea>
+                        <div class="streamer-mode" copy="connect2">Turn off Streamer Mode to view.<br>Click to copy.</div>
+                    </div>
                 </div>
 
                 <div class="fysc-command-card">
@@ -588,8 +618,11 @@
                     <p>Retrieves a user's current subscriber count.</p>
                     <p class="fysc-example">Returns the subscriber count for the specified user</p>
                     <label><strong>Command Response:</strong></label>
+                    <div class="streamer-mode-wrapper" style="width: 100%">
                     <textarea id="connect4" autocomplete="off" rows="4"
                         placeholder="Paste NightBot command response here..."></textarea>
+                        <div class="streamer-mode" copy="connect4">Turn off Streamer Mode to view.<br>Click to copy.</div>
+                    </div>
                 </div>
 
                 <div class="fysc-command-card">
@@ -597,8 +630,11 @@
                     <p>Retrieves a user's current gain rate.</p>
                     <p class="fysc-example">Returns the gain rate for the specified user</p>
                     <label><strong>Command Response:</strong></label>
+                    <div class="streamer-mode-wrapper" style="width: 100%">
                     <textarea id="connect5" autocomplete="off" rows="4"
                         placeholder="Paste NightBot command response here..."></textarea>
+                    <div class="streamer-mode" copy="connect5">Turn off Streamer Mode to view.<br>Click to copy.</div>
+                    </div>
                 </div>
 
                 <div class="fysc-command-card">
@@ -606,8 +642,11 @@
                     <p>Retrieves a user's current rank on the leaderboard.</p>
                     <p class="fysc-example">Returns the rank position for the specified user</p>
                     <label><strong>Command Response:</strong></label>
+                    <div class="streamer-mode-wrapper" style="width: 100%">
                     <textarea id="connect6" autocomplete="off" rows="4"
                         placeholder="Paste NightBot command response here..."></textarea>
+                        <div class="streamer-mode" copy="connect6">Turn off Streamer Mode to view.<br>Click to copy.</div>
+                    </div>
                 </div>
             </div>
 
@@ -672,6 +711,8 @@
 
         <div id="scriptSettings" class="settings hidden">
             <h2>Add-ons</h2>
+            <p>⚠️ <strong>WARNING: </strong>Only use this feature for debugging purposes, such as when a Livecountsedit Discord staff member tells you to run something. Never paste in code from an untrusted source!</p>
+            <button id="runSnippet">Run Code Snippet</button>
             <div>
                 <p id="loadedScripts"></p>
                 <hr>
@@ -688,9 +729,9 @@
         </div>
     </div>
     <hr><br>
-    <script src="./js/utils.js?v=7.6"></script>
-    <script src="./index.js?v=7.6.3"></script>
-    <script src="./js/scripts.js?v=7.6"></script>
+    <script src="./js/utils.js?v=7.6.4"></script>
+    <script src="./index.js?v=7.6.4"></script>
+    <script src="./js/scripts.js?v=7.6.4"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>
