@@ -13,6 +13,8 @@ let odometers = [];
 let iso;
 let data = {};
 let gainTable = {};
+let glowingCards = [];
+let fires = new Map();
 
 let uuid = uuidGen()
 let example_data = {
@@ -24,22 +26,19 @@ let example_data = {
     "rankingsWidth": '10',
     "showBlankSlots": true,
     "showDifferences": false,
-    "differenceThreshold": 100,
     "differenceStyles": {
         "left": "75",
         "top": "60",
-        "color": "#008000",
         "imageLeft": "10",
         "imageTop": "60",
         "imageSize": "50",
-        "imageEnabled": false,
-        "shakingEnabled": true,
-        "differenceImage": "",
         "differenceSize": '2',
         "lineEnabled": false,
         "lineColor": "#808080",
         "abbDifferences": false,
-        "showDifferenceWhen": "always"
+        "alignDifferences": "left",
+        "estimateUsingObservedGains": false,
+        "created": []
     },
     "cardStyles": {
         "cardWidth": '19',
@@ -51,7 +50,7 @@ let example_data = {
         "rankSize": '15',
         "containerHeight": 95,
         "containerWidth": 100,
-        "showChart": true,
+        "showChart": false,
         "chartLineColor": "#000000",
     },
     "bgColor": "#141414",
@@ -156,6 +155,9 @@ let example_data = {
     'customCSS': '',
     'debugMode': false,
     'streamerMode': false,
+    'editorShowsExactCount': false,
+    'useOdometerColors': true,
+    'maxChartValues': 50
 };
 let updateInterval;
 let apiInterval;
@@ -189,14 +191,48 @@ function initLoad(redo, previousTheme) {
     if (!data.headerSettings.items) {
         data.headerSettings.items = [];
     }
-    // Filter out items with undefined or "undefined" names; default placement to 'header'
-    data.headerSettings.items = data.headerSettings.items.filter(item =>
-        item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
-    );
-    data.headerSettings.items.forEach(item => { if (item.placement == null) item.placement = 'header'; });
+    // default placement to 'header'
+    // rename items with invalid names
+    data.headerSettings.items.forEach(item => { 
+        if (item.placement == null) item.placement = 'header'; 
+        if (!isValidHeaderName(item.name)) item.name = uuidGen();
+    });
+
+    // Old difference settings
+    if ('imageEnabled' in data.differenceStyles || 
+        'shakingEnabled' in data.differenceStyles || 
+        'differenceImage' in data.differenceStyles || 
+        'showDifferenceWhen' in data.differenceStyles ||
+        'color' in data.differenceStyles ||
+        'differenceThreshold' in data
+    ) {
+        data.differenceStyles.created.push({
+            name: 'Difference',
+            threshold: parseFloat(data.differenceThreshold) || 0,
+            icon: data.differenceStyles.imageEnabled ? (data.differenceStyles.differenceImage || '') : '',
+            color: data.differenceStyles.color || '',
+            method: '<=',
+            iconShaking: !!data.differenceStyles.shakingEnabled,
+            glowColor: '',
+            glow: 'none',
+            showWhen: data.differenceStyles.showDifferenceWhen || 'always'
+        });
+        delete data.differenceStyles.imageEnabled;
+        delete data.differenceStyles.shakingEnabled;
+        delete data.differenceStyles.differenceImage;
+        delete data.differenceStyles.showDifferenceWhen;
+        delete data.differenceStyles.color;
+        delete data.differenceThreshold;
+    }
+
+    if ('settingsEnabled' in data) {
+        delete data.settingsEnabled;
+    }
+
+    data.fireIcons.created.forEach(x => { if (!x.fontWeight) x.fontWeight = 900;})
 
     // Reset sizes if switching away from top1
-    if (redo && previousTheme && previousTheme.includes('top1') && !data.theme.includes('top1')) {
+    if (redo && previousTheme && previousTheme === 'top1' && data.theme !== 'top1') {
         const defaultCardWidth = 19;
         const defaultCardHeight = 3.6;
         const defaultImageSize = 3;
@@ -412,7 +448,7 @@ function setupDesign(redo) {
                     <div class="name" id="name_${cid}">\u200b</div>
                     <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
                 </div>
-                <img src="${data.differenceStyles.differenceImage}" class="gapimg">
+                <img src="" class="gapimg">
                 <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
                 <div class="difference_line"></div>
                 <div class="chart" id="chart_${cid}"></div>
@@ -464,7 +500,7 @@ function setupDesign(redo) {
                     <div class="name" id="name_${cid}">\u200b</div>
                     <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
                 </div>
-                <img src="${data.differenceStyles.differenceImage}" class="gapimg">
+                <img src="" class="gapimg">
                 <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
                 <div class="difference_line"></div>
                 <div class="chart" id="chart_${cid}"></div>
@@ -531,16 +567,16 @@ function initializeCharts() {
         let chartData = [];
         if (gainTable[channel.id] && gainTable[channel.id].length > 0) {
             const now = Date.now();
-            const dataPoints = gainTable[channel.id].slice(-51, -1);
+            const dataPoints = gainTable[channel.id].slice(-(data.maxChartValues + 1), -1);
             chartData = dataPoints.map((value, index) => {
                 // Create timestamps going back in time
                 const timeOffset = (dataPoints.length - index - 1) * data.updateInterval;
-                return [now - timeOffset, parseFloat(value) || 0];
+                return [now - timeOffset, getDisplayedCount(value) || 0];
             });
         } else {
             // Start with current count - add at least 2 points so line is visible
             const now = Date.now();
-            const count = parseFloat(channel.count) || 0;
+            const count = getDisplayedCount(channel.count) || 0;
             chartData = [
                 [now - data.updateInterval, count],
                 [now, count]
@@ -640,13 +676,13 @@ function updateCharts() {
             if (series) {
 
                 const now = Date.now();
-                const count = parseFloat(channel.count) || 0;
+                const count = getDisplayedCount(channel.count) || 0;
 
                 //Add new point
                 series.addPoint([now, count], true, true);
 
                 // Keep only last 50 points for performance
-                if (series.data.length > 50) {
+                while (series.data.length > data.maxChartValues) {
                     series.data[0].remove(false);
                 }
             }
@@ -712,6 +748,9 @@ function create() {
         if (document.getElementById('add_id').value.length > 0) {
             id = document.getElementById('add_id').value;
         }
+        if (data.data.some(x => x.id === id)) {
+            return alert('That ID is already in use.')
+        }
         data.data.push({
             name,
             count,
@@ -762,7 +801,7 @@ function setupMDMStyles() {
                         .num {
                             height: 100%;
                             display: flex;
-                            ${data.verticallyCenterRanks ? 'flex-direction: column' : ''}
+                            ${data.verticallyCenterRanks ? 'flex-direction: column;' : ''}
                             align-items: center;
                             border-radius: 5px;
                             background-position: center;
@@ -846,9 +885,8 @@ function update(doGains = true) {
             if (!gainTable[data.data[i].id]) {
                 gainTable[data.data[i].id] = [];
             }
-            const chartEntries = 50;
             gainTable[data.data[i].id].push(getDisplayedCount(data.data[i].count));
-            gainTable[data.data[i].id] = gainTable[data.data[i].id].slice(-(Math.max(chartEntries, data.gainAverageOf) + 1));
+            gainTable[data.data[i].id] = gainTable[data.data[i].id].slice(-(Math.max(data.maxChartValues, data.gainAverageOf) + 1));
         }
         document.getElementById('quickSelect').innerHTML = selections.join("");
         document.getElementById('quickSelect').value = past || 'select';
@@ -863,11 +901,11 @@ function update(doGains = true) {
                 });
             } else if ((!document.getElementById('sorter').value) || (document.getElementById('sorter').value == "num")) {
                 data.data = data.data.sort(function (a, b) {
-                    return b.count - a.count
+                    return getDisplayedCount(b.count) - getDisplayedCount(a.count)
                 });
             } else {
                 data.data = data.data.sort(function (a, b) {
-                    return b.count - a.count
+                    return getDisplayedCount(b.count) - getDisplayedCount(a.count)
                 });
             }
         }
@@ -883,6 +921,7 @@ function update(doGains = true) {
             }
         }
         for (let i = 0; i < data.max; i++) {
+            glowingCards = [];
             let extraTimeTillUpdate = 0;
             const interval = data.updateInterval;
             if (data.randomCountUpdateTime) {
@@ -891,12 +930,16 @@ function update(doGains = true) {
             if (data.waterFallCountUpdateTime) {
                 extraTimeTillUpdate = i * 100;
             }
+
+            if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0) {
+                calculateFires();
+            }
             setTimeout(function () {
                 num = formatRank(i + 1);
                 const currentCard = document.getElementsByClassName("card")[i];
                 if (currentCard) {
                     if (data.animatedCards.enabled) {
-                        num = currentCard.children[0].children[0].innerText
+                        num = currentCard.querySelector(".num_text").innerText
                     }
                     if (data.data[i]) {
                         if (!data.data[i].image) {
@@ -908,192 +951,165 @@ function update(doGains = true) {
                             currentCard.style.backgroundColor = data.boxColor;
                         }
                         currentCard.id = "card_" + data.data[i].id
-                        currentCard.children[0].id = "num_" + data.data[i].id
+                        currentCard.querySelector(".num").id = "num_" + data.data[i].id
 
                         const absoluteUrl = new URL(data.data[i].image, window.location.href).href;
 
-                        if (!(currentCard.children[1].src === absoluteUrl)) {
-                            currentCard.children[1].src = data.data[i].image;
+                        if (!(currentCard.querySelector(".image").src === absoluteUrl)) {
+                            currentCard.querySelector(".image").src = data.data[i].image;
                         }
 
-                        currentCard.children[1].id = "image_" + data.data[i].id
+                        currentCard.querySelector(".image").id = "image_" + data.data[i].id
 
-                        currentCard.children[2].children[0].innerText = data.data[i].name
-                        currentCard.children[2].children[0].id = "name_" + data.data[i].id
+                        currentCard.querySelector(".name").innerText = data.data[i].name
+                        currentCard.querySelector(".name").id = "name_" + data.data[i].id
 
-                        currentCard.children[2].children[1].id = "count_" + data.data[i].id
-                        currentCard.children[2].children[1].innerText = getDisplayedCount(data.data[i].count)
+                        currentCard.querySelector(".count").id = "count_" + data.data[i].id
+                        currentCard.querySelector(".count").innerText = getDisplayedCount(data.data[i].count)
                         currentCard.setAttribute('data-count', data.data[i].count)
                         //HERE
                         if (data.data[i + 1]) {
-                            let condition = true;
-                            const topGain = isFinite(data.data[i].mean_gain) ? data.data[i].mean_gain : average(data.data[i].min_gain, data.data[i].max_gain);
-                            const bottomGain = isFinite(data.data[i+1].mean_gain) ? data.data[i+1].mean_gain : average(data.data[i+1].min_gain, data.data[i+1].max_gain);
-                            switch (data.differenceStyles.showDifferenceWhen) {
-                                case 'bottomFasterSet':
-                                    if (bottomGain < topGain) condition = false;
+                            const topGainSet = getSetGain(data.data[i]);
+                            const bottomGainSet = getSetGain(data.data[i+1]);
+                            const topGainObserved = getGain(data.data[i].id);
+                            const bottomGainObserved = getGain(data.data[i+1].id);
+                            const diff = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count);
+                            const time = estimatePassingTime(data.data[i], data.data[i+1]);
+                            const hours = time / 3.6e6 * data.updateInterval;
+                            let effectDisplayed = false;
+
+                            for (let j = 0; j < data.differenceStyles.created.length; j++) {
+                                const diffEffect = data.differenceStyles.created[j];
+                                switch (diffEffect.showWhen) {
+                                    case 'bottomFasterSet':
+                                        if (bottomGainSet < topGainSet) continue;
+                                        break;
+                                    case 'topFasterSet':
+                                        if (topGainSet < bottomGainSet) continue;
+                                        break;
+                                    case 'bottomFasterObserved':
+                                        if (bottomGainObserved < topGainObserved) continue;
+                                        break;
+                                    case 'topFasterObserved':
+                                        if (topGainObserved < bottomGainObserved) continue;
+                                        break;
+                                } 
+
+                                let condition = false;
+                                switch (diffEffect.method) {
+                                    case '<=':
+                                        condition = (diff <= diffEffect.threshold);
+                                        break;
+                                    case '==':
+                                        condition = (diff == diffEffect.threshold);
+                                        break;
+                                    case '>=':
+                                        condition = (diff >= diffEffect.threshold);
+                                        break;
+                                    case '!=':
+                                        condition = (diff != diffEffect.threshold);
+                                        break;
+                                    case 'h<=':
+                                        condition = (isFinite(hours) && hours >= 0 && hours <= diffEffect.threshold);
+                                        break;
+                                    case 'h>=':
+                                        condition = (isFinite(hours) && hours >= Math.max(0, diffEffect.threshold));
+                                        break;
+                                }
+
+                                if (condition) {
+                                    effectDisplayed = true;
+                                    let thisCardGlows = false;
+                                    let nextCardGlows = false;
+                                    currentCard.querySelector(".subgap").style.color = diffEffect.color;
+                                    if (diffEffect.icon) {
+                                        currentCard.querySelector(".gapimg").src = diffEffect.icon;
+                                        currentCard.querySelector(".gapimg").style.visibility = 'visible';
+                                        currentCard.querySelector(".gapimg").style.animation = diffEffect.iconShaking ? "shake 1s infinite" : "";
+                                    } else {
+                                        currentCard.querySelector(".gapimg").style.visibility = 'hidden';
+                                    }
+                                    currentCard.querySelector(".subgap").querySelector(".text").innerText = abbs(getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count));
+                                    currentCard.querySelector(".subgap").querySelector(".odometer").innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
+                                    currentCard.querySelector(".subgap").style.visibility = 'visible';
+                                    currentCard.querySelector(".difference_line").style.visibility = 'visible';
+
+                                    switch (diffEffect.glow) {
+                                        case 'bottom':
+                                            nextCardGlows = true;
+                                            break;
+                                        case 'top':
+                                            thisCardGlows = true;
+                                            break;
+                                        case 'both':
+                                            thisCardGlows = true;
+                                            nextCardGlows = true;
+                                            break;
+                                        case 'fasterSet':
+                                            bottomGainSet < topGainSet ? thisCardGlows = true : nextCardGlows = true;
+                                            break;
+                                        case 'slowerSet':
+                                            bottomGainSet > topGainSet ? thisCardGlows = true : nextCardGlows = true;
+                                            break;
+                                        case 'fasterObserved':
+                                            bottomGainObserved < topGainObserved ? thisCardGlows = true : nextCardGlows = true;
+                                            break;
+                                        case 'slowerObserved':
+                                            bottomGainObserved > topGainObserved ? thisCardGlows = true : nextCardGlows = true;
+                                            break;                                       
+                                    }
+
+                                    if (thisCardGlows) {
+                                        if (!glowingCards[i] || glowingCards[i] > j + 1) {
+                                            glowingCards[i] = j + 1;
+                                        }
+                                    }
+
+                                    if (nextCardGlows) {
+                                        glowingCards[i + 1] = j + 1;
+                                    }
+
                                     break;
-                                case 'topFasterSet':
-                                    if (topGain < bottomGain) condition = false;
-                                    break;
-                                case 'bottomFasterObserved':
-                                    if (getGain(data.data[i + 1].id) < getGain(data.data[i].id)) condition = false;
-                                    break;
-                                case 'topFasterObserved':
-                                    if (getGain(data.data[i].id) < getGain(data.data[i + 1].id)) condition = false;
-                                    break;
-                            } 
-                            if (condition && data.data[i].count - data.data[i + 1].count < parseInt(data.differenceThreshold)) {
-                                currentCard.children[4].querySelector(".text").innerText = abbs(getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count));
-                                currentCard.children[4].querySelector(".odometer").innerText = getDisplayedCount(data.data[i].count) - getDisplayedCount(data.data[i + 1].count)
-                                currentCard.children[3].style.visibility = 'visible';
-                                currentCard.children[4].style.visibility = 'visible';
-                                currentCard.children[5].style.visibility = 'visible';
-                            } else {
-                                currentCard.children[3].style.visibility = 'hidden';
-                                currentCard.children[4].style.visibility = 'hidden';
-                                currentCard.children[5].style.visibility = 'hidden';
+                                }
+                            }
+
+                            if (!effectDisplayed) {
+                                currentCard.querySelector(".gapimg").style.visibility = 'hidden';
+                                currentCard.querySelector(".subgap").style.visibility = 'hidden';
+                                currentCard.querySelector(".difference_line").style.visibility = 'hidden';
+                            }
+
+                        } else {
+                            currentCard.querySelector(".gapimg").style.visibility = 'hidden';
+                            currentCard.querySelector(".subgap").style.visibility = 'hidden';
+                            currentCard.querySelector(".difference_line").style.visibility = 'hidden';
+                        }
+
+                        if (glowingCards[i]) {
+                            currentCard.style.backgroundColor = data.differenceStyles.created[glowingCards[i] - 1].glowColor;
+                            if (!currentCard.classList.contains("glowing")) {
+                                currentCard.classList.add("glowing");
                             }
                         } else {
-                            currentCard.children[3].style.visibility = 'hidden';
-                            currentCard.children[4].style.visibility = 'hidden';
-                            currentCard.children[5].style.visibility = 'hidden';
+                            currentCard.style.backgroundColor = data.data[i].bg || data.boxColor;
+                            currentCard.classList.remove("glowing");
                         }
-                        currentCard.children[6].id = "chart_" + data.data[i].id;
+                        currentCard.querySelector(".chart").id = "chart_" + data.data[i].id;
                         if (selected !== data.data[i].id) {
                             document.getElementById("card_" + data.data[i].id).style.border = "0.1em solid " + data.boxBorder + "";
                         }
                         if (fastest == data.data[i].id) {
                             if (data.fastest) {
-                                document.getElementById("card_" + fastest).children[2].children[0].innerText = "" + data.fastestIcon + " " + data.data[i].name
+                                document.getElementById("card_" + fastest).querySelector(".name").innerText = "" + data.fastestIcon + " " + data.data[i].name
                             }
                         }
                         if (slowest == data.data[i].id) {
                             if (data.slowest) {
-                                document.getElementById("card_" + slowest).children[2].children[0].innerText = "" + data.slowestIcon + " " + data.data[i].name
+                                document.getElementById("card_" + slowest).querySelector(".name").innerText = "" + data.slowestIcon + " " + data.data[i].name
                             }
                         }
-                        if (data.fireIcons.enabled && data.intervalCount % data.fireIcons.intervalsPerUpdate === 0) {
-                            let firePosition = data.fireIcons.firePosition;
-                            if (firePosition == 'before' || firePosition == 'after') {
-                                document.getElementById("styles").innerHTML = `.num { display: flex; }`;
-                            } else {
-                                document.getElementById("styles").innerHTML = ``;
-                            }
-                            for (let q = 0; q < data.fireIcons.created.length; q++) {
-                                let equation = false;
-                                //either gain or total
-                                if (data.fireIcons.type == 'total') {
-                                    if (data.fireIcons.created[q].method == '>=') {
-                                        if (data.data[i].count >= data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    } else if (data.fireIcons.created[q].method == '==') {
-                                        if (data.data[i].count == data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    } else if (data.fireIcons.created[q].method == '<=') {
-                                        if (data.data[i].count <= data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    } else {
-                                        if (data.data[i].count != data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    }
-                                } else if (data.fireIcons.type == 'gain') {
-                                    if (data.fireIcons.created[q].method == '>=') {
-                                        if (getGain(data.data[i].id) >= data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    } else if (data.fireIcons.created[q].method == '==') {
-                                        if (getGain(data.data[i].id) == data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    } else if (data.fireIcons.created[q].method == '<=') {
-                                        if (getGain(data.data[i].id) <= data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    } else {
-                                        if (getGain(data.data[i].id) != data.fireIcons.created[q].threshold) {
-                                            equation = true;
-                                        }
-                                    }
-                                } else if (data.fireIcons.type == 'hour') {
-                                    let subs = getGain(data.data[i].id)
-
-                                    let updateInterval = data.updateInterval / 1000;
-                                    let updatesPerHour = 3600 / updateInterval;
-
-                                    let subsPerUpdateThreshold = data.fireIcons.created[q].threshold / updatesPerHour;
-
-                                    if (data.fireIcons.created[q].method == '>=') {
-                                        equation = subs >= subsPerUpdateThreshold;
-                                    } else if (data.fireIcons.created[q].method == '==') {
-                                        equation = subs == subsPerUpdateThreshold;
-                                    } else if (data.fireIcons.created[q].method == '<=') {
-                                        equation = subs <= subsPerUpdateThreshold;
-                                    } else {
-                                        equation = subs != subsPerUpdateThreshold;
-                                    }
-                                }
-
-                                if (equation) {
-                                    let icon = data.fireIcons.created[q].icon;
-                                    let fire = document.createElement('img');
-                                    fire.classList = 'fireIcon';
-                                    fire.style = `height: 1.5vw; width: 1.5vw;
-                                        border: solid ${escapeHTML(data.fireIcons.fireBorderWidth)}px ${escapeHTML(data.fireIcons.fireBorderColor)};`;
-                                    fire.src = escapeHTML(icon);
-
-                                    if (firePosition == 'replace') {
-                                        currentCard.children[0].innerHTML = fire.outerHTML;
-                                    } else if (firePosition == 'before') {
-                                        currentCard.children[0].innerHTML = fire.outerHTML + `<div class="num_text">${num}</div>`;
-                                    } else if (firePosition == 'after') {
-                                        currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>` + fire.outerHTML;
-                                    } else if (firePosition == 'above') {
-                                        currentCard.children[0].innerHTML = fire.outerHTML + `<br><div class="num_text">${num}</div>`;
-                                    } else if (firePosition == 'below') {
-                                        currentCard.children[0].innerHTML = `<div class="num_text">${num}</div><br>` + fire.outerHTML;
-                                    } else if (firePosition == 'left') {
-                                        if (!currentCard.children[2].children[0].innerHTML.includes('<img class="fireIcon"')) {
-                                            currentCard.children[2].children[0].innerHTML = fire.outerHTML + currentCard.children[2].children[0].innerHTML;
-                                            currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                                        }
-                                    } else if (firePosition == 'right') {
-                                        if (!currentCard.children[2].children[0].innerHTML.includes('<img class="fireIcon"')) {
-                                            currentCard.children[2].children[0].innerHTML = currentCard.children[2].children[0].innerHTML + fire.outerHTML;
-                                            currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                                        }
-                                    } else if (firePosition == 'replaceName') {
-                                        currentCard.children[2].children[0].innerHTML = fire.outerHTML;
-                                        currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                                    } else if (firePosition == 'mdm') {
-                                        currentCard.children[0].style.color = `${data.fireIcons.created[q].color}`;
-                                        currentCard.children[0].style.border = `solid ${data.fireIcons.fireBorderColor} ${data.fireIcons.fireBorderWidth}px`
-                                        currentCard.children[0].style.backgroundImage = `url(${escapeHTML(icon)})`;
-                                        currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                                        currentCard.children[0].children[0].style.marginTop = data.fireIcons.created[q].margin ? data.fireIcons.created[q].margin + "px" : "";
-                                        currentCard.children[0].children[0].style.marginLeft = data.fireIcons.created[q].marginLeft ? data.fireIcons.created[q].marginLeft + "px" : "";
-                                    } else {
-                                        currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                                    }
-                                    break;
-                                } else {
-                                    currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                                    if (firePosition == 'mdm') {
-                                        currentCard.children[0].style.backgroundImage = `url('')`;
-                                        currentCard.children[0].style.color = `${data.textColor}`;
-                                        currentCard.children[0].children[0].style.marginTop = "";
-                                        currentCard.children[0].children[0].style.marginLeft = "";
-                                    }
-                                }
-                            }
-                        } else {
-                            currentCard.children[0].children[0].innerText = num;
-                        }
-                        if (data.boxBGLength !== '0') {
+                        applyFire(currentCard, i, true);
+                        if (data.boxBGLength !== '0' && !currentCard.classList.contains('glowing')) {
                             if (getDisplayedCount(data.data[i].count) > getDisplayedCount(data.data[i].lastCount)) {
                                 currentCard.style.backgroundColor = `${data.boxBGGain}`;
                             } else if (getDisplayedCount(data.data[i].count) < getDisplayedCount(data.data[i].lastCount)) {
@@ -1108,27 +1124,27 @@ function update(doGains = true) {
                     } else {
                         const id = currentCard.id;
                         currentCard.id = 'card_'
-                        currentCard.children[0].id = "num_"
-                        currentCard.children[1].id = "image_"
-                        if (currentCard.children[1].src !== BLANK_IMAGE_URL) {
-                            currentCard.children[1].src = BLANK_IMAGE_URL
+                        currentCard.querySelector(".num").id = "num_"
+                        currentCard.querySelector(".image").id = "image_"
+                        if (currentCard.querySelector(".image").src !== BLANK_IMAGE_URL) {
+                            currentCard.querySelector(".image").src = BLANK_IMAGE_URL
                         }
-                        currentCard.children[2].children[0].id = "name_"
-                        currentCard.children[2].children[0].innerText = '\u200b'
-                        currentCard.children[2].children[1].id = "count_"
-                        currentCard.children[2].children[1].innerText = '0'
-                        currentCard.children[4].querySelector(".odometer").innerText = 0;
-                        currentCard.children[4].querySelector(".text").innerText = 0;
-                        currentCard.children[0].innerHTML = `<div class="num_text">${num}</div>`;
-                        currentCard.children[0].style.backgroundImage = `url('')`;
-                        currentCard.children[0].style.color = `${data.textColor}`;
-                        currentCard.children[0].children[0].style.marginTop = "";
-                        currentCard.children[0].children[0].style.marginLeft = "";
+                        currentCard.querySelector(".name").id = "name_"
+                        currentCard.querySelector(".name").innerText = '\u200b'
+                        currentCard.querySelector(".count").id = "count_"
+                        currentCard.querySelector(".count").innerText = '0'
+                        currentCard.querySelector(".subgap").querySelector(".odometer").innerText = 0;
+                        currentCard.querySelector(".subgap").querySelector(".text").innerText = 0;
+                        currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+                        currentCard.querySelector(".num").style.backgroundImage = `url('')`;
+                        currentCard.querySelector(".num").style.color = `${data.textColor}`;
+                        currentCard.querySelector(".num_text").style.marginTop = "";
+                        currentCard.querySelector(".num_text").style.marginLeft = "";
                         if (charts[id]) {
                             charts[id].destroy();
                             delete charts[id];
                         }
-                        currentCard.children[6].id = "chart_";
+                        currentCard.querySelector(".chart").id = "chart_";
                     }
                 }
             }, extraTimeTillUpdate);
@@ -1158,16 +1174,16 @@ function update(doGains = true) {
                     }
 
                     // If counts are equal, sort by name alphabetically as tiebreaker
-                    const nameA = a.children[2]?.children[0]?.innerText || '';
-                    const nameB = b.children[2]?.children[0]?.innerText || '';
+                    const nameA = a.querySelector(".name")?.innerText || '';
+                    const nameB = b.querySelector(".name")?.innerText || '';
                     return nameA.localeCompare(nameB);
                 });
 
                 // Update rank numbers based on sorted order
                 validCards.forEach((card, index) => {
-                    if (card.children[0] && card.children[0].children[0]) {
+                    if (card.querySelector(".num_text")) {
                         const newRank = formatRank(index + 1);
-                        card.children[0].children[0].innerText = newRank;
+                        card.querySelector(".num_text").innerText = newRank;
                     }
                 });
             }, 100); // Small delay to ensure isotope has finished arranging
@@ -1741,30 +1757,10 @@ document.getElementById('leftDifferencePlacing').addEventListener('change', func
     fix();
 });
 
-document.getElementById('differenceThreshold').addEventListener('change', function () {
-    data.differenceThreshold = this.value;
-    fix();
-});
-
-document.getElementById('enableImageShakes').addEventListener('change', function () {
-    data.differenceStyles.shakingEnabled = this.checked;
-    fix();
-});
-
-document.getElementById('differenceColor').addEventListener('change', function () {
-    data.differenceStyles.color = this.value;
-    fix();
-});
-
 document.getElementById('showDifferenceLines').addEventListener('change', function () {
     data.differenceStyles.lineEnabled = this.checked;
     fix();
 });
-
-document.getElementById('showDifferenceWhen').addEventListener('change', function () {
-    data.differenceStyles.showDifferenceWhen = this.value;
-    fix();
-})
 
 document.getElementById('abbDifferences').addEventListener('change', function () {
     data.differenceStyles.abbDifferences = this.checked;
@@ -1776,68 +1772,34 @@ document.getElementById('differenceLineColor').addEventListener('change', functi
     fix();
 });
 
-document.getElementById('enableDifferenceImages').addEventListener('change', function () {
-    data.differenceStyles.imageEnabled = this.checked;
-    fix();
-});
-
 document.getElementById('leftDifferenceImagePlacing').addEventListener('change', function () {
     data.differenceStyles.imageLeft = this.value;
     fix();
 });
 
 document.getElementById('topDifferenceImagePlacing').addEventListener('change', function () {
-    data.differenceStyles.imageTop = document.getElementById('topDifferenceImagePlacing').value;
+    data.differenceStyles.imageTop = this.value;
     fix();
 });
 
 document.getElementById('differenceImageSize').addEventListener('change', function () {
-    data.differenceStyles.imageSize = document.getElementById('differenceImageSize').value;
+    data.differenceStyles.imageSize = this.value;
     fix();
 });
 
-document.getElementById('differenceImageUrl').addEventListener('change', function () {
-    data.differenceStyles.differenceImage = document.getElementById('differenceImageUrl').value;
-    document.querySelectorAll('.gapimg').forEach(item => {
-        item.src = data.differenceStyles.differenceImage;
-    });
-});
-
-function saveImageForDiffs() {
-    let image = document.getElementById('differenceImageFile').files[0];
-    if (image) {
-        let url = URL.createObjectURL(image);
-        let reader = new FileReader();
-        reader.onload = function (e) {
-            let base64 = e.target.result;
-            data.differenceStyles.differenceImage = base64;
-            document.getElementById('differenceImageFile').value = '';
-            document.querySelectorAll('.gapimg').forEach(item => {
-                item.src = base64;
-            });
-        };
-        reader.readAsDataURL(image);
-        URL.revokeObjectURL(url);
-    }
-};
-
 document.getElementById('showDifferences').addEventListener('change', function () {
-    if (document.getElementById('showDifferences').checked) {
-        data.showDifferences = true;
-    } else {
-        data.showDifferences = false;
-    }
+    data.showDifferences = this.checked;
     fix()
 });
 
 document.getElementById('showRankings').addEventListener('change', function () {
-    data.showRankings = document.getElementById('showRankings').checked;
+    data.showRankings = this.checked;
     fix()
     setupMDMStyles();
 });
 
 document.getElementById('showChart').addEventListener('change', function () {
-    data.cardStyles.showChart = document.getElementById('showChart').checked;
+    data.cardStyles.showChart = this.checked;
     if (data.cardStyles.showChart) {
         // Initialize charts when enabled
         fix()
@@ -1875,22 +1837,51 @@ document.getElementById('chartLineColor').addEventListener('change', function ()
 });
 
 document.getElementById('rankingsWidth').addEventListener('change', function () {
-    data.rankingsWidth = document.getElementById('rankingsWidth').value;
+    data.rankingsWidth = this.value;
     fix()
 });
 document.getElementById('showNames').addEventListener('change', function () {
-    data.showNames = document.getElementById('showNames').checked;
+    data.showNames = this.checked;
     fix()
 });
 document.getElementById('showImages').addEventListener('change', function () {
-    data.showImages = document.getElementById('showImages').checked;
+    data.showImages = this.checked;
     fix()
     setupMDMStyles();
 });
 document.getElementById('showCounts').addEventListener('change', function () {
-    data.showCounts = document.getElementById('showCounts').checked;
+    data.showCounts = this.checked;
     fix()
 });
+
+document.getElementById('estimateUsingObservedGains').addEventListener('change', function () {
+    data.differenceStyles.estimateUsingObservedGains = this.checked;  
+    fix();
+})
+
+document.getElementById('alignDifferences').addEventListener('change', function () {
+    data.differenceStyles.alignDifferences = this.value;
+    fix();
+})
+
+document.getElementById('editorShowsExactCount').addEventListener('click', function () {
+    data.editorShowsExactCount = this.checked;
+    refresh();
+})
+
+document.getElementById('useOdometerColors').addEventListener('click', function () {
+    data.useOdometerColors = this.checked;
+    fix();
+})
+
+document.getElementById('maxChartValues').addEventListener('change', function () {
+    let value = parseInt(this.value);
+    if (!isFinite(value)) value = 50;
+    value = Math.max(2, Math.min(value, 50));
+    data.maxChartValues = value;
+    fix();
+})
+
 function fix() {
     document.getElementById('main').style.height = data.cardStyles.containerHeight + "vh";
     document.getElementById('main').style.width = data.cardStyles.containerWidth + "vw";
@@ -1909,72 +1900,33 @@ function fix() {
     if ((!data.slowest) && (data.slowest !== false)) {
         data.slowest = true;
     }
-    if (data.animation) {
-        document.getElementById('animation').checked = true;
-    } else {
-        document.getElementById('animation').checked = false;
-    }
-    if (data.allowNegative) {
-        document.getElementById('allowNegative').checked = true;
-    } else {
-        document.getElementById('allowNegative').checked = false;
-    }
-    if (data.animatedCards.enabled) {
-        document.getElementById('animatedCardChanges').checked = true;
-    } else {
-        document.getElementById('animatedCardChanges').checked = false;
-    }
-    if (data.randomCountUpdateTime) {
-        document.getElementById('randomCountUpdateTime').checked = true;
-    } else {
-        document.getElementById('randomCountUpdateTime').checked = false;
-    }
-    if (data.waterFallCountUpdateTime) {
-        document.getElementById('waterFallCountUpdateTime').checked = true;
-    } else {
-        document.getElementById('waterFallCountUpdateTime').checked = false;
-    }
-    if (data.fastest) {
-        document.getElementById('fastest').checked = true;
-    } else {
-        document.getElementById('fastest').checked = false;
-    }
-    if (data.slowest) {
-        document.getElementById('slowest').checked = true;
-    } else {
-        document.getElementById('slowest').checked = false;
-    }
-    if (data.abbreviate) {
-        document.getElementById('abbreviate').checked = true;
-    } else {
-        document.getElementById('abbreviate').checked = false;
-    }
-    if (data.offlineGains) {
-        document.getElementById('offline').checked = true;
-    } else {
-        document.getElementById('offline').checked = false;
-    }
+
+    document.getElementById('animation').checked = data.animation;
+    document.getElementById('allowNegative').checked = data.allowNegative;
+    document.getElementById('animatedCardChanges').checked = data.animatedCards.enabled;
+    document.getElementById('randomCountUpdateTime').checked = data.randomCountUpdateTime;
+    document.getElementById('waterFallCountUpdateTime').checked = data.waterFallCountUpdateTime;
+    document.getElementById('fastest').checked = data.fastest;
+    document.getElementById('slowest').checked = data.slowest;
+    document.getElementById('abbreviate').checked = data.abbreviate;
+    document.getElementById('offline').checked = data.offlineGains;
+    document.getElementById('autosave').checked = data.autosave;
+
     if (data.autosave) {
-        document.getElementById('autosave').checked = true;
         clearInterval(saveInterval);
         saveData(false);
         saveInterval = setInterval(() => { saveData(false) }, 15000);
-    } else {
-        document.getElementById('autosave').checked = false;
     }
-    if (data.showRankings) {
-        document.getElementById('showRankings').checked = true;
-        document.querySelectorAll('.num').forEach(function (card) {
-            card.style.display = "";
-        })
-    } else {
-        document.getElementById('showRankings').checked = false;
-        document.querySelectorAll('.num').forEach(function (card) {
-            card.style.display = "none";
-        })
-    }
+
+    document.getElementById('showRankings').checked = data.showRankings;
+
+    document.querySelectorAll('.num').forEach(function (card) {
+        card.style.display = data.showRankings ? "" : "none";
+    })
+
+    document.getElementById('showChart').checked = data.cardStyles.showChart;
+
     if (data.cardStyles.showChart) {
-        document.getElementById('showChart').checked = true;
         document.querySelectorAll('.chart').forEach(function (card) {
             card.style.display = "block";
         })
@@ -1983,7 +1935,6 @@ function fix() {
             setTimeout(initializeCharts, 200);
         }
     } else {
-        document.getElementById('showChart').checked = false;
         document.querySelectorAll('.chart').forEach(function (card) {
             card.style.display = "none";
         })
@@ -1995,38 +1946,21 @@ function fix() {
             }
         });
     }
-    if (data.showBlankSlots) {
-        document.getElementById('showBlankSlots').checked = true;
-        document.getElementById('hideBlanks').innerText = '';
-    } else {
-        document.getElementById('showBlankSlots').checked = false;
-        document.getElementById('hideBlanks').innerText = '#card_ * {display: none;}';
-    }
 
-    if (data.verticallyCenterRanks) {
-        document.getElementById('verticallyCenterRanks').checked = true;
-        document.getElementById("centerRanks").innerText = ".num { align-items: center; display: flex; };"
-    } else {
-        document.getElementById('verticallyCenterRanks').checked = false;
-        document.getElementById("centerRanks").innerText = "";
-    }
+    document.getElementById('showBlankSlots').checked = data.showBlankSlots;
+    document.getElementById('hideBlanks').innerText = data.showBlankSlots ? '' : '#card_ * {display: none;}';
 
-    if (data.showDifferences) {
-        document.getElementById('showDifferences').checked = true;
-        document.getElementById('hideDifferences').innerText = '';
-    } else {
-        document.getElementById('showDifferences').checked = false;
-        document.getElementById('hideDifferences').innerText = '.subgap {display: none;}';
-    }
+    document.getElementById('verticallyCenterRanks').checked = data.verticallyCenterRanks;
+    document.getElementById("centerRanks").innerText = data.verticallyCenterRanks ? ".num { align-items: center; display: flex; };" : "";
+    document.getElementById('showDifferences').checked = data.showDifferences;
+    document.getElementById('hideDifferences').innerText = data.showDifferences ? '' : '.subgap, .gapimg {display: none;}';
+
 
     document.getElementById('leftDifferencePlacing').value = data.differenceStyles.left;
     document.getElementById('topDifferencePlacing').value = data.differenceStyles.top;
-    document.getElementById('differenceThreshold').value = data.differenceThreshold;
-    document.getElementById('differenceColor').value = data.differenceStyles.color;
     document.getElementById('showDifferenceLines').checked = data.differenceStyles.lineEnabled;
     document.getElementById('abbDifferences').checked = data.differenceStyles.abbDifferences;
     document.getElementById('differenceLineColor').value = data.differenceStyles.lineColor;
-    document.getElementById('showDifferenceWhen').value = data.differenceStyles.showDifferenceWhen;
 
     const diffs = document.getElementsByClassName("subgap");
     for (const diff of diffs) {
@@ -2039,15 +1973,36 @@ function fix() {
         }
     }
 
-    document.getElementById('enableDifferenceImages').checked = data.differenceStyles.imageEnabled;
     document.getElementById('leftDifferenceImagePlacing').value = data.differenceStyles.imageLeft;
     document.getElementById('topDifferenceImagePlacing').value = data.differenceStyles.imageTop;
-    ;
     document.getElementById('differenceImageSize').value = data.differenceStyles.imageSize;
-    document.getElementById('enableImageShakes').checked = data.differenceStyles.shakingEnabled;
+    document.getElementById('estimateUsingObservedGains').checked = data.differenceStyles.estimateUsingObservedGains;
+    document.getElementById('alignDifferences').value = data.differenceStyles.alignDifferences;
 
-    if (!data.differenceStyles.differenceImage.startsWith('data:image')) {
-        document.getElementById('differenceImageUrl').value = data.differenceStyles.differenceImage;
+    let gapAlignment = `left: ${data.differenceStyles.left}%;`;
+    switch (data.differenceStyles.alignDifferences) {
+        case 'right':
+            document.getElementById('differenceAlignmentDirection').innerText = ', right';
+            document.getElementById('differenceAlignmentTooltip').setAttribute("title", 
+                "The position of the difference counter, in percent of card height and width offset from the top right corner of the card.");
+            document.getElementById('differenceAlignmentComma').style.display = '';
+            document.getElementById('leftDifferencePlacing').style.display = '';
+            gapAlignment = `right: ${data.differenceStyles.left}%;`;
+            break;
+        case 'center':
+            document.getElementById('differenceAlignmentDirection').innerText = '';
+            document.getElementById('differenceAlignmentTooltip').setAttribute("title", 
+                "The position of the difference counter, in percent of card height offset from the top of the card.");
+            document.getElementById('differenceAlignmentComma').style.display = 'none';
+            document.getElementById('leftDifferencePlacing').style.display = 'none';
+            gapAlignment = `left: 50%;\ntransform: translateX(-50%);`;
+            break;
+        default:
+            document.getElementById('differenceAlignmentDirection').innerText = ', left';
+            document.getElementById('differenceAlignmentTooltip').setAttribute("title", 
+                "The position of the difference counter, in percent of card height and width offset from the top left corner of the card.");
+            document.getElementById('differenceAlignmentComma').style.display = '';
+            document.getElementById('leftDifferencePlacing').style.display = '';
     }
 
     document.getElementById('differenceStyling').innerText = `
@@ -2056,19 +2011,16 @@ function fix() {
             z-index: 100;
             position: absolute;
             float: none;
-            left: ${data.differenceStyles.left}%;
+            ${gapAlignment}
             font-size: ${data.differenceStyles.differenceSize}vw;
-            color: ${data.differenceStyles.color};
             visibility: hidden;
         }
 
         .gapimg {
             height: ${data.differenceStyles.imageSize}px;
-            ${data.differenceStyles.imageEnabled ? "" : "display: none"};
             left: ${data.differenceStyles.imageLeft}%;
             top: ${data.differenceStyles.imageTop}%;
             visibility: hidden;
-            ${data.differenceStyles.shakingEnabled ? "animation: shake 1s infinite;" : ""}
         }
 
         .difference_line {
@@ -2080,14 +2032,15 @@ function fix() {
         }`;
 
     document.getElementById('cardStyles').innerText = `
-            .name {
+            .main .name {
                 font-size: ${data.cardStyles.nameSize}vw;
+                line-height: ${data.cardStyles.nameSize * 1.15}vw;
                 max-width: ${data.cardStyles.nameWidth}vw;
             }
-            .count {
+            .main .count {
                 font-size: ${data.cardStyles.countSize}vw;
             }
-            .image {
+            .main .image {
                 height: ${data.cardStyles.imageSize}vw;
                 width: ${data.cardStyles.imageSize}vw;
             }
@@ -2097,8 +2050,8 @@ function fix() {
             }
         `
 
+    document.getElementById('prependZeros').checked = data.prependZeros;
     if (data.prependZeros) {
-        document.getElementById('prependZeros').checked = true;
         let index = 1;
         document.querySelectorAll('.num').forEach(function (card) {
             if (index < 10) {
@@ -2106,48 +2059,28 @@ function fix() {
             }
             index++;
         })
-
     } else {
-        document.getElementById('prependZeros').checked = false;
         let index = 1;
         document.querySelectorAll('.num').forEach(function (card) {
             card.firstChild.innerText = index
             index++;
         })
     }
-    if (data.showNames) {
-        document.getElementById('showNames').checked = true;
-        document.querySelectorAll('.name').forEach(function (card) {
-            card.style.display = "";
-        })
-    } else {
-        document.getElementById('showNames').checked = false;
-        document.querySelectorAll('.name').forEach(function (card) {
-            card.style.display = "none";
-        })
-    }
-    if (data.showImages) {
-        document.getElementById('showImages').checked = true;
-        document.querySelectorAll('.image').forEach(function (card) {
-            card.style.display = "";
-        })
-    } else {
-        document.getElementById('showImages').checked = false;
-        document.querySelectorAll('.image').forEach(function (card) {
-            card.style.display = "none";
-        })
-    }
-    if (data.showCounts) {
-        document.getElementById('showCounts').checked = true;
-        document.querySelectorAll('.count').forEach(function (card) {
-            card.style.display = "";
-        })
-    } else {
-        document.getElementById('showCounts').checked = false;
-        document.querySelectorAll('.count').forEach(function (card) {
-            card.style.display = "none";
-        })
-    }
+
+    document.getElementById('showNames').checked = data.showNames;
+    document.querySelectorAll('.name').forEach(function (card) {
+        card.style.display = data.showNames ? "" : "none";
+    })
+
+    document.getElementById('showImages').checked = data.showImages;
+    document.querySelectorAll('.image').forEach(function (card) {
+        card.style.display = data.showImages ? "" : "none";
+    })
+    
+    document.getElementById('showCounts').checked = data.showCounts;
+    document.querySelectorAll('.count').forEach(function (card) {
+        card.style.display = data.showCounts ? "" : "none";
+    })
 
     document.querySelectorAll('.card').forEach(function (card) {
         card.style.backgroundColor = data.boxColor;
@@ -2222,6 +2155,8 @@ function fix() {
     document.getElementById('gainAverageOf').value = data.gainAverageOf || 1;
     document.getElementById('counterFontWeight').value = data.counterFontWeight || "400";
     document.getElementById('counterAlignment').value = data.counterAlignment;
+    document.getElementById('useOdometerColors').checked = data.useOdometerColors;
+    document.getElementById('maxChartValues').value = data.maxChartValues || 50;
 
     const subCounters = document.getElementById('main').getElementsByClassName("count");
     for (const subCounter of subCounters) {
@@ -2236,6 +2171,11 @@ function fix() {
     const counters = document.getElementById('main').getElementsByClassName('odometer');
     for (const counter of counters) {
         counter.style.fontWeight = data.counterFontWeight;
+        if (data.useOdometerColors) {
+            counter.classList.remove('no_color_transition');
+        } else if (!counter.classList.contains('no_color_transition')) {
+            counter.classList.add('no_color_transition');
+        }
     }
 
     if (data.importFromGoogleFonts) {
@@ -2337,6 +2277,7 @@ function connect() {
     if (window.location.href.includes('?code=')) {
         window.location.href = window.location.href.split('?code=')[0];
     } else {
+        if (!data.streamerMode) toggleStreamerMode();
         saveData(false)
         window.location.href = window.location.href + "?code=" + code;
     }
@@ -2603,12 +2544,8 @@ document.getElementById('connect4').innerText = '$(urlfetch ' + apiurl + '' + co
 document.getElementById('connect5').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/gains)';
 document.getElementById('connect6').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/rank)';
 
-document.getElementById('animation').addEventListener('click', function (event) {
-    if (event.target.checked) {
-        data.animation = true;
-    } else {
-        data.animation = false;
-    }
+document.getElementById('animation').addEventListener('click', function () {
+    data.animation = this.checked;
     updateOdo();
 })
 
@@ -2624,11 +2561,7 @@ function updateOdo() {
 }
 
 document.getElementById('abbreviate').addEventListener('click', function () {
-    if (document.getElementById('abbreviate').checked) {
-        data.abbreviate = true;
-    } else {
-        data.abbreviate = false;
-    }
+    data.abbreviate = document.getElementById('abbreviate').checked;
 })
 
 document.getElementById('theme').addEventListener('change', function () {
@@ -2652,11 +2585,7 @@ function themeChanger(previousTheme) {
 }
 
 document.getElementById('fastest').addEventListener('click', function () {
-    if (document.getElementById('fastest').checked) {
-        data.fastest = true;
-    } else {
-        data.fastest = false;
-    }
+    data.fastest = this.checked;
 })
 
 document.getElementById('fastestIcon').addEventListener('change', function () {
@@ -2670,25 +2599,13 @@ document.getElementById('slowestIcon').addEventListener('change', function () {
 })
 
 document.getElementById('slowest').addEventListener('click', function () {
-    if (document.getElementById('slowest').checked) {
-        data.slowest = true;
-    } else {
-        data.slowest = false;
-    }
+    data.slowest = this.checked;
 })
 
-if (data.offlineGains) {
-    document.getElementById('offline').checked = true;
-} else {
-    document.getElementById('offline').checked = false;
-}
+document.getElementById('offline').checked = data.offlineGains;
 
 document.getElementById('offline').addEventListener('click', function () {
-    if (document.getElementById('offline').checked) {
-        data.offlineGains = true;
-    } else {
-        data.offlineGains = false;
-    }
+    data.offlineGains = this.checked;
 })
 
 document.getElementById('odometerUp').addEventListener('change', function () {
@@ -2733,11 +2650,13 @@ function toggleStreamerMode() {
     if (!data.streamerMode) {
         data.streamerMode = true;
         document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'flex');
+        document.getElementById('streamerModeB').innerText = 'Disable Streamer Mode';
         alert('Streamer Mode enabled.')
     } else {
         if (confirm('Are you sure you want to disable Streamer Mode?')) {
             data.streamerMode = false;
             document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'none');
+            document.getElementById('streamerModeB').innerText = 'Enable Streamer Mode';
             alert('Streamer Mode disabled.')
         } else {
             alert('Action cancelled.')
@@ -3141,7 +3060,7 @@ function refresh() {
                 document.getElementById('edit_max_gain').value = data.data[q].max_gain;
                 document.getElementById('edit_name').value = data.data[q].name;
                 document.getElementById('edit_bg_color').value = data.data[q].bg ? data.data[q].bg : '';
-                document.getElementById('edit_count').value = data.data[q].count;
+                document.getElementById('edit_count').value = data.editorShowsExactCount ? data.data[q].count : getDisplayedCount(data.data[q].count);
                 document.getElementById('edit_image1').value = data.data[q].image;
                 document.getElementById('edit_channel_id').innerText = 'ID: ' + data.data[q].id;
             }
@@ -3222,7 +3141,6 @@ const addFireIcon = () => {
     } else {
         let div = document.createElement('div');
         div.id = 'fireIconCreate';
-        div.style.color = '#FFF';
         div.innerHTML = `
             <label>Fire icon name:<br><input type="text" class="l-width" id="fireIcon" placeholder="Fire Icon 1"></label>
             <label>Fire icon threshold: </label><input type="number" class="s-width" step="any" id="fireIconThreshold" placeholder="1000"><br>
@@ -3232,13 +3150,25 @@ const addFireIcon = () => {
                 <option value="<=">Less than (≤)</option>
                 <option value="!=">Not equal to (≠)</option>
             </select></label>
-            <label>Fire icon: <input type="text" class="l-wodth" id="fireIconUrl" placeholder="https://example.com/image.png"><label> or </label><input type="file" id="fireIconFile"></label>
-            <label>Rank color: </label><input type="color" id="fireIconRankColor"><br>
+            <label>Fire icon: <input type="text" id="fireIconUrl" placeholder="https://example.com/image.png"><label> or </label><input type="file" id="fireIconFile"></label>
+            <label>Rank color: <input type="color" id="fireIconRankColor"></label>
             <label>Rank margin (top, left) in pixels:<br><span class="no-wrap"><input class="s-width" type="number" step="any" id="fireIconRankMargin" placeholder="Default">, 
             <input class="s-width" type="number" step="any" id="fireIconRankMarginLeft" placeholder="Default"></span></label>
+            <label>Rank font weight: <select class="s-width" id="fireIconRankFontWeight">
+                <option value="100">Thin</option>
+                <option value="200">Extra Light</option>
+                <option value="300">Light</option>
+                <option value="400">Regular</option>
+                <option value="500">Medium</option>
+                <option value="600">Semibold</option>
+                <option value="700">Bold</option>
+                <option value="800">Extra Bold</option>
+                <option value="900" selected>Black</option>
+            </select></label>
             <button onclick="saveFireIcon()">Add</button>
         `
         document.getElementById('addFireMenu').appendChild(div);
+        adjustColors();
     }
 }
 
@@ -3278,7 +3208,7 @@ const saveFireIcon = async () => {
     let used = data.fireIcons.created.some(icon => icon.name === document.getElementById('fireIcon').value);
 
     if (used) {
-        alert('Fire emojis must have unique names!');
+        alert('Fire icons must have unique names!');
         return;
     }
 
@@ -3290,6 +3220,7 @@ const saveFireIcon = async () => {
         method: document.getElementById('fireIconMethod').value,
         margin: document.getElementById('fireIconRankMargin').value,
         marginLeft: document.getElementById('fireIconRankMarginLeft').value,
+        fontWeight: document.getElementById('fireIconRankFontWeight').value
     });
 
     document.getElementById('fireIconCreate').remove();
@@ -3324,7 +3255,7 @@ const loadFireIcons = () => {
         let fireIcon = data.fireIcons.created[i];
         let icon = fireIcon.icon;
         if (icon) {
-            icon = `<img src="${escapeHTML(icon)}" style="height: 1.5em; width: 1.5em;">`
+            icon = `<img src="${escapeHTML(icon)}" class="fireIcon">`
         }
         if (i != 0) {
             div.innerHTML += "<hr>";
@@ -3345,6 +3276,17 @@ const loadFireIcons = () => {
                     <input type="number" id="new_fire_margin_${i}" class="s-width" placeholder="Default" value="${escapeHTML(fireIcon.margin)}"></span>,
                     <input type="number" id="new_fire_marginLeft_${i}" class="s-width" placeholder="Default" value="${escapeHTML(fireIcon.marginLeft)}">
                     </label>
+                    <label>Rank font weight: <select class="s-width" id="new_fire_font_weight_${i}">
+                        <option ${fireIcon.fontWeight == '100' ? 'selected' : ''} value="100">Thin</option>
+                        <option ${fireIcon.fontWeight == '200' ? 'selected' : ''} value="200">Extra Light</option>
+                        <option ${fireIcon.fontWeight == '300' ? 'selected' : ''} value="300">Light</option>
+                        <option ${fireIcon.fontWeight == '400' ? 'selected' : ''} value="400">Regular</option>
+                        <option ${fireIcon.fontWeight == '500' ? 'selected' : ''} value="500">Medium</option>
+                        <option ${fireIcon.fontWeight == '600' ? 'selected' : ''} value="600">Semibold</option>
+                        <option ${fireIcon.fontWeight == '700' ? 'selected' : ''} value="700">Bold</option>
+                        <option ${fireIcon.fontWeight == '800' ? 'selected' : ''} value="800">Extra Bold</option>
+                        <option ${fireIcon.fontWeight == '900' ? 'selected' : ''} value="900">Black</option>
+                    </select></label>
                 </div><br>
                 <div class="fire-list-controls">
                     <div><button onclick="saveFireEdits(${i})" title="Save"><span class="material-symbols-outlined">save</span></button></div>
@@ -3375,28 +3317,268 @@ const deleteFireIcon = (index) => {
 }
 
 const saveFireEdits = (index) => {
-    let used = data.fireIcons.created.some(icon => icon.name === document.getElementById('new_fire_name_' + index).value);
+    const newName = document.getElementById('new_fire_name_' + index).value;
+    if (!newName) {
+        alert('You must specify a name.');
+        document.getElementById('new_fire_name_' + index).value = data.fireIcons.created[index].name;
+        return;
+    }
+
+    const newThreshold = parseFloat(document.getElementById('new_fire_threshold_' + index).value);
+    if (!isFinite(newThreshold)) {
+        alert('You must specify a valid threshold.');
+        document.getElementById('new_fire_threshold_' + index).value = data.fireIcons.created[index].threshold;
+        return;
+    }
+
+    let used = false;
+    for (let i = 0; i < data.fireIcons.created.length; i++) {
+        if (i == index) continue;
+        if (data.fireIcons.created[i].name === newName) {
+            used = true;
+            break;
+        }
+    }
 
     if (used) {
         if (document.getElementById('new_fire_name_' + index).value != data.fireIcons.created[index].name) {
-            alert('Fire emojis must have unique names!');
+            alert('Fire icons must have unique names!');
+            document.getElementById('new_fire_name_' + index).value = data.fireIcons.created[index].name;
             return;
         }
     }
 
     data.fireIcons.created[index] = {
-        name: document.getElementById('new_fire_name_' + index).value,
-        threshold: parseFloat(document.getElementById('new_fire_threshold_' + index).value),
+        name: newName,
+        threshold: newThreshold,
         icon: data.fireIcons.created[index].icon,
         method: document.getElementById('new_fire_method_' + index).value,
         color: document.getElementById('new_fire_color_' + index).value,
         margin: document.getElementById('new_fire_margin_' + index).value,
-        marginLeft: document.getElementById('new_fire_marginLeft_' + index).value
+        marginLeft: document.getElementById('new_fire_marginLeft_' + index).value,
+        fontWeight: document.getElementById('new_fire_font_weight_' + index).value
     };
 };
 
+const addDifferenceEffect = () => {
+    if (document.getElementById('differenceEffectCreate')) {
+        document.getElementById('differenceEffectCreate').remove();
+    } else {
+        let div = document.createElement('div');
+        div.id = 'differenceEffectCreate';
+        div.innerHTML = `
+            <label>Difference effect name:<br><input type="text" class="l-width" id="diffEffectName" placeholder="Difference"></label>
+            <label>Difference threshold: </label><input type="number" class="s-width" step="any" id="diffEffectThreshold" placeholder="1000"><br>
+            <label>Difference threshold method: <select class="m-width" id="diffMethod" name="diffMethod">
+                <option value="<=">Less than (≤)</option>    
+                <option value="==">Equal to (=)</option>
+                <option value=">=">Greater than (≥)</option>
+                <option value="!=">Not equal to (≠)</option>
+                <option value="h<=">Passing in ≤X hrs</option>
+                <option value="h>=">Passing in ≥X hrs</option>
+            </select></label>
+            <label>Difference icon (leave blank for none):<br><input type="text" id="diffIconUrl" placeholder="https://example.com/image.png"><label> or </label><input type="file" id="diffIconFile"></label>
+            <label>Difference icon shaking: <input type="checkbox" id="diffShaking"></label>
+            <label>Difference color: <input type="color" id="diffColor" value="#008000"></label>
+            <label>Channel glow: </label><select class="l-width" id="diffGlow">
+                <option value="none">No glow</option>
+                <option value="bottom">Bottom glows</option>
+                <option value="top">Top glows</option>
+                <option value="fasterSet">Faster (set gain) glows</option>
+                <option value="slowerSet">Slower (set gain) glows</option>
+                <option value="fasterObserved">Faster (observed gain) glows</option>
+                <option value="slowerObserved">Slower (observed gain) glows</option>
+                <option value="both">Both glow</option>
+            </select>
+            <label>Channel glow color: <input type="color" id="diffGlowColor" value="#00ff00"></label>
+            <label>Show difference when: </label><select class="l-width" id="diffShowWhen">
+                <option value="always">Always</option>
+                <option value="bottomFasterSet">Bottom faster (set gain)</option>
+                <option value="bottomFasterObserved">Bottom faster (observed gain)</option>
+                <option value="topFasterSet">Top faster (set gain)</option>
+                <option value="topFasterObserved">Top faster (observed gain)</option>
+            </select>
+            <button onclick="saveDifferenceEffect()">Add</button>
+        `
+        document.getElementById('addDifferenceMenu').appendChild(div);
+        adjustColors();
+    }
+}
+
+const saveDifferenceEffect = async () => {
+    let file = document.getElementById('diffIconFile').files[0];
+    if (file) {
+        file = await getBase64(file);
+    } else {
+        file = document.getElementById('diffIconUrl').value;
+    }
+
+    const name = document.getElementById('diffEffectName').value;
+    const threshold = parseFloat(document.getElementById('diffEffectThreshold').value);
+    if (!name || !isFinite(threshold)) {
+        alert('Please fill out all required fields.');
+        return;
+    }
+
+    if (!data.differenceStyles.created) {
+        data.differenceStyles.created = [];
+    }
+
+    if (data.differenceStyles.created.some(i => i.name === name)) {
+        alert('Difference effects must have unique names.');
+        return;
+    }
+
+    data.differenceStyles.created.push({
+        name: name,
+        threshold: threshold,
+        icon: file,
+        color: document.getElementById('diffColor').value,
+        method: document.getElementById('diffMethod').value,
+        iconShaking: document.getElementById('diffShaking').checked,
+        glowColor: document.getElementById('diffGlowColor').value,
+        glow: document.getElementById('diffGlow').value,
+        showWhen: document.getElementById('diffShowWhen').value
+    });
+    document.getElementById('differenceEffectCreate').remove();
+    loadDifferenceEffects();
+}
+
+function reOrderDiff(type, index) {
+    if (type === 'up' && index > 0) {
+        // Swap with the previous item
+        [data.differenceStyles.created[index], data.differenceStyles.created[index - 1]] =
+            [data.differenceStyles.created[index - 1], data.differenceStyles.created[index]];
+    } else if (type === 'down' && index < data.differenceStyles.created.length - 1) {
+        // Swap with the next item
+        [data.differenceStyles.created[index], data.differenceStyles.created[index + 1]] =
+            [data.differenceStyles.created[index + 1], data.differenceStyles.created[index]];
+    } else if (type === 'top' && index > 0) {
+        // Move to the top
+        const item = data.differenceStyles.created.splice(index, 1)[0];
+        data.differenceStyles.created.unshift(item);
+    } else if (type === 'bottom' && index < data.differenceStyles.created.length - 1) {
+        // Move to the bottom
+        const item = data.differenceStyles.created.splice(index, 1)[0];
+        data.differenceStyles.created.push(item);
+    }
+    loadDifferenceEffects();
+}
+
+const loadDifferenceEffects = () => {
+    let div = document.getElementById('differenceEffects');
+    div.innerHTML = '';
+    for (let i = 0; i < data.differenceStyles.created.length; i++) {
+        let diffEffect = data.differenceStyles.created[i];
+        let icon = diffEffect.icon ? `<img src=${escapeHTML(diffEffect.icon)} style="height: 1.5em; width: 1.5em;">` : '<p>(no icon)</p>';
+        if (i != 0) {
+            div.innerHTML += "<hr>";
+        }
+        div.innerHTML += `
+            <div style="display: flex; padding: 0.5em; margin: 0.5em 0; border-radius: 0.2em;">
+                <div style="align-items: center">
+                    <div style="padding: 0.2em; border-radius: 0.2em;">${icon}</div><br>
+                    <label>Name:<br><input class="m-width" placeholder="Name" value="${escapeHTML(diffEffect.name)}" id="new_diff_name_${i}"></label>
+                    <label>Condition:<br><span class="no-wrap"><select id="new_diff_method_${i}" class="s-width">
+                        <option ${diffEffect.method == '<=' ? 'selected' : ''} value="<=">Gap ≤</option>
+                        <option ${diffEffect.method == '==' ? 'selected' : ''} value="==">Gap =</option>
+                        <option ${diffEffect.method == '>=' ? 'selected' : ''} value=">=">Gap ≥</option>
+                        <option ${diffEffect.method == '!=' ? 'selected' : ''} value="!=">Gap ≠</option>
+                        <option ${diffEffect.method == 'h<=' ? 'selected' : ''} value="h<=">Hours ≤</option>
+                        <option ${diffEffect.method == 'h>=' ? 'selected' : ''} value="h>=">Hours ≥</option>
+                    </select><input type="number" step="any" class="s-width" id="new_diff_threshold_${i}" value="${escapeHTML(diffEffect.threshold)}"><br></span></label>
+                    <label>Icon shaking: <input type="checkbox" id="new_diff_shaking_${i}" ${diffEffect.iconShaking ? 'checked' : ''}>
+                    <label>Color: <input type="color" id="new_diff_color_${i}" value="${escapeHTML(diffEffect.color)}"></label>
+                    <label>Glow:<br><select id="new_diff_glow_${i}" class="l-width">
+                        <option ${diffEffect.glow == 'none' ? 'selected' : ''} value="none">No glow</option>
+                        <option ${diffEffect.glow == 'bottom' ? 'selected' : ''} value="bottom">Bottom glows</option>
+                        <option ${diffEffect.glow == 'top' ? 'selected' : ''} value="top">Top glows</option>
+                        <option ${diffEffect.glow == 'fasterSet' ? 'selected' : ''} value="fasterSet">Faster (set gain) glows</option>
+                        <option ${diffEffect.glow == 'fasterObserved' ? 'selected' : ''} value="fasterObserved">Faster (observed gain) glows</option>
+                        <option ${diffEffect.glow == 'slowerSet' ? 'selected' : ''} value="slowerSet">Slower (set gain) glows</option>
+                        <option ${diffEffect.glow == 'slowerObserved' ? 'selected' : ''} value="slowerObserved">Slower (observed gain) glows</option>
+                        <option ${diffEffect.glow == 'both' ? 'selected' : ''} value="both">Both glow</option>
+                    </select></label>
+                    <label>Glow color: <input type="color" id="new_diff_glow_color_${i}" value="${escapeHTML(diffEffect.glowColor)}"></label>
+                    <label>Show when:<br><select id="new_diff_show_when_${i}" class="l-width">
+                        <option ${diffEffect.showWhen == 'always' ? 'selected' : ''} value="always">Always</option>
+                        <option ${diffEffect.showWhen == 'bottomFasterSet' ? 'selected' : ''} value="bottomFasterSet">Bottom faster (set gain)</option>
+                        <option ${diffEffect.showWhen == 'bottomFasterObserved' ? 'selected' : ''} value="bottomFasterObserved">Bottom faster (observed gain)</option>
+                        <option ${diffEffect.showWhen == 'topFasterSet' ? 'selected' : ''} value="topFasterSet">Top faster (set gain)</option>
+                        <option ${diffEffect.showWhen == 'topFasterObserved' ? 'selected' : ''} value="topFasterObserved">Top faster (observed gain)</option>
+                    </select></label>
+                </div>
+                <div class="fire-list-controls">
+                    <div><button onclick="saveDiffEdits(${i})" title="Save"><span class="material-symbols-outlined">save</span></button></div>
+                    <div><button onclick="deleteDiffEffect(${i})" title="Delete" ><span class="material-symbols-outlined">delete</span></button></div>
+                    <div><button onclick="reOrderDiff('up',${i})" title="Move up"><span class="material-symbols-outlined">keyboard_arrow_up</span></button></div>
+                    <div><button onclick="reOrderDiff('down',${i})" title="Move down"><span class="material-symbols-outlined">keyboard_arrow_down</span></button></button></div>
+                    <div><button onclick="reOrderDiff('top',${i})" title="Move to top"><span class="material-symbols-outlined">keyboard_double_arrow_up</span></button></button></div>
+                    <div><button onclick="reOrderDiff('bottom',${i})" title="Move to bottom"><span class="material-symbols-outlined">keyboard_double_arrow_down</span></button></button></div>
+                </div>
+            </div>
+        `
+    }
+    if (!data.differenceStyles.created.length) {
+        div.innerHTML = '<p>No difference effects created.</p>'
+    }
+    adjustColors();
+}
+loadDifferenceEffects();
+
+function deleteDiffEffect(index) {
+    data.differenceStyles.created.splice(index, 1);
+    loadDifferenceEffects();
+}
+
+function saveDiffEdits(index) {
+    const newName = document.getElementById('new_diff_name_' + index).value;
+    if (!newName) {
+        alert('You must specify a name.');
+        document.getElementById('new_diff_name_' + index).value = data.differenceStyles.created[index].name;
+        return;
+    }
+
+    const newThreshold = parseFloat(document.getElementById('new_diff_threshold_' + index).value);
+    if (!isFinite(newThreshold)) {
+        alert('You must specify a valid threshold.');
+        document.getElementById('new_diff_threshold_' + index).value = data.differenceStyles.created[index].threshold;
+        return;
+    }
+
+    let used = false;
+    for (let i = 0; i < data.differenceStyles.created.length; i++) {
+        if (i == index) continue;
+        if (data.differenceStyles.created[i].name === newName) {
+            used = true;
+            break;
+        }
+    }
+
+    if (used) {
+        alert('Difference effects must have unique names!');
+        document.getElementById('new_diff_name_' + index).value = data.differenceStyles.created[index].name;
+        return;
+    }
+
+    data.differenceStyles.created[index] = {
+        name: newName,
+        threshold: newThreshold,
+        icon: data.differenceStyles.created[index].icon,
+        color: document.getElementById('new_diff_color_' + index).value,
+        method: document.getElementById('new_diff_method_' + index).value,
+        iconShaking: document.getElementById('new_diff_shaking_' + index).checked,
+        glowColor: document.getElementById('new_diff_glow_color_' + index).value,
+        glow: document.getElementById('new_diff_glow_' + index).value,
+        showWhen: document.getElementById('new_diff_show_when_' + index).value
+    };
+}
+//     if (data.differenceStyles.created.some(i => i.name === document.getElementBy))
+// }
+
 document.getElementById('fireEnabled').addEventListener('click', function () {
     data.fireIcons.enabled = document.getElementById('fireEnabled').checked;
+    updateFires();
 });
 
 document.getElementById('fireType').addEventListener('change', function () {
@@ -3470,11 +3652,6 @@ function loadHeader() {
         data.headerSettings.items = [];
     }
 
-    // Filter out items with undefined or "undefined" names
-    data.headerSettings.items = data.headerSettings.items.filter(item =>
-        item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
-    );
-
     headerEl.style.height = (data.headerSettings.headerHeight || 0) + 'px';
     if (data.headerSettings.boxWidth && data.headerSettings.boxWidth.trim() !== '') {
         headerEl.style.gridTemplateColumns = data.headerSettings.boxWidth.split(',').map(x => x.trim() + 'fr').join(' ');
@@ -3490,11 +3667,12 @@ function loadHeader() {
     }
 
     for (let i = 0; i < data.headerSettings.items.length; i++) {
+        let func;
         const item = data.headerSettings.items[i];
         const placement = item.placement || 'header';
         const container = (placement === 'footer' && footerEl) ? footerEl : headerEl;
         // Skip items without valid names
-        if (!item || !item.name || item.name === 'undefined' || item.name === undefined) {
+        if (!item || !item.name) {
             continue;
         }
         const div = document.createElement('div');
@@ -3587,11 +3765,11 @@ function loadHeader() {
             }
         }
         if (item.type == 'battle') {
-            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
-                <div class="battle_container">
+            div.innerHTML = `<div class="battle-container battle" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
+                <div class="battle_container battle_container_left" ${item.attributes.roundAvatars ? '' : 'style="border-radius: 0;"'}>
                     <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image1_${item.name}"></img>
                     <div class="battle_info">
-                        <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">\u200b</p>
+                        <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px; line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>
@@ -3599,9 +3777,9 @@ function loadHeader() {
                     <p style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">Difference:</p>
                     <p class="odometer battle_difference count no_color_transition" id="battle_difference_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">0</p>
                 </div>
-                <div class="reverse battle_container">
+                <div class="reverse battle_container battle_container_right" ${item.attributes.roundAvatars ? '' : 'style="border-radius: 0;"'}>
                 <div class="battle_info">
-                        <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">\u200b</p>
+                        <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px; line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count2_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: right;" : ""}">0</p>
                     </div>
                     <img style="float: right; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image2_${item.name}"></img>
@@ -3609,22 +3787,140 @@ function loadHeader() {
                 </div>`;
             div.style.fontWeight = item.attributes.fontWeight || "400";
             div.style.color = item.attributes.color;
-            headerIntervals.push(setInterval(function () {
+            headerIntervals.push(setInterval(func = function () {
+                const rankRange = parseMinMax(item.attributes.restrictRanks);
+
                 let user1 = null;
                 let user2 = null;
                 if (item.attributes.type == 'custom') {
                     user1 = data.data.find(u => u.id == item.attributes.id1);
                     user2 = data.data.find(u => u.id == item.attributes.id2);
                 } else {
-                    let users = findClosestBattle();
+                    let users = findClosestBattle(item.attributes.ranking || 1, rankRange, item.attributes.threshold, item.attributes.thresholdType, item.attributes.type);
                     user1 = users?.channels[0];
                     user2 = users?.channels[1];
+                }
+
+                const rank1 = user1 ? getRankOf(user1.id) : 0
+                const rank2 = user2 ? getRankOf(user2.id) : 0
+                if (rank1 < rankRange[0] || rank1 > rankRange[1]) user1 = null;
+                if (rank2 < rankRange[0] || rank2 > rankRange[1]) user2 = null;
+
+                let left1 = left2 = right1 = right2 = '';
+                switch (item.attributes.battleRankPos) {
+                    case 'before':
+                        left1 = '#' + formatRank(rank1) + ' ';
+                        left2 = '#' + formatRank(rank2) + ' ';
+                        break;
+                    case 'after': 
+                        right1 = ' #' + formatRank(rank1);
+                        right2 = ' #' + formatRank(rank2);
+                        break;
+                    case 'outsideName':
+                        left1 = '#' + formatRank(rank1) + ' ';
+                        right2 = ' #' + formatRank(rank2);
+                        break;
+                    case 'insideName':
+                        right1 = ' #' + formatRank(rank1);
+                        left2 = '#' + formatRank(rank2) + ' ';
+                        break;
+                }
+
+                if (['left', 'right', 'outside', 'inside'].includes(item.attributes.battleRankPos)) {
+                    let rankBox1 = div.querySelector('.battle_container_left').querySelector(".num");
+                    if (rankBox1 && ((rankBox1.classList.contains("rank_battle_left")
+                        && ['right', 'inside'].includes(item.attributes.battleRankPos)) || 
+                        (rankBox1.classList.contains('rank_battle_right')
+                        && ['left', 'outside'].includes(item.attributes.battleRankPos))
+                    )) {
+                        rankBox1.remove();
+                    }
+
+                    if (!rankBox1) {
+                        rankBox1 = document.createElement("div");
+                        rankBox1.className = "num";
+                        if (['left','outside'].includes(item.attributes.battleRankPos)) {
+                            rankBox1.classList.add('rank_battle_left');
+                            div.querySelector(".battle_container_left").prepend(rankBox1);
+                        } else {
+                            rankBox1.classList.add('rank_battle_right');
+                            div.querySelector(".battle_container_left").appendChild(rankBox1);
+                        }
+                    }
+
+                    rankBox1.innerHTML = `
+                        <div class="num_text">${rank1}</div>
+                    `
+
+                    let rankBox2 = div.querySelector('.battle_container_right').querySelector(".num");
+                    if (rankBox2 && ((rankBox2.classList.contains("rank_battle_left")
+                        && ['right', 'outside'].includes(item.attributes.battleRankPos)) || 
+                        (rankBox2.classList.contains('rank_battle_right')
+                        && ['left', 'inside'].includes(item.attributes.battleRankPos))
+                    )) {
+                        rankBox2.remove();
+                    }
+
+                    if (!rankBox2) {
+                        rankBox2 = document.createElement("div");
+                        rankBox2.className = "num";
+                        if (['left','inside'].includes(item.attributes.battleRankPos)) {
+                            rankBox2.classList.add('rank_battle_left');
+                            div.querySelector(".battle_container_right").prepend(rankBox2);
+                        } else {
+                            rankBox2.classList.add('rank_battle_right');
+                            div.querySelector(".battle_container_right").appendChild(rankBox2);
+                        }
+                    }
+
+                    rankBox2.innerHTML = `
+                        <div class="num_text">${rank2}</div>
+                    `
+
+                    // console.log(rank1);
+                    // console.log(rank2);
+                    applyFire(div.querySelector(".battle_container_left"), rank1 - 1, item.attributes.applyFire);
+                    applyFire(div.querySelector(".battle_container_right"), rank2 - 1, item.attributes.applyFire);
+
+                } else {
+                    div.querySelectorAll(".num").forEach(x => x.remove());
+                    if (data.fireIcons.enabled && item.attributes.applyFire) {
+                        const fire1 = user1 ? fires.get(user1.id) : undefined;
+                        const fire2 = user2 ? fires.get(user2.id) : undefined;
+
+                        if (fire1 != undefined) {
+                            div.querySelector(".battle_container_left").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fire1].icon)})`
+                            div.querySelector(".battle_container_left .name").style.color = data.fireIcons.created[fire1].color;
+                            div.querySelector(".battle_container_left .count").style.color = data.fireIcons.created[fire1].color;
+                            div.querySelector(".battle_container_left .name").style.fontWeight = data.fireIcons.created[fire1].fontWeight;
+                            div.querySelector(".battle_container_left .count").style.fontWeight = data.fireIcons.created[fire1].fontWeight;
+                        } else {
+                            div.querySelector(".battle_container_left").style.backgroundImage = '';
+                            div.querySelector(".battle_container_left .name").style.color = '';
+                            div.querySelector(".battle_container_left .count").style.color = '';
+                            div.querySelector(".battle_container_left .name").style.fontWeight = '';
+                            div.querySelector(".battle_container_left .count").style.fontWeight = '';
+                        }
+                        if (fire2 != undefined) {
+                            div.querySelector(".battle_container_right").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fire2].icon)})`
+                            div.querySelector(".battle_container_right .name").style.color = data.fireIcons.created[fire2].color;
+                            div.querySelector(".battle_container_right .count").style.color = data.fireIcons.created[fire2].color;
+                            div.querySelector(".battle_container_right .name").style.fontWeight = data.fireIcons.created[fire2].fontWeight;
+                            div.querySelector(".battle_container_right .count").style.fontWeight = data.fireIcons.created[fire2].fontWeight;
+                        } else {
+                            div.querySelector(".battle_container_right").style.backgroundImage = '';
+                            div.querySelector(".battle_container_right .name").style.color = '';
+                            div.querySelector(".battle_container_right .count").style.color = '';
+                            div.querySelector(".battle_container_right .name").style.fontWeight = '';
+                            div.querySelector(".battle_container_right .count").style.fontWeight = '';
+                        }
+                    }
                 }
 
                 let count1 = user1 ? getDisplayedCount(user1.count) : 0;
                 let count2 = user2 ? getDisplayedCount(user2.count) : 0;
 
-                document.getElementById('battle_name1_' + item.name).innerText = user1 ? user1.name : "\u200b";
+                document.getElementById('battle_name1_' + item.name).innerText = user1 ? (left1 + user1.name + right1) : "\u200b";
                 document.getElementById('battle_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
                 if (user1 && document.getElementById('battle_image1_' + item.name).src !== user1.image) {
                     document.getElementById('battle_image1_' + item.name).src = user1.image;
@@ -3632,41 +3928,119 @@ function loadHeader() {
                     document.getElementById('battle_image1_' + item.name).src = "../default.png";
                 }
 
-                document.getElementById('battle_name2_' + item.name).innerText = user2 ? user2.name : "\u200b";
+                document.getElementById('battle_name2_' + item.name).innerText = user2 ? (left2 + user2.name + right2) : "\u200b";
                 document.getElementById('battle_count2_' + item.name).innerText = getDisplayedCount(user2 ? user2.count : 0);
-                if (user1 && document.getElementById('battle_image2_' + item.name).src !== user2.image) {
+                if (user2 && document.getElementById('battle_image2_' + item.name).src !== user2.image) {
                     document.getElementById('battle_image2_' + item.name).src = user2.image;
                 } else if (!user2) {
                     document.getElementById('battle_image2_' + item.name).src = "../default.png";
                 }
                 document.getElementById('battle_difference_' + item.name).innerText = Math.floor(count1 - count2);
+
+                if (item.attributes.hideInvalid && (!user1 || !user2)) {
+                    div.style.visibility = 'hidden';
+                } else {
+                    div.style.visibility = 'visible';
+                }
             }, item.attributes.updateInterval * 1000));
         }
         if (item.type == 'user') {
-            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px;">
-                <div class="battle_container">
-                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize};" src="../default.png" id="user_image1_${item.name}"></img>
+            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
+                <div class="battle_container" style="max-height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
+                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm;" src="../default.png" id="user_image1_${item.name}"></img>
                     <div class="battle_info">
-                        <p id="user_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px;">\u200b</p>
+                        <p id="user_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px; line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
                         <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="user_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
                     </div>
                 </div>`;
             div.style.fontWeight = item.attributes.fontWeight || "400";
             div.style.color = item.attributes.color;
-            headerIntervals.push(setInterval(function () {
+            headerIntervals.push(setInterval(func = function () {
+                const rankRange = parseMinMax(item.attributes.restrictRanks);
+
                 let user1 = null;
                 if (item.attributes.type == 'custom') {
                     user1 = data.data.find(u => u.id == item.attributes.id1);
                 } else {
-                    user1 = findFastestChannel();
+                    user1 = findFastestChannel(item.attributes.ranking || 1, rankRange);
                 }
 
-                document.getElementById('user_name1_' + item.name).innerText = user1 ? user1.name : "\u200b";
+                const rank = user1 ? getRankOf(user1.id) : 0;
+                if (rank < rankRange[0] || rank > rankRange[1]) user1 = null;
+                let left = '';
+                let right = '';
+                switch (item.attributes.userRankPos) {
+                    case 'before':
+                        left = '#' + formatRank(rank) + ' ';
+                        break;
+                    case 'after':
+                        right = ' #' + formatRank(rank);
+                        break;
+                }
+
+                document.getElementById('user_name1_' + item.name).innerText = user1 ? (left + user1.name + right) : "\u200b";
                 document.getElementById('user_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
                 if (user1 && document.getElementById('user_image1_' + item.name).src !== user1.image) {
                     document.getElementById('user_image1_' + item.name).src = user1.image;
                 } else if (!user1) {
                     document.getElementById('user_image1_' + item.name).src = "../default.png";
+                }
+
+                if (!user1 && item.attributes.hideInvalid) {
+                    div.style.visibility = 'hidden';
+                } else {
+                    div.style.visibility = 'visible';
+                }
+
+                if (['left', 'right'].includes(item.attributes.userRankPos)) {
+                    let rankBox = div.querySelector(".num");
+                    if (rankBox && ((rankBox.classList.contains("rank_battle_left") 
+                        && item.attributes.userRankPos === 'right') || 
+                        (rankBox.classList.contains("rank_battle_right") 
+                        && item.attributes.userRankPos === 'left'))) {
+                        rankBox.remove();
+                        rankBox = null;
+                    }
+
+                    if (!rankBox) {
+                        rankBox = document.createElement("div");
+                        rankBox.className = "num";
+                        if (item.attributes.userRankPos === 'left') {
+                            rankBox.classList.add('rank_battle_left');
+                            div.querySelector(".battle_container").prepend(rankBox);
+                        } else {
+                            rankBox.classList.add('rank_battle_right');
+                            div.querySelector(".battle_container").appendChild(rankBox);
+                        }
+                    }
+                    
+                    rankBox.innerHTML = `
+                        <div class="num_text">${rank}</div>
+                    `
+
+                    applyFire(div, rank - 1, item.attributes.applyFire)
+                    
+                } else {
+                    if (div.querySelector(".num")) {
+                        div.querySelector(".num").remove();
+                    }
+
+                    if (data.fireIcons.enabled && item.attributes.applyFire) {
+                        const fireIcon = user1 ? fires.get(user1.id) : undefined;
+                        if (fireIcon != undefined) {
+                            div.querySelector(".battle-container").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fireIcon].icon)})`
+                            div.querySelector(".name").style.color = data.fireIcons.created[fireIcon].color;
+                            div.querySelector(".count").style.color = data.fireIcons.created[fireIcon].color;
+                            div.querySelector(".name").style.fontWeight = data.fireIcons.created[fireIcon].fontWeight;
+                            div.querySelector(".count").style.fontWeight = data.fireIcons.created[fireIcon].fontWeight;
+                        } else {
+                            div.querySelector(".battle-container").style.backgroundImage = '';
+                            div.querySelector(".name").style.color = '';
+                            div.querySelector(".count").style.color = '';
+                            div.querySelector(".name").style.fontWeight = '';
+                            div.querySelector(".count").style.fontWeight = '';
+                        }
+                    }
                 }
             }, item.attributes.updateInterval * 1000));
         }
@@ -3680,6 +4054,10 @@ function loadHeader() {
                 container.appendChild(div);
             }
         }
+
+        if (func) {
+            func();
+        }
     }
     if (footerEl) {
         footerEl.style.fontFamily = data.headerFont || "Arial";
@@ -3687,28 +4065,57 @@ function loadHeader() {
     updateOdo()
 }
 
-function findClosestBattle() {
+function findClosestBattle(index, rankRange, threshold, thresholdType, type) {
+    const toConsider = [...data.data]
+        .slice(rankRange[0] - 1, rankRange[1])
+        .sort((a, b) => { getDisplayedCount(b.count) - getDisplayedCount(a.count)});
     let pairs = [];
-    for (let i = 0; i < data.data.length - 1; i++) {
+    for (let i = 0; i < toConsider.length - 1; i++) {
         pairs.push({
-            diff: Math.abs(data.data[i].count - data.data[i + 1].count),
-            channels: [data.data[i], data.data[i + 1]]
+            diff: Math.abs(getDisplayedCount(toConsider[i].count) - getDisplayedCount(toConsider[i + 1].count)),
+            channels: [toConsider[i], toConsider[i + 1]],
+            time: estimatePassingTime(toConsider[i], toConsider[i+1])
         });
     }
-    pairs.sort((a, b) => a.diff - b.diff);
-    return pairs[0];
+    if ((!thresholdType || thresholdType === 'count') && threshold != null) pairs = pairs.filter(x => x.diff <= threshold);
+    if (thresholdType === 'hours' && threshold != null) {
+        pairs = pairs.filter(x => {
+            const hours = x.time / 3.6e6 * data.updateInterval;
+            return hours >= 0 && hours <= threshold;
+        })
+    }
+    if (type === 'fastest') {
+        pairs = pairs.filter(x => x.time >= 0);
+        pairs.sort((a, b) => a.time - b.time);
+    } else {
+        pairs.sort((a, b) => a.diff - b.diff);
+    } 
+    return pairs[index - 1];
 }
 
-function findFastestChannel() {
-    let toReturn = [...data.data].sort((a, b) => getGain(b.id) - getGain(a.id));
-    return toReturn[0];
+function findFastestChannel(index, rankRange) {
+    const toConsider = [...data.data].slice(rankRange[0] - 1, rankRange[1]);
+    let toReturn = toConsider.sort((a, b) => getGain(b.id) - getGain(a.id));
+    return toReturn[index - 1];
 }
 
-function saveTopSettings() {
+function saveTopSettings(shouldAlert = true) {
     let items = [];
+    const valid = Array.from(document.querySelector("#sections").children)
+        .every(x => isValidHeaderName(x.querySelector(".section_option_name")?.value));
+    
+    if (!valid) {
+        return alert("Section names cannot be empty and cannot contain any of the following characters < > ' \" \\ &");
+    }
+
+    if (hasDuplicates(Array.from(document.querySelector("#sections").children).map(x => x.querySelector(".section_option_name")?.value))) {
+        return alert("Section names must be unique.")
+    }
+
     Array.from(document.querySelector("#sections").children).forEach(parent => {
+        const secID = parent.querySelector(".section_option_name").value;
         let item = {
-            "attributes": {}
+            "attributes": data.headerSettings.items.find(x => x.name === secID)?.attributes || {}
         };
         // Use querySelectorAll to find all header_option elements within the parent, not just direct children
         const options = parent.querySelectorAll(".header_option");
@@ -3719,7 +4126,7 @@ function saveTopSettings() {
                     const attrName = className.split('_')[2];
                     if (attrName) {
                         if (child.type === 'number') {
-                            item['attributes'][attrName] = child.value ? parseInt(child.value) : 0;
+                            item['attributes'][attrName] = child.value ? parseInt(child.value) : (child.classList.contains("optional") ? null : 0);
                         } else if (child.type === 'checkbox') {
                             item['attributes'][attrName] = child.checked;
                         } else {
@@ -3735,10 +4142,8 @@ function saveTopSettings() {
                 }
             }
         });
-        // Only add items with valid names
-        if (item.name && item.name !== 'undefined' && item.name.trim() !== '') {
-            items.push(item);
-        }
+        items.push(item);
+        
     });
     data.headerSettings = {
         totalSections: document.getElementById("totalSections").value || 0,
@@ -3749,7 +4154,7 @@ function saveTopSettings() {
         footerGap: document.getElementById("footerGapSections") ? (document.getElementById("footerGapSections").value || 10) : 10,
         items: items
     }
-    saveData(true);
+    saveData(shouldAlert);
     loadHeader()
 }
 
@@ -3771,9 +4176,7 @@ function loadTopSettings(itemName, itemType) {
     if (!data.headerSettings.items) {
         data.headerSettings.items = [];
     }
-    data.headerSettings.items = data.headerSettings.items.filter(item =>
-        item && item.name && item.name !== 'undefined' && item.name !== undefined && item.name.trim() !== ''
-    );
+
     data.headerSettings.items.forEach(item => {
         if (item.name == itemName) {
             item.type = itemType;
@@ -3782,9 +4185,30 @@ function loadTopSettings(itemName, itemType) {
         let div = document.createElement("div");
         div.className = "headerItem";
         div.id = `headerItem_${item.name}`;
+
+
+        function fixUserSettings(value) {
+            const userID = div.querySelector(".header_option_user_id");
+            if (userID) {
+                userID.style.display = value === "custom" ? "" : "none";
+            }
+
+            const nthFastest = div.querySelector(".header_option_nth_fastest");
+            if (nthFastest) {
+                nthFastest.style.display = value === "custom" ? "none" : "";
+            }
+        }
+
+        function fixHeaderSettings() {
+            const userType = div.querySelector(".header_option_user_type");
+            if (userType) {
+                userType.addEventListener('change', () => {fixUserSettings(userType.value)});
+                fixUserSettings(userType.value);
+            }
+        }
         let textSettings = `
             <div class="section-basic-options">
-                <div style="grid-column: 1 / -1;"><label><strong>Text content:</strong></label><br>
+                <div style="grid-column: 1 / -1;"><label><strong>Text content:</strong></label>
                     <textarea rows="3" class="section_attribute_text header_option"
                         placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)">${item.attributes.text || ''}</textarea>
                     <p style="font-size: 12px; color: #666; margin-top: 5px;">
@@ -3805,7 +4229,7 @@ function loadTopSettings(itemName, itemType) {
                 </div>
             </div>
             <details class="section-advanced-options" style="margin-top: 10px;">
-                <summary><strong>Advanced Options</strong></summary>
+                <summary><strong>Advanced Options (click to toggle)</strong></summary>
                 <div style="margin-top: 10px;" class="header-option-group">
                     <div>
                         <label>Font weight:</label>
@@ -3820,7 +4244,7 @@ function loadTopSettings(itemName, itemType) {
                     </div>
                     <div>
                         <label>Auto-scroll duration (seconds) (0 = disabled):</label>
-                        <input type="number" value="${item.attributes.scrollTime || '0'}"
+                        <input type="number" value="${escapeHTML(item.attributes.scrollTime) || '0'}"
                             class="section_attribute_scrollTime header_option xs-width" /><br>
                     </div>
                     <div>
@@ -3835,7 +4259,7 @@ function loadTopSettings(itemName, itemType) {
                 <div class="header-option-group">
                     <div>
                         <label>List length:</label>
-                        <input type="number" value="${item.attributes.length || 0}"
+                        <input type="number" value="${escapeHTML(item.attributes.length) || 0}"
                             class="section_attribute_length header_option xs-width" /><br>
                     </div>
                     <div>
@@ -3847,7 +4271,7 @@ function loadTopSettings(itemName, itemType) {
                     </div>
                     <div>
                         <label>Update interval (seconds):</label>
-                        <input type="number" value="${item.attributes.updateInterval || 0}"
+                        <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 0}"
                             class="section_attribute_updateInterval header_option xs-width" />
                     </div>
                 </div>
@@ -3856,50 +4280,85 @@ function loadTopSettings(itemName, itemType) {
         let battleSettings = `
             <div class="section-basic-options header-option-group">
                 <div><label><strong>Battle type:</strong></label>
-                    <select class="section_attribute_type header_option m-width">
+                    <select class="section_attribute_type header_option header_option_user_type m-width">
                         <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest Battle (auto)
                         </option>
+                        <option value="fastest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Closing (auto)</option>
                         <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom Users</option>
                     </select>
                 </div>
                 <div><label><strong>Update interval (seconds):</strong></label>
-                    <input type="number" value="${item.attributes.updateInterval || 2}"
+                    <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 2}"
                         class="section_attribute_updateInterval header_option xs-width" placeholder="2" />
                 </div>
+                <div><label><strong>Show rank:</strong></label>
+                    <select class="section_attribute_battleRankPos header_option m-width">
+                        <option value="none" ${item.attributes.battleRankPos === 'none' ? 'selected' : ''}>Don't show rank</option>
+                        <option value="outside" ${item.attributes.battleRankPos === 'outside' ? 'selected' : ''}>On the outside</option>
+                        <option value="inside" ${item.attributes.battleRankPos === 'inside' ? 'selected' : ''}>On the inside</option>
+                        <option value="left" ${item.attributes.battleRankPos === 'left' ? 'selected' : ''}>On the left</option>
+                        <option value="right" ${item.attributes.battleRankPos === 'right' ? 'selected' : ''}>On the right</option>
+                        <option value="outsideName" ${item.attributes.battleRankPos === 'outsideName' ? 'selected' : ''}>On the outside, in name</option>
+                        <option value="insideName" ${item.attributes.battleRankPos === 'insideName' ? 'selected' : ''}>On the inside, in name</option>
+                        <option value="before" ${item.attributes.battleRankPos === 'before' ? 'selected' : ''}>Before name</option>
+                        <option value="after" ${item.attributes.battleRankPos === 'after' ? 'selected' : ''}>After name</option>
+                    </select>
+                </div>
+                <div><label><strong>Apply fire effect:</strong></label>
+                    <input type="checkbox" class="section_attribute_applyFire header_option" ${item.attributes.applyFire ? 'checked' : ''}>
+                </div>
+                <div><label><strong>Restrict to ranks (e.g. 1-25, 51+):</strong></label>
+                    <input type="text" class="section_attribute_restrictRanks header_option s-width" value="${escapeHTML(item.attributes.restrictRanks) || ''}" placeholder="1+"">
+                </div>
+                <div><label><strong>Hide if no valid battle:</strong></label>
+                    <input type="checkbox" class="section_attribute_hideInvalid header_option" ${item.attributes.hideInvalid ? 'checked' : ''}>
+                </div>
+                <div><label><strong>Threshold type:</strong></label>
+                    <select class="section_attribute_thresholdType header_option m-width">
+                        <option value="count" ${item.attributes.thresholdType === 'count' ? 'selected' : ''}>Count</option>
+                        <option value="hours" ${item.attributes.thresholdType === 'hours' ? 'selected' : ''}>Hours until closing</option> 
+                    </select>
+                </div>
+                <div><label><strong>Threshold (leave blank for none):</strong></label>
+                    <input type="number" class="section_attribute_threshold header_option s-width optional" placeholder="None" value="${escapeHTML(item.attributes.threshold != null ? item.attributes.threshold : '')}">
+                </div>
+                <div class="header_option_nth_fastest"><label><strong>nth closest battle (e.g. 1 = closest, 2 = 2nd closest):</strong></label>
+                    <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1" value="${escapeHTML(item.attributes.ranking != null ? item.attributes.ranking : '')}">
+                </div>
             </div>
-            <div style="margin-top: 10px;" class="header-option-group">
+            <div style="margin-top: 10px;" class="header-option-group header_option_user_id">
                 <div>
                     <label><strong>User 1 ID:</strong></label>
-                    <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option l-width"
+                    <input value="${escapeHTML(item.attributes.id1) || ""}" class="section_attribute_id1 header_option l-width"
                         placeholder="Leave blank for closest battle" /><br>
                 </div>
                 <div>
                     <label><strong>User 2 ID:</strong></label>
-                    <input value="${item.attributes.id2 || ""}" class="section_attribute_id2 header_option l-width"
+                    <input value="${escapeHTML(item.attributes.id2) || ""}" class="section_attribute_id2 header_option l-width"
                         placeholder="Leave blank for closest battle" />
                 </div>
             </div>
             <details class="section-advanced-options" style="margin-top: 10px;">
-                <summary><strong>Styling Options</strong></summary>
+                <summary><strong>Styling Options (click to toggle)</strong></summary>
                 <div style="margin-top: 10px;" class="header-option-group">
                     <div><label>Background color:</label>
-                        <input type="color" value="${item.attributes.bgColor || '#000000'}"
+                        <input type="color" value="${escapeHTML(item.attributes.bgColor) || '#000000'}"
                             class="section_attribute_bgColor header_option" />
                     </div>
                     <div><label>Text color:</label>
-                        <input type="color" value="${item.attributes.color || '#ffffff'}"
+                        <input type="color" value="${escapeHTML(item.attributes.color) || '#ffffff'}"
                             class="section_attribute_color header_option" />
                     </div>
                     <div><label>Height:</label>
-                        <input type="number" value="${item.attributes.boxHeight || '20'}"
+                        <input type="number" value="${escapeHTML(item.attributes.boxHeight) || '60'}"
                             class="section_attribute_boxHeight header_option xs-width" />
                     </div>
                     <div><label>Image size:</label>
-                        <input type="number" value="${item.attributes.imageSize || '15'}"
+                        <input type="number" value="${escapeHTML(item.attributes.imageSize) || '15'}"
                             class="section_attribute_imageSize header_option xs-width" />
                     </div>
                     <div><label>Font size:</label>
-                        <input type="number" value="${item.attributes.fontSize || '15'}"
+                        <input type="number" value="${escapeHTML(item.attributes.fontSize) || '15'}"
                             class="section_attribute_fontSize header_option xs-width" />
                     </div>
                     <div><label>Font weight:</label>
@@ -3923,43 +4382,65 @@ function loadTopSettings(itemName, itemType) {
         `;
         let userSettings = `
             <div class="section-basic-options header-option-group">
-                <div><label><strong>User Type:</strong></label><br>
-                    <select class="section_attribute_type header_option m-width">
-                        <option value="closest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Growing</option>
+                <div><label><strong>User Type:</strong></label>
+                    <select class="section_attribute_type header_option header_option_user_type m-width">
+                        <option value="fastest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Growing</option>
                         <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Specific User</option>
                     </select>
                 </div>
-                <div><label><strong>Update interval (seconds):</strong></label><br>
-                    <input type="number" value="${item.attributes.updateInterval || 2}"
+                <div><label><strong>Update interval (seconds):</strong></label>
+                    <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 2}"
                         class="section_attribute_updateInterval header_option xs-width" placeholder="2" />
                 </div>
+                <div><label><strong>Show rank:</strong></label>
+                    <select class="section_attribute_userRankPos header_option m-width">
+                        <option value="none" ${item.attributes.userRankPos === 'none' ? 'selected' : ''}>Don't show rank</option>
+                        <option value="left" ${item.attributes.userRankPos === 'left' ? 'selected' : ''}>On the left</option>
+                        <option value="right" ${item.attributes.userRankPos === 'right' ? 'selected' : ''}>On the right</option>
+                        <option value="before" ${item.attributes.userRankPos === 'before' ? 'selected' : ''}>Before name</option>
+                        <option value="after" ${item.attributes.userRankPos === 'after' ? 'selected' : ''}>After name</option>
+                    </select>
+                </div>
+                <div><label><strong>Apply fire effect:</strong></label>
+                    <input type="checkbox" class="section_attribute_applyFire header_option" ${item.attributes.applyFire ? 'checked' : ''}>
+                </div>
+                <div><label><strong>Restrict to ranks (e.g. 1-25, 51+):</strong></label>
+                    <input type="text" class="section_attribute_restrictRanks header_option s-width" value="${escapeHTML(item.attributes.restrictRanks) || ''}" placeholder="1+"">
+                </div>
+                <div><label><strong>Hide if no valid user:</strong></label>
+                    <input type="checkbox" class="section_attribute_hideInvalid header_option" ${item.attributes.hideInvalid ? 'checked' : ''}>
+                </div>
+                <div class="header_option_nth_fastest"><label><strong>nth fastest channel (e.g. 1 = fastest, 2 = 2nd fastest):</strong></label>
+                    <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1" value="${escapeHTML(item.attributes.ranking != null ? item.attributes.ranking : '')}">
+                </div>
             </div>
-            <div style="margin-top: 10px;">
-                <label><strong>User ID:</strong></label><br>
-                <input value="${item.attributes.id1 || ""}" class="section_attribute_id1 header_option l-width"
-                    placeholder="Leave blank for fastest growing" />
+            <div style="margin-top: 10px;" class="header_option_user_id">
+                <label><strong>User ID:</strong></label>
+                <input value="${escapeHTML(item.attributes.id1) || ""}" class="section_attribute_id1 header_option l-width"
+                    placeholder="Select using Edit Channel to find" />
             </div>
+        </div>
             <details class="section-advanced-options" style="margin-top: 10px;">
-                <summary><strong>Styling Options</strong></summary>
+                <summary><strong>Styling Options (click to toggle)</strong></summary>
                 <div style="margin-top: 10px;" class="header-option-group">
                     <div><label>Background color:</label>
-                        <input type="color" value="${item.attributes.bgColor || '#000000'}"
+                        <input type="color" value="${escapeHTML(item.attributes.bgColor) || '#000000'}"
                             class="section_attribute_bgColor header_option" />
                     </div>
                     <div><label>Text color:</label>
-                        <input type="color" value="${item.attributes.color || '#ffffff'}"
+                        <input type="color" value="${escapeHTML(item.attributes.color) || '#ffffff'}"
                             class="section_attribute_color header_option" />
                     </div>
                     <div><label>Height:</label>
-                        <input type="number" value="${item.attributes.boxHeight || '20'}"
-                            class="section_attribute_size header_option xs-width" />
+                        <input type="number" value="${escapeHTML(item.attributes.boxHeight) || '20'}"
+                            class="section_attribute_boxHeight header_option xs-width" />
                     </div>
                     <div><label>Image size:</label>
-                        <input type="number" value="${item.attributes.imageSize || '15'}"
+                        <input type="number" value="${escapeHTML(item.attributes.imageSize) || '15'}"
                             class="section_attribute_imageSize header_option xs-width" />
                     </div>
                     <div><label>Font size:</label>
-                        <input type="number" value="${item.attributes.fontSize || '15'}"
+                        <input type="number" value="${escapeHTML(item.attributes.fontSize) || '15'}"
                             class="section_attribute_fontSize header_option xs-width" />
                     </div>
                     <div><label>Font weight:</label>
@@ -3981,8 +4462,8 @@ function loadTopSettings(itemName, itemType) {
         `;
         let boxSettings = `
             <div class="section-basic-options">
-                <div><label><strong>Number of rows:</strong></label><br>
-                    <input type="number" value="${item.attributes.rows || 0}" class="section_attribute_rows header_option xs-width"
+                <div><label><strong>Number of rows:</strong></label>
+                    <input type="number" value="${escapeHTML(item.attributes.rows) || 0}" class="section_attribute_rows header_option xs-width"
                         placeholder="0" />
                 </div>
             </div>
@@ -3992,18 +4473,18 @@ function loadTopSettings(itemName, itemType) {
         div.innerHTML = `
             <div style="padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 2px solid #ddd;">
                 <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-                    <div><label><strong>Section name:</strong></label><br>
-                        <input type="text" value="${item.name}" class="section_option_name header_option l-width"
+                    <div><label><strong>Section name:</strong></label>
+                        <input type="text" value="${escapeHTML(item.name)}" class="section_option_name header_option l-width"
                             placeholder="My Section" />
                     </div>
-                    <div><label><strong>Place in:</strong></label><br>
+                    <div><label><strong>Place in:</strong></label>
                         <select class="section_option_placement header_option m-width">
                             <option value="header" ${(item.placement || 'header') === 'header' ? 'selected' : ''}>Header</option>
                             <option value="footer" ${(item.placement || 'header') === 'footer' ? 'selected' : ''}>Footer</option>
                         </select>
                     </div>
-                    <div><label><strong>Section type:</strong></label><br>
-                        <select class="section_option_type header_option m-width" value="${item.type}"
+                    <div><label><strong>Section type:</strong></label>
+                        <select class="section_option_type header_option m-width" value="${escapeHTML(item.type)}"
                             onchange="loadTopSettings('${item.name}', this.value)">
                             <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
                             <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
@@ -4013,10 +4494,10 @@ function loadTopSettings(itemName, itemType) {
                     </div>
                 </div>
                 <details class="section-nesting-option" style="margin-bottom: 10px;">
-                    <summary><strong>Nesting (advanced)</strong></summary>
+                    <summary><strong>Nesting (advanced) (click to toggle)</strong></summary>
                     <div style="margin-top: 10px;">
                         <label>Parent box name:</label>
-                        <input type="text" value="${item.childOf || ""}" class="section_option_childOf header_option l-width"
+                        <input type="text" value="${escapeHTML(item.childOf) || ""}" class="section_option_childOf header_option l-width"
                             placeholder="Leave blank for top level" />
                         <p style="font-size: 12px; color: #666; margin-top: 5px;">Enter the name of a box section to nest this
                             inside it.</p>
@@ -4035,8 +4516,10 @@ function loadTopSettings(itemName, itemType) {
             </div>
         `;
         document.getElementById("sections").appendChild(div);
+        fixHeaderSettings();
     });
     adjustColors();
+    saveTopSettings(false);
     loadHeader();
 };
 loadTopSettings();
@@ -4063,9 +4546,10 @@ function createNewSection() {
             "sortOrder": "asc",
             "updateInterval": 2,
             "roundAvatars": false,
-            "battleAlign": false,
-            "odometerColors": true,
+            "battleAlign": true,
+            "odometerColors": false,
             "fontWeight": "400",
+            "boxHeight": 60,
             "id1": "",
             "id2": ""
         },

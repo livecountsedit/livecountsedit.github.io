@@ -3,8 +3,8 @@
 
 <head>
     <title>Livecountsedit - Fake Top 50</title>
-    <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css?v=7.6.4" rel="stylesheet" type="text/css">
+    <link href="./odometer.css?v=7.7" rel="stylesheet">
+    <link href="./index.css?v=7.7" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
@@ -25,15 +25,15 @@
     <meta property="og:url" content="https://lcedit.com" />
     <meta property="og:image" content="https://lcedit.com/images/top50.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5666487244102554"
-        crossorigin="anonymous"></script>
+    <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5666487244102554"
+        crossorigin="anonymous"></script> -->
 
     <script src="../jquery.js"></script>
     <script src="https://code.highcharts.com/stock/highstock.js"></script>
     <script>
         window.odometerOptions = { auto: false };
     </script>
-    <script src="./odometer.js"></script>
+    <script src="./odometer.js?v=7.7"></script>
 
     <script src="https://npmcdn.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
     <script src="https://npmcdn.com/isotope-masonry-horizontal@2/masonry-horizontal.js"></script>
@@ -48,6 +48,7 @@
     <style id="differenceStyling"></style>
     <style id="cardStyles"></style>
     <style id="customCSSOverrides"></style>
+    <style id="fireStyles"></style>
 </head>
 
 <body>
@@ -55,6 +56,7 @@
     <div class="main" id="main" style="margin-left: 20px;"></div>
     <div id="footer"></div>
     <hr>
+    <div class="bottom-stuff">
     <div class="other" id="settings">
         <div>
             <div class="topSettings">
@@ -74,16 +76,16 @@
                 <div>
                     <select id="theme" autocomplete="off">
                         <option value="top1">Theme: Top 1 (Vertical Columns)</option>
-                        <option value="top15">Theme: Top 15 (Vertical Columns)</option>
                         <option value="top10">Theme: Top 10 (Vertical Columns)</option>
+                        <option value="top15">Theme: Top 15 (Vertical Columns)</option>
                         <option value="top25">Theme: Top 25 (Vertical Columns)</option>
                         <option value="top50">Theme: Top 50 (Vertical Columns)</option>
                         <option value="top100">Theme: Top 100 (Vertical Columns)</option>
                         <option value="top150">Theme: Top 150 (Vertical Columns)</option>
                         <option value="top200">Theme: Top 200 (Vertical Columns)</option>
                         <option value="top1H">Theme: Top 1 (Horizontal Columns)</option>
-                        <option value="top15H">Theme: Top 15 (Horizontal Columns)</option>
                         <option value="top10H">Theme: Top 10 (Horizontal Columns)</option>
+                        <option value="top15H">Theme: Top 15 (Horizontal Columns)</option>
                         <option value="top25H">Theme: Top 25 (Horizontal Columns)</option>
                         <option value="top50H">Theme: Top 50 (Horizontal Columns)</option>
                         <option value="top100H">Theme: Top 100 (Horizontal Columns)</option>
@@ -117,9 +119,6 @@
                 </div>
                 <div>
                     <input type="checkbox" id="autosave" autocomplete="off"><label>Autosave (15s)</label>
-                </div>
-                <div>
-                    <input type="checkbox" id="offline" autocomplete="off"><label>Offline Gains</label>
                 </div>
             </div>
             <p id="storage-warning"><strong>Warning: An error occurred when saving the data in your browser. This could
@@ -320,6 +319,7 @@
                             autocomplete="off"> <button id="disableImageBorderColor">X</button></label>
                     <label>Counter gain color: <input type="color" value="#000000" id="odometerUp"></label>
                     <label>Counter lose color: <input type="color" value="#000000" id="odometerDown"></label>
+                    <label>Use counter gain/lose colors: <input type="checkbox" id="useOdometerColors"></label>
                     <label>Card gain color: <input type="color" value="#f7f5fe" id="boxBGGain"
                             autocomplete="off"></label>
                     <label>Card lose color: <input type="color" value="#f7f5fe" id="boxBGLose"
@@ -375,6 +375,8 @@
                     <label>Allow negative counts: <input type="checkbox" id="allowNegative"></label>
                     <label>Random count updates: <input type="checkbox" id="randomCountUpdateTime"></label>
                     <label>Waterfall count updates: <input type="checkbox" id="waterFallCountUpdateTime"></label>
+                    <label>Channel editor shows exact internal count: <input type="checkbox" id="editorShowsExactCount"></label>
+                    <label>Maximum chart values (2-50): <input type="number" class="xs-width" id="maxChartValues" placeholder="50" min="2" max="50"></label>
                 </div>
                 <div class="half-column">
                     <label>Update interval (seconds): <input class="s-width" type="number" value="2" id="updateint"
@@ -386,6 +388,7 @@
                     <button onclick="saveGainRateOption()">Save This Option</button>
                     <button onclick="clearGainData()">Clear Gain Data</button><br>
                     <label>Note: Gain data is <strong>NOT</strong> saved after reloading</label>
+                    <label>Offline gains: <input type="checkbox" id="offline" autocomplete="off"></label>
                     <label>Debug mode: <input type="checkbox" id="debugMode"></label>
                 </div>
             </div>
@@ -425,7 +428,7 @@
                 <div class="third-column" id="addFireMenu">
 
                 </div>
-                <div class="third-column">
+                <div class="third-column no-search">
                     <div id="fireIcons"></div>
                 </div>
             </div>
@@ -433,32 +436,25 @@
         <div id="differenceSettings" class="settings hidden">
             <h2>Difference Settings</h2>
             <div class="settings-container">
-                <div class="half-column">
+                <div class="third-column">
                     <label>Show differences: <input type="checkbox" id="showDifferences" checked></label>
-                    <label>Difference threshold: <input class="s-width" type="number" id="differenceThreshold"
-                            autocomplete="off"></label>
-                    <label><abbr
+                    <label><abbr id="differenceAlignmentTooltip"
                             title="The position of the difference counter, in percent of card height and width offset from the top left corner of the card.">Difference
-                            placement</abbr> (top, left):
+                            placement</abbr> (top<span id="differenceAlignmentDirection" class="show-in-search">, left</span>):
                         <span class="no-wrap"><input class="xs-width" type="number" step="0.1" id="topDifferencePlacing"
-                                autocomplete="off">, <input class="xs-width" type="number" step="0.1"
+                                autocomplete="off"><span id="differenceAlignmentComma">, </span><input class="xs-width" type="number" step="0.1"
                                 id="leftDifferencePlacing" autocomplete="off"></span></label>
-                    <label>Difference color: <input type="color" id="differenceColor"></label>
                     <label>Difference size: <input class="xs-width" type="number" step="0.1" value="1"
                             id="differenceSize" autocomplete="off"></label>
                     <label>Abbreviate differences (MDM): <input type="checkbox" id="abbDifferences" checked></label>
+                    <label>Align differences: <select class="s-width" id="alignDifferences">
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                    </select></label>
                     <label>Show difference lines: <input type="checkbox" id="showDifferenceLines" checked></label>
                     <label>Difference line color: <input type="color" id="differenceLineColor"></label>
-                    <label>Show difference when: <select class="l-width" id="showDifferenceWhen">
-                        <option value="always">Always</option>
-                        <option value="bottomFasterSet">Bottom faster (set gain)</option>
-                        <option value="bottomFasterObserved">Bottom faster (observed gain)</option>
-                        <option value="topFasterSet">Top faster (set gain)</option>
-                        <option value="topFasterObserved">Top faster (observed gain)</option>
-                    </select></label>
-                </div>
-                <div class="half-column">
-                    <label>Show difference image: <input type="checkbox" id="enableDifferenceImages"></label>
+                    <label>Use observed gains to estimate passing times: <input type="checkbox" id="estimateUsingObservedGains"></label>
                     <label><abbr
                             title="The position of the difference image, in percent of card height and width offset from the top left corner of the card.">Difference
                             image placement</abbr> (top, left):
@@ -468,10 +464,15 @@
                                 autocomplete="off"></span></label>
                     <label>Difference image size: <input class="xs-width" type="number" step="0.1"
                             id="differenceImageSize" autocomplete="off"></label>
-                    <label>Difference image shaking animation: <input type="checkbox" id="enableImageShakes"></label>
-                    <label>Difference image: <input class="l-width" placeholder="Image" id="differenceImageUrl"><br>or
-                        <input placeholder="Image" type="file" id="differenceImageFile" class="l-width"></label>
-                    <button onclick="saveImageForDiffs()">Save Image Upload</button>
+                    <div id="differenceEffectsCreate">
+                        <button onclick="addDifferenceEffect()">Add Difference Effect</button>
+                    </div>
+                </div>
+                <div class="third-column" id="addDifferenceMenu">
+
+                </div>
+                <div class="third-column">
+                    <div id="differenceEffects"></div>
                 </div>
             </div>
         </div>
@@ -729,19 +730,19 @@
         </div>
     </div>
     <hr><br>
-    <script src="./js/utils.js?v=7.6.4"></script>
-    <script src="./index.js?v=7.6.4"></script>
-    <script src="./js/scripts.js?v=7.6.4"></script>
+    <script src="./js/utils.js?v=7.7"></script>
+    <script src="./index.js?v=7.7"></script>
+    <script src="./js/scripts.js?v=7.7"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>
     </center><br>
-    <style id="styles"></style>
-    <ins class="adsbygoogle" style="display:block;" data-ad-format="autorelaxed"
+    </div>
+    <!-- <ins class="adsbygoogle" style="display:block;" data-ad-format="autorelaxed"
         data-ad-client="ca-pub-5666487244102554" data-ad-slot="2197125798"></ins>
     <script>
         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+    </script> -->
 </body>
 
 </html>

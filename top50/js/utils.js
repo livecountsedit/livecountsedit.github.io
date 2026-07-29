@@ -262,8 +262,8 @@ function adjustColors() {
         b = color[2];
     }
     const brightness = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
-    const textLabels = document.querySelectorAll("label,h1,h2,h3,h4,h5,h6,p,strong,input[type=file]");
-    const links = document.querySelectorAll("a:link");
+    const textLabels = document.querySelector(".bottom-stuff").querySelectorAll("label,h1,h2,h3,h4,h5,h6,p,strong,input[type=file]");
+    const links = document.querySelector(".bottom-stuff").querySelectorAll("a:link");
     if (brightness < 0.5) {
         for (i = 0; i < textLabels.length; i++) {
             if (!textLabels[i].classList.contains('subgap')) {
@@ -377,6 +377,10 @@ function getMaxGain(id) {
     return 0;
 }
 
+function getRankOf(id) {
+    return data.data.findIndex(x => x.id === id) + 1;
+}
+
 function randomColor() {
     let color = '#'
     for (let i = 0; i < 6; i++) {
@@ -394,13 +398,18 @@ function searchSettings(str) {
     const settingContainers = document.getElementsByClassName("settings-container");
     for (const container of settingContainers) {
         const labels = container.querySelectorAll("label");
-        for (const label of labels) {
+        l: for (const label of labels) {
+            let elem = label;
+            while (elem) {
+                if (elem.classList.contains('no-search')) continue l;
+                elem = elem.parentElement; 
+            }
             let hasInputChild = !!label.querySelectorAll("input,textarea,select").length;
             if (hasInputChild) {
                 const labelText = Array.from(label.childNodes)
-                    .filter(node => node.nodeType === Node.TEXT_NODE || node.nodeName === 'ABBR')
-                    .map(node => node.textContent.trim().replace(/\s+/g, ' '))
-                    .join(' ');
+                    .filter(node => node.nodeType === Node.TEXT_NODE || node.nodeName === 'ABBR' || node.classList.contains('show-in-search'))
+                    .map(node => node.textContent)
+                    .join('').replace(/\s+/g, ' ');
                 if (labelText.toLowerCase().includes(str.toLowerCase())) {
                     results.push([labelText, container.parentElement.id || container.parentElement.parentElement.id]);
                 }
@@ -427,6 +436,208 @@ function initializeCopyButtons() {
             }
         }
     })
+}
+
+function isValidHeaderName(name) {
+    return typeof name === 'string' && name && name.trim() && !name.match(/[<>'"&\\]/)
+}
+
+function hasDuplicates(arr) {
+    const set = new Set();
+    for (const item of arr) {
+        if (set.has(item)) return true;
+        else set.add(item);
+    }
+    return false;
+}
+
+function calculateFires() {
+    fires.clear();
+    for (let i = 0; i < data.data.length; i++) {
+        for (let q = 0; q < data.fireIcons.created.length; q++) {
+            let equation = false;
+            //either gain or total
+            if (data.fireIcons.type == 'total') {
+                if (data.fireIcons.created[q].method == '>=') {
+                    if (data.data[i].count >= data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                } else if (data.fireIcons.created[q].method == '==') {
+                    if (data.data[i].count == data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                } else if (data.fireIcons.created[q].method == '<=') {
+                    if (data.data[i].count <= data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                } else {
+                    if (data.data[i].count != data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                }
+            } else if (data.fireIcons.type == 'gain') {
+                if (data.fireIcons.created[q].method == '>=') {
+                    if (getGain(data.data[i].id) >= data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                } else if (data.fireIcons.created[q].method == '==') {
+                    if (getGain(data.data[i].id) == data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                } else if (data.fireIcons.created[q].method == '<=') {
+                    if (getGain(data.data[i].id) <= data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                } else {
+                    if (getGain(data.data[i].id) != data.fireIcons.created[q].threshold) {
+                        equation = true;
+                    }
+                }
+            } else if (data.fireIcons.type == 'hour') {
+                let subs = getGain(data.data[i].id)
+
+                let updateInterval = data.updateInterval / 1000;
+                let updatesPerHour = 3600 / updateInterval;
+
+                let subsPerUpdateThreshold = data.fireIcons.created[q].threshold / updatesPerHour;
+
+                if (data.fireIcons.created[q].method == '>=') {
+                    equation = subs >= subsPerUpdateThreshold;
+                } else if (data.fireIcons.created[q].method == '==') {
+                    equation = subs == subsPerUpdateThreshold;
+                } else if (data.fireIcons.created[q].method == '<=') {
+                    equation = subs <= subsPerUpdateThreshold;
+                } else {
+                    equation = subs != subsPerUpdateThreshold;
+                }
+            }
+
+            if (equation) {
+                fires.set(data.data[i].id, q);
+                break;
+            }
+        }
+    }
+}
+
+function applyFire(currentCard, i, enable) {
+    const num = formatRank(i + 1);
+    if (data.fireIcons.enabled && enable) {
+        let firePosition = data.fireIcons.firePosition;
+        if (firePosition == 'before' || firePosition == 'after') {
+            document.getElementById("fireStyles").innerHTML = `.num { display: flex; }`;
+        } else {
+            document.getElementById("fireStyles").innerHTML = ``;
+        }
+
+        const fireIcon = i >= 0 ? fires.get(data.data[i].id) : null;
+
+        if (fireIcon != undefined) {
+            let icon = data.fireIcons.created[fireIcon].icon;
+            let fire = document.createElement('img');
+            fire.classList = 'fireIcon';
+            fire.style = `height: 1.5em;
+                border: solid ${escapeHTML(data.fireIcons.fireBorderWidth)}px ${escapeHTML(data.fireIcons.fireBorderColor)};`;
+            fire.src = escapeHTML(icon);
+
+            if (firePosition == 'replace') {
+                currentCard.querySelector(".num").innerHTML = fire.outerHTML;
+            } else if (firePosition == 'before') {
+                currentCard.querySelector(".num").innerHTML = fire.outerHTML + `<div class="num_text">${num}</div>`;
+            } else if (firePosition == 'after') {
+                currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>` + fire.outerHTML;
+            } else if (firePosition == 'above') {
+                currentCard.querySelector(".num").innerHTML = fire.outerHTML + `<br><div class="num_text">${num}</div>`;
+            } else if (firePosition == 'below') {
+                currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div><br>` + fire.outerHTML;
+            } else if (firePosition == 'left') {
+                //if (!currentCard.querySelector(".name").innerHTML.includes('<img class="fireIcon"')) {
+                if (!Array.from(currentCard.querySelector(".name")).some(x => x.classList.contains("fireIcon"))) {
+                    currentCard.querySelector(".name").innerHTML = fire.outerHTML + currentCard.querySelector(".name").innerHTML;
+                    currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+                }
+            } else if (firePosition == 'right') {
+                if (!Array.from(currentCard.querySelector(".name")).some(x => x.classList.contains("fireIcon"))) {
+                    currentCard.querySelector(".name").innerHTML = currentCard.querySelector(".name").innerHTML + fire.outerHTML;
+                    currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+                }
+            } else if (firePosition == 'replaceName') {
+                currentCard.querySelector(".name").innerHTML = fire.outerHTML;
+                currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+            } else if (firePosition == 'mdm') {
+                currentCard.querySelector(".num").style.color = `${data.fireIcons.created[fireIcon].color}`;
+                currentCard.querySelector(".num").style.border = `solid ${data.fireIcons.fireBorderColor} ${data.fireIcons.fireBorderWidth}px`
+                currentCard.querySelector(".num").style.backgroundImage = `url(${escapeHTML(icon)})`;
+                currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+                currentCard.querySelector(".num_text").style.marginTop = data.fireIcons.created[fireIcon].margin ? data.fireIcons.created[fireIcon].margin + "px" : "";
+                currentCard.querySelector(".num_text").style.marginLeft = data.fireIcons.created[fireIcon].marginLeft ? data.fireIcons.created[fireIcon].marginLeft + "px" : "";
+            } else {
+                currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+            }
+            if (currentCard.querySelector(".num_text")) currentCard.querySelector(".num_text").style.fontWeight = data.fireIcons.created[fireIcon].fontWeight;
+        } else {
+            if (currentCard.querySelector(".num_text")) currentCard.querySelector(".num_text").style.fontWeight = "";
+            currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+            if (firePosition == 'mdm') {
+                currentCard.querySelector(".num").style.backgroundImage = `url('')`;
+                currentCard.querySelector(".num").style.color = `${data.textColor}`;
+                currentCard.querySelector(".num").style.border = "";
+                currentCard.querySelector(".num_text").style.marginTop = "";
+                currentCard.querySelector(".num_text").style.marginLeft = "";
+            }
+        }
+    } else {
+        document.getElementById("fireStyles").innerHTML = ``;
+        currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
+        currentCard.querySelector(".num").style.border = "";
+        currentCard.querySelector(".num_text").innerText = num;
+        currentCard.querySelector(".num_text").style.fontWeight = "";
+        currentCard.querySelector(".num").style.backgroundImage = `url('')`;
+        currentCard.querySelector(".num").style.color = `${data.textColor}`;
+        currentCard.querySelector(".num_text").style.marginTop = "";
+        currentCard.querySelector(".num_text").style.marginLeft = "";
+        currentCard.querySelector(".num").style.border = "";
+    }
+}
+
+function updateFires() {
+    for (let i = 0; i < data.max; i++) {
+        applyFire(document.getElementsByClassName("card")[i], i, true);
+    }
+    loadHeader();
+}
+
+function parseMinMax(str) {
+    if (!str) return [1, Infinity];
+    if (str === "" + parseInt(str) && parseInt(str) > 0) {
+        return [parseInt(str), parseInt(str)];
+    } else if (str.endsWith('+') && parseInt(str) > 0) {
+        return [parseInt(str), Infinity]
+    } else {
+        const min = parseInt(str.split('-')[0]);
+        const max = parseInt(str.split('-')[1]);
+        if (min > 0 && max > 0) {
+            if (min > max) return [max, min];
+            else return [min, max];
+        } else {
+            return [1, Infinity];
+        }
+    }
+}
+
+function getSetGain(channel) {
+    return isFinite(channel.mean_gain) ? channel.mean_gain 
+    : average(channel.min_gain, channel.max_gain);
+}
+
+function estimatePassingTime(topChannel, bottomChannel) {
+    const topGainSet = getSetGain(topChannel);
+    const bottomGainSet = getSetGain(bottomChannel);
+    const topGainObserved = getGain(topChannel.id);
+    const bottomGainObserved = getGain(bottomChannel.id);
+    const diff = getDisplayedCount(topChannel.count) - getDisplayedCount(bottomChannel.count);
+    return data.differenceStyles.estimateUsingObservedGains ? diff / (bottomGainObserved - topGainObserved) 
+    : diff / (bottomGainSet - topGainSet);
 }
 
 initializeCopyButtons();
