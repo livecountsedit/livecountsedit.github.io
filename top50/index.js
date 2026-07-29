@@ -3138,7 +3138,9 @@ document.getElementById("apiSource").addEventListener('change', function () {
 const addFireIcon = () => {
     if (document.getElementById('fireIconCreate')) {
         document.getElementById('fireIconCreate').remove();
+        document.getElementById('fireIconCreateButton').innerText = 'Add Fire Icon';
     } else {
+        document.getElementById('fireIconCreateButton').innerText = 'Cancel Adding Fire Icon'
         let div = document.createElement('div');
         div.id = 'fireIconCreate';
         div.innerHTML = `
@@ -3363,7 +3365,9 @@ const saveFireEdits = (index) => {
 const addDifferenceEffect = () => {
     if (document.getElementById('differenceEffectCreate')) {
         document.getElementById('differenceEffectCreate').remove();
+        document.getElementById('addDifferenceEffectButton').innerText = 'Add Difference Effect';
     } else {
+        document.getElementById('addDifferenceEffectButton').innerText = 'Cancel Adding Difference Effect';
         let div = document.createElement('div');
         div.id = 'differenceEffectCreate';
         div.innerHTML = `
@@ -3397,7 +3401,7 @@ const addDifferenceEffect = () => {
                 <option value="bottomFasterObserved">Bottom faster (observed gain)</option>
                 <option value="topFasterSet">Top faster (set gain)</option>
                 <option value="topFasterObserved">Top faster (observed gain)</option>
-            </select>
+            </select><br><br>
             <button onclick="saveDifferenceEffect()">Add</button>
         `
         document.getElementById('addDifferenceMenu').appendChild(div);
