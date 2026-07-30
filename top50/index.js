@@ -62,7 +62,6 @@ let example_data = {
     "imageBorderColor": "#000",
     "prependZeros": false,
     "boxSpacing": 0.2,
-    "animation": true,
     "abbreviate": false,
     "fastest": true,
     "fastestIcon": "🔥",
@@ -157,7 +156,10 @@ let example_data = {
     'streamerMode': false,
     'editorShowsExactCount': false,
     'useOdometerColors': true,
-    'maxChartValues': 50
+    'maxChartValues': 50,
+    'numberFormat': 'comma',
+    'animationType': 'default',
+    'reverseAnimation': false
 };
 let updateInterval;
 let apiInterval;
@@ -225,8 +227,15 @@ function initLoad(redo, previousTheme) {
         delete data.differenceThreshold;
     }
 
+    // Old menu
     if ('settingsEnabled' in data) {
         delete data.settingsEnabled;
+    }
+
+    // Old animation value
+    if ('animation' in data) {
+        data.animationType = data.animation ? 'default' : 'counting';
+        delete data.animation;
     }
 
     data.fireIcons.created.forEach(x => { if (!x.fontWeight) x.fontWeight = 900;})
@@ -394,10 +403,10 @@ function initLoad(redo, previousTheme) {
         document.body.style.backgroundImage = 'url(' + data.bgColor + ')';
     }
     document.body.style.color = data.textColor;
+    updateOdo();
     fix();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
-    updateOdo();
     if (!data.pause) updateInterval = setInterval(update, data.updateInterval);
     let element = document.getElementById(data.settingsTab);
     let button = document.getElementById('button_' + data.settingsTab);
@@ -744,7 +753,7 @@ function create() {
         }
         const count = parseFloat(addCount);
         const name = addName;
-        let id = randomGen();
+        let id = uuidGen();
         if (document.getElementById('add_id').value.length > 0) {
             id = document.getElementById('add_id').value;
         }
@@ -945,7 +954,7 @@ function update(doGains = true) {
                         if (!data.data[i].image) {
                             data.data[i].image = "../default.png";
                         }
-                        if ((data.data[i].bg) && (boxBGLength !== '1')) {
+                        if (data.data[i].bg) {
                             currentCard.style.background = data.data[i].bg;
                         } else {
                             currentCard.style.backgroundColor = data.boxColor;
@@ -1302,11 +1311,10 @@ function edit() {
                 for (let i = 0; i < data.data.length; i++) {
                     if (data.data[i].id == id) {
                         data.data[i].bg = document.getElementById('edit_bg_color').value;
+                        card.style.background = data.data[i].bg || data.boxColor;
                     }
                 }
-                try {
-                    card.style.background = document.getElementById('edit_bg_color').value;
-                } catch { }
+                    //card.style.background = document.getElementById('edit_bg_color').value;
             }
             if (document.getElementById('edit_count_check').checked) {
                 for (let i = 0; i < data.data.length; i++) {
@@ -1562,6 +1570,7 @@ document.getElementById('boxSpacing').addEventListener('change', function () {
 document.getElementById('textPicker').addEventListener('change', function () {
     document.getElementById('main').style.color = this.value;
     data.textColor = this.value;
+    fix();
 });
 
 document.getElementById('rankSize').addEventListener('change', function () {
@@ -1882,6 +1891,18 @@ document.getElementById('maxChartValues').addEventListener('change', function ()
     fix();
 })
 
+document.getElementById('numberFormat').addEventListener('change', function () {
+    data.numberFormat = this.value;
+    updateAddHourlyEstimates();
+    updateEditHourlyEstimates();
+    updateOdo();
+})
+
+document.getElementById('animationType').addEventListener('change', function () {
+    data.animationType = this.value;
+    updateOdo();
+})
+
 function fix() {
     document.getElementById('main').style.height = data.cardStyles.containerHeight + "vh";
     document.getElementById('main').style.width = data.cardStyles.containerWidth + "vw";
@@ -1901,7 +1922,7 @@ function fix() {
         data.slowest = true;
     }
 
-    document.getElementById('animation').checked = data.animation;
+    document.getElementById('reverseAnimation').checked = data.reverseAnimation;
     document.getElementById('allowNegative').checked = data.allowNegative;
     document.getElementById('animatedCardChanges').checked = data.animatedCards.enabled;
     document.getElementById('randomCountUpdateTime').checked = data.randomCountUpdateTime;
@@ -2029,7 +2050,17 @@ function fix() {
             ${data.differenceStyles.lineEnabled ? "" : "display: none"};
             width: calc(100% + ${data.boxSpacing}vw);
             visibility: hidden;
-        }`;
+        }
+            
+        .subgap .text {
+            display: ${data.differenceStyles.abbDifferences ? 'block' : 'none'};
+        }
+
+        .subgap .odometer {
+            display: ${data.differenceStyles.abbDifferences ? 'none' : 'block'};
+        }
+        
+        `;
 
     document.getElementById('cardStyles').innerText = `
             .main .name {
@@ -2157,6 +2188,8 @@ function fix() {
     document.getElementById('counterAlignment').value = data.counterAlignment;
     document.getElementById('useOdometerColors').checked = data.useOdometerColors;
     document.getElementById('maxChartValues').value = data.maxChartValues || 50;
+    document.getElementById('numberFormat').value = data.numberFormat;
+    document.getElementById('animationType').value = data.animationType;
 
     const subCounters = document.getElementById('main').getElementsByClassName("count");
     for (const subCounter of subCounters) {
@@ -2168,7 +2201,7 @@ function fix() {
     if (footerEl) footerEl.style.fontFamily = data.headerFont || "Arial";
     document.getElementById('main').style.fontFamily = data.mainFont || "Roboto";
 
-    const counters = document.getElementById('main').getElementsByClassName('odometer');
+    const counters = document.getElementById('main').getElementsByClassName('count');
     for (const counter of counters) {
         counter.style.fontWeight = data.counterFontWeight;
         if (data.useOdometerColors) {
@@ -2197,64 +2230,51 @@ function fix() {
     let odometerStyles = document.getElementById('odometerStyles')
     odometerStyles.innerText = '';
     odometerStyles.innerText += `
-    .odometer.odometer-auto-theme.odometer-animating-up .odometer-ribbon-inner,
-    .odometer.odometer-theme-default.odometer-animating-up .odometer-ribbon-inner {
-        -webkit-transition: -webkit-transform ${data.odometerSpeed}s;
-        -moz-transition: -moz-transform ${data.odometerSpeed}s;
-        -ms-transition: -ms-transform ${data.odometerSpeed}s;
-        -o-transition: -o-transform ${data.odometerSpeed}s;
-        transition: transform ${data.odometerSpeed}s;
+    .main .odometer.odometer-auto-theme.odometer-counting-up.odometer-animating .odometer-ribbon-inner,
+    .main .odometer.odometer-theme-default.odometer-counting-up.odometer-animating .odometer-ribbon-inner {
         animation: ${data.odometerSpeed}s linear up;
         animation-iteration-count: 1;
     }
 
-    .odometer.odometer-auto-theme.odometer-animating-down.odometer-animating .odometer-ribbon-inner,
-    .odometer.odometer-theme-default.odometer-animating-down.odometer-animating .odometer-ribbon-inner {
-        -webkit-transition: -webkit-transform ${data.odometerSpeed}s;
-        -moz-transition: -moz-transform ${data.odometerSpeed}s;
-        -ms-transition: -ms-transform ${data.odometerSpeed}s;
-        -o-transition: -o-transform ${data.odometerSpeed}s;
-        transition: transform ${data.odometerSpeed}s;
+    .main .odometer.odometer-auto-theme.odometer-counting-down.odometer-animating .odometer-ribbon-inner,
+    .main .odometer.odometer-theme-default.odometer-counting-down.odometer-animating .odometer-ribbon-inner {
         animation: ${data.odometerSpeed}s linear down;
         animation-iteration-count: 1;
     }
 
-    .odometer.odometer-auto-theme.odometer-animating-up.no_color_transition .odometer-ribbon-inner,
-    .odometer.odometer-theme-default.odometer-animating-up.no_color_transition .odometer-ribbon-inner,
-    .odometer.odometer-auto-theme.odometer-animating-down.no_color_transition .odometer-ribbon-inner,
-    .odometer.odometer-theme-default.odometer-animating-down.no_color_transition .odometer-ribbon-inner {
-        animation: none;
+    .no_color_transition .odometer-ribbon-inner {
+        animation: none !important;
     }
 
-@keyframes up {
-  0% {
-    color: ${data.textColor};
-  }
-  25% {
-  color: ${data.odometerUp};
-  }
-  75% {
-  color: ${data.odometerUp};
-  }
-  100% {
-    color: ${data.textColor};
-  }
-}
+    @keyframes up {
+    0% {
+        color: ${data.textColor};
+    }
+    25% {
+    color: ${data.odometerUp};
+    }
+    75% {
+    color: ${data.odometerUp};
+    }
+    100% {
+        color: ${data.textColor};
+    }
+    }
 
-@keyframes down {
-  0% {
-    color: ${data.textColor};
-  }
-  25% {
-    color: ${data.odometerDown};
-  }
-  75% {
-    color: ${data.odometerDown};
-  }
-  100% {
-    color: ${data.textColor};
-  }
-}`
+    @keyframes down {
+    0% {
+        color: ${data.textColor};
+    }
+    25% {
+        color: ${data.odometerDown};
+    }
+    75% {
+        color: ${data.odometerDown};
+    }
+    100% {
+        color: ${data.textColor};
+    }
+    }`
 }
 
 function convert3letterhexto6letters(hex) {
@@ -2544,19 +2564,32 @@ document.getElementById('connect4').innerText = '$(urlfetch ' + apiurl + '' + co
 document.getElementById('connect5').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/gains)';
 document.getElementById('connect6').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/rank)';
 
-document.getElementById('animation').addEventListener('click', function () {
-    data.animation = this.checked;
+document.getElementById('reverseAnimation').addEventListener('click', function () {
+    data.reverseAnimation = this.checked;
     updateOdo();
 })
 
 function updateOdo() {
+    
     odometers = Odometer.init();
-    for (i = 0; i < odometers.length; i++) {
-        if (data.animation) {
-            delete odometers[i].options.animation
+
+    for (const odometer of odometers) {
+
+        odometer.options.duration = parseFloat(data.odometerSpeed) * 1000 || 2000;
+        if (data.animationType === 'counting') {
+            odometer.options.animation = 'count';
+        } else if (data.animationType === 'ytstudio') {
+            odometer.options.animation = 'byDigit';
+        } else if (data.animationType === 'minimal') {
+            odometer.options.animation = 'minimal';
         } else {
-            odometers[i].options.animation = 'count'
+            delete odometer.options.animation;
         }
+
+        odometer.options.removeLeadingZeros = data.animationType === 'ytstudio';
+        odometer.options.reverseAnimation = data.reverseAnimation;
+        odometer.options.formatFunction = formatNumber;
+        odometer.render();
     }
 }
 
@@ -2622,7 +2655,8 @@ document.getElementById('odometerDown').addEventListener('change', function () {
 
 document.getElementById('odometerSpeed').addEventListener('change', function () {
     data.odometerSpeed = document.getElementById('odometerSpeed').value;
-    fix()
+    updateOdo();
+    fix();
 })
 
 document.getElementById('animatedCardChangesDuration').addEventListener('change', function () {
@@ -3682,6 +3716,18 @@ function loadHeader() {
         const div = document.createElement('div');
         div.classList.add('header_child')
         div.id = 'header_' + item.name;
+
+        if ((item.type == 'battle' || item.type == 'user') && item.attributes.odometerColors) {
+            if (!document.getElementById('headerStyles_' + item.name)) {
+                const elem = document.createElement('style');
+                elem.id = 'headerStyles_' + item.name;
+                document.head.insertBefore(elem, document.head.lastElementChild);
+            }
+        } else {
+            if (document.getElementById('headerStyles_' + item.name)) {
+                document.getElementById('headerStyles_' + item.name).remove();
+            }
+        }
         if (item.type == 'text') {
             let displayText = replaceHeaderVariables(item.attributes.text || '');
             div.style.color = item.attributes.color;
@@ -3730,7 +3776,7 @@ function loadHeader() {
                         if (item.attributes.valueFrom == 'gains') {
                             array = sourceData.sort((a, b) => getGain(a.id) - getGain(b.id));
                         } else if (item.attributes.valueFrom == 'counts') {
-                            array = sourceData.sort((a, b) => (a.count) - (b.count));
+                            array = sourceData.sort((a, b) => getDisplayedCount(a.count) - getDisplayedCount(b.count));
                         }
                         if (item.attributes.sortOrder == 'asc') {
                             array = array.reverse();
@@ -3738,11 +3784,11 @@ function loadHeader() {
                         array = array.slice(0, item.attributes.length);
                         if (item.attributes.valueFrom == 'counts') {
                             string = array.map(x => {
-                                return `${x.name}: ${Math.floor(x.count).toLocaleString('en-US')}`
+                                return `${x.name}: ${formatNumber(Math.floor(x.count))}`
                             });
                         } else if (item.attributes.valueFrom == 'gains') {
                             string = array.map(x => {
-                                return `${x.name}: ${Math.floor(getGain(x.id)).toLocaleString('en-US')}`
+                                return `${x.name}: ${formatNumber(Math.floor(getGain(x.id)))}`
                             });
                         } else {
                             for (let i = 0; i < array.length; i += 2) {
@@ -3750,7 +3796,7 @@ function loadHeader() {
                                 if (!array[i + 1] || !array[i + 2]) {
                                     endComma = '';
                                 }
-                                string += `${array[i].name} vs ${array[i + 1].name}: ${Math.floor(array[i].count - array[i + 1].count).toLocaleString('en-US')}${endComma}`
+                                string += `${array[i].name} vs ${array[i + 1].name}: ${formatNumber(getDisplayedCount(array[i].count) - getDisplayedCount(array[i + 1].count))}${endComma}`
                             }
                         }
                         if (parseFloat(item.attributes.scrollTime) > 0) {
@@ -3769,22 +3815,23 @@ function loadHeader() {
             }
         }
         if (item.type == 'battle') {
+
             div.innerHTML = `<div class="battle-container battle" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
                 <div class="battle_container battle_container_left" ${item.attributes.roundAvatars ? '' : 'style="border-radius: 0;"'}>
-                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image1_${item.name}"></img>
-                    <div class="battle_info">
-                        <p id="battle_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px; line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
-                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
+                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : escapeHTML(data.imageBorder)}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image1_${item.name}"></img>
+                    <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize)}px;">
+                        <p id="battle_name1_${item.name}" class="name" style="line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
+                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count1_${item.name}">0</p>
                     </div>
                 </div>
-                <div>
-                    <p style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">Difference:</p>
-                    <p class="odometer battle_difference count no_color_transition" id="battle_difference_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">0</p>
+                <div style="font-size: ${escapeHTML(item.attributes.fontSize)}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">
+                    <p>Difference:</p>
+                    <p class="odometer battle_difference count no_color_transition" id="battle_difference_${item.name}">0</p>
                 </div>
                 <div class="reverse battle_container battle_container_right" ${item.attributes.roundAvatars ? '' : 'style="border-radius: 0;"'}>
-                <div class="battle_info">
-                        <p id="battle_name2_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px; line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
-                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count2_${item.name}" style="font-size: ${item.attributes.fontSize}px; ${item.attributes.battleAlign ? "text-align: right;" : ""}">0</p>
+                <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize)}px; ${item.attributes.battleAlign ? "text-align: right;" : ""}">
+                        <p id="battle_name2_${item.name}" class="name" style="line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
+                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count2_${item.name}">0</p>
                     </div>
                     <img style="float: right; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image2_${item.name}"></img>
                 </div>
@@ -3881,8 +3928,6 @@ function loadHeader() {
                         <div class="num_text">${rank2}</div>
                     `
 
-                    // console.log(rank1);
-                    // console.log(rank2);
                     applyFire(div.querySelector(".battle_container_left"), rank1 - 1, item.attributes.applyFire);
                     applyFire(div.querySelector(".battle_container_right"), rank2 - 1, item.attributes.applyFire);
 
@@ -3894,29 +3939,21 @@ function loadHeader() {
 
                         if (fire1 != undefined) {
                             div.querySelector(".battle_container_left").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fire1].icon)})`
-                            div.querySelector(".battle_container_left .name").style.color = data.fireIcons.created[fire1].color;
-                            div.querySelector(".battle_container_left .count").style.color = data.fireIcons.created[fire1].color;
-                            div.querySelector(".battle_container_left .name").style.fontWeight = data.fireIcons.created[fire1].fontWeight;
-                            div.querySelector(".battle_container_left .count").style.fontWeight = data.fireIcons.created[fire1].fontWeight;
+                            div.querySelector(".battle_container_left .battle_info").style.color = data.fireIcons.created[fire1].color;
+                            div.querySelector(".battle_container_left .battle_info").style.fontWeight = data.fireIcons.created[fire1].fontWeight;
                         } else {
                             div.querySelector(".battle_container_left").style.backgroundImage = '';
-                            div.querySelector(".battle_container_left .name").style.color = '';
-                            div.querySelector(".battle_container_left .count").style.color = '';
-                            div.querySelector(".battle_container_left .name").style.fontWeight = '';
-                            div.querySelector(".battle_container_left .count").style.fontWeight = '';
+                            div.querySelector(".battle_container_left .battle_info").style.color = '';
+                            div.querySelector(".battle_container_left .battle_info").style.fontWeight = '';
                         }
                         if (fire2 != undefined) {
                             div.querySelector(".battle_container_right").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fire2].icon)})`
-                            div.querySelector(".battle_container_right .name").style.color = data.fireIcons.created[fire2].color;
-                            div.querySelector(".battle_container_right .count").style.color = data.fireIcons.created[fire2].color;
-                            div.querySelector(".battle_container_right .name").style.fontWeight = data.fireIcons.created[fire2].fontWeight;
-                            div.querySelector(".battle_container_right .count").style.fontWeight = data.fireIcons.created[fire2].fontWeight;
+                            div.querySelector(".battle_container_right .battle_info").style.color = data.fireIcons.created[fire2].color;
+                            div.querySelector(".battle_container_right .battle_info").style.fontWeight = data.fireIcons.created[fire2].fontWeight;
                         } else {
                             div.querySelector(".battle_container_right").style.backgroundImage = '';
-                            div.querySelector(".battle_container_right .name").style.color = '';
-                            div.querySelector(".battle_container_right .count").style.color = '';
-                            div.querySelector(".battle_container_right .name").style.fontWeight = '';
-                            div.querySelector(".battle_container_right .count").style.fontWeight = '';
+                            div.querySelector(".battle_container_right .battle_info").style.color = '';
+                            div.querySelector(".battle_container_right .battle_info").style.fontWeight = '';
                         }
                     }
                 }
@@ -3946,6 +3983,64 @@ function loadHeader() {
                 } else {
                     div.style.visibility = 'visible';
                 }
+
+                const styles = document.getElementById('headerStyles_' + item.name);
+                if (styles) {
+                    styles.innerText = `
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-auto-theme.odometer-counting-up.odometer-animating#battle_count1_${CSS.escape(item.name)} .odometer-ribbon-inner,
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-theme-default.odometer-counting-up.odometer-animating#battle_count1_${CSS.escape(item.name)} .odometer-ribbon-inner {
+                            animation: ${data.odometerSpeed}s linear up1;
+                            animation-iteration-count: 1;
+                        }
+
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-auto-theme.odometer-counting-down.odometer-animating#battle_count1_${CSS.escape(item.name)} .odometer-ribbon-inner,
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-theme-default.odometer-counting-down.odometer-animating#battle_count1_${CSS.escape(item.name)} .odometer-ribbon-inner {
+                            animation: ${data.odometerSpeed}s linear down1;
+                            animation-iteration-count: 1;
+                        }
+
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-auto-theme.odometer-counting-up.odometer-animating#battle_count2_${CSS.escape(item.name)} .odometer-ribbon-inner,
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-theme-default.odometer-counting-up.odometer-animating#battle_count2_${CSS.escape(item.name)} .odometer-ribbon-inner {
+                            animation: ${data.odometerSpeed}s linear up2;
+                            animation-iteration-count: 1;
+                        }
+
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-auto-theme.odometer-counting-down.odometer-animating#battle_count2_${CSS.escape(item.name)} .odometer-ribbon-inner,
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-theme-default.odometer-counting-down.odometer-animating#battle_count2_${CSS.escape(item.name)} .odometer-ribbon-inner {
+                            animation: ${data.odometerSpeed}s linear down2;
+                            animation-iteration-count: 1;
+                        }
+
+                        @keyframes up1 {
+                            0% { color: ${getComputedStyle(div.querySelector(".battle_container_left .count")).color}; }
+                            25% { color: ${data.odometerUp}; }
+                            75% { color: ${data.odometerUp}; }
+                            100%: { color: ${getComputedStyle(div.querySelector(".battle_container_left .count")).color}; }
+                        }
+
+                        @keyframes down1 {
+                            0% { color: ${getComputedStyle(div.querySelector(".battle_container_left .count")).color}; }
+                            25% { color: ${data.odometerDown}; }
+                            75% { color: ${data.odometerDown}; }
+                            100%: { color: ${getComputedStyle(div.querySelector(".battle_container_left .count")).color}; }
+                        }
+
+                        @keyframes up2 {
+                            0% { color: ${getComputedStyle(div.querySelector(".battle_container_right .count")).color}; }
+                            25% { color: ${data.odometerUp}; }
+                            75% { color: ${data.odometerUp}; }
+                            100%: { color: ${getComputedStyle(div.querySelector(".battle_container_right .count")).color}; }
+                        }
+
+                        @keyframes down2 {
+                            0% { color: ${getComputedStyle(div.querySelector(".battle_container_right .count")).color}; }
+                            25% { color: ${data.odometerDown}; }
+                            75% { color: ${data.odometerDown}; }
+                            100%: { color: ${getComputedStyle(div.querySelector(".battle_container_right .count")).color}; }
+                        }
+                    `;
+                }
+
             }, item.attributes.updateInterval * 1000));
         }
         if (item.type == 'user') {
@@ -4033,18 +4128,46 @@ function loadHeader() {
                         const fireIcon = user1 ? fires.get(user1.id) : undefined;
                         if (fireIcon != undefined) {
                             div.querySelector(".battle-container").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fireIcon].icon)})`
-                            div.querySelector(".name").style.color = data.fireIcons.created[fireIcon].color;
-                            div.querySelector(".count").style.color = data.fireIcons.created[fireIcon].color;
-                            div.querySelector(".name").style.fontWeight = data.fireIcons.created[fireIcon].fontWeight;
-                            div.querySelector(".count").style.fontWeight = data.fireIcons.created[fireIcon].fontWeight;
+                            div.querySelector(".battle_info").style.color = data.fireIcons.created[fireIcon].color;
+                            div.querySelector(".battle_info").style.fontWeight = data.fireIcons.created[fireIcon].fontWeight;
                         } else {
                             div.querySelector(".battle-container").style.backgroundImage = '';
-                            div.querySelector(".name").style.color = '';
-                            div.querySelector(".count").style.color = '';
-                            div.querySelector(".name").style.fontWeight = '';
-                            div.querySelector(".count").style.fontWeight = '';
+                            div.querySelector(".battle_info").style.color = '';
+                            div.querySelector(".battle_info").style.fontWeight = '';
                         }
                     }
+                }
+
+                const styles = document.getElementById('headerStyles_' + item.name);
+                if (styles) {
+                    styles.innerText = `
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-auto-theme.odometer-counting-up.odometer-animating .odometer-ribbon-inner,
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-theme-default.odometer-counting-up.odometer-animating .odometer-ribbon-inner {
+                            animation: ${data.odometerSpeed}s linear up1;
+                            animation-iteration-count: 1;
+                        }
+
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-auto-theme.odometer-counting-down.odometer-animating .odometer-ribbon-inner,
+                        .header_child#${CSS.escape('header_' + item.name)} .odometer.odometer-theme-default.odometer-counting-down.odometer-animating .odometer-ribbon-inner {
+                            animation: ${data.odometerSpeed}s linear down1;
+                            animation-iteration-count: 1;
+                        }
+
+                        @keyframes up1 {
+                            0% { color: ${getComputedStyle(div.querySelector(".count")).color}; }
+                            25% { color: ${data.odometerUp}; }
+                            75% { color: ${data.odometerUp}; }
+                            100%: { color: ${getComputedStyle(div.querySelector(".count")).color}; }
+                        }
+
+                        @keyframes down1 {
+                            0% { color: ${getComputedStyle(div.querySelector(".count")).color}; }
+                            25% { color: ${data.odometerDown}; }
+                            75% { color: ${data.odometerDown}; }
+                            100%: { color: ${getComputedStyle(div.querySelector(".count")).color}; }
+                        }
+
+                    `;
                 }
             }, item.attributes.updateInterval * 1000));
         }
@@ -4333,13 +4456,11 @@ function loadTopSettings(itemName, itemType) {
             <div style="margin-top: 10px;" class="header-option-group header_option_user_id">
                 <div>
                     <label><strong>User 1 ID:</strong></label>
-                    <input value="${escapeHTML(item.attributes.id1) || ""}" class="section_attribute_id1 header_option l-width"
-                        placeholder="Leave blank for closest battle" /><br>
+                    <input value="${escapeHTML(item.attributes.id1) || ""}" class="section_attribute_id1 header_option l-width" /><br>
                 </div>
                 <div>
                     <label><strong>User 2 ID:</strong></label>
-                    <input value="${escapeHTML(item.attributes.id2) || ""}" class="section_attribute_id2 header_option l-width"
-                        placeholder="Leave blank for closest battle" />
+                    <input value="${escapeHTML(item.attributes.id2) || ""}" class="section_attribute_id2 header_option l-width" />
                 </div>
             </div>
             <details class="section-advanced-options" style="margin-top: 10px;">
@@ -4532,6 +4653,9 @@ function removeTopSetting(name) {
     if (confirm("Are you sure you want to delete this setting?")) {
         let itemToRemove = data.headerSettings.items.find(item => item.name === name);
         if (itemToRemove) {
+            if (document.getElementById('headerStyles_' + name)) {
+                document.getElementById('headerStyles_' + name).remove();
+            }
             data.headerSettings.items.splice(data.headerSettings.items.indexOf(itemToRemove), 1);
             loadTopSettings();
         }
@@ -4665,8 +4789,8 @@ function updateAddHourlyEstimates() {
     const updateIntervals = 3.6e6 / Math.max(4,data.updateInterval);
     const mean = updateIntervals * (usingMeanGain ? addMeanGain : (addMinGain + addMaxGain) / 2);
     const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? addStdGain : (addMinGain - addMaxGain / Math.sqrt(12))));
-    document.getElementById("addHourlyMean").innerText = Math.abs(mean) > 10 ? Math.round(mean).toLocaleString('en-US') : mean.toLocaleString('en-US', {maximumSignificantDigits: 2});
-    document.getElementById("addHourlyStDev").innerText = stdev > 10 ? Math.round(stdev).toLocaleString('en-US') : stdev.toLocaleString('en-US', {maximumSignificantDigits: 2});
+    document.getElementById("addHourlyMean").innerText = Math.abs(mean) > 10 ? formatNumber(Math.round(mean)) : formatNumber(mean, {maximumSignificantDigits: 2});
+    document.getElementById("addHourlyStDev").innerText = stdev > 10 ? formatNumber(Math.round(stdev)) : formatNumber(stdev, {maximumSignificantDigits: 2});
 }
 
 function updateEditHourlyEstimates() {
@@ -4680,8 +4804,8 @@ function updateEditHourlyEstimates() {
     const updateIntervals = 3.6e6 / Math.max(4,data.updateInterval);
     const mean = updateIntervals * (usingMeanGain ? editMeanGain : (editMinGain + editMaxGain) / 2);
     const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? editStdGain : (editMinGain - editMaxGain / Math.sqrt(12))));
-    document.getElementById("editHourlyMean").innerText = Math.abs(mean) > 10 ? Math.round(mean).toLocaleString('en-US') : mean.toLocaleString('en-US', {maximumSignificantDigits: 2});
-    document.getElementById("editHourlyStDev").innerText = stdev > 10 ? Math.round(stdev).toLocaleString('en-US') : stdev.toLocaleString('en-US', {maximumSignificantDigits: 2});
+    document.getElementById("editHourlyMean").innerText = Math.abs(mean) > 10 ? formatNumber(Math.round(mean)) : formatNumber(mean, {maximumSignificantDigits: 2});
+    document.getElementById("editHourlyStDev").innerText = stdev > 10 ? formatNumber(Math.round(stdev)) : formatNumber(stdev, {maximumSignificantDigits: 2});
 }
 
 document.getElementById("add_min_gain").addEventListener('input', updateAddHourlyEstimates);

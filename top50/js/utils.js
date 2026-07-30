@@ -70,7 +70,7 @@ function replaceHeaderVariables(text) {
         result = result.replace(/\$hourly(?!\d|\(|\()/g, () => {
             if (index >= 0 && index < sortedData.length && sortedData[index]) {
                 const hourly = getHourlyGain(sortedData[index].id);
-                return Math.floor(hourly).toLocaleString('en-US');
+                return formatNumber(Math.floor(hourly));
             }
             return '0';
         });
@@ -86,7 +86,7 @@ function replaceHeaderVariables(text) {
         // Replace $count (without number) with count at this rank
         result = result.replace(/\$count(?!\d|\(|\()/g, () => {
             if (index >= 0 && index < sortedData.length && sortedData[index]) {
-                return Math.floor(sortedData[index].count || 0).toLocaleString('en-US');
+                return formatNumber(Math.floor(sortedData[index].count || 0));
             }
             return '0';
         });
@@ -165,7 +165,7 @@ function replaceHeaderVariables(text) {
         const index = parseInt(rank) - 1;
         if (index >= 0 && index < sortedData.length && sortedData[index]) {
             const hourly = getHourlyGain(sortedData[index].id);
-            return Math.floor(hourly).toLocaleString('en-US');
+            return formatNumber(Math.floor(hourly));
         }
         return '0';
     });
@@ -183,7 +183,7 @@ function replaceHeaderVariables(text) {
         const rank = rankParen || rankDirect;
         const index = parseInt(rank) - 1;
         if (index >= 0 && index < sortedData.length && sortedData[index]) {
-            return Math.floor(sortedData[index].count || 0).toLocaleString('en-US');
+            return formatNumber(Math.floor(sortedData[index].count || 0));
         }
         return '0';
     });
@@ -224,18 +224,15 @@ function getDisplayedCount(n) {
 }
 
 const uuidGen = function () {
+    if (self && self.crypto && typeof self.crypto.randomUUID === 'function') {
+        return self.crypto.randomUUID();
+    }
     let a = function () {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
     };
     return a() + a() + '-' + a() + '-' + a() + '-' + a() + '-' + a() + a() + a();
 }
 
-function randomGen() {
-    var S4 = function () {
-        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-    };
-    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
-}
 function avg(a, b) {
     return (a + b) / 2
 }
@@ -638,6 +635,33 @@ function estimatePassingTime(topChannel, bottomChannel) {
     const diff = getDisplayedCount(topChannel.count) - getDisplayedCount(bottomChannel.count);
     return data.differenceStyles.estimateUsingObservedGains ? diff / (bottomGainObserved - topGainObserved) 
     : diff / (bottomGainSet - topGainSet);
+}
+
+function formatNumber(num, options) {
+    switch (data.numberFormat) {
+        case 'dot':
+            return num.toLocaleString('de-DE', options);
+        case 'space':
+            return num.toLocaleString('en-US', options).replace(/,/g, '\u00a0');
+        case 'spaceComma':
+            return num.toLocaleString('de-DE', options).replace(/\./g, '\u00a0');
+        case 'indian':
+            return num.toLocaleString('hi-IN', options);
+        case 'apo':
+            return num.toLocaleString('en-US', options).replace(/,/g, "'");
+        case 'apoComma':
+            return num.toLocaleString('de-DE', options).replace(/\./g, "'");
+        case 'noSep':
+            if (!options) options = {};
+            options.useGrouping = false;
+            return num.toLocaleString('US', options);
+        case 'noSepComma':
+            if (!options) options = {};
+            options.useGrouping = false;
+            return num.toLocaleString('DE', options);
+        default:
+            return num.toLocaleString('en-US', options);
+    }
 }
 
 initializeCopyButtons();

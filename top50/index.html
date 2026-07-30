@@ -3,8 +3,8 @@
 
 <head>
     <title>Livecountsedit - Fake Top 50</title>
-    <link href="./odometer.css?v=7.7" rel="stylesheet">
-    <link href="./index.css?v=7.7" rel="stylesheet" type="text/css">
+    <link href="../odometer/odometer.css?v=7.7.2" rel="stylesheet">
+    <link href="./index.css?v=7.7.2" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
@@ -33,7 +33,7 @@
     <script>
         window.odometerOptions = { auto: false };
     </script>
-    <script src="./odometer.js?v=7.7"></script>
+    <script src="../odometer/odometer.js?v=7.7.2"></script>
 
     <script src="https://npmcdn.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
     <script src="https://npmcdn.com/isotope-masonry-horizontal@2/masonry-horizontal.js"></script>
@@ -47,8 +47,8 @@
     <style id="rankSizeStyles"></style>
     <style id="differenceStyling"></style>
     <style id="cardStyles"></style>
-    <style id="customCSSOverrides"></style>
     <style id="fireStyles"></style>
+    <style id="customCSSOverrides"></style>
 </head>
 
 <body>
@@ -282,7 +282,24 @@
                                 step="0.1"></span></label>
                 </div>
                 <div class="half-column">
-                    <label>Odometer animation: <input type="checkbox" id="animation" checked></label>
+                    <label>Animation type: <select id="animationType" class="l-width">
+                        <option value="default">Odometer (default)</option>
+                        <option value="ytstudio">Odometer (YouTube Studio)</option>
+                        <option value="counting">Counting</option>
+                        <option value="minimal">Odometer (minimal animation)</option>
+                    </select></label>
+                    <label>Number format: <select id="numberFormat" class="l-width">
+                        <option value="comma">12,345,678.9</option>
+                        <option value="dot">12.345.678,9</option>
+                        <option value="space">12 345 678.9</option>
+                        <option value="spaceComma">12 345 678,9</option>
+                        <option value="indian">1,23,45,678.9</option>
+                        <option value="apo">12'345'678.9</option>
+                        <option value="apoComma">12'345'678,9</option>
+                        <option value="noSep">12345678.9</option>
+                        <option value="noSepComma">12345678,9</option>
+                    </select></label>
+                    <label>Reverse odometer animation: <input type="checkbox" id="reverseAnimation" checked></label>
                     <label>Show ranks: <input type="checkbox" id="showRankings" checked></label>
                     <label>Show chart: <input type="checkbox" id="showChart" checked></label>
                     <label>Show images: <input type="checkbox" id="showImages" checked></label>
@@ -730,9 +747,9 @@
         </div>
     </div>
     <hr><br>
-    <script src="./js/utils.js?v=7.7"></script>
-    <script src="./index.js?v=7.7.1"></script>
-    <script src="./js/scripts.js?v=7.7"></script>
+    <script src="./js/utils.js?v=7.7.2"></script>
+    <script src="./index.js?v=7.7.2"></script>
+    <script src="./js/scripts.js?v=7.7.2"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>

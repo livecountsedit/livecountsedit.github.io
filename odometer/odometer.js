@@ -358,10 +358,10 @@
         removeClass(this.el, 'odometer-counting-up odometer-counting-down odometer-animating');
         if (diff > 0) {
           addClass(this.el, 'odometer-counting-up');
-          this.el.setAttribute('style', `color: ${this.options.upColor}`)
+          if (this.options.upColor) this.el.style.color = this.options.upColor;
         } else {
           addClass(this.el, 'odometer-counting-down');
-          this.el.setAttribute('style', `color: ${this.options.downColor}`)
+          if (this.options.downColor) this.el.style.color = this.options.downColor;
         }
         this.stopWatchingMutations();
         this.animate(newValue);
@@ -508,7 +508,7 @@
       };
   
       Odometer.prototype.animateSlide = function (newValue) {
-        var boosted, cur, digitCount, digits, dist, down, end, fractionalCount, frame, frames, i, incr, j, mark, newDigitCount, numEl, oldDigitCount, oldValue, start, _base, _i, _j, _k, _l, _len, _len1, _len2, _m, _ref, _results;
+        var boosted, cur, digitCount, digits, dist, down, end, fractionalCount, frame, frames, i, incr, j, mark, newDigitCount, numEl, oldDigitCount, oldValue, separators, start, _base, _i, _j, _k, _l, _len, _len1, _len2, _m, _ref, _results;
         oldValue = this.value;
         fractionalCount = this.getFractionalDigitCount(oldValue, newValue);
         if (fractionalCount) {
@@ -557,13 +557,39 @@
 
         this.resetDigits();
         _ref = digits.reverse();
-        
-        
+
+        if (this.options.formatFunction) {
+            const formattedOldValue = this.options.formatFunction(oldValue).split('').reverse().join('');
+            const formattedNewValue = this.options.formatFunction(newValue).split('').reverse().join('');
+            const longer = formattedOldValue.length > formattedNewValue.length ? formattedOldValue : formattedNewValue;
+
+            let template = '';
+            for (i = 0; i < formattedNewValue.length || i < formattedOldValue.length; i++) {
+                if (formattedNewValue[i] && formattedNewValue[i].match(/[^0-9]/)) {
+                    template += formattedNewValue[i];
+                } else if (formattedOldValue[i] && formattedOldValue[i].match(/[^0-9]/)) {
+                    template += formattedOldValue[i];
+                } else {
+                    template += "0";
+                }
+            }
+            separators = template.split("0");
+        }
 
         for (i = _l = 0, _len1 = _ref.length; _l < _len1; i = ++_l) {
-
             if (!this.digits[i]) {
-                this.addDigit(' ', i >= fractionalCount);
+                if (this.options.formatFunction) {
+                    if (separators[i]) {
+                        for (j = 0; j < separators[i].length; ++j) {
+                            this.addSpacer(separators[i][j]);
+                        }
+                    }
+                    const digit = this.renderDigit();
+                    this.digits.push(digit);
+                    this.insertDigit(digit);
+                } else {
+                    this.addDigit(' ', i >= fractionalCount);
+                }
             }
 
             if ((_base = this.ribbons)[i] == null) {
@@ -629,6 +655,7 @@
 
             if ((this.options.animation !== 'minimal' && this.options.animation !== 'byDigit') || _ref[i][0] !== _ref[i][_ref[i].length-1] || oldValue == -newValue ) { // Fixes animation bug when updating from X to -X
                 const animationDuration = this.options.duration > 0 ? this.options.duration / 1000 : 2
+                
                 this.ribbons[i].setAttribute('style', `-webkit-transition: -webkit-transform ${animationDuration}s; -moz-transition: -moz-transform ${animationDuration}s; -ms-transition: -ms-transform ${animationDuration}s; -o-transition: -o-transform ${animationDuration}s; transition: transform ${animationDuration}s;`)
                 if (down) {
                     addClass(this.ribbons[i], 'odometer-animating-down')

@@ -419,7 +419,7 @@
                                     "tag": "select",
                                     "selectOptions": [
                                         ["0", "Odometer (default)"],
-                                        ["1", "Odomter (YouTube Studio)"],
+                                        ["1", "Odometer (YouTube Studio)"],
                                         ["2", "Counting"],
                                         ["3", "Odometer (minimal animation)"]
                                     ]
