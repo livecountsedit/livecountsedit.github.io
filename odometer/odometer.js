@@ -282,7 +282,7 @@
         if (value == null) {
           value = this.value;
         }
-        this.el.removeAttribute('style')
+        this.el.style.color = '';
         this.stopWatchingMutations();
         this.resetFormat();
         this.inside.innerHTML = '';
@@ -326,7 +326,7 @@
           _ref = valueString.split('').reverse();
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             valueDigit = _ref[_i];
-            if (valueDigit.match(/0-9/)) {
+            if (valueDigit.match(/[0-9]/)) {
               digit = this.renderDigit();
               digit.querySelector('.odometer-value').innerHTML = valueDigit;
               this.digits.push(digit);
