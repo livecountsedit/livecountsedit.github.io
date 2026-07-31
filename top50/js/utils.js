@@ -211,7 +211,7 @@ function abbs(n) {
     let l = Math.floor(Math.log10(n) / 3);
     let d = 10 ** Math.floor(Math.log10(n) - 2);
     let r = Math.floor(n / d) * d;
-    let result = (s * r) / (1000 ** l) + (l > 5 ? "?" : " KMBTQ"[l]);
+    let result = formatNumber((s * r) / (1000 ** l)) + (l > 5 ? "?" : " KMBTQ"[l]);
     if (result.endsWith(" ")) return result.slice(0, -1);
     return result;
 }
