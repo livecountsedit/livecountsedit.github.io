@@ -2203,7 +2203,6 @@ function fix() {
 
     const counters = document.getElementById('main').getElementsByClassName('count');
     for (const counter of counters) {
-        counter.style.fontWeight = data.counterFontWeight;
         if (data.useOdometerColors) {
             counter.classList.remove('no_color_transition');
         } else if (!counter.classList.contains('no_color_transition')) {
@@ -2230,6 +2229,11 @@ function fix() {
     let odometerStyles = document.getElementById('odometerStyles')
     odometerStyles.innerText = '';
     odometerStyles.innerText += `
+
+    .main .count {
+        font-weight: ${data.counterFontWeight};
+    }
+
     .main .odometer.odometer-auto-theme.odometer-counting-up.odometer-animating .odometer-ribbon-inner,
     .main .odometer.odometer-theme-default.odometer-counting-up.odometer-animating .odometer-ribbon-inner {
         animation: ${data.odometerSpeed}s linear up;
@@ -4047,9 +4051,9 @@ function loadHeader() {
             div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
                 <div class="battle_container" style="max-height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
                     <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm;" src="../default.png" id="user_image1_${item.name}"></img>
-                    <div class="battle_info">
-                        <p id="user_name1_${item.name}" class="name" style="font-size: ${item.attributes.fontSize}px; line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
-                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="user_count1_${item.name}" style="font-size: ${item.attributes.fontSize}px;">0</p>
+                    <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize)}px;">
+                        <p id="user_name1_${item.name}" class="name" style="line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
+                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="user_count1_${item.name}">0</p>
                     </div>
                 </div>`;
             div.style.fontWeight = item.attributes.fontWeight || "400";
