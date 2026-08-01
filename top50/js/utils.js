@@ -623,7 +623,7 @@ function parseMinMax(str) {
 }
 
 function getSetGain(channel) {
-    return isFinite(channel.mean_gain) ? channel.mean_gain 
+    return isFinite(channel.mean_gain) && isFinite(channel.std_gain) ? channel.mean_gain 
     : average(channel.min_gain, channel.max_gain);
 }
 

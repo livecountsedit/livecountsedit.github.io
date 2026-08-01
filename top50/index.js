@@ -860,7 +860,7 @@ function update(doGains = true) {
             data.data[i].mean_gain = parseFloat(data.data[i].mean_gain);
             data.data[i].std_gain = parseFloat(data.data[i].std_gain);
             if (doGains) {
-                if ((data.data[i].mean_gain && data.data[i].std_gain) && (data.data[i].mean_gain != 0) && (data.data[i].std_gain != 0)) {
+                if (isFinite(data.data[i].mean_gain) && isFinite(data.data[i].std_gain)) {
                     data.data[i].count = parseFloat(data.data[i].count) + randomGaussian(parseFloat(data.data[i].mean_gain), parseFloat(data.data[i].std_gain))
                 } else {
                     data.data[i].count = parseFloat(data.data[i].count) + random(parseFloat(data.data[i].min_gain), parseFloat(data.data[i].max_gain));
@@ -1154,6 +1154,12 @@ function update(doGains = true) {
                             delete charts[id];
                         }
                         currentCard.querySelector(".chart").id = "chart_";
+                        applyFire(currentCard, i, false);
+                        currentCard.querySelector(".gapimg").style.visibility = 'hidden';
+                        currentCard.querySelector(".subgap").style.visibility = 'hidden';
+                        currentCard.querySelector(".difference_line").style.visibility = 'hidden';
+                        currentCard.style.backgroundColor = data.boxColor;
+                        currentCard.classList.remove("glowing");
                     }
                 }
             }, extraTimeTillUpdate);
@@ -3042,18 +3048,25 @@ function selectorFunction(e) {
                 document.getElementById('card_' + selected + '').style.border = "";
                 for (let q = 0; q < data.data.length; q++) {
                     if (data.data[q].id == id) {
-                        if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
+                        if (isFinite(data.data[q].mean_gain) && isFinite(data.data[q].std_gain)) {
                             document.getElementById('edit_mean_gain').value = data.data[q].mean_gain;
                             document.getElementById('edit_mean_gain_check').checked = true;
-                            document.getElementById('edit_std_gain').value = data.data[q].mean_gain;
+                            document.getElementById('edit_std_gain').value = data.data[q].std_gain;
                             document.getElementById('edit_std_gain_check').checked = true;
+                            document.getElementById('edit_min_gain').value = "";
+                            document.getElementById('edit_min_gain_check').checked = false;
+                            document.getElementById('edit_max_gain').value = "";
+                            document.getElementById('edit_max_gain_check').checked = false;
                         } else {
                             document.getElementById('edit_mean_gain').value = "";
                             document.getElementById('edit_mean_gain_check').checked = false;
+                            document.getElementById('edit_std_gain').value = "";
                             document.getElementById('edit_std_gain_check').checked = false;
+                            document.getElementById('edit_min_gain').value = data.data[q].min_gain;
+                            document.getElementById('edit_min_gain_check').checked = true;
+                            document.getElementById('edit_max_gain').value = data.data[q].max_gain;
+                            document.getElementById('edit_max_gain_check').checked = true;
                         }
-                        document.getElementById('edit_min_gain').value = data.data[q].min_gain;
-                        document.getElementById('edit_max_gain').value = data.data[q].max_gain;
                         document.getElementById('edit_name').value = data.data[q].name;
                         document.getElementById('edit_bg_color').value = data.data[q].bg ? data.data[q].bg : '';
                         document.getElementById('edit_count').value = data.data[q].count;
@@ -3084,18 +3097,25 @@ function refresh() {
     } else {
         for (let q = 0; q < data.data.length; q++) {
             if (data.data[q].id == currentChannel) {
-                if ((data.data[q].mean_gain) && (data.data[q].std_gain) && (data.data[q].mean_gain != 0) && (data.data[q].std_gain != 0)) {
+                if (isFinite(data.data[q].mean_gain) && isFinite(data.data[q].std_gain)) {
                     document.getElementById('edit_mean_gain').value = data.data[q].mean_gain;
                     document.getElementById('edit_mean_gain_check').checked = true;
-                    document.getElementById('edit_std_gain').value = data.data[q].mean_gain;
+                    document.getElementById('edit_std_gain').value = data.data[q].std_gain;
                     document.getElementById('edit_std_gain_check').checked = true;
+                    document.getElementById('edit_min_gain').value = "";
+                    document.getElementById('edit_min_gain_check').checked = false;
+                    document.getElementById('edit_max_gain').value = "";
+                    document.getElementById('edit_max_gain_check').checked = false;
                 } else {
                     document.getElementById('edit_mean_gain').value = "";
                     document.getElementById('edit_mean_gain_check').checked = false;
+                    document.getElementById('edit_std_gain').value = "";
                     document.getElementById('edit_std_gain_check').checked = false;
+                    document.getElementById('edit_min_gain').value = data.data[q].min_gain;
+                    document.getElementById('edit_min_gain_check').checked = true;
+                    document.getElementById('edit_max_gain').value = data.data[q].max_gain;
+                    document.getElementById('edit_max_gain_check').checked = true;
                 }
-                document.getElementById('edit_min_gain').value = data.data[q].min_gain;
-                document.getElementById('edit_max_gain').value = data.data[q].max_gain;
                 document.getElementById('edit_name').value = data.data[q].name;
                 document.getElementById('edit_bg_color').value = data.data[q].bg ? data.data[q].bg : '';
                 document.getElementById('edit_count').value = data.editorShowsExactCount ? data.data[q].count : getDisplayedCount(data.data[q].count);
