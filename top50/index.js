@@ -1309,18 +1309,15 @@ function edit() {
                         data.data[i].name = name;
                     }
                 }
-                try {
-                    card.querySelector('.name').innerText = name;
-                } catch { }
+                if (card) card.querySelector('.name').innerText = name;
             }
             if (document.getElementById('edit_bg_color_check').checked) {
                 for (let i = 0; i < data.data.length; i++) {
                     if (data.data[i].id == id) {
                         data.data[i].bg = document.getElementById('edit_bg_color').value;
-                        card.style.background = data.data[i].bg || data.boxColor;
+                        if (card) card.style.background = data.data[i].bg || data.boxColor;
                     }
                 }
-                    //card.style.background = document.getElementById('edit_bg_color').value;
             }
             if (document.getElementById('edit_count_check').checked) {
                 for (let i = 0; i < data.data.length; i++) {
@@ -1328,9 +1325,7 @@ function edit() {
                         data.data[i].count = count;
                     }
                 }
-                try {
-                    card.querySelector('.odometer').innerText = getDisplayedCount(count);
-                } catch { }
+                if (card) card.querySelector('.odometer').innerText = getDisplayedCount(count);
             }
             if (document.getElementById('edit_image_check').checked) {
                 for (let i = 0; i < data.data.length; i++) {
@@ -1338,9 +1333,7 @@ function edit() {
                         data.data[i].image = image;
                     }
                 }
-                try {
-                    card.querySelector('.image').src = image;
-                } catch { }
+                if (card) card.querySelector('.image').src = image;
             }
         }
     } else {
