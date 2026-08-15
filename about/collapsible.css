@@ -7,7 +7,7 @@
     border: none;
     text-align: left;
     outline: none;
-    font-size: 1vw;
+    font-size: 1em;
 }
 
 .collapsible-button:hover {
@@ -16,7 +16,7 @@
 
 .collapsible-button:after {
     content: '+';
-    font-size: 1vw;
+    font-size: 1em;
     color: white;
     float: right;
     margin-left: 5px;
