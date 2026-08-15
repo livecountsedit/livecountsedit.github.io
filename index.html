@@ -99,15 +99,16 @@
 
     <div id="disqus_thread" style="width: 100%;"></div>
     <script>
-        function resetAll() {
+        async function resetAll() {
             if (confirm("Are you sure you want to reset ALL data for every counter on our site? This cannot be undone!")) {
                 if (confirm("FINAL WARNING: Are you REALLY sure you want to reset ALL data for every counter on our site? This cannot be undone!")) {
                     try {
                         localStorage.clear();
+                        await indexedDB.deleteDatabase('LCEDIT')
                         alert("Successfully reset all data.")
                     } catch (error) {
                         console.error(error);
-                        alert("Uh-oh. An error occured while resetting all data.")
+                        alert("Uh-oh. An error occured while resetting all data. Make sure you close all other Livecountsedit tabs before trying again.")
                     }
                 } else {
                     alert("Action cancelled.")

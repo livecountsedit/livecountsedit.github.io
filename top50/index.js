@@ -5,6 +5,7 @@ let saveInterval;
 let chart;
 let charts = {}; // Store chart instances by channel ID
 const BLANK_IMAGE_URL = new URL('../blank.png', document.baseURI).href;
+const COUNTER_THEME = "top50";
 let nextUpdateAudit = false;
 let specificChannels = [];
 let pickingChannels = false;
@@ -15,6 +16,7 @@ let data = {};
 let gainTable = {};
 let glowingCards = [];
 let fires = new Map();
+let appendedMDMStyles = false;
 
 let uuid = uuidGen()
 let example_data = {
@@ -159,20 +161,46 @@ let example_data = {
     'maxChartValues': 50,
     'numberFormat': 'comma',
     'animationType': 'default',
-    'reverseAnimation': false
+    'reverseAnimation': false,
+    'saveType': COUNTER_THEME,
+    'index': 1
 };
 let updateInterval;
 let apiInterval;
 
 initLoad()
-function initLoad(redo, previousTheme) {
-    let storedData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : null;
+async function initLoad(redo, previousTheme) {
+    let storedData;
+
+    const oldData = localStorage.getItem('data');
+
+    if (oldData) {
+        try {
+            const oldSave = JSON.parse(oldData);
+            oldSave.saveType = COUNTER_THEME;
+            if (confirm('Livecountsedit has upgraded to a better browser storage method. You have old data stored in your browser, would you like to save a backup just in case?')) {
+                const file = new Blob([JSON.stringify(oldSave)], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(file);
+                a.download = 'data.json';
+                a.click();
+                delete a;
+            }
+            storedData = oldSave;
+        } catch (err) {
+            console.error(err);
+        }
+        localStorage.removeItem('data');
+    } else {
+        storedData = await retrieveDataFromBrowser(COUNTER_THEME, 1);
+    }
+    //let storedData = localStorage.getItem("data") ? JSON.parse(localStorage.getItem("data")) : null;
 
     if (!redo) {
         if (storedData) {
             data = mergeWithExampleData(storedData, example_data);
         } else {
-            data = example_data;
+            data = structuredClone(example_data);
         }
     }
 
@@ -236,6 +264,14 @@ function initLoad(redo, previousTheme) {
     if ('animation' in data) {
         data.animationType = data.animation ? 'default' : 'counting';
         delete data.animation;
+    }
+
+    if (typeof data.apiUpdates.headers === 'string') {
+        data.apiUpdates.headers = {};
+    }
+
+    if (typeof data.apiUpdates.body === 'string') {
+        data.apiUpdates.headers = {};
     }
 
     data.fireIcons.created.forEach(x => { if (!x.fontWeight) x.fontWeight = 900;})
@@ -338,13 +374,7 @@ function initLoad(redo, previousTheme) {
             data.cardStyles.rankSize = String(defaultRankSize * 3);
         }
     }
-    if (data.pause) {
-        document.getElementById("pauseB").innerText = "Resume";
-    }
-    if (data.streamerMode) {
-        document.getElementById("streamerModeB").innerText = "Disable Streamer Mode";
-        document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'flex');
-    }
+    updateStreamerMode();
     if (data.lastOnline && data.offlineGains && !data.pause) {
         const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval;
         for (let i = 0; i < data.data.length; i++) {
@@ -407,11 +437,24 @@ function initLoad(redo, previousTheme) {
     fix();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
-    if (!data.pause) updateInterval = setInterval(update, data.updateInterval);
+    if (!data.pause) {
+        updateInterval = setInterval(update, data.updateInterval);
+        update();
+    }
     let element = document.getElementById(data.settingsTab);
     let button = document.getElementById('button_' + data.settingsTab);
     element.classList.remove("hidden");
     button.classList.add("enabled");
+
+    if (!redo) {
+        loadAPIUpdates();
+        loadFireIcons();
+        loadDifferenceEffects();
+        loadTopSettings();
+        afterDrawingMenu();
+        loadScripts();
+        initScripts();
+    }
 };
 
 function setupDesign(redo) {
@@ -775,8 +818,6 @@ function create() {
     }
 }
 
-let appendedMDMStyles = false;
-
 function setupMDMStyles() {
     if (data.fireIcons.firePosition !== 'mdm' || !data.fireIcons.enabled) {
         appendedMDMStyles = false;
@@ -957,6 +998,7 @@ function update(doGains = true) {
                         if (data.data[i].bg) {
                             currentCard.style.background = data.data[i].bg;
                         } else {
+                            currentCard.style.background = '';
                             currentCard.style.backgroundColor = data.boxColor;
                         }
                         currentCard.id = "card_" + data.data[i].id
@@ -1095,11 +1137,13 @@ function update(doGains = true) {
                         }
 
                         if (glowingCards[i]) {
+                            currentCard.style.background = '';
                             currentCard.style.backgroundColor = data.differenceStyles.created[glowingCards[i] - 1].glowColor;
                             if (!currentCard.classList.contains("glowing")) {
                                 currentCard.classList.add("glowing");
                             }
                         } else {
+                            currentCard.style.background = data.data[i].bg || '';
                             currentCard.style.backgroundColor = data.data[i].bg || data.boxColor;
                             currentCard.classList.remove("glowing");
                         }
@@ -1395,7 +1439,7 @@ function load1() {
 function load() {
     var data3 = {};
     if (document.getElementById('loadData1').files[0]) {
-        document.getElementById('loadData1').files[0].text().then(function (data2) {
+        document.getElementById('loadData1').files[0].text().then(async function (data2) {
             data3 = JSON.parse(data2);
             if (data3.data) {
                 clearInterval(updateInterval);
@@ -1404,13 +1448,17 @@ function load() {
                 if (!data.uuid) {
                     data.uuid = uuidGen();
                 }
+                if (data.index !== 1) {
+                    data.index = 1;
+                }
                 try {
-                    localStorage.setItem("data", JSON.stringify(data));
+                    await saveDataInBrowser(COUNTER_THEME, data);
+                    //localStorage.setItem("data", JSON.stringify(data));
                 } catch (error) {
                     console.error(error);
                 }
                 document.getElementById('main').innerHTML = "";
-                window.location.reload()
+                window.location.reload();
             }
         });
     } else {
@@ -1439,9 +1487,9 @@ function save2(public = false) {
     }
 }
 
-function reset() {
+async function reset() {
     if (confirm("Are you sure you want to reset?")) {
-        localStorage.removeItem("data");
+        await deleteDataInBrowser(COUNTER_THEME, 1)
         location.reload();
     }
 }
@@ -1624,14 +1672,14 @@ document.getElementById('borderPicker').addEventListener('change', function () {
     fix()
 });
 
-document.getElementById('animatedCardChanges').addEventListener('change', function () {
+document.getElementById('animatedCardChanges').addEventListener('change', async function () {
     if (confirm('This will refresh the page')) {
         if (this.checked) {
             data.animatedCards.enabled = true;
         } else {
             data.animatedCards.enabled = false;
         }
-        saveData(true);
+        await saveInBrowser(COUNTER_THEME, true);
         location.reload();
     }
 });
@@ -1934,8 +1982,8 @@ function fix() {
 
     if (data.autosave) {
         clearInterval(saveInterval);
-        saveData(false);
-        saveInterval = setInterval(() => { saveData(false) }, 15000);
+        saveInBrowser(COUNTER_THEME, false);
+        saveInterval = setInterval(async () => { await saveInBrowser(COUNTER_THEME, false) }, 15000);
     }
 
     document.getElementById('showRankings').checked = data.showRankings;
@@ -2296,12 +2344,12 @@ if (window.location.href.includes('?code=')) {
     connected = true;
 }
 
-function connect() {
+async function connect() {
     if (window.location.href.includes('?code=')) {
         window.location.href = window.location.href.split('?code=')[0];
     } else {
         if (!data.streamerMode) toggleStreamerMode();
-        saveData(false)
+        await saveInBrowser(false)
         window.location.href = window.location.href + "?code=" + code;
     }
 }
@@ -2461,9 +2509,9 @@ function update2() {
                     method: 'POST'
                 })
                     .then(response => response.text())
-                    .then(json => {
+                    .then(async json => {
                         if (json == "done") {
-                            saveData(false)
+                            await saveInBrowser(COUNTER_THEME, false)
                             location.reload();
                         }
                     })
@@ -2471,11 +2519,11 @@ function update2() {
         });
 }
 
-document.getElementById('autosave').addEventListener('change', function () {
+document.getElementById('autosave').addEventListener('change', async function () {
     if (document.getElementById('autosave').checked) {
         clearInterval(saveInterval);
-        saveData(false);
-        saveInterval = setInterval(() => { saveData(false) }, 15000);
+        await saveInBrowser(COUNTER_THEME, false)
+        saveInterval = setInterval(async () => { await saveInBrowser(COUNTER_THEME, false) }, 15000);
         data.autosave = true;
     } else {
         clearInterval(saveInterval);
@@ -2662,10 +2710,10 @@ document.getElementById('odometerSpeed').addEventListener('change', function () 
     fix();
 })
 
-document.getElementById('animatedCardChangesDuration').addEventListener('change', function () {
+document.getElementById('animatedCardChangesDuration').addEventListener('change', async function () {
     if (confirm('This will refresh the page.')) {
         data.animatedCards.duration = document.getElementById('animatedCardChangesDuration').value * 1000;
-        saveData(true);
+        await saveInBrowser(COUNTER_THEME, false)
         location.reload();
     }
 })
@@ -2680,24 +2728,6 @@ function pause() {
         document.getElementById('pauseB').innerText = "Pause"
         updateInterval = setInterval(update, data.updateInterval);
         update()
-    }
-}
-
-function toggleStreamerMode() {
-    if (!data.streamerMode) {
-        data.streamerMode = true;
-        document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'flex');
-        document.getElementById('streamerModeB').innerText = 'Disable Streamer Mode';
-        alert('Streamer Mode enabled.')
-    } else {
-        if (confirm('Are you sure you want to disable Streamer Mode?')) {
-            data.streamerMode = false;
-            document.querySelectorAll('.streamer-mode').forEach(x => x.style.display = 'none');
-            document.getElementById('streamerModeB').innerText = 'Enable Streamer Mode';
-            alert('Streamer Mode disabled.')
-        } else {
-            alert('Action cancelled.')
-        }
     }
 }
 
@@ -2990,7 +3020,6 @@ function loadAPIUpdates() {
     document.getElementById('apiUpdateInt').value = data.apiUpdates.interval / 1000;
     document.getElementById('enableApiUpdate').innerText = data.apiUpdates.enabled ? 'Disable API Updates' : 'Enable API Updates'
 }
-loadAPIUpdates()
 
 function selectorFunction(e) {
     let target = e.target;
@@ -3124,12 +3153,12 @@ document.getElementById("apiSource").addEventListener('change', function () {
         data.apiUpdates = {
             'enabled': false,
             'url': 'https://mixerno.space/api/youtube-channel-counter/user/{{channels}}',
-            'interval': 10000,
+            'interval': parseInt(document.getElementById('apiUpdateInt').value) || 10000,
             'method': 'GET',
-            'body': '',
-            'headers': '',
+            'body': {},
+            'headers': {},
             'maxChannelsPerFetch': 'one',
-            'customAPIList': [],
+            'customAPIList': document.getElementById('customAPIList').value ? document.getElementById('customAPIList').value.split(',') : [],
             'custom': false,
             'response': {
                 'loop': 'data',
@@ -3155,12 +3184,12 @@ document.getElementById("apiSource").addEventListener('change', function () {
         data.apiUpdates = {
             'enabled': false,
             'url': 'https://mixerno.space/api/youtube-channel-counter/user/{{channels}}',
-            'interval': 10000,
+            'interval': parseInt(document.getElementById('apiUpdateInt').value) || 10000,
             'method': 'GET',
-            'body': '',
-            'headers': '',
+            'body': {},
+            'headers': {},
             'maxChannelsPerFetch': 'one',
-            'customAPIList': [],
+            'customAPIList': document.getElementById('customAPIList').value ? document.getElementById('customAPIList').value.split(',') : [],
             'custom': false,
             'response': {
                 'loop': 'data',
@@ -3186,7 +3215,7 @@ document.getElementById("apiSource").addEventListener('change', function () {
     loadAPIUpdates();
 })
 
-const addFireIcon = () => {
+function addFireIcon() {
     if (document.getElementById('fireIconCreate')) {
         document.getElementById('fireIconCreate').remove();
         document.getElementById('fireIconCreateButton').innerText = 'Add Fire Icon';
@@ -3234,7 +3263,7 @@ function getBase64(file) {
     });
 }
 
-const saveFireIcon = async () => {
+async function saveFireIcon() {
     let file = document.getElementById('fireIconFile').files[0];
     if (file) {
         file = await getBase64(file);
@@ -3301,7 +3330,7 @@ function reOrderFire(type, index) {
     loadFireIcons();
 }
 
-const loadFireIcons = () => {
+function loadFireIcons() {
     let div = document.getElementById('fireIcons');
     div.innerHTML = '';
     for (let i = 0; i < data.fireIcons.created.length; i++) {
@@ -3362,7 +3391,6 @@ const loadFireIcons = () => {
     document.getElementById('fireBorderWidth').value = data.fireIcons.fireBorderWidth || 0;
     adjustColors();
 }
-loadFireIcons();
 
 const deleteFireIcon = (index) => {
     data.fireIcons.created.splice(index, 1);
@@ -3413,7 +3441,7 @@ const saveFireEdits = (index) => {
     };
 };
 
-const addDifferenceEffect = () => {
+function addDifferenceEffect() {
     if (document.getElementById('differenceEffectCreate')) {
         document.getElementById('differenceEffectCreate').remove();
         document.getElementById('addDifferenceEffectButton').innerText = 'Add Difference Effect';
@@ -3460,7 +3488,7 @@ const addDifferenceEffect = () => {
     }
 }
 
-const saveDifferenceEffect = async () => {
+async function saveDifferenceEffect() {
     let file = document.getElementById('diffIconFile').files[0];
     if (file) {
         file = await getBase64(file);
@@ -3520,7 +3548,7 @@ function reOrderDiff(type, index) {
     loadDifferenceEffects();
 }
 
-const loadDifferenceEffects = () => {
+function loadDifferenceEffects () {
     let div = document.getElementById('differenceEffects');
     div.innerHTML = '';
     for (let i = 0; i < data.differenceStyles.created.length; i++) {
@@ -3579,7 +3607,6 @@ const loadDifferenceEffects = () => {
     }
     adjustColors();
 }
-loadDifferenceEffects();
 
 function deleteDiffEffect(index) {
     data.differenceStyles.created.splice(index, 1);
@@ -4243,7 +4270,7 @@ function findFastestChannel(index, rankRange) {
     return toReturn[index - 1];
 }
 
-function saveTopSettings(shouldAlert = true) {
+async function saveTopSettings(shouldAlert = true) {
     let items = [];
     const valid = Array.from(document.querySelector("#sections").children)
         .every(x => isValidHeaderName(x.querySelector(".section_option_name")?.value));
@@ -4298,11 +4325,11 @@ function saveTopSettings(shouldAlert = true) {
         footerGap: document.getElementById("footerGapSections") ? (document.getElementById("footerGapSections").value || 10) : 10,
         items: items
     }
-    saveData(shouldAlert);
+    await saveInBrowser(COUNTER_THEME, shouldAlert)
     loadHeader()
 }
 
-function loadTopSettings(itemName, itemType) {
+async function loadTopSettings(itemName, itemType) {
     if (!itemType) {
         document.getElementById("totalSections").value = data.headerSettings.totalSections || '';
         document.getElementById("heightSections").value = data.headerSettings.headerHeight || 0;
@@ -4661,10 +4688,9 @@ function loadTopSettings(itemName, itemType) {
         fixHeaderSettings();
     });
     adjustColors();
-    saveTopSettings(false);
+    await saveTopSettings(false);
     loadHeader();
 };
-loadTopSettings();
 
 function removeTopSetting(name) {
     if (confirm("Are you sure you want to delete this setting?")) {
@@ -4745,55 +4771,6 @@ function saveCustomCSS() {
     document.getElementById('customCSSOverrides').innerHTML = css;
     data['customCSS'] = css;
 }
-
-document.getElementById('settingsSearch').addEventListener('input', (e) => {
-    const query = e.target.value;
-    const searchResultsDiv = document.querySelector(".search-results")
-    searchResultsDiv.replaceChildren()
-    searchResultsDiv.innerText = "";
-    if (query) {
-        const results = searchSettings(query);
-        if (results.length) {
-            for (const result of results) {
-                const p = document.createElement('p');
-                p.innerText = result[0].replace(/\s+/g, ' ');
-                const id = result[1];
-                const button = document.getElementById('button_' + id).cloneNode(true);
-                button.classList.add("enabled");
-                button.id = "";
-                p.appendChild(button);
-                searchResultsDiv.appendChild(p);
-            }
-        } else {
-            searchResultsDiv.innerHTML = "<p>No results found.</p>";
-        }
-    }
-    adjustColors();
-})
-
-document.getElementById('runSnippet').addEventListener('click', () => {
-    const result = prompt("⚠️ PLEASE READ!!! Make sure you know what you're doing before using this. NEVER paste in code from an untrusted source. If anything happens because of something you pasted in here IT IS 100% ON YOU! Please type I UNDERSTAND in all caps before proceeding.");
-    if (result === "I UNDERSTAND") {
-        const code = prompt("Paste in your code here. ⚠️ NEVER EVER paste in code from an untrusted source!");
-        if (code) {
-            const response = prompt("Are you REALLY sure you wanna run this? Type YES in all caps to confirm. Again, if anything happens cause of what you pasted in here, IT'S 100% ON YOU!");
-            if (response === "YES") {
-                try {
-                    eval(code);
-                    alert("Success!")
-                } catch (err) {
-                    alert(`An error occurred: ${err}`)
-                }
-            } else {
-                alert("Action cancelled.");
-            }
-        } else {
-            alert("Action cancelled.")
-        }
-    } else {
-        alert("Action cancelled.")
-    }
-})
 
 function updateAddHourlyEstimates() {
     const addMinGain = parseFloat(document.getElementById("add_min_gain").value) || 0;

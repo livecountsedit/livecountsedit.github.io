@@ -1189,3 +1189,12 @@ sidebar navigation
     background: #ffffff;
     color: #f62d51;
   }
+
+.menu {
+    width: calc(100% - 240px);
+    float: right;
+}
+
+.menu button {
+    margin: 5px 5px;
+}

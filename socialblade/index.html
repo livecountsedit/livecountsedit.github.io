@@ -2,8 +2,9 @@
 
 <head>
     <title>Livecountsedit - SocialBlade</title>
-    <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css" rel="stylesheet" type="text/css">
+    <link href="../odometer.css" rel="stylesheet" type="text/css">
+    <link href="../common.css?v=7.8" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.8" rel="stylesheet" type="text/css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -22,89 +23,37 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://lcedit.com" />
     <meta property="og:image" content="https://lcedit.com/images/socialblade.png" />
-    <link href="./index.css" type="text/css" rel="stylesheet">
-    <link rel="stylesheet" href="../odometer.css" id="counterStyle" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css" />
+    <style id="noSocialBladeLogo"></style>
 </head>
 <html>
 
 <body style="background: #eae9ec;">
-    <div id="settingsMenu"
-            style="text-align: center; position: fixed; overflow: auto; z-index: 2; border: solid #000000; width: 25%; height: 95%; background-color: #cccccc;">
+    <div id="settingsMenu" class="menu">
             <button id="close" style="font-size: 25px;">Exit Menu</button>
-            <br>
-            <br>
-            <div class="option">
-                <label for="options.counter.title">Counter title/Username</label><br>
-                <input type="text" placeholder="User" class="option-input" id="options.counter.title" value="User">
-            </div>
-            <br>
-            <div class="option">
-                <label for="options.counter.avatar.url">Avatar URL</label><br>
-                <input type="text" class="option-input" id="options.counter.avatar.url" value="https://lcedit.com/default.png"><br>
-                <strong>OR</strong>
-                <input type="file" class="option-input" id="options.counter.avatar.file">
-            </div>
-            <br>
-            <div class="option">
-                <label for="options.counter.value">Counter value (integers only)</label><br>
-                <input type="text" placeholder="Channel Subscribers" class="option-input" id="options.counter.value" value="0">
-                <button onclick="submit()">Submit</button>
-            </div>
-            <br>
-            <p>Counter Gain Rate</p>
-            <div class="option-section" id="options.counter.rates.mode.0">
-                <div class="option">
-                    <p>
-                        <span>Min Subs</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Max Subs</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Update Interval</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units" value="2"></span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day">day(s)</option>
-                            </select></span>
-                        <br>
-                        <br>
-                        <span>Sub Gain Rate In Per 1:</span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second2">second</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute
-                                </option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day2">day</option>
-                            </select></span>
-                    </p>
-                </div>
-            </div><br>
-
-            <div class="option">
-                <span>Counter Type:</span>
-                <span><select class="option-input" id="options-counter-type">
-                    <option value="youtube">YouTube</option>
-                    <option value="twitch">Twitch</option>
-                    <option value="twitter">Twitter</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="none">None</option>
-                </select></span>
-            </div><br>
-
-            <div class="option">
-                <span><input type="checkbox" id="options-chart" checked>Show Chart</span>
-            </div><br>
             <hr>
-            <h3>API Updates</h3>
+            <div id="controlButtons">
+            </div>
+            <hr>
+            <div id="menuButtons">
+            </div>
+            <hr>
+            <div id="settingsMenus">
+            </div>
+            <br>
+            <hr>
+            <div>
+                <h3>Questions, bugs, comments, or suggestions?</h3>
+                <p>Join the <a href="/about/discord.html">Livecountsedit Discord server!</a></p>
+            </div>
+            <hr>
+            <div>
+                <h3>Disclaimer</h3>
+                <p>This page is a parody of the original <a href="https://socialblade.com/youtube/realtime">SocialBlade Realtime Counter</a>. All credit goes to <a href="https://socialblade.com">SocialBlade LLC</a> for the design of this page.</p><br>
+                <p>Educational & fun purposes only. No copyright infrigment is intended. We do not condone the use of this site for spreading misinformation.</p><br>
+            </div>
+            
+            <!-- <h3>API Updates</h3>
             <div class="option">
                 <label for="api-channelID">Channel ID</label><br>
                 <input type="text" placeholder="Channel ID (e.g., UC...)" class="option-input" id="api-channelID">
@@ -167,9 +116,8 @@
             <div class="option">
                 <label>Status: <span id="apiStatusIndicator">--</span></label>
             </div>
-            <hr>
-            <h3>Disclaimer</h3>
-            <p>This page is a parody of the <a href="https://socialblade.com/youtube/realtime">original Social Blade realtime counter</a>. All credit goes to <a href="https://socialblade.com/">Social Blade LLC</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
+            <hr> -->
+
         </div>
     <div id="notification_overlay"
         style="position:fixed; top:0; bottom:0; left:0; right:0; background-color:#222; opacity:0.95; z-index:100001; display: none;">
@@ -191,12 +139,14 @@
         <div style="width: 1260px; height: 60px; margin: 0px auto; color:#fff; background: #2f2c2c;"
             id="main-menu-container">
             <div style="width: 233px; height: 60px; margin: 0px; float: left; background: #2f2c2c; ">
-                <a href="/"><img src="./Socialblade-logo.png" style="margin: 0px;" alt="a"></a>
+                <a ><img src="./Socialblade-logo.png" style="margin: 0px;"></a>
             </div>
             <div style="width: 1027px; height: 60px; margin: 0px; float: left; background: #2f2c2c;">
                 <div
                     style="width: 340px; height: 32px; line-height: 32px; margin-top: 3px; margin-right: 2px; float: right;  background: #2f2c2c;">
                     <input id="SearchInput" placeholder="Enter YouTube Username">
+                    <br>
+                    <button id="saveCountButton">Save count</button>
                 </div>
             </div>
         </div>
@@ -220,13 +170,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="top-menu-list"><a href="">Consulting</a></div>
-                <div class="top-menu-list"><a href="">Compare</a></div>
-                <div class="top-menu-list"><a href="https://socialblade.com/blog/">Blog</a></div>
+                <div class="top-menu-list"><a >Consulting</a></div>
+                <div class="top-menu-list"><a >Compare</a></div>
+                <div class="top-menu-list"><a >Blog</a></div>
             </div>
             <div id="top-menu-social">
                 <div class="top-menu-partner" style="width: 260px; background: #d63e33; text-align: center;"><a
-                        href="" style="font-weight: bold; color:#fff; text-decoration: none;"><i
+                         style="font-weight: bold; color:#fff; text-decoration: none;"><i
                             class="fa fa-star"></i> Premium Membership</a></div>
             </div>
         </div>
@@ -237,7 +187,7 @@
     <div class="page-title">
         <div class="containment">
             <h2 id="realtime-title">Real Time YouTube Subscriber Count</h2>
-            <h4>This page updates every second.</h4>
+            <h4 id="updateIntervalDisplay">This page updates every second.</h4>
             <i class="fa fa-cogs" id="openSettings" onclick="openmenu()"></i>
             <i class="fa fa-users"></i>
         </div>
@@ -245,8 +195,8 @@
 
     <div class="containment share">
         <div class="left">
-            <a class="twitter" href="/">Share on Twitter</a>
-            <a class="facebook" href="/">Share on Facebook</a>
+            <a class="twitter" >Share on Twitter</a>
+            <a class="facebook" >Share on Facebook</a>
         </div>
         <div class="right">
             <a class="return" href="/">Back to Livecountsedit</a>
@@ -257,10 +207,10 @@
         <div class="containment text-center">
             <div class="page-realtime-body-containment">
                 <div class="meta meta-youtube">
-                    <img id="userimg" src="../default.png" alt="Loading" />
-                    <a href="/" target="_blank"><span>Subscribe</span><span id="platform-plus-sign">+</span></a>
+                    <img id="userimg" src="../default.png"/>
+                    <a  target="_blank"><span>Subscribe</span><span id="platform-plus-sign">+</span></a>
                 </div>
-                <span><h3 id="userName" class="realtime-username-youtube">User</h3><sup><img src="youtube-icon.png"
+                <span style="position:relative"><h3 id="userName" class="realtime-username-youtube">User</h3><sup><img src="youtube-icon.png"
                 alt="Icon" class="platform-icon"></sup></span>
 
             </div>
@@ -287,8 +237,11 @@
         &nbsp;
     </div>
     <script src="../jquery.js" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+    <script src="../commonUtils.js?v=7.8"></script>
+    <script src="../commonCounter.js?v=7.8"></script>
     <script src="../highstock.js"></script>
-    <script src="./index.js"></script>
+    <script src="./socialblade.js?v=7.8"></script>
 </body>
 
 </html>

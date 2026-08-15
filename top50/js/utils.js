@@ -1,15 +1,3 @@
-function escapeHTML(text) {
-    if (text != null) {
-        text = text.toString();
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-    return "";
-}
 
 function formatRank(rank) {
     if (!data.prependZeros) return rank;
@@ -197,48 +185,11 @@ function clearGainData() {
     }
 }
 
-function abb(n) {
-    let s = Math.sign(n);
-    n = Math.abs(n);
-    if (n < 1) return 0;
-    else return Math.floor(s * Math.floor(n / (10 ** (Math.floor(Math.log10(n)) - 2))) * (10 ** (Math.floor(Math.log10(n)) - 2)))
-}
-
-function abbs(n) {
-    let s = Math.sign(n);
-    n = Math.abs(n);
-    if (n < 1) return '0';
-    let l = Math.floor(Math.log10(n) / 3);
-    let d = 10 ** Math.floor(Math.log10(n) - 2);
-    let r = Math.floor(n / d) * d;
-    let result = formatNumber((s * r) / (1000 ** l)) + (l > 5 ? "?" : " KMBTQ"[l]);
-    if (result.endsWith(" ")) return result.slice(0, -1);
-    return result;
-}
-
 function getDisplayedCount(n) {
     if (!isFinite(n)) n = 0;
     if (!data.allowNegative && n < 0) n = 0;
     if (data.abbreviate) return abb(n);
     else return Math.floor(n);
-}
-
-const uuidGen = function () {
-    if (self && self.crypto && typeof self.crypto.randomUUID === 'function') {
-        return self.crypto.randomUUID();
-    }
-    let a = function () {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    };
-    return a() + a() + '-' + a() + '-' + a() + '-' + a() + '-' + a() + a() + a();
-}
-
-function avg(a, b) {
-    return (a + b) / 2
-}
-
-function random(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function adjustColors() {
@@ -282,47 +233,8 @@ function adjustColors() {
     }
 }
 
-function mergeWithExampleData(imported, example) {
-    if (typeof imported !== 'object' || imported === null) return example;
-    for (let key in example) {
-        if (!imported.hasOwnProperty(key)) {
-            imported[key] = example[key];
-        } else if (typeof example[key] === 'object' && !Array.isArray(example[key])) {
-            imported[key] = mergeWithExampleData(imported[key], example[key]);
-        }
-    }
-
-    return imported;
-}
-
-function saveData(alert2) {
-    if (data.debugMode) console.log("Attempting to save...")
-    try {
-        data.lastOnline = Date.now();
-        localStorage.setItem("data", JSON.stringify(data));
-        document.getElementById("storage-warning").style.display = "none";
-        if (alert2) {
-            alert("Saved!");
-        }
-        if (data.debugMode) console.log("Saved in browser.");
-    } catch (error) {
-        if (alert2) {
-            alert(`Error: ${error}`);
-        }
-        if (data.debugMode) console.error("Failed to save in browser: " + error)
-        document.getElementById("storage-warning").style.display = "block";
-    }
-}
-
 function saveGainRateOption() {
     data.gainAverageOf = Math.max(1, Math.round(document.getElementById('gainAverageOf').value));
-}
-
-function randomGaussian(mean, stdev) {
-    let a = 0, b = 0;
-    while (!a) a = Math.random();
-    while (!b) b = Math.random();
-    return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b) * stdev + mean;
 }
 
 function average(num1, num2) {
@@ -390,62 +302,8 @@ function mean(a, b) {
     return (a + b) / 2
 }
 
-function searchSettings(str) {
-    results = []
-    const settingContainers = document.getElementsByClassName("settings-container");
-    for (const container of settingContainers) {
-        const labels = container.querySelectorAll("label");
-        l: for (const label of labels) {
-            let elem = label;
-            while (elem) {
-                if (elem.classList.contains('no-search')) continue l;
-                elem = elem.parentElement; 
-            }
-            let hasInputChild = !!label.querySelectorAll("input,textarea,select").length;
-            if (hasInputChild) {
-                const labelText = Array.from(label.childNodes)
-                    .filter(node => node.nodeType === Node.TEXT_NODE || node.nodeName === 'ABBR' || node.classList.contains('show-in-search'))
-                    .map(node => node.textContent)
-                    .join('').replace(/\s+/g, ' ');
-                if (labelText.toLowerCase().includes(str.toLowerCase())) {
-                    results.push([labelText, container.parentElement.id || container.parentElement.parentElement.id]);
-                }
-            }
-        }
-    }
-    return results;
-}
-
-function includesAtLeastOneOf(str, ...substrs) {
-    for (const substr of substrs) {
-        if (str.includes(substr)) return true;
-    }
-    return false;
-}
-
-function initializeCopyButtons() {
-    document.querySelectorAll('[copy]').forEach(x => {
-        x.onclick = () => {
-            const elem = document.getElementById(x.getAttribute("copy"));
-            if (elem && elem.value) {
-                navigator.clipboard.writeText(elem.value);
-                alert("Copied!")
-            }
-        }
-    })
-}
-
 function isValidHeaderName(name) {
     return typeof name === 'string' && name && name.trim() && !name.match(/[<>'"&\\]/)
-}
-
-function hasDuplicates(arr) {
-    const set = new Set();
-    for (const item of arr) {
-        if (set.has(item)) return true;
-        else set.add(item);
-    }
-    return false;
 }
 
 function calculateFires() {

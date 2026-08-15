@@ -30,7 +30,8 @@
         integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700" rel="stylesheet">
     <link href="./odometer.css" rel="stylesheet">
-    <link href="./index.css" rel="stylesheet">
+    <link href="../common.css?v=7.8" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.8" rel="stylesheet">
 </head>
 
 <body class="fix-header fix-sidebar card-no-border">
@@ -39,7 +40,7 @@
         <header class="topbar">
             <nav class="navbar top-navbar navbar-toggleable-sm navbar-light">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="https://akshatmittal.com/youtube-realtime/">
+                    <a class="navbar-brand">
                         <b class="text-white">
                             <i class="fab fa-youtube"></i>
                         </b>
@@ -186,7 +187,7 @@
                 <div class="row" id="sharer" style="margin-top: 0px;">
                     <div class="col-12">
                         <div class="card-block text-center">
-                            <div class="text-center p-t-0 row">
+                            <div class="text-center p-t-0 row social-media-buttons">
                                 <div class="col-12 col-md-4">
                                     <div class="card no-shadow btn-youtube mb-0 p-2 waves-effect" id="yt_shareyt">
                                         <span class="font-light m-b-0"><i class="fab fa-youtube"></i> Visit</span>
@@ -243,20 +244,20 @@
                 <a href="https://akshatmittal.com/youtube-realtime/"><button>This website is a parody of the orignal
                         site.</button></a>
                 <br>
-                <div class="row">
+                <div class="row social-media-buttons">
                     <div class="col-sm-12">
                         <div class="card-block text-center p-t-0">
-                            <a href="https://www.facebook.com/itsreallyakshat" target="_blank">
+                            <a target="_blank">
                                 <div class="align-self-center btn-facebook m-1 round">
                                     <i class="fab fa-facebook"></i>
                                 </div>
                             </a>
-                            <a href="https://www.twitter.com/iakshatmittal" target="_blank">
+                            <a target="_blank">
                                 <div class="align-self-center btn-twitter m-1 round">
                                     <i class="fab fa-twitter"></i>
                                 </div>
                             </a>
-                            <a href="https://www.instagram.com/itsreallyakshat" target="_blank">
+                            <a target="_blank">
                                 <div class="align-self-center btn-instagram m-1 round">
                                     <i class="fab fa-instagram"></i>
                                 </div>
@@ -267,241 +268,28 @@
             </div>
         </div>
         <center>
-            <div>
-                <div class="option">
-                    <p>
-                        <span>Min Subs</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Max Subs</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Update Interval</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units" ></span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day">day(s)</option>
-                            </select></span>
-                        <br>
-                        <br>
-                        <span>Sub Gain Rate In Per 1:</span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnitt">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second2">second</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute
-                                </option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day2">day</option>
-                            </select></span>
-                    </p>
+            <div class="menu">
+                <div id="controlButtons"></div>
+                <hr>
+                <div id="menuButtons"></div>
+                <hr>
+                <div id="settingsMenus"></div>
+                <hr>
+                <div style="padding:12px;width:50%;">
+                    <h3>Disclaimer</h3>
+                    <p>This page is a parody of the <a href="https://gh.akshatmittal.com/youtube-realtime/">original Akshatmittal live subscriber counter</a>. All credit goes to <a href="https://akshatmittal.com/">Akshatmittal</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
                 </div>
-                <div class="option">
-                    <label for="options.counter.title">Counter title/Username</label><br>
-                    <input type="text" placeholder="Channel Name" class="option-input" id="options.counter.title" value="User">
-                </div>
-                <div class="option">
-                    <label for="options.counter.value">Counter value (integers only)</label><br>
-                    <input type="text" placeholder="Channel Subscribers" class="option-input"
-                        id="options.counter.value" value="0">
-                    <button onclick="submit()">Submit</button>
-                </div>
-                <div class="option">
-                    <label for="options.counter.footer">Counter footer (e.g. "Subscribers", "Followers")</label><br>
-                    <input type="text" placeholder="Followers, Subscribers, etc" class="option-input"
-                        id="options.counter.footer" value="Subscribers">
-                </div>
-                <br>
-                <div class="option">
-                    <label for="options.counter.banner.url">Banner URL</label><br>
-                    <input type="text" class="option-input" id="options.counter.banner.url" value="https://lcedit.com/default_banner.png"><br>
-                    <strong>OR</strong>
-                    <input type="file" class="option-input" id="options.counter.banner.file">
-                </div>
-                <br>
-                <div class="option">
-                    <label for="options.counter.avatar.url">Avatar URL</label><br>
-                    <input type="text" class="option-input" id="options.counter.avatar.url" value="https://lcedit.com/default.png"><br>
-                    <strong>OR</strong>
-                    <input type="file" class="option-input" id="options.counter.avatar.file">
-                </div>
-                <br>
-                <br>
-                <br>
-                <br>
-                <div class="option">
-                    <label for="options.counter.footer2">(Views) Footer</label><br>
-                    <input type="text" placeholder="Followers, Subscribers, etc" class="option-input"
-                        id="options.counter.footer1" value="Views">
-                </div>
-                <br>
-                <div class="option">
-                    <label for="options.counter.footer3">(Videos) Footer</label><br>
-                    <input type="text" placeholder="Followers, Subscribers, etc" class="option-input"
-                        id="options.counter.footer2" value="Videos">
-                </div>
-                <br>
-                <div class="option">
-                    <label for="options.counter.value1">(Views) Counter value (integers only)</label><br>
-                    <input type="text" placeholder="Counter Value" class="option-input"
-                        id="options.counter.value1" value="0">
-                    <button onclick="submit1()">Submit</button>
-                </div>
-                <br>
-                <div class="option">
-                    <label for="options.counter.value2">(Videos) Counter value (integers only)</label><br>
-                    <input type="text" placeholder="Counter Value" class="option-input"
-                        id="options.counter.value2" value="0">
-                    <button onclick="submit2()">Submit</button>
-                </div>
-                <br>
-                <br>
-                <p>
-                    <span>Min Views</span>
-                    <span><input type="number" class="short-input option-input"
-                            id="options.counter.rates.basicMinimum1" value="0"></span>
-                    <br>
-                    <br>
-                    <span>Max Views</span>
-                    <span><input type="number" class="short-input option-input"
-                            id="options.counter.rates.basicMaximum1" value="0"></span>
-                <p>
-                    <span>Update Interval</span>
-                    <span><input type="number" class="short-input option-input"
-                            id="options.counter.rates.mode.basic.units1" ></span>
-                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit1">
-                            <option value="1" id="options.counter.rates.mode.basic.units.second3">second(s)</option>
-                            <option value="60" id="options.counter.rates.mode.basic.units.minute3">minute(s)</option>
-                            <option value="3600" id="options.counter.rates.mode.basic.units.hour3">hour(s)</option>
-                            <option value="86400" id="options.counter.rates.mode.basic.units.day3">day(s)</option>
-                        </select></span>
-                    <br>
-                    <br>
-                    <span>Views Gain Rate In Per 1:</span>
-                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit11">
-                            <option value="1" id="options.counter.rates.mode.basic.units.second4">second</option>
-                            <option value="60" id="options.counter.rates.mode.basic.units.minute4">minute</option>
-                            <option value="3600" id="options.counter.rates.mode.basic.units.hour4">hour</option>
-                            <option value="86400" id="options.counter.rates.mode.basic.units.day4">day</option>
-                        </select></span>
-
-                    <br>
-                    <br>
-                <p>
-                    <span>Min Videos</span>
-                    <span><input type="number" class="short-input option-input"
-                            id="options.counter.rates.basicMinimum2" value="0"></span>
-                    <br>
-                    <br>
-                    <span>Max Videos</span>
-                    <span><input type="number" class="short-input option-input"
-                            id="options.counter.rates.basicMaximum2" value="0"></span>
-                <p>
-                    <span>Update Interval</span>
-                    <span><input type="number" class="short-input option-input"
-                            id="options.counter.rates.mode.basic.units2" ></span>
-                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
-                            <option value="1" id="options.counter.rates.mode.basic.units.second5">second(s)</option>
-                            <option value="60" id="options.counter.rates.mode.basic.units.minute5">minute(s)</option>
-                            <option value="3600" id="options.counter.rates.mode.basic.units.hour5">hour(s)</option>
-                            <option value="86400" id="options.counter.rates.mode.basic.units.day5">day(s)</option>
-                        </select></span>
-                    <br>
-                    <br>
-                    <span>Video Gain Rate In Per 1:</span>
-                    <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit22">
-                            <option value="1" id="options.counter.rates.mode.basic.units.second6">second</option>
-                            <option value="60" id="options.counter.rates.mode.basic.units.minute6">minute</option>
-                            <option value="3600" id="options.counter.rates.mode.basic.units.hour6">hour</option>
-                            <option value="86400" id="options.counter.rates.mode.basic.units.day6">day</option>
-                        </select></span>
-
-                    <br>
-                    <br>
-                    <br>
-                    <br>
             </div>
-            <hr>
-            <h3>API Updates</h3>
-            <div class="option">
-                <label for="api-channelID">Channel ID</label><br>
-                <input type="text" placeholder="Channel ID (e.g., UC...)" class="option-input" id="api-channelID">
-            </div>
-            <div class="option">
-                <label for="api-url">API URL</label><br>
-                <input type="text" placeholder="https://api.example.com/{{channelID}}" class="option-input" id="api-url">
-                <label>Use {{channelID}} where channel ID should be inserted</label>
-            </div>
-            <div class="option">
-                <label for="api-method">Method</label><br>
-                <select class="option-input" id="api-method">
-                    <option value="GET">GET</option>
-                    <option value="POST">POST</option>
-                </select>
-            </div>
-            <div class="option">
-                <label for="api-loop">Loop through (data = root)</label><br>
-                <input type="text" placeholder="data" class="option-input" id="api-loop">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-updateName">Update Name</span><br>
-                <input type="text" placeholder="Name path (e.g., snippet.title)" class="option-input" id="api-pathName">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-updateImage">Update Image</span><br>
-                <input type="text" placeholder="Image path (e.g., snippet.thumbnails.default.url)" class="option-input" id="api-pathImage">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-updateCount">Update Count</span><br>
-                <input type="text" placeholder="Count path (e.g., statistics.subscriberCount)" class="option-input" id="api-pathCount">
-            </div>
-            <div class="option">
-                <label for="api-pathID">ID Path (Required)</label><br>
-                <input type="text" placeholder="id" class="option-input" id="api-pathID">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-IDIncludes">ID Includes (Enable if ID is part of another string)</span>
-            </div>
-            <div class="option">
-                <label for="api-headers">Headers (optional, format: HeaderName: value;)</label><br>
-                <textarea class="option-input" id="api-headers" rows="3"></textarea>
-            </div>
-            <div class="option">
-                <label for="api-body">Body (optional, for POST, format: key: value;)</label><br>
-                <textarea class="option-input" id="api-body" rows="3"></textarea>
-            </div>
-            <div class="option">
-                <label for="api-interval">Update Interval (seconds)</label><br>
-                <input type="number" placeholder="10" class="option-input" id="api-interval" min="1">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-forceUpdates">Force Updates (even without count changes)</span>
-            </div>
-            <div class="option">
-                <button onclick="saveAPIUpdates()">Save API Update Settings</button>
-                <button onclick="apiUpdate()">Update Now</button>
-                <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
-            </div>
-            <div class="option">
-                <label>Status: <span id="apiStatusIndicator">--</span></label>
-            </div>
-            <hr>
-            <div style="padding:12px;width:50%;">
-                <h3>Disclaimer</h3>
-                <p>This page is a parody of the <a href="https://gh.akshatmittal.com/youtube-realtime/">original Akshatmittal live subscriber counter</a>. All credit goes to <a href="https://akshatmittal.com/">Akshatmittal</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
-            </div>
-    </div>
     </center>
     </div>
     </div>
     <script src="../odometer.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.6/odometer.min.js"></script>
-    <script src="./index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+    <script src="../commonUtils.js?v=7.8"></script>
+    <script src="../commonCounter.js?v=7.8"></script>
+    <script src="../highstock.js"></script>
+    <script src="./akshatmittal.js?v=7.8"></script>
 </body>
 
 </html>
