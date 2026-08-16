@@ -3153,7 +3153,7 @@ document.getElementById("apiSource").addEventListener('change', function () {
         data.apiUpdates = {
             'enabled': false,
             'url': 'https://mixerno.space/api/youtube-channel-counter/user/{{channels}}',
-            'interval': parseInt(document.getElementById('apiUpdateInt').value) || 10000,
+            'interval': parseFloat(document.getElementById('apiUpdateInt').value) * 1000 || 10000,
             'method': 'GET',
             'body': {},
             'headers': {},
@@ -3184,7 +3184,7 @@ document.getElementById("apiSource").addEventListener('change', function () {
         data.apiUpdates = {
             'enabled': false,
             'url': 'https://mixerno.space/api/youtube-channel-counter/user/{{channels}}',
-            'interval': parseInt(document.getElementById('apiUpdateInt').value) || 10000,
+            'interval': parseFloat(document.getElementById('apiUpdateInt').value) * 1000 || 10000,
             'method': 'GET',
             'body': {},
             'headers': {},
