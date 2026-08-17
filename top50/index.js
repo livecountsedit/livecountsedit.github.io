@@ -3,9 +3,11 @@ let currentIndex = 0;
 let auditTimeout;
 let saveInterval;
 let chart;
+let code;
 let charts = {}; // Store chart instances by channel ID
 const BLANK_IMAGE_URL = new URL('../blank.png', document.baseURI).href;
 const COUNTER_THEME = "top50";
+window.COUNTER_THEME = "top50";
 let nextUpdateAudit = false;
 let specificChannels = [];
 let pickingChannels = false;
@@ -17,6 +19,11 @@ let gainTable = {};
 let glowingCards = [];
 let fires = new Map();
 let appendedMDMStyles = false;
+
+// override function in importData
+function fillMenus() {
+    return;
+}
 
 let uuid = uuidGen()
 let example_data = {
@@ -163,7 +170,31 @@ let example_data = {
     'animationType': 'default',
     'reverseAnimation': false,
     'saveType': COUNTER_THEME,
-    'index': 1
+    'index': 1,
+    partialExports: {
+        state: true,
+        counters: true,
+        names: true,
+        counts: true,
+        avatars: true,
+        backgrounds: true,
+        gains: true,
+        charts: true,
+        audits: true,
+        designSettings: true,
+        styles: true,
+        customCSS: true,
+        technicalSettings: true,
+        fireSettings: true,
+        differenceSettings: true,
+        apiUpdates: true,
+        streamSettings: true,
+        headerSettings: true,
+        scripts: true
+    },
+    saveVersion: SAVE_VERSION,
+    versionCreated: VERSION,
+    versionLastOpened: VERSION
 };
 let updateInterval;
 let apiInterval;
@@ -199,6 +230,8 @@ async function initLoad(redo, previousTheme) {
     if (!redo) {
         if (storedData) {
             data = mergeWithExampleData(storedData, example_data);
+            data.data = data.data.map(x => new Channel(x));
+            data.saveType = COUNTER_THEME;
         } else {
             data = structuredClone(example_data);
         }
@@ -454,6 +487,26 @@ async function initLoad(redo, previousTheme) {
         afterDrawingMenu();
         loadScripts();
         initScripts();
+        code = data.uuid
+        document.getElementById('connect').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
+        document.getElementById('connect2').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
+        document.getElementById('connect3').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
+        document.getElementById('connect4').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/user)';
+        document.getElementById('connect5').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/gains)';
+        document.getElementById('connect6').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/rank)';
+        let connected = false;
+        if (window.location.href.includes('?code=')) {
+            code = window.location.href.split('?code=')[1];
+            connected = true;
+        }
+
+        let update2Hold;
+        if (connected) {
+            update2()
+            update2Hold = setInterval(update2, 2500);
+            document.getElementById('isconnected').innerText = "Yes";
+            document.getElementById('toConnect').innerText = "Disconnect";
+        }
     }
 };
 
@@ -1440,26 +1493,25 @@ function load() {
     var data3 = {};
     if (document.getElementById('loadData1').files[0]) {
         document.getElementById('loadData1').files[0].text().then(async function (data2) {
+            clearInterval(updateInterval);
+            clearInterval(auditTimeout);
             data3 = JSON.parse(data2);
-            if (data3.data) {
-                clearInterval(updateInterval);
-                clearInterval(auditTimeout);
-                data = JSON.parse(data2);
+            try {
+                await importData(data3);
                 if (!data.uuid) {
                     data.uuid = uuidGen();
                 }
                 if (data.index !== 1) {
                     data.index = 1;
                 }
-                try {
-                    await saveDataInBrowser(COUNTER_THEME, data);
-                    //localStorage.setItem("data", JSON.stringify(data));
-                } catch (error) {
-                    console.error(error);
-                }
-                document.getElementById('main').innerHTML = "";
-                window.location.reload();
+                //console.log(data);
+                await saveDataInBrowser(COUNTER_THEME, data);
+                //localStorage.setItem("data", JSON.stringify(data));
+            } catch (error) {
+                console.error(error);
             }
+            document.getElementById('main').innerHTML = "";
+            window.location.reload();
         });
     } else {
         alert('No save file found!')
@@ -2270,6 +2322,12 @@ function fix() {
     document.getElementById('fastestIcon').value = data.fastestIcon || '🔥';
     document.getElementById('slowestIcon').value = data.slowestIcon || '⌛️';
     document.getElementById('debugMode').checked = !!data.debugMode;
+
+    document.querySelectorAll(".partial-export-option").forEach(x => {
+        const part = x.getAttribute("partial-export");
+        x.checked = data.partialExports[part];
+    })
+
     if (data.updateInterval) {
         document.getElementById('updateint').value = (data.updateInterval / 1000).toString()
     }
@@ -2337,12 +2395,6 @@ function convert3letterhexto6letters(hex) {
     }
     return hex;
 }
-let code = data.uuid
-let connected = false;
-if (window.location.href.includes('?code=')) {
-    code = window.location.href.split('?code=')[1];
-    connected = true;
-}
 
 async function connect() {
     if (window.location.href.includes('?code=')) {
@@ -2353,13 +2405,7 @@ async function connect() {
         window.location.href = window.location.href + "?code=" + code;
     }
 }
-let update2Hold;
-if (connected) {
-    update2()
-    update2Hold = setInterval(update2, 2500);
-    document.getElementById('isconnected').innerText = "Yes";
-    document.getElementById('toConnect').innerText = "Disconnect";
-}
+
 
 function update2() {
     fetch(apiurl + code + '')
@@ -2608,16 +2654,16 @@ function custom() {
     }
 }
 
-document.getElementById('connect').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';
-document.getElementById('connect2').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=10,20&returnText=$(user) uploaded $(query)!)';
-document.getElementById('connect3').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?value=edit&returnText=Edited $(user)!)';
-document.getElementById('connect4').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/user)';
-document.getElementById('connect5').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/gains)';
-document.getElementById('connect6').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/rank)';
-
 document.getElementById('reverseAnimation').addEventListener('click', function () {
     data.reverseAnimation = this.checked;
     updateOdo();
+})
+
+document.querySelectorAll(".partial-export-option").forEach(x => {
+    const part = x.getAttribute("partial-export");
+    x.addEventListener('click', function () {
+        data.partialExports[part] = x.checked;
+    })
 })
 
 function updateOdo() {

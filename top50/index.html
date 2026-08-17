@@ -3,10 +3,10 @@
 
 <head>
     <title>Livecountsedit - Fake Top 50</title>
-    <link href="../odometer/odometer.css?v=7.8" rel="stylesheet">
+    <link href="../odometer/odometer.css?v=7.8.2" rel="stylesheet">
     <!-- <link href="./odometer.css" rel="stylesheet"> -->
-    <link href="../common.css?v=7.8" rel="stylesheet" type="text/css">
-    <link href="./index.css?v=7.8" rel="stylesheet" type="text/css">
+    <link href="../common.css?v=7.8.2" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.8.2" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
@@ -34,7 +34,7 @@
         window.odometerOptions = { auto: false };
     </script>
     <!-- <script src="./odometer.js"></script> -->
-    <script src="../odometer/odometer.js?v=7.8"></script>
+    <script src="../odometer/odometer.js?v=7.8.2"></script>
 
     <script src="https://npmcdn.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
     <script src="https://npmcdn.com/isotope-masonry-horizontal@2/masonry-horizontal.js"></script>
@@ -110,12 +110,6 @@
                     <button onclick="saveInBrowser(COUNTER_THEME, true)">Save (In Browser)</button>
                 </div>
                 <div>
-                    <button onclick="save2(true)">Export Public Save (In File)</button>
-                </div>
-                <div>
-                    <button onclick="save2()">Export Private Save (In File)</button>
-                </div>
-                <div>
                     <button id="streamerModeB" onclick="toggleStreamerMode()">Enable Streamer Mode</button>
                 </div>
                 <div>
@@ -126,20 +120,6 @@
                     be the result of your save file being too large. Learn more about this error in <a
                         href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/Problems-with-Local-Storage">this
                         article</a>.</strong></p>
-            <div class="topSettings topSettings-load">
-                <div>
-                    <label>Load Save (From Top 50 Save)</label>
-                    <input type="file" id="loadData1" autocomplete="off">
-                </div>
-                <div>
-                    <label>Load Save (From YT Studio)</label>
-                    <input type="file" id="loadData2" autocomplete="off">
-                </div>
-                <div>
-                    <label>Load Save (Channels Only)</label>
-                    <input type="file" id="loadData3" autocomplete="off">
-                </div>
-            </div>
             <hr>
         </div>
         <center>
@@ -167,6 +147,8 @@
                 Settings</button>
             <button class="settingType" id="button_scriptSettings"
                 onclick="displaySetting('scriptSettings', this)">Add-ons</button>
+            <button class="settingType" id="button_importExportSettings"
+                onclick="displaySetting('importExportSettings', this)">Import & Export Data</button>
             <button class="settingType" id="button_searchSettings"
                 onclick="displaySetting('searchSettings', this)">Search</button>
             </button>
@@ -741,6 +723,61 @@
             </div>
         </div>
 
+        <div id="importExportSettings" class="settings hidden">
+            <h2>Import & Export Data</h2>
+            <div>
+                <h3>Please select what you would like included in your import/export:</h3>
+                <div style="display: flex; flex-direction: row; flex-wrap:wrap;">
+                    <div class="partial-export-option-container">
+                        <div class="partial-export-option-column">
+                            <label><abbr title="Things like whether the counter is paused, streamer mode, etc.">Current state & preferences</abbr><input type="checkbox" class="partial-export-option" partial-export="state"></label>
+                            <label>Channels<input type="checkbox" class="partial-export-option" partial-export="counters"></label>
+                            <label>Channel names<input type="checkbox" class="partial-export-option" partial-export="names"></label>
+                            <label>Channel counts<input type="checkbox" class="partial-export-option" partial-export="counts"></label>
+                            <label>Channel avatars<input type="checkbox" class="partial-export-option" partial-export="avatars"></label>
+                            <label>Channel backgrounds<input type="checkbox" class="partial-export-option" partial-export="backgrounds"></label>
+                            <label>Channel gains<input type="checkbox" class="partial-export-option" partial-export="gains"></label>
+                            <label>Chart settings<input type="checkbox" class="partial-export-option" partial-export="charts"></label>
+                            <label>Audit settings<input type="checkbox" class="partial-export-option" partial-export="audits"></label>
+                        </div>
+                        <div class="partial-export-option-column">
+                            <label>Design settings<input type="checkbox" class="partial-export-option" partial-export="designSettings"></label>
+                            <label>Style settings<input type="checkbox" class="partial-export-option" partial-export="styles"></label>
+                            <label>Custom CSS<input type="checkbox" class="partial-export-option" partial-export="customCSS"></label>
+                            <label>Technical settings<input type="checkbox" class="partial-export-option" partial-export="technicalSettings"></label>
+                            <label>Fire icons & settings<input type="checkbox" class="partial-export-option" partial-export="fireSettings"></label>
+                            <label>Difference effects & settings<input type="checkbox" class="partial-export-option" partial-export="differenceSettings"></label>
+                            <label>API updates<input type="checkbox" class="partial-export-option" partial-export="apiUpdates"></label>
+                            <label>Stream settings & ID<input type="checkbox" class="partial-export-option" partial-export="streamSettings"></label>
+                            <label>Header/footer items & settings<input type="checkbox" class="partial-export-option" partial-export="headerSettings"></label>
+                            <label>Add-ons<input type="checkbox" class="partial-export-option" partial-export="scripts"></label>
+                        </div>
+                    </div>
+                    <div style="flex: 1 1 400px;">
+                        <p>⚠️ <strong>WARNING:</strong> If you are connected to Nightbot or ever plan on doing so on this save, <strong>DO NOT</strong> share saves including Stream Settings & ID!</p>
+                        <p>Additionally, if you use credientials for your API updates, <strong>DO NOT</strong> share saves including API update settings.</p>
+                        <button onclick="enableAllPartialExports()">Select all</button><button onclick="disableAllPartialExports()">Deselect all</button><button onclick="toggleAllPartialExports()">Toggle all</button>
+                        <hr>
+                        <button onclick="exportData(true);">Export data</button>
+                        <hr>
+                        <div>
+                            <label>Load Save (From Top 50 Save)</label>
+                            <input type="file" id="loadData1" autocomplete="off">
+                        </div>
+                        <div>
+                            <label>Load Save (From YT Studio)</label>
+                            <input type="file" id="loadData2" autocomplete="off">
+                        </div>
+                        <div>
+                            <label>Load Save (Channels Only)</label>
+                            <input type="file" id="loadData3" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
         <div id="searchSettings" class="settings hidden">
             <h2>Search Settings</h2>
             <input type="text" id="settingsSearch" placeholder="e.g. text color">
@@ -749,10 +786,10 @@
     </div>
     <hr><br>
     <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
-    <script src="../commonUtils.js?v=7.8"></script>
-    <script src="./js/utils.js?v=7.8"></script>
-    <script src="./js/scripts.js?v=7.8"></script>
-    <script src="./index.js?v=7.8.1"></script>
+    <script src="../commonUtils.js?v=7.8.2"></script>
+    <script src="./js/utils.js?v=7.8.2"></script>
+    <script src="./js/scripts.js?v=7.8.2"></script>
+    <script src="./index.js?v=7.8.2"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>

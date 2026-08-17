@@ -118,6 +118,7 @@ async function processImport(imported) {
     imported.data[1].name = 'Views';
     imported.data[2].name = 'Videos';
     imported.saveType = COUNTER_THEME;
+    imported.versionLastOpened = VERSION;
     updateAutoSave();
     updateStreamerMode();
     changeUpdateInterval();

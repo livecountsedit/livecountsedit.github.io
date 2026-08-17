@@ -916,3 +916,15 @@ center .settingType {
   gap: 20px;
   flex-wrap: wrap;
 }
+
+.partial-export-option-container {
+    display: grid;
+    grid-template-columns: 300px 300px;
+}
+
+.partial-export-option-column label {
+  display: grid !important;
+  grid-template-columns: 225px 20px;
+  align-items: start;
+  text-align: left;
+}

@@ -133,6 +133,7 @@ async function processImport(imported) {
         imported.data = imported.data.slice(0, 1);
     }
     imported.saveType = COUNTER_THEME;
+    imported.versionLastOpened = VERSION;
     updateAutoSave();
     updateStreamerMode();
     renderChart();
