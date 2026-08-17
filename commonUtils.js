@@ -768,10 +768,6 @@ async function importData(imported) {
     imported.partialExports = partialImports;
     imported = processData(imported);
 
-    if (!imported.data) {
-        imported.data = [];
-    }
-
     imported.saveType = COUNTER_THEME;
     imported.versionLastOpened = example_data.versionLastOpened;
 
@@ -788,6 +784,7 @@ async function importData(imported) {
     } else {
         data = mergeWithExampleData(imported, example_data, true);
     }
+    if (!data.data) data.data = [];
     data.data = data.data.map(x => new Channel(x));
     await processImport(imported);
     fillMenus();
