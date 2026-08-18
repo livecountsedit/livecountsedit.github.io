@@ -4,6 +4,7 @@ let auditTimeout;
 let saveInterval;
 let chart;
 let code;
+let obsMode;
 let charts = {}; // Store chart instances by channel ID
 const BLANK_IMAGE_URL = new URL('../blank.png', document.baseURI).href;
 const COUNTER_THEME = "top50";
@@ -203,9 +204,12 @@ initLoad()
 async function initLoad(redo, previousTheme) {
     let storedData;
 
+    obsMode = localStorage.getItem('obs-' + COUNTER_THEME);
+    localStorage.removeItem('obs-' + COUNTER_THEME);
+
     const oldData = localStorage.getItem('data');
 
-    if (oldData) {
+    if (oldData && !obsMode) {
         try {
             const oldSave = JSON.parse(oldData);
             oldSave.saveType = COUNTER_THEME;
@@ -232,6 +236,7 @@ async function initLoad(redo, previousTheme) {
             data = mergeWithExampleData(storedData, example_data);
             data.data = data.data.map(x => new Channel(x));
             data.saveType = COUNTER_THEME;
+            data.versionLastOpened = VERSION;
         } else {
             data = structuredClone(example_data);
         }
@@ -485,6 +490,7 @@ async function initLoad(redo, previousTheme) {
         loadDifferenceEffects();
         loadTopSettings();
         afterDrawingMenu();
+        if (obsMode) enableOBSMode();
         loadScripts();
         initScripts();
         code = data.uuid
@@ -1726,38 +1732,23 @@ document.getElementById('borderPicker').addEventListener('change', function () {
 
 document.getElementById('animatedCardChanges').addEventListener('change', async function () {
     if (confirm('This will refresh the page')) {
-        if (this.checked) {
-            data.animatedCards.enabled = true;
-        } else {
-            data.animatedCards.enabled = false;
-        }
-        await saveInBrowser(COUNTER_THEME, true);
+        data.animatedCards.enabled = this.checked;
+        await saveInBrowser(COUNTER_THEME, false);
+        if (obsMode) localStorage.setItem('obs-' + COUNTER_THEME, '1');
         location.reload();
     }
 });
 
 document.getElementById('allowNegative').addEventListener('change', function () {
-    if (this.checked) {
-        data.allowNegative = true;
-    } else {
-        data.allowNegative = false;
-    }
+    data.allowNegative = this.checked;
 });
 
 document.getElementById('randomCountUpdateTime').addEventListener('change', function () {
-    if (this.checked) {
-        data.randomCountUpdateTime = true;
-    } else {
-        data.randomCountUpdateTime = false;
-    }
+    data.randomCountUpdateTime = this.checked;
 });
 
 document.getElementById('waterFallCountUpdateTime').addEventListener('change', function () {
-    if (this.checked) {
-        data.waterFallCountUpdateTime = true;
-    } else {
-        data.waterFallCountUpdateTime = false;
-    }
+    data.waterFallCountUpdateTime = this.checked;
 });
 
 function loadMyFont() {
@@ -2558,6 +2549,7 @@ function update2() {
                     .then(async json => {
                         if (json == "done") {
                             await saveInBrowser(COUNTER_THEME, false)
+                            if (obsMode) localStorage.setItem('obs-' + COUNTER_THEME, '1');
                             location.reload();
                         }
                     })
@@ -2760,6 +2752,7 @@ document.getElementById('animatedCardChangesDuration').addEventListener('change'
     if (confirm('This will refresh the page.')) {
         data.animatedCards.duration = document.getElementById('animatedCardChangesDuration').value * 1000;
         await saveInBrowser(COUNTER_THEME, false)
+        if (obsMode) localStorage.setItem('obs-' + COUNTER_THEME, '1');
         location.reload();
     }
 })

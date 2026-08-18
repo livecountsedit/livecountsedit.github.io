@@ -1,7 +1,7 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal'];
 const DB_VERSION = 3;
-const VERSION = '7.8.2';
+const VERSION = '7.8.3';
 const SAVE_VERSION = 8;
 
 function escapeHTML(text) {
@@ -252,6 +252,25 @@ function afterDrawingMenu() {
             data.apiUpdates.response.videos.path = 'counts[5].count';
         }
         fillMenus();
+    })
+
+    document.getElementById('obsImportFile')?.addEventListener('change', async () => {
+        const importedFile = document.getElementById('obsImportFile').files[0];
+        if (importedFile) {
+            try {
+                clearInterval(saveInterval);
+                const importedText = await importedFile.text();
+                const imported = JSON.parse(importedText);
+                imported.streamerMode = true;
+                imported.index = 1;
+                localStorage.setItem('obs-' + COUNTER_THEME, '1');
+                await saveDataInBrowser(COUNTER_THEME, imported);
+                window.location.reload();
+            } catch (err) {
+                showDialog('There was an error in importing your save.');
+                console.error(err);
+            }
+        }
     })
 
     afterDrawingMenu2();
@@ -793,4 +812,83 @@ async function importData(imported) {
 // needs to be implemented by individual counters
 async function processImport(imported) {
     return imported;
+}
+
+function promptOBSMode() {
+    const dialog = document.createElement('dialog');
+    const div = document.createElement('div');
+    div.innerHTML = 'Are you sure you want to enable OBS Browser Mode?<br>You cannot disable this without refreshing.<br>Be sure to read our <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/OBS-Browser-Tutorial">OBS Browser tutorial</a> first to make sure you know what you\'re doing!'
+    div.style.maxWidth = '500px';
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.style.textAlign = 'center';
+    const yesButton = document.createElement('button')
+    yesButton.innerText = 'Yes';
+    yesButton.style.backgroundColor = 'lightgreen';
+    yesButton.style.marginRight = '150px';
+    yesButton.onclick = () => {
+        dialog.close();
+        dialog.remove();
+        delete dialog;
+        enableOBSMode();
+    }
+    const noButton = document.createElement('button');
+    noButton.innerText = 'No';
+    noButton.style.backgroundColor = 'pink';
+    noButton.onclick = () => {
+        dialog.close();
+        dialog.remove();
+        delete dialog;
+    }
+    buttonsDiv.append(yesButton, noButton);
+    dialog.append(div, buttonsDiv);
+    document.body.appendChild(dialog);
+    dialog.showModal();
+}
+
+function enableOBSMode() {
+
+    document.getElementById('obsModeB').disabled = true;
+    document.getElementById('obsModeB').innerText = 'OBS Browser Mode Enabled';
+    // disable OBS browser-incompatible prompts
+    window.alert = function () {};
+    window.confirm = function () { return true; };
+    window.prompt = function () { return ''; };
+
+    document.querySelectorAll('.no-obs-mode').forEach(x => x.style.display = 'none');
+    document.querySelectorAll('.obs-mode').forEach(x => x.classList.remove('obs-mode'));
+}
+
+function obsImport() {
+    document.getElementById('obsImportFile').click();
+}
+
+function obsExport() {
+    try {
+        navigator.clipboard.writeText(JSON.stringify(data));
+        showDialog('Data copied to clipboard.<br>Be sure to read our <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/OBS-Browser-Tutorial">OBS Browser tutorial</a> so you know how to get the data out of the browser source!')
+    } catch (err) {
+        showDialog('An error occurred while trying to export data :(')
+        console.error(err);
+    }
+
+}
+
+function showDialog(html) {
+    const dialog = document.createElement('dialog');
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    const buttonDiv = document.createElement('div');
+    buttonDiv.style.textAlign = 'right';
+    const button = document.createElement('button');
+    button.innerText = 'OK';
+    button.style.marginRight = '10px';
+    button.onclick = () => {
+        dialog.close();
+        dialog.remove();
+        delete dialog;
+    }
+    buttonDiv.append(button);
+    dialog.append(div, buttonDiv);
+    document.body.append(dialog);
+    dialog.showModal();
 }

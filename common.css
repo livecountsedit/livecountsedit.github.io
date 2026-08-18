@@ -106,3 +106,11 @@ input[type=checkbox] {
 .streamer-mode:active {
     background-color: #ddd;
 }
+
+.obs-mode {
+    display: none;
+}
+
+#obsImportFile {
+    display: none;
+}

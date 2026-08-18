@@ -3,10 +3,10 @@
 
 <head>
     <title>Livecountsedit - Fake Top 50</title>
-    <link href="../odometer/odometer.css?v=7.8.2" rel="stylesheet">
+    <link href="../odometer/odometer.css?v=7.8.3" rel="stylesheet">
     <!-- <link href="./odometer.css" rel="stylesheet"> -->
-    <link href="../common.css?v=7.8.2" rel="stylesheet" type="text/css">
-    <link href="./index.css?v=7.8.2" rel="stylesheet" type="text/css">
+    <link href="../common.css?v=7.8.3" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.8.3" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
@@ -34,7 +34,7 @@
         window.odometerOptions = { auto: false };
     </script>
     <!-- <script src="./odometer.js"></script> -->
-    <script src="../odometer/odometer.js?v=7.8.2"></script>
+    <script src="../odometer/odometer.js?v=7.8.3"></script>
 
     <script src="https://npmcdn.com/isotope-layout@3/dist/isotope.pkgd.js"></script>
     <script src="https://npmcdn.com/isotope-masonry-horizontal@2/masonry-horizontal.js"></script>
@@ -111,6 +111,9 @@
                 </div>
                 <div>
                     <button id="streamerModeB" onclick="toggleStreamerMode()">Enable Streamer Mode</button>
+                </div>
+                <div>
+                    <button id="obsModeB" onclick="promptOBSMode()">Enable OBS Browser Mode</button>
                 </div>
                 <div>
                     <input type="checkbox" id="autosave" autocomplete="off"><label>Autosave (15s)</label>
@@ -527,7 +530,7 @@
                     <label>Loop through (data = root JSON object):<br>
                         <input class="m-width" id="apiLoop" placeholder="data.items" autocomplete="off"></label>
                     <label></label>
-                    Check the boxes to enable API updates for the corresponding data.
+                    <p>Check the boxes to enable API updates for the corresponding data.</p>
                     <label>Path to name: <input class="m-width" id="pathName" placeholder="snippet.title"
                             autocomplete="off"> <input type="checkbox" id="updateName"></label>
                     <label>Path to image URL: <input class="m-width" id="pathImage"
@@ -712,8 +715,8 @@
 
         <div id="scriptSettings" class="settings hidden">
             <h2>Add-ons</h2>
-            <p>⚠️ <strong>WARNING: </strong>Only use this feature for debugging purposes, such as when a Livecountsedit Discord staff member tells you to run something. Never paste in code from an untrusted source!</p>
-            <button id="runSnippet">Run Code Snippet</button>
+            <p class="no-obs-mode">⚠️ <strong>WARNING: </strong>Only use this feature for debugging purposes, such as when a Livecountsedit Discord staff member tells you to run something. Never paste in code from an untrusted source!</p>
+            <button id="runSnippet" class="no-obs-mode">Run Code Snippet</button>
             <div>
                 <p id="loadedScripts"></p>
                 <hr>
@@ -758,19 +761,23 @@
                         <p>Additionally, if you use credientials for your API updates, <strong>DO NOT</strong> share saves including API update settings.</p>
                         <button onclick="enableAllPartialExports()">Select all</button><button onclick="disableAllPartialExports()">Deselect all</button><button onclick="toggleAllPartialExports()">Toggle all</button>
                         <hr>
-                        <button onclick="exportData(true);">Export data</button>
+                        <p class="obs-mode">Note: All OBS browser source imports/exports are full imports/exports. Partial saves do not apply.</p>
+                        <button class="no-obs-mode" onclick="exportData(true);">Export data</button>
+                        <button class="obs-mode" onclick="obsImport();">Import data (OBS browser source)</button>
+                        <input type="file" id="obsImportFile" autocomplete="off" accept=".json,.txt">
+                        <button class="obs-mode" onclick="obsExport();">Export data (OBS browser source)</button>
                         <hr>
-                        <div>
+                        <div class="no-obs-mode">
                             <label>Load Save (From Top 50 Save)</label>
-                            <input type="file" id="loadData1" autocomplete="off">
+                            <input type="file" id="loadData1" autocomplete="off" accept=".json,.txt">
                         </div>
-                        <div>
+                        <div class="no-obs-mode">
                             <label>Load Save (From YT Studio)</label>
-                            <input type="file" id="loadData2" autocomplete="off">
+                            <input type="file" id="loadData2" autocomplete="off" accept=".json,.txt">
                         </div>
-                        <div>
+                        <div class="no-obs-mode">
                             <label>Load Save (Channels Only)</label>
-                            <input type="file" id="loadData3" autocomplete="off">
+                            <input type="file" id="loadData3" autocomplete="off" accept=".json,.txt">
                         </div>
                     </div>
                 </div>
@@ -786,10 +793,10 @@
     </div>
     <hr><br>
     <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
-    <script src="../commonUtils.js?v=7.8.2.1"></script>
-    <script src="./js/utils.js?v=7.8.2"></script>
-    <script src="./js/scripts.js?v=7.8.2"></script>
-    <script src="./index.js?v=7.8.2"></script>
+    <script src="../commonUtils.js?v=7.8.3"></script>
+    <script src="./js/utils.js?v=7.8.3"></script>
+    <script src="./js/scripts.js?v=7.8.3"></script>
+    <script src="./index.js?v=7.8.3"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>
