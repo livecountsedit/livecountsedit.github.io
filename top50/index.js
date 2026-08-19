@@ -4,7 +4,6 @@ let auditTimeout;
 let saveInterval;
 let chart;
 let code;
-let obsMode;
 let charts = {}; // Store chart instances by channel ID
 const BLANK_IMAGE_URL = new URL('../blank.png', document.baseURI).href;
 const COUNTER_THEME = "top50";
@@ -203,9 +202,6 @@ let apiInterval;
 initLoad()
 async function initLoad(redo, previousTheme) {
     let storedData;
-
-    obsMode = localStorage.getItem('obs-' + COUNTER_THEME);
-    localStorage.removeItem('obs-' + COUNTER_THEME);
 
     const oldData = localStorage.getItem('data');
 
@@ -490,7 +486,6 @@ async function initLoad(redo, previousTheme) {
         loadDifferenceEffects();
         loadTopSettings();
         afterDrawingMenu();
-        if (obsMode) enableOBSMode();
         loadScripts();
         initScripts();
         code = data.uuid

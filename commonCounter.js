@@ -460,11 +460,11 @@ const MENU = {
                 },
                 {
                     type: 'html',
-                    value: '<br><button onclick="exportData()">Export Data</button>'
+                    value: '<br><p class="obs-mode">Note: All OBS browser source imports/exports are full imports/exports. Partial saves do not apply.</p><button class="no-obs-mode" onclick="exportData()">Export Data</button><button class="obs-mode" onclick="obsExport()">Export Data (OBS Browser Source)</button>'
                 },
                 {
                     type: 'html',
-                    value: '<button onclick="document.getElementById(\'fileImport\').click()">Import Data</button><input type="file" id="fileImport" class="hidden-file-input" accept=".txt, .json"><br>'
+                    value: '<button class="no-obs-mode" onclick="document.getElementById(\'fileImport\').click()">Import Data</button><input type="file" id="fileImport" class="hidden-file-input" accept=".json, .txt"><button class="obs-mode" onclick="obsImport()">Import Data (OBS Browser Source)</button><input type="file" id="obsImportFile" class="hidden-file-input" accept=".json, .txt"><br>'
                 },
                 {
                     title: 'Autosave (15s)',
@@ -493,6 +493,7 @@ const MENU = {
         ['resetB', 'Reset', 'reset()'],
         ['saveInBrowser', 'Save (in browser)', 'saveInBrowser(COUNTER_THEME, true)'],
         ['streamerModeB', 'Enable Streamer Mode', 'toggleStreamerMode()'],
+        ['obsModeB', 'Enable OBS Browser Mode', 'promptOBSMode()'],
         ['refreshCountB', 'Refresh count', 'refreshCount()']
     ]
 }

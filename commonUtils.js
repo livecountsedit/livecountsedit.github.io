@@ -1,8 +1,9 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal'];
 const DB_VERSION = 3;
-const VERSION = '7.8.3';
+const VERSION = '7.8.4';
 const SAVE_VERSION = 8;
+let obsMode;
 
 function escapeHTML(text) {
     if (text != null) {
@@ -258,7 +259,11 @@ function afterDrawingMenu() {
         const importedFile = document.getElementById('obsImportFile').files[0];
         if (importedFile) {
             try {
-                clearInterval(saveInterval);
+                try {
+                    clearInterval(saveInterval);
+                } catch (err) {
+                    clearInterval(updaters.get('autosave'));
+                }
                 const importedText = await importedFile.text();
                 const imported = JSON.parse(importedText);
                 imported.streamerMode = true;
@@ -272,6 +277,8 @@ function afterDrawingMenu() {
             }
         }
     })
+
+    loadOBSMode();
 
     afterDrawingMenu2();
 }
@@ -792,13 +799,11 @@ async function importData(imported) {
 
     if (Object.keys(imported.partialExports).some(x => !imported.partialExports[x])) {
         imported.partialExports = data.partialExports;
-        const action = prompt('Either this save is a partial export/from an old version, or you have decided to only partially import this save.\nType 1 to use DEFAULT settings for unimported settings.\nType 2 to KEEP your current settings for unimported settings.\nType anything else or leave blank to cancel.');
-        if (action == '1') {
+        const action = confirm("You are doing a partial import, so not all settings are included. Do you want to merge the partial import with what you already have? If not, press Cancel and everything that isn't imported will be reset!");
+        if (!action) {
             data = mergeWithExampleData(imported, example_data, true);
-        } else if (action == '2') {
-            data = mergeWithExampleData(imported, data, true);
         } else {
-            return;
+            data = mergeWithExampleData(imported, data, true);
         }
     } else {
         data = mergeWithExampleData(imported, example_data, true);
@@ -846,7 +851,6 @@ function promptOBSMode() {
 }
 
 function enableOBSMode() {
-
     document.getElementById('obsModeB').disabled = true;
     document.getElementById('obsModeB').innerText = 'OBS Browser Mode Enabled';
     // disable OBS browser-incompatible prompts
@@ -891,4 +895,10 @@ function showDialog(html) {
     dialog.append(div, buttonDiv);
     document.body.append(dialog);
     dialog.showModal();
+}
+
+function loadOBSMode() {
+    const obsMode = localStorage.getItem('obs-' + COUNTER_THEME);
+    localStorage.removeItem('obs-' + COUNTER_THEME);
+    if (obsMode) enableOBSMode();
 }
