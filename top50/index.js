@@ -3340,6 +3340,7 @@ async function saveFireIcon() {
     });
 
     document.getElementById('fireIconCreate').remove();
+    document.getElementById('fireIconCreateButton').innerText = 'Add Fire Icon';
     loadFireIcons();
 };
 
@@ -3558,6 +3559,7 @@ async function saveDifferenceEffect() {
         showWhen: document.getElementById('diffShowWhen').value
     });
     document.getElementById('differenceEffectCreate').remove();
+    document.getElementById('addDifferenceEffectButton').innerText = 'Add Difference Effect';
     loadDifferenceEffects();
 }
 
