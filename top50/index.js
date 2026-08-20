@@ -486,7 +486,7 @@ async function initLoad(redo, previousTheme) {
         loadDifferenceEffects();
         loadTopSettings();
         afterDrawingMenu();
-        loadScripts();
+        await loadScripts();
         initScripts();
         code = data.uuid
         document.getElementById('connect').innerText = '$(urlfetch ' + apiurl + '' + code + '/$(userid)/$(query)?returnText=Added $(user)!)';

@@ -1,5 +1,5 @@
-function loadScripts() {
-    fetch('https://scripts.lcedit.com/all')
+async function loadScripts() {
+    fetch('https://scripts.lcedit.com/all?v=' + uuidGen())
         .then(res => res.text())
         .then(resd => {
             const entries = resd
@@ -62,12 +62,12 @@ function loadScripts() {
                                 }
                             }
 
-                            saveData(false); // or reload the affected item
+                            await saveInBrowser(false); // or reload the affected item
                             button.innerHTML = 'Uninstall'
                         }
                     } else {
                         data.scripts = data.scripts.filter(id => id !== object.id);
-                        saveData(false);
+                        await saveInBrowser(false);
                         location.reload();
                     }
                 });
