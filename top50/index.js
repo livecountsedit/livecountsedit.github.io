@@ -2387,7 +2387,7 @@ async function connect() {
         window.location.href = window.location.href.split('?code=')[0];
     } else {
         if (!data.streamerMode) toggleStreamerMode();
-        await saveInBrowser(false)
+        await saveInBrowser(COUNTER_THEME, false)
         window.location.href = window.location.href + "?code=" + code;
     }
 }

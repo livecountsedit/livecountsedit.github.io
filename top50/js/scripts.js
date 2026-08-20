@@ -62,12 +62,12 @@ async function loadScripts() {
                                 }
                             }
 
-                            await saveInBrowser(false); // or reload the affected item
+                            await saveInBrowser(COUNTER_THEME, false); // or reload the affected item
                             button.innerHTML = 'Uninstall'
                         }
                     } else {
                         data.scripts = data.scripts.filter(id => id !== object.id);
-                        await saveInBrowser(false);
+                        await saveInBrowser(COUNTER_THEME, false);
                         location.reload();
                     }
                 });
