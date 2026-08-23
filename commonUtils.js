@@ -1,7 +1,7 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio'];
 const DB_VERSION = 7;
-const VERSION = '7.9';
+const VERSION = '7.9.1';
 const SAVE_VERSION = 9;
 let obsMode;
 
@@ -32,8 +32,7 @@ function abbs(n) {
     let l = Math.floor(Math.log10(n) / 3);
     let d = 10 ** Math.floor(Math.log10(n) - 2);
     let r = Math.floor(n / d) * d;
-    let result = formatNumber((s * r) / (1000 ** l)) + (l > 5 ? "?" : " KMBTQ"[l]);
-    if (result.endsWith(" ")) return result.slice(0, -1);
+    let result = formatNumber((s * r) / (1000 ** l)) + (l > 7 ? "?" : ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx'][l]);
     return result;
 }
 
@@ -690,6 +689,7 @@ class Channel {
 
     getDisplayedCount() {
         if (!data.allowNegative && this.count < 0) this.count = 0;
+        this.count = clamp(this.count, -Channel.MAX_MAGNITUDE, Channel.MAX_MAGNITUDE);
         if (data.abbreviate) return abb(this.count);
         else return isFinite(this.count) ? Math.floor(this.count) : 0;
     }
@@ -928,6 +928,9 @@ class Channel {
     static doOfflineGains() {
         data.data.forEach(x => x.offlineGain());
     }
+
+    // Prevents counter from crashing with too many digits
+    static MAX_MAGNITUDE = 999999999999999900000;
 
     // Calculates the next abbreviation milestone
     // e.g. for 12,345 it is 12,400, for 100,000 it is 101,000

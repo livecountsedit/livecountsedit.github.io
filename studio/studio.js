@@ -6,8 +6,7 @@ function studioAbbs(n) {
     if (n < 1) return '0';
     if (n < 1000) return s * Math.floor(n);
     let l = Math.floor(Math.log10(n) / 3);
-    let result = formatNumber(s * n / (1000 ** l), { minimumFractionDigits: 1, maximumFractionDigits: 1, roundingMode: 'trunc' }) + (l > 5 ? "?" : " KMBTQ"[l]);
-    if (result.endsWith(" ")) return result.slice(0, -1);
+    let result = formatNumber(s * n / (1000 ** l), { minimumFractionDigits: 1, maximumFractionDigits: 1, roundingMode: 'trunc' }) + (l > 7 ? "?" : ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx'][l]);
     return result;
 }
 

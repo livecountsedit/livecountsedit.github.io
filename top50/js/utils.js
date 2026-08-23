@@ -188,6 +188,7 @@ function clearGainData() {
 function getDisplayedCount(n) {
     if (!isFinite(n)) n = 0;
     if (!data.allowNegative && n < 0) n = 0;
+    n = clamp(n, -Channel.MAX_MAGNITUDE, Channel.MAX_MAGNITUDE);
     if (data.abbreviate) return abb(n);
     else return Math.floor(n);
 }
