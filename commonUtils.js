@@ -1,8 +1,8 @@
 const AUTOSAVE_INTERVAL = 15000;
-const DB_TABLES = ['socialblade', 'top50', 'akshatmittal'];
-const DB_VERSION = 3;
-const VERSION = '7.8.4';
-const SAVE_VERSION = 8;
+const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio'];
+const DB_VERSION = 7;
+const VERSION = '7.9';
+const SAVE_VERSION = 9;
 let obsMode;
 
 function escapeHTML(text) {
@@ -57,7 +57,7 @@ function random(min, max) {
 
 function mergeWithExampleData(imported, example, deleteExtras = false) {
     if (typeof imported !== 'object' || imported === null) return structuredClone(example);
-    if (deleteExtras) {
+    if (deleteExtras && Object.keys(example).length) {
         for (const key in imported) {
             if (!example.hasOwnProperty(key)) {
                 delete imported[key];
@@ -308,6 +308,10 @@ async function initDB() {
                     })
                 }
             }
+        },
+
+        blocked(current, blocked) {
+            alert('The database has been updated. Please close all other Livecountsedit tabs to continue.')
         }
     })
     return db;
@@ -319,6 +323,7 @@ async function retrieveDataFromBrowser(table, index) {
         const result = await db.get(table, index);
         return result;
     } catch (err) {
+        console.error(err);
         return null;
     }
 }
@@ -395,6 +400,16 @@ function randomGaussian(mean, stdev) {
     return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b) * stdev + mean;
 }
 
+function randomFromCustomDistribution(dist) {
+    if (typeof dist != 'object' || !dist.entries || !dist.entries.length || !dist.totalWeight || dist.totalWeight < 0) return 0;
+    const a = Math.random() * dist.totalWeight;
+    let i = 0;
+    while (a > dist.entries[i]?.cutoff && dist.entries[i]) {
+        i++;
+    }
+    return random(dist.entries[i].min, dist.entries[i].max);
+}
+
 function enableAllPartialExports() {
     document.querySelectorAll('.partial-export-option').forEach(x => { if (!x.checked) x.click() })
 }
@@ -455,11 +470,35 @@ function processData(dat) {
                     delete dat.data[i].std_gain_value;
                     delete dat.data[i].gain_type;
                     delete dat.data[i].gain_per;
+                    delete dat.data[i].gain_per_number;
+                    if (dat.data[i].custom_counter_data) {
+                        delete dat.data[i].custom_counter_data.custom_rate;
+                        delete dat.data[i].custom_counter_data.custom_distribution;
+                    }
                 }
             }
             if (!dat.partialExports.backgrounds) {
                 for (i = 0; i < dat.data.length; i++) {
                     delete dat.data[i].bg;
+                }
+            }
+
+            if (!dat.partialExports.technicalSettings) {
+                for (i = 0; i < dat.data.length; i++) {
+                    if (dat.data[i].custom_counter_data) {
+                        delete dat.data[i].custom_counter_data.max;
+                        delete dat.data[i].custom_counter_data.min;
+                        delete dat.data[i].custom_counter_data.updateProbability;
+                        if (!Object.keys(dat.data[i].custom_counter_data).length) {
+                            delete dat.data[i].custom_counter_data;
+                        }
+                    }
+                }
+            }
+
+            if (!dat.partialExports.apiUpdates) {
+                for (i = 0; i < dat.data.length; i++) {
+                    delete dat.data[i].last_api_count;
                 }
             }
 
@@ -471,16 +510,24 @@ function processData(dat) {
             if (dat.cardStyles) {
                 delete dat.cardStyles.showChart;
                 delete dat.cardStyles.chartLineColor;
+                delete dat.cardStyles.chartGridColor;
+                delete dat.cardStyles.chartCreditsEnabled;
+                delete dat.cardStyles.showChartGrid;
+                delete dat.cardStyles.chartBaseColor;
             }
             delete dat.liveGraph;
             delete dat.maxChartValues;
             delete dat.saveChartData;
+            delete dat.graphDates;
+            delete dat.graphValues;
+            delete dat.useStaticGraph;
         }
         if (!dat.partialExports.designSettings) {
             delete dat.showImages;
             delete dat.showNames;
             delete dat.showCounts;
             delete dat.showRankings;
+            delete dat.showBanners;
             delete dat.rankingsWidth;
             if (dat.cardStyles) {
                 delete dat.cardStyles.cardWidth;
@@ -511,6 +558,7 @@ function processData(dat) {
             delete dat.animationType;
             delete dat.reverseAnimation;
             delete dat.showBlankSlots;
+            delete dat.footerText;
         }
         if (!dat.partialExports.styles) {
             delete dat.boxBGLength;
@@ -529,6 +577,8 @@ function processData(dat) {
             delete dat.mainFont;
             delete dat.counterFontWeight;
             delete dat.counterAlignment;
+            delete dat.nameColor;
+            delete dat.footerColor;
         }
         if (!dat.partialExports.technicalSettings) {
             delete dat.abbreviate;
@@ -558,6 +608,9 @@ function processData(dat) {
         }
         if (!dat.partialExports.headerSettings) {
             delete dat.headerFont;
+            if (!dat.partialExports.styles) {
+                delete dat.importFromGoogleFonts;
+            }
             delete dat.headerSettings;
         }
         if (!dat.partialExports.scripts) {
@@ -572,6 +625,18 @@ function processData(dat) {
 
         if (!dat.partialExports.akshatmittalSettings) {
             delete dat.akshatmittalSettings;
+        }
+
+        if (!dat.partialExports.lceditThemeSettings) {
+            delete dat.lceditThemeSettings;
+        }
+
+        if (!dat.partialExports.lcnetSettings) {
+            delete dat.lcnetSettings;
+        }
+
+        if (!dat.partialExports.ytStudioSettings) {
+            delete dat.ytStudioSettings;
         }
     }
     return dat;
@@ -610,11 +675,17 @@ class Channel {
         this.std_gain = parseFloat(options.std_gain);
         this.mean_gain_value = parseFloat(options.mean_gain_value) || 0;
         this.std_gain_value = parseFloat(options.std_gain_value) || 0;
-        this.gain_type = isFinite(this.mean_gain) && isFinite(this.std_gain) ? 'gaussian' : 'uniform';
+        this.gain_type = options.gain_type || (isFinite(this.mean_gain) && isFinite(this.std_gain) ? 'gaussian' : 'uniform');
         this.bg = options.bg || '';
         this.banner = options.banner || '/default_banner.png';
         this.gain_per = options.gain_per || 'updateInterval';
         this.last_api_count = parseFloat(options.last_api_count);
+        this.gain_per_number = parseFloat(options.gain_per_number) || 1;
+        if (options.custom_counter_data && typeof options.custom_counter_data === 'object' && !Array.isArray(options.custom_counter_data)) {
+            this.custom_counter_data = structuredClone(options.custom_counter_data);
+        } else {
+            this.custom_counter_data = Object.create(null);
+        }
     }
 
     getDisplayedCount() {
@@ -624,17 +695,30 @@ class Channel {
     }
 
     getGainMultiplier() {
+        let gainPerNumber = this.gain_per_number;
+        if (!gainPerNumber) gainPerNumber = 1;
+        gainPerNumber = clamp(gainPerNumber, 0.001, Number.MAX_VALUE);
+        this.gain_per_number = gainPerNumber;
+
+        let updateProbability = this.custom_counter_data.updateProbability;
+        if (!isFinite(updateProbability)) {
+            this.custom_counter_data.updateProbability = 100;
+            updateProbability = 100;
+        }
+        updateProbability = clamp(updateProbability, 0, 100);
+        updateProbability /= 100;
+
         switch (this.gain_per) {
             case 'second':
-                return data.updateInterval / 1_000;
+                return data.updateInterval / 1_000 / gainPerNumber / updateProbability;
             case 'minute':
-                return data.updateInterval / 60_000;
+                return data.updateInterval / 60_000 / gainPerNumber / updateProbability;
             case 'hour':
-                return data.updateInterval / 3_600_000;
+                return data.updateInterval / 3_600_000 / gainPerNumber / updateProbability;
             case 'day':
-                return data.updateInterval / 86_400_000;
+                return data.updateInterval / 86_400_000 / gainPerNumber / updateProbability;
             default:
-                return 1;
+                return 1 / gainPerNumber / updateProbability;
         }
     }
 
@@ -642,6 +726,12 @@ class Channel {
 
         // Ignore gains if using a real sub count
         if (data.apiUpdates.enabled && data.apiUpdates.forceUpdates) return;
+        if (!isFinite(this.custom_counter_data.updateProbability)) {
+            this.custom_counter_data.updateProbability = 100;
+        }
+
+        this.custom_counter_data.updateProbability = clamp(this.custom_counter_data.updateProbability, 0, 100);
+        if (Math.random() >= (this.custom_counter_data.updateProbability / 100)) return;
 
         let multiplier = this.getGainMultiplier();
         let gain = 0;
@@ -649,6 +739,8 @@ class Channel {
             gain = randomGaussian(this.mean_gain * multiplier, this.std_gain * Math.sqrt(multiplier));
             // With normally distributed gains, this results in the variability being accurate
             // This is possible because normal distribution + normal distribution = normal distribution
+        } else if (this.gain_type === 'custom') {
+            gain = randomFromCustomDistribution(this.custom_counter_data.custom_distribution) * multiplier;
         } else {
             gain = random(this.min_gain, this.max_gain) * multiplier;
             // With uniform (min/max) gains the long term result is a normal distribution.
@@ -667,25 +759,84 @@ class Channel {
                 this.adjustForAPI(this.last_api_count);
             }
         }
+
+        if (this.custom_counter_data.min != undefined && isFinite(this.custom_counter_data.min) && this.count < this.custom_counter_data.min) {
+            this.count = this.custom_counter_data.min;
+        }
+
+        if (this.custom_counter_data.max != undefined && isFinite(this.custom_counter_data.max) && this.count > this.custom_counter_data.max) {
+            this.count = this.custom_counter_data.max;
+        }
+    }
+
+    calculateMeanOfCustomDistribution() {
+        try {
+            // The formula for calculating the average for a custom distribution is:
+            // sum of (min + max) / 2 * probability for each entry
+            const totalWeight = this.custom_counter_data.custom_distribution.totalWeight;
+            let avg = 0;
+            for (const row of this.custom_counter_data.custom_distribution.entries) {
+                avg += (row.min + row.max) * row.weight;
+            }
+            avg /= (totalWeight + totalWeight);
+            if (!isFinite(avg)) avg = 0;
+            return avg;
+        } catch (err) {
+            return 0;
+        }
     }
 
     // Get the mean gain per update interval
     getUnitMeanGain() {
+        const multiplier = this.getGainMultiplier();
         if (this.gain_type === 'gaussian') {
-            return this.mean_gain * this.getGainMultiplier();
+            return this.mean_gain * multiplier;
+        } else if (this.gain_type === 'custom') {
+            return this.calculateMeanOfCustomDistribution() * multiplier;
         } else {
-            return avg(this.min_gain, this.max_gain) * this.getGainMultiplier();
+            return avg(this.min_gain, this.max_gain) * multiplier;
         }
     }
 
     // Get to standard deviation of gain per update interval
     getUnitStDevGain() {
+        const multiplier = this.getGainMultiplier();
         if (this.gain_type === 'gaussian') {
-            return this.std_gain * Math.sqrt(this.getGainMultiplier());
+            /*
+                The number of update intervals in "gain per" is 1 / multiplier.
+                We want the standard deviation after this "gain per" duration to be std_gain.
+                Sum of n i.i.d. normal random variables with standard deviation 
+                s / sqrt(n) or variance s^2 / n will have variance s^2 or standard deviation s.
+            */
+            return this.std_gain * Math.sqrt(multiplier);
+        } else if (this.gain_type === 'custom') {
+            /*
+                For a custom distribution we use the statistical formula for variance:
+                variance = mean of X^2 - (mean of X)^2.
+                
+                The mean of X^2 for each piece is the second moment of the uniform distribution
+                From https://en.wikipedia.org/wiki/Continuous_uniform_distribution:
+                mean of X^2 = (b^3-a^3)/(3*(b-a))
+                This simplifies to (a^2+ab+b^2)/3, the formula used here.
+                We multiply the contribution from each piece by its probability (w / totalWeight).
+            */
+            let variance = 0;
+            const avg = this.calculateMeanOfCustomDistribution();
+            try {
+                const totalWeight = this.custom_counter_data.custom_distribution.totalWeight;
+                for (const row of this.custom_counter_data.custom_distribution.entries) {
+                    const a = row.min, b = row.max, w = row.weight;
+                    variance += (a * a + a * b + b * b) * w / totalWeight / 3;
+                }
+                variance -= avg * avg;
+                return Math.sqrt(Math.max(0, variance));
+            } catch (err) {
+                return 0;
+            }
         } else {
             // The standard deviation of a uniform distribution is (max - min) / sqrt(12)
             // https://en.wikipedia.org/wiki/Continuous_uniform_distribution
-            return Math.abs(this.max_gain - this.min_gain) * this.getGainMultiplier() / Math.sqrt(12);
+            return Math.abs(this.max_gain - this.min_gain) * multiplier / Math.sqrt(12);
         }
     }
 
@@ -720,6 +871,14 @@ class Channel {
             if (this.last_api_count >= 0) {
                 this.adjustForAPI(this.last_api_count);
             }
+        }
+
+        if (this.custom_counter_data.min != undefined && isFinite(this.custom_counter_data.min) && this.count < this.custom_counter_data.min) {
+            this.count = this.custom_counter_data.min;
+        }
+
+        if (this.custom_counter_data.max != undefined && isFinite(this.custom_counter_data.max) && this.count > this.custom_counter_data.max) {
+            this.count = this.custom_counter_data.max;
         }
     }
 
@@ -780,9 +939,27 @@ class Channel {
 }
 
 async function importData(imported) {
-
+    // v7 Livecountsedit and Livecounts.net saves
     if (typeof imported.saveType === 'number') {
-        return alert('Saves from v7 Livecountsedit and Livecounts.net themes are not supported yet.')
+        try {
+            imported = convert_lcedit_7_0_to_top_50(imported);
+            console.log()
+        } catch (err) {
+            alert('An error occurred while converting your save file.')
+            console.error(err);
+            imported = {};
+        }
+        //return alert('Saves from v7 Livecountsedit and Livecounts.net themes are not supported yet.')
+    } else if ('graphDates' in imported && Array.isArray(imported.graphDates)) {
+        // YT Studio saves
+        try {
+            imported = convert_yt_studio_to_top_50(imported);
+            console.log()
+        } catch (err) {
+            alert('An error occurred while converting your save file.')
+            console.error(err);
+            imported = {};
+        }
     }
 
     const partialImports = structuredClone(data.partialExports);
@@ -812,7 +989,12 @@ async function importData(imported) {
     data.data = data.data.map(x => new Channel(x));
     await processImport(imported);
     fillMenus();
+    saveAPISettings(false);
 }
+
+function saveAPISettings(shouldAlert = false) {
+    // for compatibility with top 50. do not delete
+} 
 
 // needs to be implemented by individual counters
 async function processImport(imported) {
@@ -901,4 +1083,92 @@ function loadOBSMode() {
     const obsMode = localStorage.getItem('obs-' + COUNTER_THEME);
     localStorage.removeItem('obs-' + COUNTER_THEME);
     if (obsMode) enableOBSMode();
+}
+
+function loadMyFont() {
+    if (data.headerFont && !document.getElementById('font-' + data.headerFont)) {
+        const fontStuff = document.createElement('link');
+        fontStuff.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(data.headerFont).replaceAll("%20", "+")}:100,200,300,400,500,600,700,800,900&display=swap`;
+        fontStuff.className = 'font';
+        fontStuff.rel = 'stylesheet';
+        fontStuff.id = 'font-' + data.headerFont;
+        document.head.appendChild(fontStuff);
+    }
+
+    if (data.mainFont && !document.getElementById('font-' + data.mainFont)) {
+        const fontStuff = document.createElement('link');
+        fontStuff.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(data.mainFont).replaceAll("%20", "+")}:100,200,300,400,500,600,700,800,900&display=swap`;
+        fontStuff.className = 'font';
+        fontStuff.rel = 'stylesheet';
+        fontStuff.id = 'font-' + data.mainFont;
+        document.head.appendChild(fontStuff);
+    }
+}
+
+function formatNumber(num, options) {
+    switch (data.numberFormat) {
+        case 'dot':
+            return num.toLocaleString('de-DE', options);
+        case 'space':
+            return num.toLocaleString('en-US', options).replace(/,/g, '\u00a0');
+        case 'spaceComma':
+            return num.toLocaleString('de-DE', options).replace(/\./g, '\u00a0');
+        case 'indian':
+            return num.toLocaleString('hi-IN', options);
+        case 'apo':
+            return num.toLocaleString('en-US', options).replace(/,/g, "'");
+        case 'apoComma':
+            return num.toLocaleString('de-DE', options).replace(/\./g, "'");
+        case 'noSep':
+            if (!options) options = {};
+            options.useGrouping = false;
+            return num.toLocaleString('US', options);
+        case 'noSepComma':
+            if (!options) options = {};
+            options.useGrouping = false;
+            return num.toLocaleString('DE', options);
+        default:
+            return num.toLocaleString('en-US', options);
+    }
+}
+
+function updateOdo() {
+    
+    odometers = Odometer.init();
+
+    for (const odometer of odometers) {
+
+        odometer.options.duration = parseFloat(data.odometerSpeed) * 1000 || 2000;
+        if (data.animationType === 'counting') {
+            odometer.options.animation = 'count';
+        } else if (data.animationType === 'ytstudio') {
+            odometer.options.animation = 'byDigit';
+        } else if (data.animationType === 'minimal') {
+            odometer.options.animation = 'minimal';
+        } else {
+            delete odometer.options.animation;
+        }
+
+        if (window.COUNTER_THEME !== 'top50' && data.useOdometerColors) {
+            odometer.options.upColor = data.odometerUp;
+            odometer.options.downColor = data.odometerDown;
+        } else {
+            delete odometer.options.upColor;
+            delete odometer.options.downColor;
+        }
+
+        odometer.options.removeLeadingZeros = data.animationType === 'ytstudio';
+        odometer.options.reverseAnimation = data.reverseAnimation;
+        odometer.options.formatFunction = formatNumber;
+        odometer.render();
+    }
+}
+
+function download(fileData, fileName = 'export.json') {
+    const file = new Blob([typeof fileData === 'object' ? JSON.stringify(fileData) : fileData], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+    delete a;
 }

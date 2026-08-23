@@ -29,9 +29,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
         integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700" rel="stylesheet">
-    <link href="./odometer.css" rel="stylesheet">
-    <link href="../common.css?v=7.8.4" rel="stylesheet" type="text/css">
-    <link href="./index.css?v=7.8.4" rel="stylesheet">
+    <link href="../odometer/odometer.css" rel="stylesheet">
+    <link href="../common.css?v=7.9" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.9" rel="stylesheet">
+    <style id="counterColor"></style>
 </head>
 
 <body class="fix-header fix-sidebar card-no-border">
@@ -160,7 +161,7 @@
                 <div class="row">
                     <!-- Column -->
                     <div class="col-sm-12">
-                        <div class="card m-b-0 m-t-20" style="height: 530px;">
+                        <div class="card main-card m-b-0 m-t-20" style="height: 530px;">
                             <img class="card-img-top img-responsive" src="../default_banner.png" id="yt_cover"
                                 style="max-height:200px;">
                             <div class="card-block little-profile p-b-0 text-center">
@@ -211,7 +212,7 @@
                     <div class="col-sm-12" id="yt_sharear2">
                         <div class="row">
                             <div class="col-12 col-lg-7">
-                                <div class="card">
+                                <div class="card main-card">
                                     <div class="card-block">
                                         <div class="card-body">
                                             <div class="position-relative">
@@ -225,7 +226,7 @@
                                 </div>
                             </div>
                             <div class="col-12 col-lg-5">
-                                <div class="card">
+                                <div class="card main-card">
                                     <div class="card-block">
                                         <div class="card-body">
                                             <div class="position-relative">
@@ -275,21 +276,26 @@
                 <hr>
                 <div id="settingsMenus"></div>
                 <hr>
+                <div>
+                    <h3>Questions, bugs, comments, or suggestions?</h3>
+                    <p>Read our <a href="/about/faq.html">website FAQ</a>.</p>
+                    <p>You can also join the <a href="/about/discord.html">Livecountsedit Discord server</a>!</p>
+                </div>
+                <hr>
                 <div style="padding:12px;width:50%;">
                     <h3>Disclaimer</h3>
-                    <p>This page is a parody of the <a href="https://gh.akshatmittal.com/youtube-realtime/">original Akshatmittal live subscriber counter</a>. All credit goes to <a href="https://akshatmittal.com/">Akshatmittal</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
+                    <p>This page is a parody of the <a href="https://gh.akshatmittal.com/youtube-realtime/">original Akshatmittal live subscriber counter</a>. All credit goes to <a href="https://akshatmittal.com/">Akshatmittal</a> for the design of this page. Educational & fun purposes only. No copyright infrigment is intended. We do not condone the use of this site for spreading misinformation.</p>
                 </div>
             </div>
     </center>
     </div>
     </div>
-    <script src="../odometer.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.6/odometer.min.js"></script>
+    <script src="../odometer/odometer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
-    <script src="../commonUtils.js?v=7.8.4"></script>
-    <script src="../commonCounter.js?v=7.8.4"></script>
-    <script src="../highstock.js"></script>
-    <script src="./akshatmittal.js?v=7.8.4"></script>
+    <script src="../converter/converter.js?v=7.9"></script>
+    <script src="../commonUtils.js?v=7.9"></script>
+    <script src="../commonCounter.js?v=7.9"></script>
+    <script src="./akshatmittal.js?v=7.9"></script>
 </body>
 
 </html>

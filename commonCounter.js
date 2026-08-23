@@ -5,6 +5,7 @@ let data;
 let example_data = {
     abbreviate: false,
     allowNegative: false,
+    animationType: 'default',
     apiUpdates: {
         enabled: false,
         url: '',
@@ -38,12 +39,21 @@ let example_data = {
         leeway: 0,
     },
     autosave: true,
+    bgColor: '#ffffff',
+    counterFontWeight: '400',
     data: [],
     debugMode: true,
     editorShowsExactCount: false,
+    importFromGoogleFonts: false,
     index: 1,
     intervalCount: 0,
     lastOnline: Date.now(),
+    mainFont: 'Arial, Helvetica, sans-serif',
+    nameColor: '#000000',
+    numberFormat: 'comma',
+    odometerDown: '#c00000',
+    odometerSpeed: 2,
+    odometerUp: '#008000',
     partialExports: {
         state: true, // State and preferences
         counters: true, // Counters
@@ -51,14 +61,19 @@ let example_data = {
         counts: true, // Counter counts
         avatars: true, // Counter avatars
         gains: true, // Counter gains
+        designSettings: true, // Design settings
+        styles: true, // Styling
         technicalSettings: true, // Technical settings
         apiUpdates: true, // API updates
     },
     pause: false,
+    reverseAnimation: false,
     saveType: '',
     saveVersion: SAVE_VERSION,
     streamerMode: false,
+    textColor: '#000000',
     updateInterval: 2000,
+    useOdometerColors: false,
     versionCreated: VERSION,
     versionLastOpened: VERSION
 }
@@ -88,7 +103,8 @@ const MENU = {
                     type: 'select',
                     path: 'data.data.0.gain_type',
                     options: [['uniform', 'Min/max'],
-                    ['gaussian', 'Mean/standard deviation']],
+                    ['gaussian', 'Mean/standard deviation'],
+                    ['custom', 'Custom distribution']],
                     func: function (item) {
                         updateGainType(0);
                     }
@@ -128,15 +144,62 @@ const MENU = {
                     }
                 },
                 {
+                    title: 'Custom distribution<br>',
+                    value: '',
+                    type: 'textarea',
+                    path: 'data.data.0.custom_counter_data.custom_rate',
+                    className: 'custom-gain-setting-0',
+                    placeholder: 'min1, max1, weight1\nmin2, max2, weight2\n...',
+                    func: function (item) {
+                        updateGainType(0);
+                    }
+                },
+                {
                     title: 'Gain is per every: ',
-                    value: 'second',
-                    type: 'select',
-                    path: 'data.data.0.gain_per',
-                    options: [['second', 'second'],
-                    ['updateInterval', 'update interval'],
-                    ['minute', 'minute'],
-                    ['hour', 'hour'],
-                    ['day', 'day']]
+                    items: [
+                        {
+                            value: 1,
+                            type: 'number',
+                            path: 'data.data.0.gain_per_number',
+                            className: 's-width'
+                        },
+                        {
+                            value: 'second',
+                            type: 'select',
+                            path: 'data.data.0.gain_per',
+                            options: [['second', 'second(s)'],
+                            ['updateInterval', 'update interval(s)'],
+                            ['minute', 'minute(s)'],
+                            ['hour', 'hour(s)'],
+                            ['day', 'day(s)']]
+                        }
+                    ]
+                },
+                {
+                    title: '<abbr title="Adds variability to the counter updating. Gains will scale accordingly.">Update probability (%)</abbr>',
+                    type: 'number',
+                    value: 100,
+                    placeholder: 100,
+                    path: 'data.data.0.custom_counter_data.updateProbability',
+                    className: 's-width'
+                },
+                {
+                    type: 'html',
+                    value: '<br>'
+                },
+                {
+                    title: 'Minimum count',
+                    type: 'number',
+                    value: '',
+                    path: 'data.data.0.custom_counter_data.min',
+                    placeholder: 'Leave blank for none'
+                },
+                {
+                    title: 'Maximum count',
+                    type: 'number',
+                    value: '',
+                    path: 'data.data.0.custom_counter_data.max',
+                    placeholder: 'Leave blank for none'
                 },
                 {
                     type: 'html',
@@ -156,13 +219,137 @@ const MENU = {
             ]
         },
         {
+            title: 'Design Settings & Styling',
+            items: [
+                {
+                    title: 'Username color',
+                    type: 'color',
+                    path: 'data.nameColor',
+                    id: 'nameColor',
+                },
+                {
+                    title: 'Counter color',
+                    type: 'color',
+                    path: 'data.textColor',
+                    id: 'textColor',
+                },
+                {
+                    title: 'Odometer up color',
+                    type: 'color',
+                    path: 'data.odometerUp'
+                },
+                {
+                    title: 'Odometer down color',
+                    type: 'color',
+                    path: 'data.odometerDown'
+                },
+                {
+                    title: 'Use odometer colors',
+                    type: 'checkbox',
+                    path: 'data.useOdometerColors'
+                },
+                {
+                    title: 'Background color',
+                    type: 'color',
+                    path: 'data.bgColor',
+                    id: 'bgColor'
+                },
+                {
+                    type: 'html',
+                    value: '<br>'
+                },
+                {
+                    title: 'Font',
+                    type: 'text',
+                    path: 'data.mainFont',
+                    func: function (item) {
+                        if (data.importFromGoogleFonts) {
+                            loadMyFont();
+                        }
+                    }
+                },
+                {
+                    title: 'Import from Google Fonts',
+                    type: 'checkbox',
+                    path: 'data.importFromGoogleFonts',
+                    func: function (item) {
+                        if (data.importFromGoogleFonts) {
+                            loadMyFont();
+                        }
+                    }
+                },
+                {
+                    title: '<abbr title="Note: not all font weights are supported on all fonts">Font weight</abbr>',
+                    type: 'select',
+                    path: 'data.counterFontWeight',
+                    options: [
+                        ['100', 'Thin'],
+                        ['200', 'Extra Light'],
+                        ['300', 'Light'],
+                        ['400', 'Regular'],
+                        ['500', 'Medium'],
+                        ['600', 'Semibold'],
+                        ['700', 'Bold'],
+                        ['800', 'Extra Bold'],
+                        ['900', 'Black']
+                    ]
+                },
+                {
+                    type: 'html',
+                    value: '<br>'
+                },
+                {
+                    title: 'Odometer animation type',
+                    type: 'select',
+                    path: 'data.animationType',
+                    options: [
+                        ['default', 'Odometer (default)'],
+                        ['ytstudio', 'Odometer (YouTube studio)'],
+                        ['counting', 'Counting'],
+                        ['minimal', 'Odometer (minimal)']
+                    ]
+                },
+                {
+                    title: 'Odometer animation duration (seconds)',
+                    type: 'number',
+                    value: 2,
+                    path: 'data.odometerSpeed',
+                    className: 's-width'
+                },
+                {
+                    title: 'Reverse odometer animation',
+                    type: 'checkbox',
+                    value: false,
+                    path: 'data.reverseAnimation'
+                },
+                {
+                    title: 'Number format',
+                    type: 'select',
+                    value: 'comma',
+                    path: 'data.numberFormat',
+                    options: [
+                        ['comma', '12,345,678.9'],
+                        ['dot', '12.345.678,9'],
+                        ['space', '12 345 678.9'],
+                        ['spaceComma', '12 345 678,9'],
+                        ['indian', '1,23,45,678.9'],
+                        ['apo', "12'345'678.9"],
+                        ['apoComma', "12'345'678,9"],
+                        ['noSep', '12345678.9'],
+                        ['noSepComma', '12345678,9']
+                    ]
+                }
+            ]
+        },
+        {
             title: 'Technical Settings',
             items: [
                 {
                     title: 'Update interval (seconds)',
                     type: 'number',
                     value: 2,
-                    id: 'updateInterval'
+                    id: 'updateInterval',
+                    className: 's-width'
                 },
                 {
                     title: 'Channel editor shows exact internal count',
@@ -368,7 +555,7 @@ const MENU = {
                     value: 0,
                     type: 'number',
                     path: 'data.apiUpdates.leeway',
-                    className: 'api-setting',
+                    className: 'api-setting s-width',
                     auto: false,
                 },
                 {
@@ -379,7 +566,8 @@ const MENU = {
                     title: 'API update interval (seconds)',
                     value: 10,
                     type: 'number',
-                    id: 'apiUpdateInterval'
+                    id: 'apiUpdateInterval',
+                    className: 's-width'
                 },
                 {
                     type: 'html',
@@ -438,6 +626,20 @@ const MENU = {
                     value: true,
                     type: 'checkbox',
                     path: 'data.partialExports.gains',
+                    className: 'partial-export-option'
+                },
+                {
+                    title: 'Design settings',
+                    value: true,
+                    type: 'checkbox',
+                    path: 'data.partialExports.designSettings',
+                    className: 'partial-export-option'
+                },
+                {
+                    title: 'Styling',
+                    value: true,
+                    type: 'checkbox',
+                    path: 'data.partialExports.styles',
                     className: 'partial-export-option'
                 },
                 {
@@ -508,7 +710,7 @@ function displaySetting(index) {
     document.getElementById('button_' + index).classList.add('active')
 }
 
-function fix() {
+function fix(noOdo = false) {
     return alert('dummy');
 }
 
@@ -536,90 +738,112 @@ function drawMenu(menu, buttons, divs, controls) {
                 div.innerHTML = item.value;
             } else {
                 div.className = 'settings-container';
-                let elem;
                 const label = document.createElement('label');
                 label.innerHTML = item.title + ' ';
-                if (item.type === 'textarea') {
-                    elem = document.createElement('textarea');
-                } else if (item.type === 'select') {
-                    elem = document.createElement('select');
-                    for (const option of item.options) {
-                        const optionElem = document.createElement('option');
-                        optionElem.value = option[0];
-                        optionElem.innerText = option[1];
-                        elem.appendChild(optionElem);
+                let itemArray = item.items || [item];
+                for (const subItem of itemArray) {
+                    let elem;
+                    let colorRemover;
+                    if (subItem.type === 'textarea') {
+                        elem = document.createElement('textarea');
+                    } else if (subItem.type === 'select') {
+                        elem = document.createElement('select');
+                        for (const option of subItem.options) {
+                            const optionElem = document.createElement('option');
+                            optionElem.value = option[0];
+                            optionElem.innerText = option[1];
+                            elem.appendChild(optionElem);
+                        }
+                    } else {
+                        elem = document.createElement('input');
+                        elem.type = subItem.type;
                     }
-                } else {
-                    elem = document.createElement('input');
-                    elem.type = item.type;
-                }
 
-                if (item.className) elem.className = item.className;
-                if (item.id) elem.id = item.id;
+                    if (subItem.className) elem.className = subItem.className;
+                    if (subItem.id) elem.id = subItem.id;
 
-                if (item.type !== 'checkbox') {
-                    if (item.value != undefined) elem.value = item.value;
-                    if (item.placeholder != undefined) elem.placeholder = item.placeholder;
-                } else {
-                    elem.checked = Boolean(item.value);
-                }
-                if (item.path) {
-                    elem.setAttribute('data-path', item.path);
-                    const func = item.func || (function (_) {});
-                    if (item.auto !== false) {
-                        if (item.type === 'checkbox') {
-                            elem.addEventListener('change', e => {
-                                const splitPath = item.path.split('.');
+                    if (subItem.type !== 'checkbox') {
+                        if (subItem.value != undefined) elem.value = subItem.value;
+                        if (subItem.placeholder != undefined) elem.placeholder = subItem.placeholder;
+                        if (subItem.type === 'color') {
+                            colorRemover = document.createElement('button');
+                            colorRemover.innerText = 'X';
+                            colorRemover.onclick = () => {
+                                const splitPath = subItem.path.split('.');
                                 if (splitPath[0] === 'data') {
-                                    let location = data;
+                                    let location = example_data;
                                     for (i = 1; i < splitPath.length - 1; i++) {
                                         location = location[splitPath[i]];
                                     }
-                                    location[splitPath[splitPath.length - 1]] = e.target.checked;
+                                    colorRemover.previousElementSibling.value = location[splitPath[splitPath.length - 1]];
+                                    colorRemover.previousElementSibling.dispatchEvent(new Event('change'));
                                 }
-                                func(item);
-                                fix();
-                            })
-                        } else if (item.type === 'number') {
-                            elem.addEventListener('change', e => {
-                                const splitPath = item.path.split('.');
-                                if (splitPath[0] === 'data') {
-                                    let location = data;
-                                    for (i = 1; i < splitPath.length - 1; i++) {
-                                        location = location[splitPath[i]];
+                            }
+                        }
+                    } else {
+                        elem.checked = Boolean(subItem.value);
+                    }
+                    if (subItem.path) {
+                        elem.setAttribute('data-path', subItem.path);
+                        const func = subItem.func || (function (_) {});
+                        if (subItem.auto !== false) {
+                            if (subItem.type === 'checkbox') {
+                                elem.addEventListener('change', e => {
+                                    const splitPath = subItem.path.split('.');
+                                    if (splitPath[0] === 'data') {
+                                        let location = data;
+                                        for (i = 1; i < splitPath.length - 1; i++) {
+                                            location = location[splitPath[i]];
+                                        }
+                                        location[splitPath[splitPath.length - 1]] = e.target.checked;
                                     }
-                                    location[splitPath[splitPath.length - 1]] = parseFloat(e.target.value);
-                                }
-                                func(item);
-                                fix();
-                            })
-                        } else {
-                            elem.addEventListener('change', e => {
-                                const splitPath = item.path.split('.');
-                                if (splitPath[0] === 'data') {
-                                    let location = data;
-                                    for (i = 1; i < splitPath.length - 1; i++) {
-                                        location = location[splitPath[i]];
+                                    func(subItem);
+                                    fix();
+                                })
+                            } else if (subItem.type === 'number') {
+                                elem.addEventListener('change', e => {
+                                    const splitPath = subItem.path.split('.');
+                                    if (splitPath[0] === 'data') {
+                                        let location = data;
+                                        for (i = 1; i < splitPath.length - 1; i++) {
+                                            location = location[splitPath[i]];
+                                        }
+                                        location[splitPath[splitPath.length - 1]] = parseFloat(e.target.value);
                                     }
-                                    location[splitPath[splitPath.length - 1]] = e.target.value;
-                                }
-                                func(item);
-                                fix();
-                            })
+                                    func(subItem);
+                                    fix();
+                                })
+                            } else {
+                                elem.addEventListener('change', e => {
+                                    const splitPath = subItem.path.split('.');
+                                    if (splitPath[0] === 'data') {
+                                        let location = data;
+                                        for (i = 1; i < splitPath.length - 1; i++) {
+                                            location = location[splitPath[i]];
+                                        }
+                                        location[splitPath[splitPath.length - 1]] = e.target.value;
+                                    }
+                                    func(subItem);
+                                    fix();
+                                })
+                            }
                         }
                     }
-                }
-                if (item.streamerMode) {
-                    const streamerModeWrapper = document.createElement('div');
-                    streamerModeWrapper.className = 'streamer-mode-wrapper';
-                    streamerModeWrapper.appendChild(elem);
-                    const streamerModeDiv = document.createElement('div');
-                    streamerModeDiv.className = 'streamer-mode';
-                    streamerModeDiv.innerText = 'Turn off Streamer Mode to view this!';
-                    streamerModeWrapper.appendChild(streamerModeDiv); 
-                    label.appendChild(streamerModeWrapper);
-                } else {
-                    label.appendChild(elem);
+                    if (subItem.streamerMode) {
+                        const streamerModeWrapper = document.createElement('div');
+                        streamerModeWrapper.className = 'streamer-mode-wrapper';
+                        streamerModeWrapper.appendChild(elem);
+                        const streamerModeDiv = document.createElement('div');
+                        streamerModeDiv.className = 'streamer-mode';
+                        streamerModeDiv.innerText = 'Turn off Streamer Mode to view this!';
+                        streamerModeWrapper.appendChild(streamerModeDiv); 
+                        label.appendChild(streamerModeWrapper);
+                    } else {
+                        label.appendChild(elem);
+                    }
+                    if (colorRemover) {
+                        label.appendChild(colorRemover);
+                    }
                 }
                 div.appendChild(label);
             }
@@ -869,10 +1093,10 @@ async function updateAPINow(bypass = false) {
                     data.data[0].banner = bannerUpdate;
                 }
                 if (viewsUpdate !== undefined && typeof viewsUpdate == 'number' && isFinite(viewsUpdate)) {
-                    data.data[1].count = viewsUpdate;
+                    if (data.data[1]) data.data[1].count = viewsUpdate;
                 }
                 if (videosUpdate !== undefined && typeof videosUpdate == 'number' && isFinite(videosUpdate)) {
-                    data.data[2].count = videosUpdate;
+                    if (data.data[2]) data.data[2].count = videosUpdate;
                 }
                 if (countUpdate !== undefined && typeof countUpdate === 'number' && isFinite(countUpdate)) {
                     data.data[0].adjustForAPI(countUpdate);
@@ -890,10 +1114,10 @@ async function updateAPINow(bypass = false) {
                     data.data[0].banner = bannerUpdate;
                 }
                 if (viewsUpdate !== undefined && typeof viewsUpdate == 'number' && isFinite(viewsUpdate)) {
-                    data.data[1].count = viewsUpdate;
+                    if (data.data[1]) data.data[1].count = viewsUpdate;
                 }
                 if (videosUpdate !== undefined && typeof videosUpdate == 'number' && isFinite(videosUpdate)) {
-                    data.data[2].count = videosUpdate;
+                    if (data.data[2]) data.data[2].count = videosUpdate;
                 }
                 if (countUpdate !== undefined && typeof countUpdate === 'number' && isFinite(countUpdate)) {
                     data.data[0].adjustForAPI(countUpdate);
@@ -913,7 +1137,7 @@ async function updateAPINow(bypass = false) {
             document.getElementById('counterBannerURL').value = bannerUpdate;
         }
 
-        fix();
+        fix(true);
         
         if (document.getElementById('apiUpdateStatus')) {
             document.getElementById('apiUpdateStatus').innerText = 'OK';
@@ -942,12 +1166,17 @@ function fillMenus() {
             if (x.type === 'checkbox') {
                 x.checked = Boolean(location[splitPath[splitPath.length - 1]]);
             } else {
-                x.value = location[splitPath[splitPath.length - 1]];
+                if (location[splitPath[splitPath.length - 1]] == undefined) {
+                    x.value = '';
+                } else {
+                    x.value = location[splitPath[splitPath.length - 1]];
+                }
             }
         }
     })
     document.getElementById('updateInterval').value = data.updateInterval / 1000;
     loadAPIUpdates();
+    refreshCount();
 }
 
 function loadAPIUpdates() {
@@ -985,11 +1214,43 @@ function updateGainType(index) {
             counter.std_gain = counter.std_gain_value;
             document.querySelectorAll('.uniform-gain-setting-' + index).forEach(x => x.parentElement.style.display = 'none');
             document.querySelectorAll('.gaussian-gain-setting-' + index).forEach(x => x.parentElement.style.display = '');
+            document.querySelectorAll('.custom-gain-setting-' + index).forEach(x => x.parentElement.style.display = 'none');
+        } else if (counter.gain_type === 'custom') {
+            const customGains = counter.custom_counter_data.custom_rate || '';
+            const result = {
+                totalWeight: 0,
+                entries: [],
+            };
+            let totalWeight = 0;
+            const rows = customGains.split('\n');
+            for (i = 0; i < rows.length; i++) {
+                const rowData = rows[i].replace(/ +/g, '').split(',')
+                const weight = clamp(parseFloat(rowData[2]), 0, Number.MAX_VALUE) || 0;
+                totalWeight += weight;
+                const entry = {
+                    min: parseFloat(rowData[0]) || 0,
+                    max: parseFloat(rowData[1]) || 0,
+                    weight: weight,
+                    cutoff: totalWeight
+                };
+                result.entries.push(entry);
+                result.totalWeight = totalWeight;
+            }
+            counter.custom_counter_data.custom_distribution = result;
+
+            // For compatibility with Top 50, we convert the custom distribution to one with equivalent mean and standard deviation.
+            counter.mean_gain = counter.getUnitMeanGain();
+            counter.std_gain = counter.getUnitStDevGain();
+
+            document.querySelectorAll('.uniform-gain-setting-' + index).forEach(x => x.parentElement.style.display = 'none');
+            document.querySelectorAll('.gaussian-gain-setting-' + index).forEach(x => x.parentElement.style.display = 'none');
+            document.querySelectorAll('.custom-gain-setting-' + index).forEach(x => x.parentElement.style.display = '');
         } else {
             counter.mean_gain = NaN;
             counter.std_gain = NaN;
             document.querySelectorAll('.gaussian-gain-setting-' + index).forEach(x => x.parentElement.style.display = 'none');
             document.querySelectorAll('.uniform-gain-setting-' + index).forEach(x => x.parentElement.style.display = '');
+            document.querySelectorAll('.custom-gain-setting-' + index).forEach(x => x.parentElement.style.display = 'none');
         }
     }
 }
@@ -1069,10 +1330,16 @@ function enableChartFeature() {
                 path: 'data.cardStyles.showChart'
             },
             {
+                title: 'Chart line color',
+                type: 'color',
+                path: 'data.cardStyles.chartLineColor'
+            },
+            {
                 title: 'Maximum chart values (2-5000):',
                 value: 1500,
                 type: 'number',
-                path: 'data.maxChartValues'
+                path: 'data.maxChartValues',
+                className: 's-width'
             },
             {
                 title: 'Save chart data when reloaded',
@@ -1163,7 +1430,7 @@ function enableBannerFeature() {
     MENU.tabs.find(x => x.title === 'Import & Export Data').items.splice(5, 0, partialExportAddition);
 }
 
-function enableViewsAndVideoFeature() {
+function enableViewsAndVideoFeature(noVideo = false) {
     const extraKeys = {
         apiUpdates: {
             response: {
@@ -1220,10 +1487,12 @@ function enableViewsAndVideoFeature() {
         value: '<br>'
     }]
 
+    if (noVideo) newAPIUpdateOptions.splice(2);
+
     MENU.tabs.find(x => x.title === 'API Updates').items.splice(20, 0, ...newAPIUpdateOptions);
 
     const newTab = {
-        title: 'View and Video Counters',
+        title: noVideo ? 'View Counter' : 'View and Video Counters',
         items: [
             {
                 title: 'View count',
@@ -1236,9 +1505,10 @@ function enableViewsAndVideoFeature() {
                 title: 'Views gain type',
                 value: 'uniform',
                 type: 'select',
-                path: 'data.data.0.gain_type',
+                path: 'data.data.1.gain_type',
                 options: [['uniform', 'Min/max'],
-                ['gaussian', 'Mean/standard deviation']],
+                ['gaussian', 'Mean/standard deviation'],
+                ['custom', 'Custom distribution']],
                 func: function (item) {
                     updateGainType(1);
                 }
@@ -1278,15 +1548,57 @@ function enableViewsAndVideoFeature() {
                 }
             },
             {
+                title: 'Custom distribution for views gain<br>',
+                value: '',
+                type: 'textarea',
+                path: 'data.data.1.custom_counter_data.custom_rate',
+                className: 'custom-gain-setting-1',
+                placeholder: 'min1, max1, weight1\nmin2, max2, weight2\n...',
+                func: function (item) {
+                    updateGainType(1);
+                }
+            },
+            {
                 title: 'Views gain is per every: ',
-                value: 'second',
-                type: 'select',
-                path: 'data.data.1.gain_per',
-                options: [['second', 'second'],
-                ['updateInterval', 'update interval'],
-                ['minute', 'minute'],
-                ['hour', 'hour'],
-                ['day', 'day']]
+                items: [
+                    {
+                        value: 1,
+                        type: 'number',
+                        path: 'data.data.1.gain_per_number',
+                        className: 's-width'
+                    },
+                    {
+                        value: 'second',
+                        type: 'select',
+                        path: 'data.data.1.gain_per',
+                        options: [['second', 'second(s)'],
+                        ['updateInterval', 'update interval(s)'],
+                        ['minute', 'minute(s)'],
+                        ['hour', 'hour(s)'],
+                        ['day', 'day(s)']]
+                    }
+                ]
+            },
+            {
+                title: '<abbr title="Adds variability to the counter updating. Gains will scale accordingly.">Update probability for views (%)</abbr>',
+                type: 'number',
+                value: 100,
+                path: 'data.data.1.custom_counter_data.updateProbability',
+                className: 's-width'
+            },
+            {
+                title: 'Minimum view count',
+                type: 'number',
+                value: '',
+                path: 'data.data.1.custom_counter_data.min',
+                placeholder: 'Leave blank for none'
+            },
+            {
+                title: 'Maximum view count',
+                type: 'number',
+                value: '',
+                path: 'data.data.1.custom_counter_data.max',
+                placeholder: 'Leave blank for none'
             },
             {
                 type: 'html',
@@ -1305,7 +1617,8 @@ function enableViewsAndVideoFeature() {
                 type: 'select',
                 path: 'data.data.2.gain_type',
                 options: [['uniform', 'Min/max'],
-                ['gaussian', 'Mean/standard deviation']],
+                ['gaussian', 'Mean/standard deviation'],
+                ['custom', 'Custom distribution']],
                 func: function (item) {
                     updateGainType(2);
                 }
@@ -1345,28 +1658,138 @@ function enableViewsAndVideoFeature() {
                 }
             },
             {
+                title: 'Custom distribution for videos gain<br>',
+                value: '',
+                type: 'textarea',
+                path: 'data.data.2.custom_counter_data.custom_rate',
+                className: 'custom-gain-setting-2',
+                placeholder: 'min1, max1, weight1\nmin2, max2, weight2\n...',
+                func: function (item) {
+                    updateGainType(2);
+                }
+            },
+            {
                 title: 'Videos gain is per every: ',
-                value: 'second',
-                type: 'select',
-                path: 'data.data.2.gain_per',
-                options: [['second', 'second'],
-                ['updateInterval', 'update interval'],
-                ['minute', 'minute'],
-                ['hour', 'hour'],
-                ['day', 'day']]
+                items: [
+                    {
+                        value: 1,
+                        type: 'number',
+                        path: 'data.data.2.gain_per_number',
+                        className: 's-width'
+                    },
+                    {
+                        value: 'second',
+                        type: 'select',
+                        path: 'data.data.2.gain_per',
+                        options: [['second', 'second(s)'],
+                        ['updateInterval', 'update interval(s)'],
+                        ['minute', 'minute(s)'],
+                        ['hour', 'hour(s)'],
+                        ['day', 'day(s)']]
+                    }
+                ]
+            },
+            {
+                title: '<abbr title="Adds variability to the counter updating. Gains will scale accordingly.">Update probability for videos (%)</abbr>',
+                type: 'number',
+                value: 100,
+                path: 'data.data.2.custom_counter_data.updateProbability',
+                className: 's-width'
+            },
+            {
+                title: 'Minimum video count',
+                type: 'number',
+                value: '',
+                path: 'data.data.2.custom_counter_data.min',
+                placeholder: 'Leave blank for none'
+            },
+            {
+                title: 'Maximum video count',
+                type: 'number',
+                value: '',
+                path: 'data.data.2.custom_counter_data.max',
+                placeholder: 'Leave blank for none'
             },
         ]
     }
 
+    if (noVideo) newTab.items.splice(11);
+
     MENU.tabs.splice(1, 0, newTab);
 
     const partialExportAddition = {
-        title: 'View and video counters',
+        title: noVideo ? 'View counter' : 'View and video counters',
         value: true,
         type: 'checkbox',
         path: 'data.partialExports.viewAndVideoCounts',
         className: 'partial-export-option'
     };
 
-    MENU.tabs.find(x => x.title === 'Import & Export Data').items.splice(-5, 0, partialExportAddition);
+    MENU.tabs.find(x => x.title === 'Import & Export Data').items.splice(-8, 0, partialExportAddition);
+}
+
+function enableCreditsTab() {
+    MENU.tabs.push({
+        title: 'Credits',
+        items: [{
+            type: 'html',
+            value: `<div>
+                <h3>Questions, bugs, comments, or suggestions?</h3>
+                <p>Read our <a href="/about/faq.html">website FAQ</a>.</p>
+                <p>You can also join the <a href="/about/discord.html">Livecountsedit Discord server</a>!</p>
+            </div>
+            <hr>
+            <div>
+                <h3>Disclaimer</h3>
+                <p>This page is a parody of the original Livecounts.net counter by @ColleensCuber (<a href="https://x.com/LivecountsSite">@LivecountsSite</a>).</p>
+                <p>All credit goes to them for the design of this page.</p>
+                <p>No copyright infrigment is intended. Educational & fun purposes only.</p>
+                <p>We do not condone the use of this site for spreading misinformation.</p>
+            </div>`
+        }]
+    });
+}
+
+function updateChart(val) {
+
+    data.maxChartValues = clamp(Math.floor(data.maxChartValues), 2, 5000);
+
+    if (chart.series[0].data.length > data.maxChartValues) {
+        chart.series[0].setData(chart.series[0].data.slice(1-data.maxChartValues));
+    } else if (chart.series[0].data.length == data.maxChartValues) {
+        chart.series[0].removePoint(0);
+    }
+
+    chart.series[0].addPoint([Date.now(), val]);
+
+    if (data.saveChartData) {
+        data.liveGraph = chart.series[0].data.map(x => [x.x, x.y])
+    } else {
+        data.liveGraph = [];
+    }
+}
+
+function clearChart() {
+    if (confirm('Are you sure you want to clear the chart?')) {
+        data.liveGraph = [];
+        renderChart();
+    }
+}
+
+function importingStuff(imported, max = 1) {
+    while (imported.data.length < max) {
+        imported.data.push(new Channel());
+    }
+    if (imported.data.length > max) {
+        imported.data = imported.data.slice(0, max);
+    }
+    imported.saveType = COUNTER_THEME;
+    imported.versionLastOpened = VERSION;
+    updateAutoSave();
+    updateStreamerMode();
+    changeUpdateInterval();
+    refreshCount();
+    if (imported.importFromGoogleFonts) {
+        loadMyFont();
+    }
 }

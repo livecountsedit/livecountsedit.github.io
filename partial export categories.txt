@@ -88,3 +88,16 @@ data.fireIcons - fireSettings
 data.headerSettings - headerSettings
 data.scripts - scripts
 data.customCSS - customCSS
+
+data.lceditThemeSettings - lceditThemeSettings
+data.lcnetSettings - lcnetSettings
+data.data[i].custom_counter_data.custom_rate - gains
+data.cardStyles.chartGridColor - charts
+data.cardStyles.chartCreditsEnabled - charts
+data.cardStyles.showChartGrid - charts
+data.data[i].custom_counter_data.max - technicalSettings
+data.data[i].custom_counter_data.min - technicalSettings
+data.data[i].custom_counter_data.updateProbability - technicalSettings
+data.data[i].gain_per_number - gains
+data.showBanners - designSettings
+data.nameColor - styles

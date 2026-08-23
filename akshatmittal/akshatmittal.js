@@ -6,6 +6,14 @@ window.onload = async () => {
     enableBannerFeature();
 
     const extraKeys = {
+        boxColor: '#ffffff',
+        bgColor: '#eef5f9',
+        nameColor: '#605a64',
+        mainFont: 'Roboto, sans-serif',
+        textColor: '#605a64',
+        footerColor: '#67757c',
+        counterFontWeight: '300',
+        odometerSpeed: 0.5,
         akshatmittalSettings: {
             countEditBox: false,
             showFeaturedUsers: true,
@@ -50,11 +58,23 @@ window.onload = async () => {
         className: 'partial-export-option'
     }
 
+    const styleAdditions = [{
+        title: 'Card background color',
+        type: 'color',
+        path: 'data.boxColor'
+    }, {
+        title: 'Footer color',
+        type: 'color',
+        path: 'data.footerColor'
+    }];
+
     // Insert Akshatmittal tab at second to last position
     MENU.tabs.splice(-2, 0, insertedTab);
 
     // Insert partial export setting at fourth to last position
     MENU.tabs.find(x => x.title === 'Import & Export Data').items.splice(-3, 0, partialExportAddition);
+    
+    MENU.tabs.find(x => x.title === 'Design Settings & Styling').items.splice(6, 0, ...styleAdditions);
 
     try {
         data = await retrieveDataFromBrowser(COUNTER_THEME, 1);
@@ -109,29 +129,21 @@ window.onload = async () => {
 }
 
 async function processImport(imported) {
-    while (imported.data.length < 3) {
-        imported.data.push(new Channel());
-    }
-    if (imported.data.length > 3) {
-        imported.data = imported.data.slice(0, 3);
-    }
+    importingStuff(imported, 3);
     imported.data[1].name = 'Views';
     imported.data[2].name = 'Videos';
-    imported.saveType = COUNTER_THEME;
-    imported.versionLastOpened = VERSION;
-    updateAutoSave();
-    updateStreamerMode();
-    changeUpdateInterval();
-    refreshCount();
     fix();
+    updateGainType(0);
+    updateGainType(1);
+    updateGainType(2);
     return imported;
 }
 
 function afterDrawingMenu2() {
+    fillMenus(document.getElementById('settingsMenus'));
     updateGainType(0);
     updateGainType(1);
     updateGainType(2);
-    fillMenus(document.getElementById('settingsMenus'));
     saveAPISettings(false);
     refreshCount();
 
@@ -151,7 +163,7 @@ function updateCounters2(doGains = true) {
     document.getElementById('yt_videos').innerText = Math.floor(data.data[2].count);
 }
 
-function fix() {
+function fix(noOdo = false) {
     document.getElementById('yt_name').innerText = data.data[0].name || 'User';
     if (data.data[0].image !== document.getElementById('yt_profile').src) {
         document.getElementById('yt_profile').src = data.data[0].image;
@@ -162,5 +174,25 @@ function fix() {
 
     document.getElementById('pinned_nav').style.display = data.akshatmittalSettings.showFeaturedUsers ? 'block' : 'none';
     document.querySelectorAll(".social-media-buttons").forEach(x => x.style.display = data.akshatmittalSettings.showSocialMedia ? 'flex' : 'none');
-
+    document.querySelector('.page-wrapper').style.backgroundColor = data.bgColor;
+    document.getElementById('yt_name').style.color = data.nameColor;
+    document.getElementById('yt_name').style.fontFamily = data.mainFont;
+    document.getElementById('yt_subs').style.color = data.textColor;
+    document.querySelectorAll('.odometer').forEach(x => {
+        x.style.fontFamily = data.mainFont;
+        x.style.fontWeight = data.counterFontWeight;
+    });
+    document.body.style.fontFamily = data.mainFont;
+    document.querySelectorAll('.main-card').forEach(x => {
+        x.style.backgroundColor = data.boxColor;
+    });
+    document.getElementById('footer').style.color = data.footerColor;
+    document.getElementById('footer1').style.color = data.footerColor;
+    document.getElementById('footer2').style.color = data.footerColor;
+    document.getElementById('counterColor').innerText = `
+        #counter {
+            color: ${data.textColor};
+        }
+    `
+    if (!noOdo) updateOdo();
 }

@@ -1445,12 +1445,6 @@ document.getElementById('loadData1').addEventListener('change', function () {
     }
 });
 
-document.getElementById('loadData2').addEventListener('change', function () {
-    if (confirm('Are you sure you want to import a new save? Your current data will be erased')) {
-        load1();
-    }
-});
-
 document.getElementById('loadData3').addEventListener('change', function () {
     if (confirm('Are you sure you want to add these new channels?')) {
         addNewChannels();
@@ -1464,7 +1458,16 @@ function addNewChannels() {
     }
     if (document.getElementById('loadData3').files[0]) {
         document.getElementById('loadData3').files[0].text().then(function (data2) {
-            const newChannels = JSON.parse(data2).data;
+            data2 = JSON.parse(data2);
+            let newChannels = data2.data;
+            if (!newChannels && 'name' in data2 && 'count' in data2) {
+                newChannels = [data2];
+            }
+
+            // old Livecountsedit v7.0 save
+            if (typeof data2.saveType === 'number') {
+                return alert('Saves must be converted before you can import channels.');
+            }
             newChannels.forEach((item, index) => {
                 if (!item.id) item.id = uuidGen();
                 const has = data.data.some(channel => channel.id === item.id);
@@ -1472,20 +1475,12 @@ function addNewChannels() {
                     stats.failed++;
                 } else {
                     stats.success++;
-                    data.data.push(item);
+                    data.data.push(new Channel(item));
                 }
                 if (index == newChannels.length - 1) {
                     alert('Imported ' + stats.success + " channels! (" + stats.failed + " duplicates)")
                 }
             })
-        })
-    }
-}
-
-function load1() {
-    if (document.getElementById('loadData2').files[0]) {
-        document.getElementById('loadData2').files[0].text().then(function (data2) {
-            data.data.push(JSON.parse(data2))
         })
     }
 }
@@ -1516,27 +1511,6 @@ function load() {
         });
     } else {
         alert('No save file found!')
-    }
-}
-function save2(public = false) {
-    let data2;
-    if (public) {
-        data2 = structuredClone(data);
-        data2.apiUpdates.enabled = false;
-        data2.apiUpdates.url = '';
-        data2.apiUpdates.body = Object.create(null);
-        data2.apiUpdates.headers = Object.create(null);
-        data2.uuid = null;
-    } else {
-        data2 = data;
-    }
-    if (public || confirm("PLEASE READ: You are exporting a private save file. This means that the save file will include things like any API keys you have put in. If you do not wish for this data to be in your save file, export a public save that is safe to share publicly instead. Be sure to NEVER share the private save file with anyone you do not trust!")) {
-        let data3 = JSON.stringify(data2);
-        let a = document.createElement('a');
-        let file = new Blob([data3], { type: 'text/plain' });
-        a.href = URL.createObjectURL(file);
-        a.download = public ? 'data.json' : 'data-PRIVATE.json';
-        a.click();
     }
 }
 
@@ -1599,7 +1573,9 @@ function downloadChannel() {
         let id = selected;
         for (let i = 0; i < data.data.length; i++) {
             if (data.data[i].id == id) {
-                let data2 = JSON.stringify(data.data[i]);
+                let data2 = JSON.stringify({
+                    data: [data.data[i]]
+                });
                 let a = document.createElement('a');
                 let file = new Blob([data2], { type: 'text/plain' });
                 a.href = URL.createObjectURL(file);
@@ -1745,26 +1721,6 @@ document.getElementById('randomCountUpdateTime').addEventListener('change', func
 document.getElementById('waterFallCountUpdateTime').addEventListener('change', function () {
     data.waterFallCountUpdateTime = this.checked;
 });
-
-function loadMyFont() {
-    if (!document.getElementById('font-' + data.headerFont)) {
-        const fontStuff = document.createElement('link');
-        fontStuff.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(data.headerFont).replaceAll("%20", "+")}:100,200,300,400,500,600,700,800,900&display=swap`;
-        fontStuff.className = 'font';
-        fontStuff.rel = 'stylesheet';
-        fontStuff.id = 'font-' + data.headerFont;
-        document.head.appendChild(fontStuff);
-    }
-
-    if (!document.getElementById('font-' + data.mainFont)) {
-        const fontStuff = document.createElement('link');
-        fontStuff.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(data.mainFont).replaceAll("%20", "+")}:100,200,300,400,500,600,700,800,900&display=swap`;
-        fontStuff.className = 'font';
-        fontStuff.rel = 'stylesheet';
-        fontStuff.id = 'font-' + data.mainFont;
-        document.head.appendChild(fontStuff);
-    }
-}
 
 document.getElementById('importFromGoogleFonts').addEventListener('change', function () {
     data.importFromGoogleFonts = this.checked;
@@ -2653,30 +2609,6 @@ document.querySelectorAll(".partial-export-option").forEach(x => {
     })
 })
 
-function updateOdo() {
-    
-    odometers = Odometer.init();
-
-    for (const odometer of odometers) {
-
-        odometer.options.duration = parseFloat(data.odometerSpeed) * 1000 || 2000;
-        if (data.animationType === 'counting') {
-            odometer.options.animation = 'count';
-        } else if (data.animationType === 'ytstudio') {
-            odometer.options.animation = 'byDigit';
-        } else if (data.animationType === 'minimal') {
-            odometer.options.animation = 'minimal';
-        } else {
-            delete odometer.options.animation;
-        }
-
-        odometer.options.removeLeadingZeros = data.animationType === 'ytstudio';
-        odometer.options.reverseAnimation = data.reverseAnimation;
-        odometer.options.formatFunction = formatNumber;
-        odometer.render();
-    }
-}
-
 document.getElementById('abbreviate').addEventListener('click', function () {
     data.abbreviate = document.getElementById('abbreviate').checked;
 })
@@ -2987,22 +2919,27 @@ function saveAPIUpdates() {
     data.apiUpdates.customAPIList = document.getElementById('customAPIList').value ? document.getElementById('customAPIList').value.split(',') : [];
     data.apiUpdates.method = document.getElementById('apiMethod').value;
     data.apiUpdates.forceUpdates = document.getElementById('forceUpdates').checked;
-    let headers = document.getElementById('extraCred').value.toString().split(';&#10;').join(';\n').split(';\n')
-    let newHeaders = {}
+
+    let headers = document.getElementById('extraCred').value.toString().split(';').filter(x => x.trim());
+    let newHeaders = {};
     for (let i = 0; i < headers.length; i++) {
-        let header = headers[i].split(': ')
+        let header = headers[i].split(':').map(x => x.trim());
         if (header[1]) {
-            newHeaders[header[0]] = header[1]
+            newHeaders[header[0]] = header[1];
         }
     }
-    data.apiUpdates.headers = newHeaders
-    let body = document.getElementById('body').value.toString().split(';&#10;').join(';\n').split(';\n')
-    let newBody = {}
+    data.apiUpdates.headers = newHeaders;
+    
+    let body = document.getElementById('body').value.toString().split(';').filter(x => x.trim());
+    let newBody = {};
     for (let i = 0; i < body.length; i++) {
-        let header = body[i].split(':')
-        newBody[header[0]] = header[1]
+        let b = body[i].split(':').map(x => x.trim());
+        if (b[1]) {
+            newBody[b[0]] = b[1];
+        }
     }
-    data.apiUpdates.body = newBody
+    data.apiUpdates.body = newBody;
+
     data.apiUpdates.response = {
         'loop': document.getElementById('apiLoop').value,
         'name': {

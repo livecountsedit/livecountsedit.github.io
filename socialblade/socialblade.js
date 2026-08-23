@@ -1,5 +1,4 @@
 const CHART_TEXT_COLOR = '#bdbdbd';
-const CHART_LINE_COLOR = '#b3382c';
 const CHART_GRIDLINE_COLOR = '#000000';
 let chart;
 
@@ -12,6 +11,14 @@ window.onload = async () => {
     enableChartFeature();
 
     const extraKeys = {
+        cardStyles: {
+            chartLineColor: '#b3382c'
+        },
+        bgColor: '#eeeeee',
+        nameColor: '#b3382c',
+        mainFont: 'Roboto, sans-serif',
+        counterFontWeight: '700',
+        textColor: '#232323',
         socialBladeSettings: {
             countEditBox: false,
             counterType: 'youtube',
@@ -126,26 +133,16 @@ window.onload = async () => {
 }
 
 async function processImport(imported) {
-    if (!imported.data.length) {
-        imported.data.push(new Channel());
-    }
-    if (imported.data.length > 1) {
-        imported.data = imported.data.slice(0, 1);
-    }
-    imported.saveType = COUNTER_THEME;
-    imported.versionLastOpened = VERSION;
-    updateAutoSave();
-    updateStreamerMode();
     renderChart();
-    changeUpdateInterval();
-    refreshCount();
+    importingStuff(imported);
+    updateGainType(0);
     fix();
     return imported;
 }
 
 function afterDrawingMenu2() {
     updateGainType(0);
-    fillMenus(document.getElementById('settingsMenus'));
+    fillMenus();
     saveAPISettings(false);
     refreshCount();
 
@@ -176,7 +173,7 @@ document.getElementById('close').onclick = function () {
     document.getElementById('settingsMenu').style.visibility = "hidden"
 }
 
-function fix() {
+function fix(noOdo = false) {
     document.getElementById('userName').innerText = data.data[0].name || 'User';
     document.getElementById('updateIntervalDisplay').innerText = data.updateInterval === 1000 ? 'This page updates every second.' : `This page updates every ${data.updateInterval / 1000} seconds.`
     if (data.data[0].image !== document.getElementById('userimg').src) {
@@ -254,6 +251,31 @@ function fix() {
         document.getElementById('SearchInput').type = 'text';
         document.getElementById('saveCountButton').style.display = 'none';
     }
+
+    document.querySelector('.page-realtime-body').style.backgroundColor = data.bgColor;
+    document.getElementById('counter').style.color = data.textColor;
+    document.getElementById('counter').style.fontWeight = data.counterFontWeight;
+    document.getElementById('counter').style.fontFamily = data.mainFont;
+
+    document.getElementById('counterColor').innerText = `
+        #counter {
+            color: ${data.textColor};
+        }
+    `
+
+    document.getElementById('userName').style.color = data.nameColor;
+    document.getElementById('userName').style.fontFamily = data.mainFont;
+    document.querySelector('.realtime-watermark').style.fontFamily = data.mainFont;
+    try {
+        chart.series[0].update({
+            color: data.cardStyles.chartLineColor,
+            name: data.socialBladeSettings.counterType === 'youtube' ? 'Subscribers' : 'Followers',
+            lineColor: data.cardStyles.chartLineColor
+        })
+    } catch (err) {
+        console.error(err);
+    }
+    if (!noOdo) updateOdo();
 }
 
 function renderChart() {
@@ -296,36 +318,12 @@ function renderChart() {
         series: [
             {
                 showInLegend: false,
-                name: 'Subscribers',
+                name: data.socialBladeSettings.counterType === 'youtube' ? 'Subscribers' : 'Followers',
                 marker: { enabled: false},
-                color: CHART_LINE_COLOR,
-                lineColor: CHART_LINE_COLOR,
+                color: data.cardStyles.chartLineColor,
+                lineColor: data.cardStyles.chartLineColor,
                 data: data.saveChartData ? (data.liveGraph || []) : []
             }
         ]
     })
-}
-
-function updateChart(val) {
-
-    data.maxChartValues = clamp(Math.floor(data.maxChartValues), 2, 5000);
-
-    while (chart.series[0].data.length >= data.maxChartValues) {
-        chart.series[0].removePoint(0);
-    }
-
-    chart.series[0].addPoint([Date.now(), val]);
-
-    if (data.saveChartData) {
-        data.liveGraph = chart.series[0].data.map(x => [x.x, x.y])
-    } else {
-        data.liveGraph = [];
-    }
-}
-
-function clearChart() {
-    if (confirm('Are you sure you want to clear the chart?')) {
-        data.liveGraph = [];
-        renderChart();
-    }
 }

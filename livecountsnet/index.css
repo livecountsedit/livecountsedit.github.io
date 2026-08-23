@@ -14,6 +14,11 @@ body {
     background-color: var(--bg-color);
 }
 
+.menu {
+    color: black !important;
+    font-weight: 400 !important;
+}
+
 .lcnet-item {
     left: 0;
     right: 0;
@@ -163,8 +168,8 @@ body {
     transition: background-color .3s;
 }
 
-.tab-stuff {
-    float: left;
+.menu button {
+    margin-right: 5px;
 }
 
 .tab-content {
@@ -177,10 +182,6 @@ body {
 
 input[type=color] {
     margin: 0 auto;
-}
-
-.tabs button.active {
-    background-color: #aaaaaa;
 }
 
 .modal-dialog {

@@ -29,7 +29,9 @@ body {
 .tabs {
     float: left;
     border: 1px solid var(--border-color, #ddd);
-    width: 15%;
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 10vw;
     height: 100%;
     border-radius: 15px;
     overflow-y: auto;
@@ -57,14 +59,30 @@ body {
     background-color: #43436f
 }
 
-.tab-content {
-    float: left;
+.menu {
+    width: 45vw;
+}
+
+.tab-controls button, .tab-content button {
+    margin-right: 5px;
+}
+
+.tab-container {
+    max-width: 45vw;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     padding: 0px 12px;
     border: 1px solid var(--border-color, #ddd);
     border-left: none;
-    width: 30vw;
-    height: 100%;
     border-radius: 15px;
+}
+
+.tab-stuff {
+    flex: 1 1 auto;
+    text-align: center;
+    margin-top: 10px;
+    text-wrap: wrap;
     overflow-y: scroll;
 }
 
@@ -81,8 +99,8 @@ body {
 
 .counter-area {
     padding: 20px 5px;
-    width: 98%;
-    height: 87%;
+    width: 100%;
+    height: 100%;
     background-color: var(--counter-bg-color, #223);
     border-radius: 15px;
 }

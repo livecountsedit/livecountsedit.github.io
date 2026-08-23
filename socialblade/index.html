@@ -2,9 +2,9 @@
 
 <head>
     <title>Livecountsedit - SocialBlade</title>
-    <link href="../odometer.css" rel="stylesheet" type="text/css">
-    <link href="../common.css?v=7.8.4" rel="stylesheet" type="text/css">
-    <link href="./index.css?v=7.8.4" rel="stylesheet" type="text/css">
+    <link href="../odometer/odometer.css" rel="stylesheet" type="text/css">
+    <link href="../common.css?v=7.9" rel="stylesheet" type="text/css">
+    <link href="./index.css?v=7.9" rel="stylesheet" type="text/css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -25,6 +25,7 @@
     <meta property="og:image" content="https://lcedit.com/images/socialblade.png" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet" type="text/css" />
     <style id="noSocialBladeLogo"></style>
+    <style id="counterColor"></style>
 </head>
 <html>
 
@@ -44,7 +45,8 @@
             <hr>
             <div>
                 <h3>Questions, bugs, comments, or suggestions?</h3>
-                <p>Join the <a href="/about/discord.html">Livecountsedit Discord server!</a></p>
+                <p>Read our <a href="/about/faq.html">website FAQ</a>.</p>
+                <p>You can also join the <a href="/about/discord.html">Livecountsedit Discord server</a>!</p>
             </div>
             <hr>
             <div>
@@ -52,72 +54,6 @@
                 <p>This page is a parody of the original <a href="https://socialblade.com/youtube/realtime">SocialBlade Realtime Counter</a>. All credit goes to <a href="https://socialblade.com">SocialBlade LLC</a> for the design of this page.</p><br>
                 <p>Educational & fun purposes only. No copyright infrigment is intended. We do not condone the use of this site for spreading misinformation.</p><br>
             </div>
-            
-            <!-- <h3>API Updates</h3>
-            <div class="option">
-                <label for="api-channelID">Channel ID</label><br>
-                <input type="text" placeholder="Channel ID (e.g., UC...)" class="option-input" id="api-channelID">
-            </div>
-            <div class="option">
-                <label for="api-url">API URL</label><br>
-                <input type="text" placeholder="https://api.example.com/{{channelID}}" class="option-input" id="api-url">
-                <label>Use {{channelID}} where channel ID should be inserted</label>
-            </div>
-            <div class="option">
-                <label for="api-method">Method</label><br>
-                <select class="option-input" id="api-method">
-                    <option value="GET">GET</option>
-                    <option value="POST">POST</option>
-                </select>
-            </div>
-            <div class="option">
-                <label for="api-loop">Loop through (data = root)</label><br>
-                <input type="text" placeholder="data" class="option-input" id="api-loop">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-updateName">Update Name</span><br>
-                <input type="text" placeholder="Name path (e.g., snippet.title)" class="option-input" id="api-pathName">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-updateImage">Update Image</span><br>
-                <input type="text" placeholder="Image path (e.g., snippet.thumbnails.default.url)" class="option-input" id="api-pathImage">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-updateCount">Update Count</span><br>
-                <input type="text" placeholder="Count path (e.g., statistics.subscriberCount)" class="option-input" id="api-pathCount">
-            </div>
-            <div class="option">
-                <label for="api-pathID">ID Path (Required)</label><br>
-                <input type="text" placeholder="id" class="option-input" id="api-pathID">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-IDIncludes">ID Includes (Enable if ID is part of another string)</span>
-            </div>
-            <div class="option">
-                <label for="api-headers">Headers (optional, format: HeaderName: value;)</label><br>
-                <textarea class="option-input" id="api-headers" rows="3"></textarea>
-            </div>
-            <div class="option">
-                <label for="api-body">Body (optional, for POST, format: key: value;)</label><br>
-                <textarea class="option-input" id="api-body" rows="3"></textarea>
-            </div>
-            <div class="option">
-                <label for="api-interval">Update Interval (seconds)</label><br>
-                <input type="number" placeholder="10" class="option-input" id="api-interval" min="1">
-            </div>
-            <div class="option">
-                <span><input type="checkbox" id="api-forceUpdates">Force Updates (even without count changes)</span>
-            </div>
-            <div class="option">
-                <button onclick="saveAPIUpdates()">Save API Update Settings</button>
-                <button onclick="apiUpdate()">Update Now</button>
-                <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
-            </div>
-            <div class="option">
-                <label>Status: <span id="apiStatusIndicator">--</span></label>
-            </div>
-            <hr> -->
-
         </div>
     <div id="notification_overlay"
         style="position:fixed; top:0; bottom:0; left:0; right:0; background-color:#222; opacity:0.95; z-index:100001; display: none;">
@@ -224,7 +160,7 @@
         </div>
     </div>
 
-    <script src="../odometer.js" type="text/javascript"></script>
+    <script src="../odometer/odometer.js" type="text/javascript"></script>
 
     <div id="footer-bottom-bar-wrap">
         <div id="footer-bottom-bar">
@@ -238,10 +174,11 @@
     </div>
     <script src="../jquery.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
-    <script src="../commonUtils.js?v=7.8.4"></script>
-    <script src="../commonCounter.js?v=7.8.4"></script>
+    <script src="../converter/converter.js?v=7.9"></script>
+    <script src="../commonUtils.js?v=7.9"></script>
+    <script src="../commonCounter.js?v=7.9"></script>
     <script src="../highstock.js"></script>
-    <script src="./socialblade.js?v=7.8.4"></script>
+    <script src="./socialblade.js?v=7.9"></script>
 </body>
 
 </html>

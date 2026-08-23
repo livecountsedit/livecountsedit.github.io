@@ -495,31 +495,4 @@ function estimatePassingTime(topChannel, bottomChannel) {
     : diff / (bottomGainSet - topGainSet);
 }
 
-function formatNumber(num, options) {
-    switch (data.numberFormat) {
-        case 'dot':
-            return num.toLocaleString('de-DE', options);
-        case 'space':
-            return num.toLocaleString('en-US', options).replace(/,/g, '\u00a0');
-        case 'spaceComma':
-            return num.toLocaleString('de-DE', options).replace(/\./g, '\u00a0');
-        case 'indian':
-            return num.toLocaleString('hi-IN', options);
-        case 'apo':
-            return num.toLocaleString('en-US', options).replace(/,/g, "'");
-        case 'apoComma':
-            return num.toLocaleString('de-DE', options).replace(/\./g, "'");
-        case 'noSep':
-            if (!options) options = {};
-            options.useGrouping = false;
-            return num.toLocaleString('US', options);
-        case 'noSepComma':
-            if (!options) options = {};
-            options.useGrouping = false;
-            return num.toLocaleString('DE', options);
-        default:
-            return num.toLocaleString('en-US', options);
-    }
-}
-
 initializeCopyButtons();

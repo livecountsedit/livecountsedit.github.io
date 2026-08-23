@@ -3,7 +3,8 @@
 
 <head>
     <title>Livecountsedit - Fake YouTube Studio</title>
-    <link href="./odometer.css" rel="stylesheet">
+    <link href="../odometer/odometer.css" rel="stylesheet">
+    <link href="../common.css?v=7.9" rel="stylesheet">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -22,189 +23,36 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://lcedit.com" />
     <meta property="og:image" content="../images/studio.png" />
-    <link rel="stylesheet" id="themeStylesheet" href="./dark.css">
+    <link rel="stylesheet" id="themeStylesheet" href="./dark.css?v=7.9">
     <script src="../highstock.js"></script>
+    <style id="counterColor"></style>
 </head>
 
 <body>
-    <div id="settingsMenu">
+    <div id="settingsMenu" class="menu">
         <button id="close">Close</button><br><br>
-        <hr class="hr2">
-        <br>
-        <h1>Settings</h1>
-        <div class="option">
-            <label>Counter title/Username</label><br>
-            <input type="text" placeholder="Channel Name" id="name_input" autocomplete="off" value="Livecountsedit">
-        </div>
-        <div class="option">
-            <label>Footer/Label</label><br>
-            <input type="text" placeholder="Footer Title" id="footer_input" autocomplete="off">
-        </div>
-        <br>
-        <br>
-        <div class="option">
-            <label>Avatar URL</label><br>
-            <input type="text" placeholder="https://example.com/image.png" id="image_input"
-                autocomplete="off" value="../default.png"><br>
-            <strong>OR</strong>
-            <input type="file" id="file_input" accept="image/*" autocomplete="off">
-        </div>
-        <br>
-        <div class="option">
-            <label>Counter value (whole numbers only)</label><br>
-            <input type="number" placeholder="Channel Subscribers" id="subscribers_input" autocomplete="off" value="0">
-            <input type="checkbox" id="enabled" autocomplete="off" checked>
-        </div>
-        <br>
-        <button onclick="submit()">Set Settings</button>
-        <br>
-        <hr class="hr2">
-        <br>
-        <p>Counter Gain Rate</p>
-        <div class="option-section">
-            <div class="option">
-                <p>
-                    <span>Min Subs</span>
-                    <span><input type="number" id="min_subs" autocomplete="off" placeholder="0"></span>
-                    <br>
-                    <br>
-                    <span>Max Subs</span>
-                    <span><input type="number" id="max_subs" autocomplete="off" placeholder="0"></span>
-                    <br>
-                    <br>
-                    <span>Per Every</span>
-                    <span><input type="number" id="updateInterval" autocomplete="off" placeholder="2"></span><label> seconds</label>
-                    <br>
-                </p>
-                <br>
-                <button onclick="submit1()">Set Rates</button>
-            </div>
-        </div>
-        <br>
-        <hr class="hr2">
-        <br>
-        <p>Graph Type:</p>
-        <select class="option-input" id="graph_type">
-            <option value="live">Live</option>
-            <option value="set">Set Data</option>
-        </select><br>
-        <br>
-        <input id="dropdownTopText" placeholder="Top Text" autocomplete="off">
-        <input id="dropdownBottomText" placeholder="Bottom Text" autocomplete="off"><br>
-        <label>Max Graph Points: </label><input id="maxPoints" placeholder="100" autocomplete="off">
-        <br><br>
-        <div class="options">
-            <label>Graph Dates</label><br>
-            <textarea type="text" id="graph_dates"
-                autocomplete="off">Aug 31 2023, Sep 1 2023, Sep 2 2023, Sep 3 2023, Sep 4 2023, Sep 5 2023, Sep 6 2023</textarea><br>
-            <label>Graph Values</label><br>
-            <textarea type="text" id="graph_values" autocomplete="off">1, 2, 3, 4, 5, 6, 7</textarea>
-        </div>
-        <button onclick="submit2()">Save Settings</button><br>
-        <button onclick="clearChart()">Clear Chart</button><br>
-        <br>
-        <hr class="hr2">
-        <br>
-        <p>Select comma type:</p>
-        <select name="selectcomma" id="selectcomma">
-            <option value="comma1">,ddd (1,234,567)</option>
-            <option value="comma2">.ddd (1.234.567)</option>
-            <option value="comma3"> ddd (1 234 567)</option>
-        </select>
-        <br>
-        <br>
-        <hr class="hr2">
-
-        <div style="display: flex; width: 100%; gap: 0.3em;">
-            <button onclick="saveData()">Save Data</button>
-            <button onclick="exportData()">Export Data</button>
-            <button onclick="resetData()">Reset Data</button>
-            <button onclick="toggleTheme()">Switch Theme (light/dark)</button>
-        </div><br>
-        <div style="display: flex; width: 100%; gap: 5em;">
-            <div>
-                <label>Autosave (15s)</label>
-                <input type="checkbox" id="autosave" autocomplete="off">
-            </div>
-            <div>
-                <label>Import Data</label>
-                <input type="file" id="file_input2" accept=".json">
-            </div>
-        </div><br>
-    <hr class="hr2">
-    <p>Having issues with the counter not showing up correctly? Try the <a href="./old/index.html">old version</a> from before the odometer update. Alternatively, use the setting below.</p>
-    <input type="number" id="marginTopOfCount" placeholder="Margin Top of Count" autocomplete="off">
-    <button onclick="setMarginTopOfCount()">Set Margin Top of Count</button><br>
-    <label>0 is the default, the lower the number (including negative) the higher the count will be placed on screen and vice versa</label>
-    <hr class="hr2">
-    <br>
-    <h3>API Updates</h3>
-    <div class="option">
-        <label for="api-channelID">Channel ID</label><br>
-        <input type="text" placeholder="Channel ID (e.g., UC...)" id="api-channelID" autocomplete="off">
+        <p>💡 Tip: Press the <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" class="svg6"
+                        onclick="openmenu()">
+                        <g>
+                            <path
+                                d="M13,14h-2v-2h2V14z M13,5h-2v6h2V5z M19,3H5v16.59l3.29-3.29L8.59,16H9h10V3 M20,2v15H9l-5,5V2H20L20,2z">
+                            </path>
+                        </g>
+                    </svg> icon on the top right to reopen the menu.</p>
+        <hr>
+        <div class="tab-controls"></div><br><hr>
+        <div class="tabs"></div><br><hr>
+        <div class="tab-stuff"></div><br><hr>
+        <button onclick="setLightTheme()">Set light theme</button><button onclick="setDarkTheme()">Set dark theme</button>
+    <br><br><br><hr>
+    <div>
+        <h3>Questions, bugs, comments, or suggestions?</h3>
+        <p>Read our <a href="/about/faq.html">website FAQ</a>.</p>
+        <p>You can also join the <a href="/about/discord.html">Livecountsedit Discord server</a>!</p>
     </div>
-    <div class="option">
-        <label for="api-url">API URL</label><br>
-        <input type="text" placeholder="https://api.example.com/{{channelID}}" id="api-url" autocomplete="off">
-        <label>Use {{channelID}} where channel ID should be inserted</label>
-    </div>
-    <div class="option">
-        <label for="api-method">Method</label><br>
-        <select id="api-method">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-        </select>
-    </div>
-    <div class="option">
-        <label for="api-loop">Loop through (data = root)</label><br>
-        <input type="text" placeholder="data" id="api-loop" autocomplete="off">
-    </div>
-    <div class="option">
-        <span><input type="checkbox" id="api-updateName">Update Name</span><br>
-        <input type="text" placeholder="Name path (e.g., snippet.title)" id="api-pathName" autocomplete="off">
-    </div>
-    <div class="option">
-        <span><input type="checkbox" id="api-updateImage">Update Image</span><br>
-        <input type="text" placeholder="Image path (e.g., snippet.thumbnails.default.url)" id="api-pathImage" autocomplete="off">
-    </div>
-    <div class="option">
-        <span><input type="checkbox" id="api-updateCount">Update Count</span><br>
-        <input type="text" placeholder="Count path (e.g., statistics.subscriberCount)" id="api-pathCount" autocomplete="off">
-    </div>
-    <div class="option">
-        <label for="api-pathID">ID Path (Required)</label><br>
-        <input type="text" placeholder="id" id="api-pathID" autocomplete="off">
-    </div>
-    <div class="option">
-        <span><input type="checkbox" id="api-IDIncludes">ID Includes (Enable if ID is part of another string)</span>
-    </div>
-    <div class="option">
-        <label for="api-headers">Headers (optional, format: HeaderName: value;)</label><br>
-        <textarea id="api-headers" rows="3" autocomplete="off"></textarea>
-    </div>
-    <div class="option">
-        <label for="api-body">Body (optional, for POST, format: key: value;)</label><br>
-        <textarea id="api-body" rows="3" autocomplete="off"></textarea>
-    </div>
-    <div class="option">
-        <label for="api-interval">Update Interval (seconds)</label><br>
-        <input type="number" placeholder="10" id="api-interval" min="1" autocomplete="off">
-    </div>
-    <div class="option">
-        <span><input type="checkbox" id="api-forceUpdates">Force Updates (even without count changes)</span>
-    </div>
-    <div class="option">
-        <button onclick="saveAPIUpdates()">Save API Update Settings</button>
-        <button onclick="apiUpdate()">Update Now</button>
-        <button onclick="enableApiUpdate()" id="enableApiUpdate">Enable API Updates</button>
-    </div>
-    <div class="option">
-        <label>Status: <span id="apiStatusIndicator">--</span></label>
-    </div>
-    <hr class="hr2">
-    <br>
+    <hr>
     <h3>Disclaimer</h3>
-            <p>This page is a parody of the original YouTube Studio live counter, which can be accessed in the <a href="https://studio.youtube.com">YouTube Studio</a>. All credit goes to <a href="https://youtube.com/">YouTube</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
+    <p>This page is a parody of the original YouTube Studio live counter, which can be accessed in the <a href="https://studio.youtube.com">YouTube Studio</a>. All credit goes to <a href="https://youtube.com/">YouTube</a> for the design of this page. Educational and fun purposes only. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
 </div>
     <div class="header">
         <div class="sub-header">
@@ -250,7 +98,12 @@
                     </svg>
                 </div>
             </div>
+            <div id="manual-input">
+                <input type="number" placeholder="Count" id="studio-input-count">
+                <button id="saveCountButton">Set</button>
+            </div>
         </div>
+        
     </div>
     <img src="../default.png" id="image">
     <p id="name">Livecountsedit</p>
@@ -269,7 +122,7 @@
                     </div>
                     <div></div>
                     <div class="chart-dropdown-area1">
-                        <div class="chart-dropdown-area1">
+                        <div class="chart-dropdown-area1 chart-dropdown-area1-inner">
                             <div class="alignLeft">
                                 <p id="dropdown-label1">
                                     Aug 31 - Sep 6, 2023</p>
@@ -298,6 +151,10 @@
         </div>
     </div>
 </body>
-<script src="./script.js"></script>
-<script src="./odometer.js"></script>
+<script src="../odometer/odometer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+<script src="../converter/converter.js?v=7.9"></script>
+<script src="../commonUtils.js?v=7.9"></script>
+<script src="../commonCounter.js?v=7.9"></script>
+<script src="./studio.js?v=7.9"></script>
 </html>

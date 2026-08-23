@@ -529,23 +529,23 @@ div.page-realtime-body .containment:after {
 }
 
 .realtime-username-youtube {
-    color: #b3382c !important;
+    color: #b3382c;
 }
 
 .realtime-username-twitter {
-    color: #b3382c !important;
+    color: #b3382c;
 }
 
 .realtime-username-twitch {
-    color: #b3382c !important;
+    color: #b3382c;
 }
 
 .realtime-username-instagram {
-    color: #b3382c !important;
+    color: #b3382c;
 }
 
 .realtime-username-tiktok {
-    color: #ff4c74 !important;
+    color: #ff4c74;
 }
 
 .page-realtime-body h5.odometer {

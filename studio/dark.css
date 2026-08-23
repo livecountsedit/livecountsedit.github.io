@@ -122,6 +122,10 @@ body {
   padding: 5px;
 }
 
+.svg6 {
+    height: 18px;
+}
+
 #image {
   position: absolute;
   top: 119px;
@@ -131,6 +135,7 @@ body {
   height: 80px;
   border: 8px solid #282828;
   border-radius: 50%;
+  z-index: 1;
 }
 
 #name {
@@ -327,4 +332,10 @@ textarea {
 
 .svg2,.svg3 {
   cursor: pointer;
+}
+
+#manual-input {
+    position: absolute;
+    top: 16px;
+    right: 100px;
 }

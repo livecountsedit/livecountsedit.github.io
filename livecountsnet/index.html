@@ -4,7 +4,8 @@
     <title>Livecountsedit - Fake livecounts.net</title>
     <link href="../odometer/odometer.css" rel="stylesheet">
     <link href="../bootstrap.css" rel="stylesheet">
-    <link href="./index.css" rel="stylesheet" type="text/css">
+    <link href="../common.css?v=7.9" rel="stylesheet">
+    <link href="./index.css?v=7.9" rel="stylesheet" type="text/css">
     <link rel="icon" href="../logo.png">
     <meta charSet="utf-8" />
     <meta name="description"
@@ -24,6 +25,7 @@
     <meta property="og:url" content="https://lcedit.com" />
     <meta property="og:image" content="https://lcedit.com/images/lcnet.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style id="counterColor"></style>
 </head>
 <noscript>Please enable JavaScript.</noscript>
 
@@ -34,20 +36,11 @@
                 <div class="modal-header">
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="tabs">
-                        <div class="tab-buttons"></div>
-                        <button class="btn btn-primary" onclick="submit()">Save settings</button><br>
-                        <button class="btn btn-primary" onclick="refreshCount()">Refresh count</button><br>
-                        <button class="btn btn-danger" onclick="reset()">Reset</button><br>
-                        <button id="pause-button" class="btn btn-secondary" onclick="togglePause()">Pause</button><br>
-                        <button class="btn btn-secondary" onclick="version()">Check version</button><br>
-                        <button class="btn btn-secondary" onclick="exportToJSON()">Export data (public)</button><br>
-                        <button class="btn btn-danger" onclick="exportToJSON(true)">Export data (private)</button><br>
-                        <button class="btn btn-secondary" onclick="document.querySelector('#import-data-v7').click()">Import data (v7)</button><br>
-                        <input type="file" class="file-import" id="import-data-v7" accept=".json">
-                    </div>
-                    <div class="tab-stuff"></div>
+                <div class="modal-body menu">
+                    <div class="tab-controls"></div><hr>
+                    <div class="tabs"></div><br><hr>
+                    <div class="tab-stuff"></div><br><hr>
+                    <button onclick="setLightTheme()">Set light theme</button><button onclick="setDarkTheme()">Set dark theme</button>
                 </div>
             </div>
         </div>
@@ -73,16 +66,20 @@
         <div id="lcnet-footer" class="lcnet-item">
             <div id="manual-input">
                 <input type="number" placeholder="Count" id="lcnet-input-count">
-                <button onclick="setCountManually()">Set</button>
+                <button id="saveCountButton">Set</button>
             </div>
-            Version 7.1.5 • Disclaimer: We are not affiliated with the real livecounts.net • <a href="/">Back to main page</a>
+            Disclaimer: We are not affiliated with the real livecounts.net • <a href="/">Back to main page</a>
             <i class="fa fa-bars" data-bs-toggle="modal" data-bs-target="#lcnet-settings-modal"></i>
         </div>
     </div>
 </body>
 <script src="../odometer/odometer.js"></script>
-<script src="../drawMenu.js"></script>
 <script src="../bootstrap.js"></script>
-<script src="../counter.js"></script>
-<script src="./lcnet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+<script src="../converter/converter.js?v=7.9"></script>
+<script src="../commonUtils.js?v=7.9"></script>
+<script src="../commonCounter.js?v=7.9"></script>
+<script src="./livecountsnet.js?v=7.9"></script>
+<!-- <script src="../counter.js"></script>
+<script src="./lcnet.js"></script> -->
 </html>
