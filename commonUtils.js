@@ -1,7 +1,7 @@
 const AUTOSAVE_INTERVAL = 15000;
-const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio'];
-const DB_VERSION = 7;
-const VERSION = '7.9.1';
+const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo'];
+const DB_VERSION = 9;
+const VERSION = '7.10';
 const SAVE_VERSION = 9;
 let obsMode;
 
@@ -223,8 +223,9 @@ function afterDrawingMenu() {
 
     document.getElementById('apiSourcePreset')?.addEventListener('change', () => {
         const val = document.getElementById('apiSourcePreset').value;
+        const isVideo = (COUNTER_THEME && COUNTER_THEME.includes('video'));
         if (!val || val === 'custom') return;
-        data.apiUpdates.url = 'https://mixerno.space/api/youtube-channel-counter/user/';
+        data.apiUpdates.url = isVideo ? 'https://mixerno.space/api/youtube-video-counter/user/' : 'https://mixerno.space/api/youtube-channel-counter/user/';
         data.apiUpdates.headers = {};
         data.apiUpdates.body = {};
         data.apiUpdates.response.loop = 'data';
@@ -248,8 +249,13 @@ function afterDrawingMenu() {
         }
 
         if (data.apiUpdates.response.videos) {
-            data.apiUpdates.response.videos.enabled = true;
-            data.apiUpdates.response.videos.path = 'counts[5].count';
+            data.apiUpdates.response.videos.enabled = !isVideo;
+            data.apiUpdates.response.videos.path = isVideo ? 'counts[4].count' : 'counts[5].count';
+        }
+
+        if (data.apiUpdates.response.comments) {
+            data.apiUpdates.response.comments.enabled = true;
+            data.apiUpdates.response.comments.path = 'counts[5].count'
         }
         fillMenus();
     })
@@ -278,7 +284,6 @@ function afterDrawingMenu() {
     })
 
     loadOBSMode();
-
     afterDrawingMenu2();
 }
 
@@ -501,9 +506,13 @@ function processData(dat) {
                 }
             }
 
-            if (!dat.partialExports.viewAndVideoCounts && dat.saveType === 'akshatmittal') {
+            if (!dat.partialExports.viewAndVideoCounts && ['livecountsnet', 'akshatmittal', 'livecountseditvideo', 'akshatmittalvideo'].includes(dat.saveType)) {
                 dat.data = dat.data.slice(0, 1);
             }
+        }
+
+        if (!dat.partialExports.viewAndVideoCounts && ['livecountsnet', 'akshatmittal', 'livecountseditvideo', 'akshatmittalvideo'].includes(dat.saveType)) {
+            delete dat.viewCounters;
         }
         if (!dat.partialExports.charts) {
             if (dat.cardStyles) {
@@ -657,7 +666,7 @@ function exportData(shouldAlert = true) {
     const file = new Blob([jsonData], { type: 'text/plain' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(file);
-    a.download = 'export.json';
+    a.download = (COUNTER_THEME || 'export') + '.json';
     a.click();
     delete a;
 }
@@ -668,6 +677,10 @@ class Channel {
         this.name = options.name || 'User';
         this.count = parseFloat(options.count) || 0;
         this.image = options.image || '/default.png'
+        if (COUNTER_THEME && COUNTER_THEME.includes('video')) {
+            this.name = 'Video';
+            this.image = '/default_thumbnail.jpg';
+        }
         this.min_gain = parseFloat(options.min_gain) || 0;
         this.max_gain = parseFloat(options.max_gain) || 0;
         this.mean_gain = parseFloat(options.mean_gain);
@@ -687,11 +700,15 @@ class Channel {
         }
     }
 
-    getDisplayedCount() {
+    getDisplayedCount(index = 0) {
+        if (data.abbreviate && this.isSubCounter()) return abb(this.getUnabbreviatedCount());
+        else return this.getUnabbreviatedCount();
+    }
+
+    getUnabbreviatedCount() {
         if (!data.allowNegative && this.count < 0) this.count = 0;
         this.count = clamp(this.count, -Channel.MAX_MAGNITUDE, Channel.MAX_MAGNITUDE);
-        if (data.abbreviate) return abb(this.count);
-        else return isFinite(this.count) ? Math.floor(this.count) : 0;
+        return isFinite(this.count) ? Math.floor(this.count) : 0;
     }
 
     getGainMultiplier() {
@@ -725,7 +742,15 @@ class Channel {
     gain() {
 
         // Ignore gains if using a real sub count
-        if (data.apiUpdates.enabled && data.apiUpdates.forceUpdates) return;
+        if (data.apiUpdates.enabled) {
+            if (data.apiUpdates.forceUpdates) return;
+            const index = this.getIndex();
+            if (!this.isSubCounter() && data.apiUpdates.response.count.enabled && index === 0) return;
+            if (!this.isSubCounter() && data.apiUpdates.response.views?.enabled && index === 1) return;
+            if (!this.isSubCounter() && data.apiUpdates.response.videos?.enabled && index === 2) return;
+            if (!this.isSubCounter() && data.apiUpdates.response.comments?.enabled && index === 3) return;
+        }
+
         if (!isFinite(this.custom_counter_data.updateProbability)) {
             this.custom_counter_data.updateProbability = 100;
         }
@@ -919,6 +944,15 @@ class Channel {
                 }
             }
         }
+    }
+
+    getIndex() {
+        return data.data.findIndex(x => x.id === this.id);
+    }
+
+    isSubCounter() {
+        const index = this.getIndex();
+        return COUNTER_THEME === 'top50' || (COUNTER_THEME.includes('compare') ? index <= 1 : (COUNTER_THEME.includes('video') ? false : index === 0));
     }
 
     static doGains() {

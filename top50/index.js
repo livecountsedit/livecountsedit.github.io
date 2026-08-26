@@ -673,12 +673,13 @@ function initializeCharts() {
         let chartData = [];
         if (gainTable[channel.id] && gainTable[channel.id].length > 0) {
             const now = Date.now();
-            const dataPoints = gainTable[channel.id].slice(-(data.maxChartValues + 1), -1);
+            const dataPoints = gainTable[channel.id].slice(-(data.maxChartValues+1), -1);
             chartData = dataPoints.map((value, index) => {
                 // Create timestamps going back in time
-                const timeOffset = (dataPoints.length - index - 1) * data.updateInterval;
+                const timeOffset = (dataPoints.length - index) * data.updateInterval;
                 return [now - timeOffset, getDisplayedCount(value) || 0];
             });
+            console.log(chartData)
         } else {
             // Start with current count - add at least 2 points so line is visible
             const now = Date.now();
@@ -785,12 +786,8 @@ function updateCharts() {
                 const count = getDisplayedCount(channel.count) || 0;
 
                 //Add new point
-                series.addPoint([now, count], true, true);
+                series.addPoint([now, count], true, series.data.length === data.maxChartValues);
 
-                // Keep only last 50 points for performance
-                while (series.data.length > data.maxChartValues) {
-                    series.data[0].remove(false);
-                }
             }
         } catch (e) {
             // Ignore errors when updating charts

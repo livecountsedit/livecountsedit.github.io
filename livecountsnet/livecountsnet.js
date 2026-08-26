@@ -110,17 +110,8 @@ window.onload = async () => {
         }
     }
 
-    if (!data) data = structuredClone(example_data);
-    data.data = data.data.slice(0, 2);
-    data.data = data.data.map(x => new Channel(x));
-    while (data.data.length < 2) { 
-        data.data.push(new Channel());
-    }
-
-    
-
+    fixData(2);
     drawMenu(MENU, document.querySelector('.tabs'), document.querySelector('.tab-stuff'), document.querySelector('.tab-controls'));
-
     afterDrawingMenu();
     await processImport(data);
 }
@@ -128,14 +119,12 @@ window.onload = async () => {
 async function processImport(imported) {
     importingStuff(imported, 2);
     fix();
-    updateGainType(0);
-    updateGainType(1);
+    updateGainTypes(2);
     return imported;
 }
 
 function afterDrawingMenu2() {
-    updateGainType(0);
-    updateGainType(1);
+    updateGainTypes(2);
     fillMenus();
     saveAPISettings(false);
     refreshCount();
@@ -153,7 +142,7 @@ function updateCounters2(doGains = true) {
     document.getElementById('lcnet-count').innerText = count;
 
     if (data.lcnetSettings.viewCounter) {
-        const viewCount = data.data[1].getDisplayedCount();
+        const viewCount = data.data[1].getUnabbreviatedCount();
         document.getElementById('lcnet-small-count').innerText = viewCount;
         document.getElementById('lcnet-small-text').innerText = 'total video views'
     } else {

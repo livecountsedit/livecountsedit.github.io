@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=0.9, user-scalable=no">
     <title>Livecountsedit - Fake Akshatmittal Video</title>
     <link rel="icon" href="../../logo.png">
+    <link rel="stylesheet" href="../../common.css">
     <meta charSet="utf-8" />
     <meta name="description"
         content="Livecountsedit - BEST LIVE PLATFORM FOR FAKE SUB COUNTS OF YOUTUBE, SOCIALBLADE, YT Studio, TOP 50, FYSC, FSCW" />
@@ -30,8 +31,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"
         integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700" rel="stylesheet">
-    <link href="../odometer.css" rel="stylesheet">
-    <link href="../index.css" rel="stylesheet">
+    <link href="../../odometer/odometer.css" rel="stylesheet">
+    <link href="../index.css?v=7.10" rel="stylesheet">
+    <style id="counterColor"></style>
 </head>
 
 <body class="fix-header fix-sidebar card-no-border">
@@ -154,10 +156,10 @@
                 <div class="row">
                     <!-- Column -->
                     <div class="col-sm-12">
-                        <h3 class="m-t-20 m-b-0 text-center" style="font-size: 2em;">YouTube Live View Count</h3>
+                        <h3 class="m-t-20 m-b-0 text-center" style="font-size: 2em;" id="headerText">YouTube Live View Count</h3>
                     </div>
                     <div class="col-sm-12">
-                        <div class="card m-b-0 m-t-20">
+                        <div class="card main-card m-b-0 m-t-20">
                             <div class="card-block little-profile p-b-0 text-center">
                                 <div class="pro-img">
                                     <img src="../../default.png"
@@ -185,7 +187,7 @@
                 <div class="row" id="sharer">
                     <div class="col-12">
                         <div class="card-block text-center">
-                            <div class="text-center p-t-0 row">
+                            <div class="text-center p-t-0 row social-media-buttons">
                                 <div class="col-12 col-md-4">
                                     <div class="card no-shadow btn-youtube mb-0 p-2 waves-effect" id="yt_shareyt">
                                         <span class="font-light m-b-0"><i class="fab fa-youtube"></i> Watch</span>
@@ -209,45 +211,45 @@
                 <div class="row" style="margin-top: 1px;">
                     <div class="col-sm-12" id="yt_sharear2">
                         <div class="row">
-                            <div class="col-12 col-lg-4">
-                                <div class="card">
+                            <div class="col-12 col-lg-4" id="likeCounter">
+                                <div class="card main-card">
                                     <div class="card-block">
                                         <div class="card-body">
                                             <div class="position-relative">
                                                 <div class="mt-2 ml-2 white">
                                                     <h1 class="display-5 odometer odometer-theme-minimal" id="yt_likes">
                                                         0</h1>
-                                                    <span>Likes</span>
+                                                    <span id="footer1">Likes</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="card">
+                            <div class="col-12 col-lg-4" id="dislikeCounter">
+                                <div class="card main-card">
                                     <div class="card-block">
                                         <div class="card-body">
                                             <div class="position-relative">
                                                 <div class="mt-2 ml-2 white">
                                                     <h1 class="display-5 odometer odometer-theme-minimal"
                                                         id="yt_dislikes">0</h1>
-                                                    <span>Dislikes</span>
+                                                    <span id=footer2>Dislikes</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="card">
+                            <div class="col-12 col-lg-4" id="commentCounter">
+                                <div class="card main-card">
                                     <div class="card-block">
                                         <div class="card-body">
                                             <div class="position-relative">
                                                 <div class="mt-2 ml-2 white">
                                                     <h1 class="display-5 odometer odometer-theme-minimal"
                                                         id="yt_comments">0</h1>
-                                                    <span>Comments</span>
+                                                    <span id="footer3">Comments</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -261,20 +263,20 @@
                 <a href="https://akshatmittal.com/youtube-realtime/"><button>This website is a parody of the orignal
                         site.</button></a>
                 <br>
-                <div class="row">
+                <div class="row social-media-buttons">
                     <div class="col-sm-12">
                         <div class="card-block text-center p-t-0">
-                            <a href="https://www.facebook.com/itsreallyakshat" target="_blank">
+                            <a target="_blank">
                                 <div class="align-self-center btn-facebook m-1 round">
                                     <i class="fab fa-facebook"></i>
                                 </div>
                             </a>
-                            <a href="https://www.twitter.com/iakshatmittal" target="_blank">
+                            <a target="_blank">
                                 <div class="align-self-center btn-twitter m-1 round">
                                     <i class="fab fa-twitter"></i>
                                 </div>
                             </a>
-                            <a href="https://www.instagram.com/itsreallyakshat" target="_blank">
+                            <a target="_blank">
                                 <div class="align-self-center btn-instagram m-1 round">
                                     <i class="fab fa-instagram"></i>
                                 </div>
@@ -284,196 +286,40 @@
                 </div>
             </div>
         </div>
-        <center>
-            <div>
-                <div class="option">
-                    <label for="options.counter.title">Counter title/Video Name</label><br>
-                    <input type="text" placeholder="Video Name" class="option-input" id="options.counter.title" value="Video">
-                </div>
-                <br>
-                <div class="option">
-                    <label for="options.counter.avatar.url">Thumbnail URL</label><br>
-                    <input type="text" class="option-input" id="options.counter.avatar.url" value="https://lcedit.com/default.png"><br>
-                    <strong>OR</strong>
-                    <input type="file" class="option-input" id="options.counter.avatar.file">
-                </div>
-                <br>
-                <div class="option">
-                    <label for="options.counter.value">View Counter Value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 1" class="option-input" id="options.counter.value" value="0">
-                    <button onclick="submit1()">Submit</button>
-                </div>
-                <div class="option">
-                    <label for="options.counter.value">Like Counter Value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 2" class="option-input" id="options.counter.value2" value="0">
-                    <button onclick="submit2()">Submit</button>
-                </div>
-                <div class="option">
-                    <label for="options.counter.value">Dislike Counter Value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 3" class="option-input" id="options.counter.value3" value="0">
-                    <button onclick="submit3()">Submit</button>
-                </div>
-                <div class="option">
-                    <label for="options.counter.value">Comment Counter Value (integers only)</label><br>
-                    <input type="text" placeholder="Counter 4" class="option-input" id="options.counter.value4" value="0">
-                    <button onclick="submit4()">Submit</button>
-                </div>
-
-                <br>
-                <p>View Counter Gain Rate</p>
-                <div class="option-section" id="options.counter.rates.mode.0">
-                    <div class="option">
-                        <span>Min Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum0" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Max Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum0" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Update Interval</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units0" ></span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit0">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second0">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute0">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour0">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day0">day(s)</option>
-                            </select></span>
-                        <br>
-                        <br>
-                        <span>Counter Gain Rate In Per 1:</span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit00">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second00">second</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute00">minute</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour00">hour</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day00">day</option>
-                            </select></span>
-                        </p>
-                    </div>
-                </div>
-                <br>
-                <p>Like Counter Gain Rate</p>
-                <div class="option-section" id="options.counter.rates.mode.1">
-                    <div class="option">
-                        <span>Min Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum1" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Max Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum1" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Update Interval</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units1" value=2></span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit1">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second1">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute1">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour1">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day1">day(s)</option>
-                            </select></span>
-                        <br>
-                        <br>
-                        <span>Counter Gain Rate In Per 1:</span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit11">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second11">second</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute11">minute</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour11">hour</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day11">day</option>
-                            </select></span>
-                        </p>
-                    </div>
-                </div>
-                <br>
-                <p>Dislike Counter Gain Rate</p>
-                <div class="option-section" id="options.counter.rates.mode.2">
-                    <div class="option">
-                        <span>Min Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum2" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Max Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum2" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Update Interval</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units2" value=2></span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit2">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second2">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute2">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour2">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day2">day(s)</option>
-                            </select></span>
-                        <br>
-                        <br>
-                        <span>Counter Gain Rate In Per 1:</span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit22">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second22">second</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute22">minute</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour22">hour</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day22">day</option>
-                            </select></span>
-                        </p>
-                    </div>
-                </div>
-                <br>
-                <p>Comment Counter Gain Rate</p>
-                <div class="option-section" id="options.counter.rates.mode.3">
-                    <div class="option">
-                        <span>Min Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMinimum3" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Max Rate</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.basicMaximum3" value="0"></span>
-                        <br>
-                        <br>
-                        <span>Update Interval</span>
-                        <span><input type="number" class="short-input option-input"
-                                id="options.counter.rates.mode.basic.units3" value=2></span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit3">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second3">second(s)</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute3">minute(s)</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour3">hour(s)</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day3">day(s)</option>
-                            </select></span>
-                        <br>
-                        <br>
-                        <span>Counter Gain Rate In Per 1:</span>
-                        <span><select class="option-input" id="options.counter.rates.mode.basic.baseUnit33">
-                                <option value="1" id="options.counter.rates.mode.basic.units.second33">second</option>
-                                <option value="60" id="options.counter.rates.mode.basic.units.minute33">minute</option>
-                                <option value="3600" id="options.counter.rates.mode.basic.units.hour33">hour</option>
-                                <option value="86400" id="options.counter.rates.mode.basic.units.day33">day</option>
-                            </select></span>
-                        </p>
-                    </div>
-                </div>
+        
                 
 
     </div>
-    <div style="padding:12px;width:50%;">
-        <h3>Disclaimer</h3>
-        <p>This page is a parody of the <a href="https://gh.akshatmittal.com/youtube-realtime/live-view-count/">original Akshatmittal live view counter</a>. All credit goes to <a href="https://akshatmittal.com/">Akshatmittal</a> for the design of this page. This website is for educational and entertainment purposes only, and we do not make any profit off of this site. We believe this constitutes fair use under Title 17 U.S.C. § 107 of the Copyright Act of 1976. No copyright infringement is intended. We also do not condone the use of this site for spreading misinformation.</p>
-    </div>
-    
+
+    <center>
+        <div class="menu">
+            <div id="controlButtons"></div>
+            <hr>
+            <div id="menuButtons"></div>
+            <hr>
+            <div id="settingsMenus"></div>
+            <hr>
+            <div>
+                <h3>Questions, bugs, comments, or suggestions?</h3>
+                <p>Read our <a href="/about/faq.html">website FAQ</a>.</p>
+                <p>You can also join the <a href="/about/discord.html">Livecountsedit Discord server</a>!</p>
+            </div>
+            <hr>
+            <div style="padding:12px;width:50%;">
+                <h3>Disclaimer</h3>
+                <p>This page is a parody of the <a href="akshatmittal.com/youtube-realtime/live-view-count/">original Akshatmittal live view counter</a>. All credit goes to <a href="https://akshatmittal.com/">Akshatmittal</a> for the design of this page. Educational & fun purposes only. No copyright infrigment is intended. We do not condone the use of this site for spreading misinformation.</p>
+            </div>
+        </div>
     </center>
     
     </div>
     </div>
-    <script src="./odometer.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/odometer.js/0.4.6/odometer.min.js"></script>
-    <script src="./index.js"></script>
+    <script src="../../odometer/odometer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+    <script src="../..//converter/converter.js?v=7.10"></script>
+    <script src="../..//commonUtils.js?v=7.10"></script>
+    <script src="../..//commonCounter.js?v=7.10"></script>
+    <script src="./akshatmittalvideo.js?v=7.10"></script>
 </body>
 
 </html>

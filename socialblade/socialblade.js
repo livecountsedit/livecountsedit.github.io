@@ -89,11 +89,7 @@ window.onload = async () => {
     } catch (err) {
         console.error(err);
     }
-    if (!data) data = structuredClone(example_data);
-    data.data = data.data.slice(0, 1);
-    data.data = data.data.map(x => new Channel(x));
-    if (!data.data.length) data.data.push(new Channel());
-
+    fixData();
     // Load old API update settings
     const oldAPIUpdates = localStorage.getItem('socialblade-apiUpdates');
     if (oldAPIUpdates) {
@@ -135,13 +131,13 @@ window.onload = async () => {
 async function processImport(imported) {
     renderChart();
     importingStuff(imported);
-    updateGainType(0);
+    updateGainTypes();
     fix();
     return imported;
 }
 
 function afterDrawingMenu2() {
-    updateGainType(0);
+    updateGainTypes();
     fillMenus();
     saveAPISettings(false);
     refreshCount();

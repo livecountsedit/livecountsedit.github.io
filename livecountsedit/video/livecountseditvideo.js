@@ -4,10 +4,11 @@ window.onload = async () => {
 
     document.getElementById('versionNumber').innerText = VERSION;
 
-    COUNTER_THEME = 'livecountsedit';
+    COUNTER_THEME = 'livecountseditvideo';
     example_data.saveType = COUNTER_THEME;
     
     enableChartFeature();
+    enableViewCounterMode();
 
     const extraKeys = {
         bgColor: '#222233',
@@ -18,13 +19,12 @@ window.onload = async () => {
             showChartGrid: true
         },
         footerColor: '#ffffff',
-        footerText: 'Subscribers',
+        footerText: 'Views',
         maxChartValues: 450,
         nameColor: '#ffffff',
         showImages: true,
         textColor: '#ffffff',
         lceditThemeSettings: {
-            bannerBlur: 4,
             isFullScreen: false,
             showFooter: true,
         },
@@ -33,19 +33,13 @@ window.onload = async () => {
         }
     }
 
-
     example_data = mergeWithExampleData(extraKeys, example_data);
 
     const extraCounterOptions = [{
-        title: 'Show avatar',
+        title: 'Show thumbnail',
         value: true,
         type: 'checkbox',
         path: 'data.showImages'
-    }, {
-        title: 'Show banner',
-        value: true,
-        type: 'checkbox',
-        path: 'data.showBanners'
     }];
 
     MENU.tabs.find(x => x.title === 'Counter Settings').items.push(...extraCounterOptions);
@@ -67,12 +61,6 @@ window.onload = async () => {
         title: 'Footer color',
         type: 'color',
         path: 'data.footerColor'
-    }, {
-        title: 'Banner blur amount (pixels)',
-        type: 'number',
-        value: 4,
-        path: 'data.lceditThemeSettings.bannerBlur',
-        className: 's-width'
     }]
 
     MENU.tabs.find(x => x.title === 'Design Settings & Styling').items.splice(5, 0, ...extraStyleOptions);
@@ -94,7 +82,7 @@ window.onload = async () => {
     }]
 
     const partialExportAddition = {
-        title: '<abbr title="Whether or not to show the footer, the banner blur amount, and whether or not the counter is full screen.">Livecountsedit theme settings</abbr>',
+        title: '<abbr title="Whether or not to show the footer, and whether or not the counter is full screen.">Livecountsedit theme settings</abbr>',
         value: true,
         type: 'checkbox',
         path: 'data.partialExports.lceditThemeSettings',
@@ -128,34 +116,15 @@ window.onload = async () => {
         }]
     })
 
-    const oldData = localStorage.getItem('lcedit-lcedit');
-    if (oldData) {
-        try {
-            if (confirm('You have old data saved in your browser that needs to be converted. Would you like to save a backup just in case?')) {
-                const file = new Blob([oldData], { type: 'text/plain' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(file);
-                a.download = 'livecountsedit-legacy.json';
-                a.click();
-                delete a;
-            }
-
-            const oldSave = convert_lcedit_7_0_to_top_50(JSON.parse(oldData));
-            data = mergeWithExampleData(oldSave, example_data);
-        } catch (err) {
-            console.error(err);
-        }
-        localStorage.removeItem('lcedit-lcedit');
-    } else {
-        try {
-            data = await retrieveDataFromBrowser(COUNTER_THEME, 1);
-            data = mergeWithExampleData(data, example_data);
-        } catch (err) {
-            console.error(err);
-        }
+    try {
+        data = await retrieveDataFromBrowser(COUNTER_THEME, 1);
+        data = mergeWithExampleData(data, example_data);
+    } catch (err) {
+        console.error(err);
     }
 
-    fixData();
+    fixData(4);
+    
     drawMenu(MENU, document.querySelector('.tabs'), document.querySelector('.tab-stuff'), document.querySelector('.tab-controls'));
     afterDrawingMenu();
     await processImport(data);
@@ -163,15 +132,16 @@ window.onload = async () => {
 
 async function processImport(imported) {
     renderChart();
-    importingStuff(imported);
+    importingStuff(imported, 4);
     fix();
-    updateGainTypes();
+    updateGainTypes(4);
     toggleFullScreen(data.lceditThemeSettings.isFullScreen || false);
     return imported;
 }
 
 function afterDrawingMenu2() {
-    updateGainTypes();
+    updateGainTypes(4);
+    console.log('hi');
     fillMenus();
     saveAPISettings(false);
     refreshCount();
@@ -179,20 +149,26 @@ function afterDrawingMenu2() {
 
 function updateCounters2(doGains = true) {
     const count = data.data[0].getDisplayedCount();
-    document.getElementById('counter-counter').innerText = count;
+    document.getElementById('counter').innerText = count;
+
+    const likeCount = data.data[1].getDisplayedCount();
+    document.getElementById('counter2').innerText = likeCount;
+
+    const dislikeCount = data.data[2].getDisplayedCount();
+    document.getElementById('counter3').innerText = dislikeCount;
+
+    const commentCount = data.data[3].getDisplayedCount();
+    document.getElementById('counter4').innerText = commentCount;
+
     updateChart(count);
 }
 
 function fix(noOdo = false) {
-    document.getElementById('counter-title').innerText = data.data[0].name || 'User';
+    document.getElementById('counter-title').innerText = data.data[0].name || 'Video';
     document.getElementById('counter-title').style.color = data.nameColor;
 
     if (data.data[0].image !== document.getElementById('counter-avatar').src) {
         document.getElementById('counter-avatar').src = data.data[0].image || '/default.png';
-    }
-
-    if (data.data[0].banner !== document.getElementById('counter-banner').src) {
-        document.getElementById('counter-banner').src = data.data[0].banner || '/default_banner.png';
     }
 
     if (data.cardStyles.showChart) {
@@ -202,18 +178,32 @@ function fix(noOdo = false) {
         document.getElementById('counter-chart').style.display = 'none';
     }
 
-    document.querySelector('.counter-area').style.backgroundColor = data.bgColor;
+    document.querySelector('.counter-content').style.backgroundColor = data.bgColor;
     document.body.style.fontWeight = data.counterFontWeight;
     document.body.style.fontFamily = data.mainFont;
     document.getElementById('counter-avatar').style.display = data.showImages ? '' : 'none';
-    document.getElementById('counter-banner').style.visibility = data.showBanners ? '' : 'hidden';
-    document.getElementById('counter-banner').style.filter = 'blur(' + data.lceditThemeSettings.bannerBlur + 'px)';
 
-    document.getElementById('counter-footer').innerText = data.footerText;
-    document.getElementById('counter-footer').style.display = data.lceditThemeSettings.showFooter ? '' : 'none';
-    document.getElementById('counter-footer').style.color = data.footerColor;
+    document.getElementById('footer').innerText = data.footerText;
+    document.getElementById('footer').style.display = data.lceditThemeSettings.showFooter ? '' : 'none';
+    document.querySelectorAll('.footer').forEach(x => x.style.color = data.footerColor);
+
+    document.getElementById('counter2').parentElement.style.display = data.viewCounters.likes ? '' : 'none';
+    document.getElementById('counter3').parentElement.style.display = data.viewCounters.dislikes ? '' : 'none';
+    document.getElementById('counter4').parentElement.style.display = data.viewCounters.comments ? '' : 'none';
+
+    document.getElementById('footer2').innerText = data.viewCounters.likesFooter;
+    data.data[1].name = data.viewCounters.likesFooter;
+    document.getElementById('footer3').innerText = data.viewCounters.dislikesFooter;
+    data.data[2].name = data.viewCounters.dislikesFooter;
+    document.getElementById('footer4').innerText = data.viewCounters.commentsFooter;
+    data.data[3].name = data.viewCounters.commentsFooter;
+
     document.getElementById('counterColor').innerText = `
-        #counter-counter {
+        #counter {
+            color: ${data.textColor};
+        }
+
+        .counter2 {
             color: ${data.textColor};
         }
     `

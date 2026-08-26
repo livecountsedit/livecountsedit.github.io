@@ -122,12 +122,26 @@ body {
     position: relative;
 }
 
+.thumbnail {
+    width: calc(128em / 9);
+    height: 8em;
+    vertical-align: middle;
+    border-radius: 5px;
+    border: 2px solid #fff;
+    margin-top: 1.5em;
+    position: relative;
+}
+
 .counter-title {
     font-size: var(--title-font-size, 4.5vh)
 }
 
 .counter {
     font-size: var(--counter-font-size, 8vh)
+}
+
+.counter2 {
+    font-size: 50px;
 }
 
 .footer {
@@ -154,4 +168,10 @@ body {
 
 .fa.fa-info-circle {
     font-size: 1rem;
+}
+
+.small-counter-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
 }

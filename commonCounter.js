@@ -352,7 +352,7 @@ const MENU = {
                     className: 's-width'
                 },
                 {
-                    title: 'Channel editor shows exact internal count',
+                    title: 'Editor shows exact internal count',
                     type: 'checkbox',
                     value: true,
                     path: 'data.editorShowsExactCount',
@@ -393,7 +393,10 @@ const MENU = {
                     title: 'Channel ID',
                     type: 'text',
                     value: '',
-                    path: 'data.data.0.id'
+                    path: 'data.data.0.id',
+                    func: function (item) {
+                        regenerateDuplicatedID();
+                    }
                 },
                 {
                     type: 'html',
@@ -975,10 +978,10 @@ async function updateAPINow(bypass = false) {
         }
 
         const item = apiData[0];
-        let nameUpdate, countUpdate, imageUpdate, bannerUpdate, viewsUpdate, videosUpdate, idUpdate;
-        
-        if (data.apiUpdates.response.name.enabled) {
-            const pathParts = data.apiUpdates.response.name.path.split('.');
+        let nameUpdate, countUpdate, imageUpdate, bannerUpdate, viewsUpdate, videosUpdate, idUpdate, commentsUpdate;
+
+        function getItemFromPath(item, path) {
+            const pathParts = path.split('.');
             let result = item;
             for (const part of pathParts) {
                 if (part.includes('[')) {
@@ -989,139 +992,73 @@ async function updateAPINow(bypass = false) {
                     result = result[part];
                 }
             }
-            nameUpdate = result;
+            return result;
+        }
+        
+        if (data.apiUpdates.response.name.enabled) {
+            nameUpdate = getItemFromPath(item, data.apiUpdates.response.name.path)
         }
         
         if (data.apiUpdates.response.count.enabled) {
-            const pathParts = data.apiUpdates.response.count.path.split('.');
-            let result = item;
-            for (const part of pathParts) {
-                if (part.includes('[')) {
-                    const [arrName, index] = part.split('[');
-                    const idx = parseInt(index.split(']')[0]);
-                    result = result[arrName][idx];
-                } else {
-                    result = result[part];
-                }
-            }
-            countUpdate = parseFloat(result);
+            countUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.count.path));
         }
         
         if (data.apiUpdates.response.image.enabled) {
-            const pathParts = data.apiUpdates.response.image.path.split('.');
-            let result = item;
-            for (const part of pathParts) {
-                if (part.includes('[')) {
-                    const [arrName, index] = part.split('[');
-                    const idx = parseInt(index.split(']')[0]);
-                    result = result[arrName][idx];
-                } else {
-                    result = result[part];
-                }
-            }
-            imageUpdate = result;
+            imageUpdate = getItemFromPath(item, data.apiUpdates.response.image.path);
         }
 
         if (data.apiUpdates.response.banner?.enabled) {
-            const pathParts = data.apiUpdates.response.banner.path.split('.');
-            let result = item;
-            for (const part of pathParts) {
-                if (part.includes('[')) {
-                    const [arrName, index] = part.split('[');
-                    const idx = parseInt(index.split(']')[0]);
-                    result = result[arrName][idx];
-                } else {
-                    result = result[part];
-                }
-            }
-            bannerUpdate = result;
+            bannerUpdate = getItemFromPath(item, data.apiUpdates.response.banner.path);
         }
 
-        // For akshatmittal theme
+        // views update: for Akshatmittal & Livecounts.net themes
+        // corresponds to likes on view counters
         if (data.apiUpdates.response.views?.enabled) {
-            const pathParts = data.apiUpdates.response.views.path.split('.');
-            let result = item;
-            for (const part of pathParts) {
-                if (part.includes('[')) {
-                    const [arrName, index] = part.split('[');
-                    const idx = parseInt(index.split(']')[0]);
-                    result = result[arrName][idx];
-                } else {
-                    result = result[part];
-                }
-            }
-            viewsUpdate = result;
+            viewsUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.views.path));
         }
 
+        // corresponds to dislikes on view counters
         if (data.apiUpdates.response.videos?.enabled) {
-            const pathParts = data.apiUpdates.response.videos.path.split('.');
-            let result = item;
-            for (const part of pathParts) {
-                if (part.includes('[')) {
-                    const [arrName, index] = part.split('[');
-                    const idx = parseInt(index.split(']')[0]);
-                    result = result[arrName][idx];
-                } else {
-                    result = result[part];
-                }
-            }
-            videosUpdate = result;
+            videosUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.videos.path));
+        }
+
+        if (data.apiUpdates.response.comments?.enabled) {
+            commentsUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.comments.path));
         }
         
-        const idPathParts = data.apiUpdates.response.id.path.split('.');
-        let idResult = item;
-        for (const part of idPathParts) {
-            if (part.includes('[')) {
-                const [arrName, index] = part.split('[');
-                const idx = parseInt(index.split(']')[0]);
-                idResult = idResult[arrName][idx];
-            } else {
-                idResult = idResult[part];
+        idUpdate = getItemFromPath(item, data.apiUpdates.response.id.path);
+
+        function updateStuff() {
+            if (nameUpdate !== undefined) {
+                data.data[0].name = nameUpdate;
+            }
+            if (imageUpdate !== undefined) {
+                data.data[0].image = imageUpdate;
+            }
+            if (bannerUpdate !== undefined) {
+                data.data[0].banner = bannerUpdate;
+            }
+            if (viewsUpdate !== undefined && typeof viewsUpdate == 'number' && isFinite(viewsUpdate)) {
+                if (data.data[1]) data.data[1].count = viewsUpdate;
+            }
+            if (videosUpdate !== undefined && typeof videosUpdate == 'number' && isFinite(videosUpdate)) {
+                if (data.data[2]) data.data[2].count = videosUpdate;
+            }
+            if (commentsUpdate !== undefined && typeof commentsUpdate == 'number' && isFinite(commentsUpdate)) {
+                if (data.data[3]) data.data[3].count = commentsUpdate;
+            }
+            if (countUpdate !== undefined && typeof countUpdate === 'number' && isFinite(countUpdate)) {
+                data.data[0].isSubCounter() ? data.data[0].adjustForAPI(countUpdate) : data.data[0].count = countUpdate;
             }
         }
-        idUpdate = idResult;
         
         if (data.apiUpdates.response.id.IDIncludes) {
             if (idUpdate && idUpdate.includes(data.data[0].id)) {
-                if (nameUpdate !== undefined) {
-                    data.data[0].name = nameUpdate;
-                }
-                if (imageUpdate !== undefined) {
-                    data.data[0].image = imageUpdate;
-                }
-                if (bannerUpdate !== undefined) {
-                    data.data[0].banner = bannerUpdate;
-                }
-                if (viewsUpdate !== undefined && typeof viewsUpdate == 'number' && isFinite(viewsUpdate)) {
-                    if (data.data[1]) data.data[1].count = viewsUpdate;
-                }
-                if (videosUpdate !== undefined && typeof videosUpdate == 'number' && isFinite(videosUpdate)) {
-                    if (data.data[2]) data.data[2].count = videosUpdate;
-                }
-                if (countUpdate !== undefined && typeof countUpdate === 'number' && isFinite(countUpdate)) {
-                    data.data[0].adjustForAPI(countUpdate);
-                }
+                updateStuff();
             }
         } else {
             if (idUpdate === data.data[0].id) {
-                if (nameUpdate !== undefined) {
-                    data.data[0].name = nameUpdate;
-                }
-                if (imageUpdate !== undefined) {
-                    data.data[0].image = imageUpdate;
-                }
-                if (bannerUpdate !== undefined) {
-                    data.data[0].banner = bannerUpdate;
-                }
-                if (viewsUpdate !== undefined && typeof viewsUpdate == 'number' && isFinite(viewsUpdate)) {
-                    if (data.data[1]) data.data[1].count = viewsUpdate;
-                }
-                if (videosUpdate !== undefined && typeof videosUpdate == 'number' && isFinite(videosUpdate)) {
-                    if (data.data[2]) data.data[2].count = videosUpdate;
-                }
-                if (countUpdate !== undefined && typeof countUpdate === 'number' && isFinite(countUpdate)) {
-                    data.data[0].adjustForAPI(countUpdate);
-                }
+                updateStuff();
             }
         }
 
@@ -1299,7 +1236,7 @@ function updateCounters2() {
 function refreshCount() {
     const countInputs = document.querySelectorAll('.count-input');
     for (i = 0; i < countInputs.length; i++) {
-        countInputs[i].value = data.editorShowsExactCount ? data.data[i].count : data.data[i].getDisplayedCount();
+        countInputs[i].value = data.editorShowsExactCount ? data.data[i].count : data.data[i].getDisplayedCount(i);
     }
 }
 
@@ -1583,6 +1520,7 @@ function enableViewsAndVideoFeature(noVideo = false) {
                 title: '<abbr title="Adds variability to the counter updating. Gains will scale accordingly.">Update probability for views (%)</abbr>',
                 type: 'number',
                 value: 100,
+                placeholder: 100,
                 path: 'data.data.1.custom_counter_data.updateProbability',
                 className: 's-width'
             },
@@ -1693,6 +1631,7 @@ function enableViewsAndVideoFeature(noVideo = false) {
                 title: '<abbr title="Adds variability to the counter updating. Gains will scale accordingly.">Update probability for videos (%)</abbr>',
                 type: 'number',
                 value: 100,
+                placeholder: 100,
                 path: 'data.data.2.custom_counter_data.updateProbability',
                 className: 's-width'
             },
@@ -1726,6 +1665,251 @@ function enableViewsAndVideoFeature(noVideo = false) {
     };
 
     MENU.tabs.find(x => x.title === 'Import & Export Data').items.splice(-8, 0, partialExportAddition);
+}
+
+function enableViewCounterMode() {
+    enableViewsAndVideoFeature();
+
+    const extraKeys = {
+        apiUpdates: {
+            response: {
+                views: {
+                    enabled: false,
+                    path: 'likes'
+                },
+                videos: {
+                    enabled: false,
+                    path: 'dislikes'
+                },
+                comments: {
+                    enabled: false,
+                    path: 'comments'
+                }
+            }
+        },
+        viewCounters: {
+            likes: true,
+            likesFooter: 'Likes',
+            dislikes: true,
+            dislikesFooter: 'Dislikes',
+            comments: true,
+            commentsFooter: 'Comments'
+        }        
+    }
+
+    example_data = mergeWithExampleData(extraKeys, example_data);
+
+
+    const counterTab = MENU.tabs.find(x => x.title === 'Counter Settings');
+    counterTab.items.forEach(x => {
+        if (x.title) x.title = x.title.replace('Username', 'Title').replace('Avatar', 'Thumbnail');
+        if (x.value && typeof x.value === 'string') x.value = x.value.replace('avatar', 'thumbnail');
+    })
+
+    const styleTab = MENU.tabs.find(x => x.title === 'Design Settings & Styling');
+    styleTab.items.forEach(x => {
+        if (x.title) x.title = x.title.replace('Username', 'Title');
+    })
+
+    const tab = MENU.tabs.find(x => x.title === 'View and Video Counters');
+    tab.title = 'Like, Dislike, and Comment Counters';
+    tab.items.forEach(x => {
+        if (x.title) x.title = x.title.replace('View', 'Like')
+            .replace('view', 'like')
+            .replace('Video', 'Dislike')
+            .replace('video', 'dislike')
+    })
+
+    const apiTab = MENU.tabs.find(x => x.title === 'API Updates');
+
+    apiTab.items.forEach(x => {
+        if (x.title) x.title = x.title.replace('View', 'Like')
+            .replace('view', 'like')
+            .replace('Video', 'Dislike')
+            .replace('video', 'dislike')
+            .replace('Avatar', 'Thumbnail')
+            .replace('avatar', 'thumbnail')
+            .replace('Channel', 'Video')
+    });
+
+    newAPIOptions = [{
+        title: 'Update comment count',
+        value: false,
+        type: 'checkbox',
+        path: 'data.apiUpdates.response.comments.enabled',
+        className: 'api-setting',
+        auto: false
+    }, {
+        title: 'Path to comment count',
+        value: '',
+        type: 'text',
+        path: 'data.apiUpdates.response.comments.path',
+        className: 'api-setting',
+        auto: false
+    }, {
+        type: 'html',
+        value: '<br>'
+    }];
+
+    apiTab.items.splice(26, 0, ...newAPIOptions);
+    
+    // get rid of channel ID finder
+    apiTab.items.splice(1, 1);
+    apiTab.items[2].options[1][1] = 'mixerno.space (API views)'
+
+    // get rid of force updates/estimation leeway cause view counters aren't abbreviated
+    apiTab.items.splice(30, 3);
+
+    const likeCounterItems = [{
+        title: 'Show like counter',
+        type: 'checkbox',
+        path: 'data.viewCounters.likes',
+    }, {
+        title: 'Like counter footer',
+        type: 'text',
+        path: 'data.viewCounters.likesFooter'
+    }];
+
+    tab.items.splice(0, 0, ...likeCounterItems);
+
+    const dislikeCounterItems = [{
+        title: 'Show dislike counter',
+        type: 'checkbox',
+        path: 'data.viewCounters.dislikes'
+    }, {
+        title: 'Dislike counter footer',
+        type: 'text',
+        path: 'data.viewCounters.dislikesFooter'
+    }]
+
+    tab.items.splice(14, 0, ...dislikeCounterItems);
+
+    const commentCounterItems = [{
+        type: 'html',
+        value: '<br>',
+    }, {
+        title: 'Show comment counter',
+        type: 'checkbox',
+        path: 'data.viewCounters.comments'
+    }, {
+        title: 'Comment counter footer',
+        type: 'text',
+        path: 'data.viewCounters.commentsFooter'
+    }, {
+        title: 'Comment count',
+        value: 0,
+        type: 'number',
+        path: 'data.data.3.count',
+        className: 'count-input'
+    },
+    {
+        title: 'Comments gain type',
+        value: 'uniform',
+        type: 'select',
+        path: 'data.data.3.gain_type',
+        options: [['uniform', 'Min/max'],
+        ['gaussian', 'Mean/standard deviation'],
+        ['custom', 'Custom distribution']],
+        func: function (item) {
+            updateGainType(3);
+        }
+    },
+    {
+        title: 'Min comments gain',
+        value: 0,
+        type: 'number',
+        path: 'data.data.3.min_gain',
+        className: 'uniform-gain-setting-3'
+    },
+    {
+        title: 'Max comments gain',
+        value: 0,
+        type: 'number',
+        path: 'data.data.3.max_gain',
+        className: 'uniform-gain-setting-3'
+    },
+    {
+        title: 'Mean comments gain',
+        value: 0,
+        type: 'number',
+        path: 'data.data.3.mean_gain_value',
+        className: 'gaussian-gain-setting-3',
+        func: function (item) {
+            updateGainType(3);
+        }
+    },
+    {
+        title: 'Standard deviation of comments gain',
+        value: 1,
+        type: 'number',
+        path: 'data.data.3.std_gain_value',
+        className: 'gaussian-gain-setting-3',
+        func: function (item) {
+            updateGainType(3);
+        }
+    },
+    {
+        title: 'Custom distribution for comments gain<br>',
+        value: '',
+        type: 'textarea',
+        path: 'data.data.3.custom_counter_data.custom_rate',
+        className: 'custom-gain-setting-3',
+        placeholder: 'min1, max1, weight1\nmin2, max2, weight2\n...',
+        func: function (item) {
+            updateGainType(3);
+        }
+    },
+    {
+        title: 'Comments gain is per every: ',
+        items: [
+            {
+                value: 1,
+                type: 'number',
+                path: 'data.data.3.gain_per_number',
+                className: 's-width'
+            },
+            {
+                value: 'second',
+                type: 'select',
+                path: 'data.data.3.gain_per',
+                options: [['second', 'second(s)'],
+                ['updateInterval', 'update interval(s)'],
+                ['minute', 'minute(s)'],
+                ['hour', 'hour(s)'],
+                ['day', 'day(s)']]
+            }
+        ]
+    },
+    {
+        title: '<abbr title="Adds variability to the counter updating. Gains will scale accordingly.">Update probability for comments (%)</abbr>',
+        type: 'number',
+        value: 100,
+        placeholder: 100,
+        path: 'data.data.3.custom_counter_data.updateProbability',
+        className: 's-width'
+    },
+    {
+        title: 'Minimum comment count',
+        type: 'number',
+        value: '',
+        path: 'data.data.3.custom_counter_data.min',
+        placeholder: 'Leave blank for none'
+    },
+    {
+        title: 'Maximum comment count',
+        type: 'number',
+        value: '',
+        path: 'data.data.3.custom_counter_data.max',
+        placeholder: 'Leave blank for none'
+    }]
+    tab.items.push(...commentCounterItems);
+
+    const partialExportItem = MENU.tabs.find(x => x.title === 'Import & Export Data').items.find(x => x.title === 'View and video counters');
+    partialExportItem.title = 'Like, dislike, and comment counters';
+
+    const technicalSettingsTab = MENU.tabs.find(x => x.title === 'Technical Settings');
+    // Remove abbreviate count option
+    technicalSettingsTab.items.splice(2,1);
 }
 
 function enableCreditsTab() {
@@ -1791,5 +1975,29 @@ function importingStuff(imported, max = 1) {
     refreshCount();
     if (imported.importFromGoogleFonts) {
         loadMyFont();
+    }
+}
+
+function fixData(max = 1) {
+    if (!data) data = structuredClone(example_data);
+    data.data = data.data.filter(x => x);
+    data.data = data.data.slice(0, max);
+    data.data = data.data.map(x => new Channel(x));
+    while (data.data.length < max) {
+        data.data.push(new Channel());
+    }
+}
+
+function updateGainTypes(max = 1) {
+    // for some reason i is being used idk why
+    for (j = 0; j < max; j++) {
+        updateGainType(j);
+    }
+} 
+
+function regenerateDuplicatedID() {
+    const index = data.data.findLastIndex(x => x.id === data.data[0].id);
+    if (index > 0) {
+        data.data[index].id = uuidGen();
     }
 }

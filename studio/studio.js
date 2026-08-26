@@ -200,13 +200,8 @@ window.onload = async () => {
         }
     }
     
-    if (!data) data = structuredClone(example_data);
-    data.data = data.data.slice(0, 1);
-    data.data = data.data.map(x => new Channel(x));
-    if (!data.data.length) data.data.push(new Channel());
-
+    fixData();
     drawMenu(MENU, document.querySelector('.tabs'), document.querySelector('.tab-stuff'), document.querySelector('.tab-controls'));
-
     afterDrawingMenu();
     await processImport(data);
 }
@@ -214,13 +209,13 @@ window.onload = async () => {
 async function processImport(imported) {
     renderChart();
     importingStuff(imported);
-    updateGainType(0);
+    updateGainTypes();
     fix();
     return imported;
 }
 
 function afterDrawingMenu2() {
-    updateGainType(0);
+    updateGainTypes();
     fillMenus();
     saveAPISettings(false);
     refreshCount();

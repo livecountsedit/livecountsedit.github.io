@@ -1,9 +1,8 @@
 window.onload = async () => {
-    COUNTER_THEME = 'akshatmittal';
+    COUNTER_THEME = 'akshatmittalvideo';
     example_data.saveType = COUNTER_THEME;
 
-    enableViewsAndVideoFeature();
-    enableBannerFeature();
+    enableViewCounterMode();
 
     const extraKeys = {
         boxColor: '#ffffff',
@@ -12,6 +11,7 @@ window.onload = async () => {
         mainFont: 'Roboto, sans-serif',
         textColor: '#605a64',
         footerColor: '#67757c',
+        footerText: 'Views',
         counterFontWeight: '300',
         odometerSpeed: 0.5,
         akshatmittalSettings: {
@@ -83,58 +83,22 @@ window.onload = async () => {
         console.error(err);
     }
 
-    fixData(3);
-
-    // Load old API settings
-    const oldAPIUpdates = localStorage.getItem('akshatmittal-apiUpdates');
-    if (oldAPIUpdates) {
-        try {
-            const jsonData = JSON.parse(oldAPIUpdates);
-            const oldSave = {
-                apiUpdates: jsonData,
-                data: [new Channel({ id: jsonData.channelID || uuidGen() }, new Channel(), new Channel())],
-                partialExports: {
-                    counters: true,
-                    apiUpdates: true
-                },
-                saveType: COUNTER_THEME
-            }
-            delete oldSave.apiUpdates.channelID;
-            if (confirm('You have old API update settings saved for the Akshatmittal counter. Would you like to save a backup just in case?')) {
-                const file = new Blob([JSON.stringify(oldSave)], { type: 'text/plain' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(file);
-                a.download = 'akshatmittal-legacy-api-updates.json';
-                a.click();
-                delete a;
-            }
-
-            delete oldSave.partialExports;
-            data = mergeWithExampleData(oldSave, data);
-            
-        } catch (err) {
-            console.error(err);
-        }
-        localStorage.removeItem('akshatmittal-apiUpdates');
-    }
-
+    fixData(4);
     drawMenu(MENU, document.getElementById('menuButtons'), document.getElementById('settingsMenus'), document.getElementById('controlButtons'));
     afterDrawingMenu();
     await processImport(data);
 }
 
 async function processImport(imported) {
-    importingStuff(imported, 3);
-    imported.data[1].name = 'Views';
-    imported.data[2].name = 'Videos';
+    importingStuff(imported, 4);
     fix();
-    updateGainTypes(3);
+    updateGainTypes(4);
     return imported;
 }
 
 function afterDrawingMenu2() {
     fillMenus(document.getElementById('settingsMenus'));
-    updateGainTypes(3);
+    updateGainTypes(4);
     saveAPISettings(false);
     refreshCount();
 
@@ -150,17 +114,21 @@ function afterDrawingMenu2() {
 function updateCounters2(doGains = true) {
     const count = data.data[0].getDisplayedCount();
     document.getElementById('yt_subs').innerText = count;
-    document.getElementById('yt_views').innerText = data.data[1].getUnabbreviatedCount();
-    document.getElementById('yt_videos').innerText = data.data[2].getUnabbreviatedCount();
+
+    const likeCount = data.data[1].getDisplayedCount();
+    document.getElementById('yt_likes').innerText = likeCount;
+
+    const dislikeCount = data.data[2].getDisplayedCount();
+    document.getElementById('yt_dislikes').innerText = dislikeCount;
+
+    const commentCount = data.data[3].getDisplayedCount();
+    document.getElementById('yt_comments').innerText = commentCount;
 }
 
 function fix(noOdo = false) {
-    document.getElementById('yt_name').innerText = data.data[0].name || 'User';
+    document.getElementById('yt_name').innerText = data.data[0].name || 'Video';
     if (data.data[0].image !== document.getElementById('yt_profile').src) {
         document.getElementById('yt_profile').src = data.data[0].image;
-    }
-    if (data.data[0].banner !== document.getElementById('yt_cover').src) {
-        document.getElementById('yt_cover').src = data.data[0].banner;
     }
 
     document.getElementById('pinned_nav').style.display = data.akshatmittalSettings.showFeaturedUsers ? 'block' : 'none';
@@ -176,11 +144,30 @@ function fix(noOdo = false) {
     document.querySelectorAll('.main-card').forEach(x => {
         x.style.backgroundColor = data.boxColor;
     });
+
+    const numberEnabled = data.viewCounters.likes + data.viewCounters.dislikes + data.viewCounters.comments;
+    const cardClass = 'col-12 ' + (numberEnabled === 3 ? 'col-lg-4' : (numberEnabled === 2 ? 'col-lg-6': 'col-lg-12'));
+
+    document.getElementById('headerText').style.color = data.footerColor;
+    document.getElementById('likeCounter').style.display = data.viewCounters.likes ? '' : 'none';
+    document.getElementById('likeCounter').className = cardClass;
+    document.getElementById('dislikeCounter').style.display = data.viewCounters.dislikes ? '' : 'none';
+    document.getElementById('dislikeCounter').className = cardClass;
+    document.getElementById('commentCounter').style.display = data.viewCounters.comments ? '' : 'none';
+    document.getElementById('commentCounter').className = cardClass;
     document.getElementById('footer').style.color = data.footerColor;
+    document.getElementById('footer').innerText = data.footerText;
     document.getElementById('footer1').style.color = data.footerColor;
+    document.getElementById('footer1').innerText = data.viewCounters.likesFooter;
+    data.data[1].name = data.viewCounters.likesFooter;
     document.getElementById('footer2').style.color = data.footerColor;
+    document.getElementById('footer2').innerText = data.viewCounters.dislikesFooter;
+    data.data[2].name = data.viewCounters.dislikesFooter;
+    document.getElementById('footer3').style.color = data.footerColor;
+    document.getElementById('footer3').innerText = data.viewCounters.commentsFooter;
+    data.data[3].name = data.viewCounters.commentsFooter;
     document.getElementById('counterColor').innerText = `
-        #yt_subs, #yt_views, #yt_videos {
+        #yt_subs, #yt_likes, #yt_dislikes, #yt_comments {
             color: ${data.textColor};
         }
     `
