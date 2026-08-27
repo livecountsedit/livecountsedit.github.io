@@ -573,7 +573,7 @@
                     template += "0";
                 }
             }
-            separators = template.split("0");
+            separators = template.replace(/\-/g,'').split("0");
         }
 
         for (i = _l = 0, _len1 = _ref.length; _l < _len1; i = ++_l) {

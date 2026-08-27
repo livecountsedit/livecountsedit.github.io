@@ -928,3 +928,7 @@ center .settingType {
   align-items: start;
   text-align: left;
 }
+
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+}

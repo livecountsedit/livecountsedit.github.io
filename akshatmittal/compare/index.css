@@ -36,7 +36,7 @@ a:focus {
 
 .img-responsive {
     max-width: 100%;
-    height: auto;
+    height: 20%;
     display: inline-block;
 }
 
@@ -1251,3 +1251,30 @@ sidebar navigation
     background: #ffffff;
     color: #f62d51;
   }
+
+.menu {
+    text-align: center;
+}
+
+.menu button {
+    margin-right: 5px;
+}
+
+.card-img-top {
+    object-fit: cover;
+}
+
+.manual-input {
+    position: absolute;
+    z-index: 1;
+    top: 15px;
+    display: none;
+}
+
+#manual-input-left {
+    left: 15px;
+}
+
+#manual-input-right {
+    right: 15px;
+}

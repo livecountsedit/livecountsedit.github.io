@@ -119,6 +119,7 @@ let example_data = {
         'fireBorderColor': '#000',
         'fireBorderWidth': 0,
         'intervalsPerUpdate': 1,
+        'fireObservedGains': true,
         'created': []
     },
     'apiUpdates': {
@@ -185,7 +186,7 @@ let example_data = {
         styles: true,
         customCSS: true,
         technicalSettings: true,
-        fireSettings: true,
+        fireIcons: true,
         differenceSettings: true,
         apiUpdates: true,
         streamSettings: true,
@@ -346,6 +347,7 @@ async function initLoad(redo, previousTheme) {
     }
 
     if (data.apiUpdates.enabled) {
+        data.apiUpdates.interval = clamp(data.apiUpdates.interval, 1000, 2147483647);
         apiInterval = setInterval(function () {
             apiUpdate(true);
         }, parseFloat(data.apiUpdates.interval));
@@ -1901,6 +1903,11 @@ document.getElementById('showCounts').addEventListener('change', function () {
     fix()
 });
 
+document.getElementById('fireObservedGains').addEventListener('change', function () {
+    data.fireIcons.fireObservedGains = this.checked;  
+    fix();
+})
+
 document.getElementById('estimateUsingObservedGains').addEventListener('change', function () {
     data.differenceStyles.estimateUsingObservedGains = this.checked;  
     fix();
@@ -2036,6 +2043,7 @@ function fix() {
     document.getElementById('topDifferenceImagePlacing').value = data.differenceStyles.imageTop;
     document.getElementById('differenceImageSize').value = data.differenceStyles.imageSize;
     document.getElementById('estimateUsingObservedGains').checked = data.differenceStyles.estimateUsingObservedGains;
+    document.getElementById('fireObservedGains').checked = data.fireIcons.fireObservedGains;
     document.getElementById('alignDifferences').value = data.differenceStyles.alignDifferences;
 
     let gapAlignment = `left: ${data.differenceStyles.left}%;`;
@@ -2761,12 +2769,26 @@ function apiUpdate(interval) {
         groups = [targetChannels];
     }
 
+    // Limit API requests to 90,000 per hour
+    // (thanks Dapocha for your API tracked top 10,000 insta crasher lol)
+    // Enough for an entire Top 50 to update once every 2s
+    const HOURLY_REQUEST_LIMIT = 90000;
+    const hourlyRequests = groups.length * 3.6e6 / data.apiUpdates.interval;
+    const probability = HOURLY_REQUEST_LIMIT / hourlyRequests;
+
     // Build and fetch URLs
     for (let i = 0; i < groups.length; i++) {
         let newUrl = url.includes('{{channels}}')
             ? url.replace('{{channels}}', groups[i])
             : url + groups[i];
-        fetchNext(newUrl);
+
+        // Spread the requests out evenly throughout the update interval so they don't all come at once
+        const throttleTime = (i / groups.length) * data.apiUpdates.interval;
+
+        // Randomly skip some API requests if it goes over the limit
+        if (probability >= 1 || Math.random() < probability) {
+            setTimeout(() => {fetchNext(newUrl)}, throttleTime);
+        }
     }
 
     function fetchNext(url) {
@@ -2900,6 +2922,7 @@ function enableApiUpdate() {
     if (!data.apiUpdates.enabled) {
         data.apiUpdates.enabled = true
         document.getElementById('enableApiUpdate').innerText = "Disable API Updates"
+        data.apiUpdates.interval = clamp(data.apiUpdates.interval, 1000, 2147483647);
         apiInterval = setInterval(function () {
             apiUpdate(true)
         }, data.apiUpdates.interval)
@@ -2956,7 +2979,7 @@ function saveAPIUpdates() {
             'path': document.getElementById('pathID').value
         }
     }
-    data.apiUpdates.interval = parseFloat(document.getElementById('apiUpdateInt').value) * 1000;
+    data.apiUpdates.interval = clamp((parseFloat(document.getElementById('apiUpdateInt').value) * 1000) || 10000, 1000, 2147483647);
     data.apiUpdates.enabled = document.getElementById('enableApiUpdate').innerText == 'Disable API Updates' ? true : false;
     alert('API Update Settings Saved')
 }
@@ -2986,6 +3009,7 @@ function loadAPIUpdates() {
     document.getElementById('IDIncludes').checked = data.apiUpdates.response.id.IDIncludes
     document.getElementById('pathID').value = data.apiUpdates.response.id.path
     document.getElementById('apiUpdateInt').value = data.apiUpdates.interval / 1000;
+    document.getElementById('forceUpdates').checked = data.apiUpdates.forceUpdates;
     document.getElementById('enableApiUpdate').innerText = data.apiUpdates.enabled ? 'Disable API Updates' : 'Enable API Updates'
 }
 

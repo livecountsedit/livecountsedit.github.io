@@ -160,7 +160,7 @@ function livecountsNetSubscribe() {
 function fix(noOdo = false) {
     document.getElementById('lcnet-name').innerText = data.data[0].name || 'User';
     document.getElementById('lcnet-update-text').innerText = `updated every ${data.updateInterval / 1000} second${data.updateInterval === 1000 ? '' : 's'}`
-    if (data.data[0].image !== document.getElementById('lcnet-avatar').src) {
+    if ((data.data[0].image || '/default.png') !== document.getElementById('lcnet-avatar').src) {
         document.getElementById('lcnet-avatar').src = data.data[0].image || '/default.png';
     }
 

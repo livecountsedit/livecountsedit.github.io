@@ -1,8 +1,8 @@
 const AUTOSAVE_INTERVAL = 15000;
-const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo'];
-const DB_VERSION = 9;
+const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo', 'livecountseditcompare','akshatmittalcompare'];
+const DB_VERSION = 11;
 const VERSION = '7.10';
-const SAVE_VERSION = 9;
+const SAVE_VERSION = 10;
 let obsMode;
 
 function escapeHTML(text) {
@@ -524,6 +524,7 @@ function processData(dat) {
                 delete dat.cardStyles.chartBaseColor;
             }
             delete dat.liveGraph;
+            delete dat.liveGraph2;
             delete dat.maxChartValues;
             delete dat.saveChartData;
             delete dat.graphDates;
@@ -567,6 +568,8 @@ function processData(dat) {
             delete dat.reverseAnimation;
             delete dat.showBlankSlots;
             delete dat.footerText;
+            delete dat.footerText2;
+            delete dat.gapText;
         }
         if (!dat.partialExports.styles) {
             delete dat.boxBGLength;
@@ -598,6 +601,7 @@ function processData(dat) {
             delete dat.waterFallCountUpdateTime;
             delete dat.gainAverageOf;
             delete dat.animatedCards;
+            delete dat.gapMethod;
         }
         if (!dat.partialExports.apiUpdates) {
             delete dat.apiUpdates;
@@ -743,8 +747,13 @@ class Channel {
 
         // Ignore gains if using a real sub count
         if (data.apiUpdates.enabled) {
-            if (data.apiUpdates.forceUpdates) return;
             const index = this.getIndex();
+            if (data.apiUpdates.forceUpdates) {
+                const shouldFetchFirst = !COUNTER_THEME.includes('compare') || data.apiUpdates.updateSide != '2';
+                const shouldFetchSecond = COUNTER_THEME.includes('compare') && data.apiUpdates.updateSide != '1';
+                if (shouldFetchFirst && index === 0) return;
+                if (shouldFetchSecond && index === 1) return;
+            }
             if (!this.isSubCounter() && data.apiUpdates.response.count.enabled && index === 0) return;
             if (!this.isSubCounter() && data.apiUpdates.response.views?.enabled && index === 1) return;
             if (!this.isSubCounter() && data.apiUpdates.response.videos?.enabled && index === 2) return;

@@ -145,6 +145,20 @@ function afterDrawingMenu2() {
             data.data[0].count = count;
         }
     })
+
+    document.querySelector('.navbar-header').addEventListener('click', () => {
+        hidenav();
+    })
+}
+
+function hidenav() {
+    if (document.querySelector('.left-sidebar').style.display === 'none') {
+        document.querySelector('.left-sidebar').style.display = '';
+        document.querySelector('.page-wrapper').style.marginLeft = '';
+    } else {
+        document.querySelector('.left-sidebar').style.display = 'none';
+        document.querySelector('.page-wrapper').style.marginLeft = '0';
+    }
 }
 
 function updateCounters2(doGains = true) {
@@ -156,11 +170,11 @@ function updateCounters2(doGains = true) {
 
 function fix(noOdo = false) {
     document.getElementById('yt_name').innerText = data.data[0].name || 'User';
-    if (data.data[0].image !== document.getElementById('yt_profile').src) {
-        document.getElementById('yt_profile').src = data.data[0].image;
+    if ((data.data[0].image || '/default.png') !== document.getElementById('yt_profile').src) {
+        document.getElementById('yt_profile').src = data.data[0].image || '/default.png';
     }
-    if (data.data[0].banner !== document.getElementById('yt_cover').src) {
-        document.getElementById('yt_cover').src = data.data[0].banner;
+    if ((data.data[0].banner || '/default_banner.png') !== document.getElementById('yt_cover').src) {
+        document.getElementById('yt_cover').src = data.data[0].banner || '/default_banner.png';
     }
 
     document.getElementById('pinned_nav').style.display = data.akshatmittalSettings.showFeaturedUsers ? 'block' : 'none';

@@ -8,6 +8,7 @@ window.onload = async () => {
     example_data.saveType = COUNTER_THEME;
     
     enableChartFeature();
+    enableBannerFeature();
 
     const extraKeys = {
         bgColor: '#222233',
@@ -187,11 +188,11 @@ function fix(noOdo = false) {
     document.getElementById('counter-title').innerText = data.data[0].name || 'User';
     document.getElementById('counter-title').style.color = data.nameColor;
 
-    if (data.data[0].image !== document.getElementById('counter-avatar').src) {
+    if ((data.data[0].image || '/default.png') !== document.getElementById('counter-avatar').src) {
         document.getElementById('counter-avatar').src = data.data[0].image || '/default.png';
     }
 
-    if (data.data[0].banner !== document.getElementById('counter-banner').src) {
+    if ((data.data[0].banner || '/default_banner.png') !== document.getElementById('counter-banner').src) {
         document.getElementById('counter-banner').src = data.data[0].banner || '/default_banner.png';
     }
 

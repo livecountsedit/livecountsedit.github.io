@@ -172,7 +172,7 @@ document.getElementById('close').onclick = function () {
 function fix(noOdo = false) {
     document.getElementById('userName').innerText = data.data[0].name || 'User';
     document.getElementById('updateIntervalDisplay').innerText = data.updateInterval === 1000 ? 'This page updates every second.' : `This page updates every ${data.updateInterval / 1000} seconds.`
-    if (data.data[0].image !== document.getElementById('userimg').src) {
+    if ((data.data[0].image || '/default.png') !== document.getElementById('userimg').src) {
         document.getElementById('userimg').src = data.data[0].image || '/default.png';
     }
     if (!data.saveChartData) {

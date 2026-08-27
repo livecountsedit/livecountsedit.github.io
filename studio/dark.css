@@ -338,4 +338,5 @@ textarea {
     position: absolute;
     top: 16px;
     right: 100px;
+    display: none;
 }

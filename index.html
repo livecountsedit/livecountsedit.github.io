@@ -95,27 +95,89 @@
     <p>This button will reset local storage for lcedit.com (which means data for ALL counters that use save data will be
         wiped). Use this button if errors are preventing you from resetting corrupted data on a counter that uses save
         data. Be sure to reload the counter after using this.</p>
-    <button class="reset" onclick="resetAll()">RESET ALL DATA</button>
+    <button class="reset" onclick="confirm1()">RESET ALL DATA</button>
 
     <div id="disqus_thread" style="width: 100%;"></div>
     <script>
-        async function resetAll() {
-            if (confirm("Are you sure you want to reset ALL data for every counter on our site? This cannot be undone!")) {
-                if (confirm("FINAL WARNING: Are you REALLY sure you want to reset ALL data for every counter on our site? This cannot be undone!")) {
+        let count = 0;
+
+        function showDialog(text) {
+            document.querySelectorAll('dialog').forEach(x => {
+                x.close();
+                x.remove();
+            })
+            const dialog = document.createElement('dialog');
+            const div = document.createElement('div');
+            div.style.maxWidth = '500px';
+            div.innerHTML = text;
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.style.textAlign = 'center';
+            const okButton = document.createElement('button');
+            okButton.style.fontSize = '1em';
+            okButton.innerText = 'OK';
+            okButton.onclick = () => {
+                dialog.close();
+                dialog.remove();
+            }
+            buttonsDiv.appendChild(okButton);
+            dialog.append(div, buttonsDiv);
+            document.body.appendChild(dialog);
+            dialog.showModal();
+        }
+        function confirm1() {
+            count = 0;
+            const dialog = document.createElement('dialog');
+            const div = document.createElement('div');
+            div.innerHTML = '⚠️ Are you sure you want to reset ALL data for every counter on our site? This cannot be undone!';
+            div.style.maxWidth = '500px';
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.style.textAlign = 'center';
+            const yesButton = document.createElement('button')
+            yesButton.innerText = 'Yes';
+            yesButton.style.backgroundColor = 'lightgreen';
+            yesButton.style.marginRight = '150px';
+            yesButton.style.width = '5em';
+            yesButton.style.fontSize = '1em';
+            yesButton.onclick = async () => {
+                dialog.close();
+                if (count === 0) {
+                    setTimeout(() => {
+                        count++;
+                        div.innerHTML = '⚠️🚨 FINAL WARNING: Are you REALLY sure you want to reset ALL data for every counter on our site? This cannot be undone!';
+                        dialog.showModal();
+                    }, 100)
+                } else {
                     try {
                         localStorage.clear();
-                        await indexedDB.deleteDatabase('LCEDIT')
-                        alert("Successfully reset all data.")
+                        const req = indexedDB.deleteDatabase('LCEDIT')
+                        req.onsuccess = () => {
+                            showDialog("Successfully reset all data.");
+                        }
+
+                        req.onblocked = () => {
+                            showDialog("Please close all other lcedit.com tabs because the database reset is currently blocked by another page using it.");
+                        }
+
                     } catch (error) {
                         console.error(error);
-                        alert("Uh-oh. An error occured while resetting all data. Make sure you close all other Livecountsedit tabs before trying again.")
+                        showDialog("Uh-oh. An error occured while resetting all data. Make sure you close all other Livecountsedit tabs before trying again.")
                     }
-                } else {
-                    alert("Action cancelled.")
                 }
-            } else {
-                alert("Action cancelled.")
             }
+            const noButton = document.createElement('button');
+            noButton.innerText = 'No';
+            noButton.style.backgroundColor = 'pink';
+            noButton.onclick = () => {
+                dialog.close();
+                dialog.remove();
+                showDialog('Action cancelled.');
+            }
+            noButton.style.width = '5em';
+            noButton.style.fontSize = '1em';
+            buttonsDiv.append(yesButton, noButton);
+            dialog.append(div, buttonsDiv);
+            document.body.appendChild(dialog);
+            dialog.showModal();
         }
     </script>
 

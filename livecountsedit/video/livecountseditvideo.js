@@ -167,8 +167,8 @@ function fix(noOdo = false) {
     document.getElementById('counter-title').innerText = data.data[0].name || 'Video';
     document.getElementById('counter-title').style.color = data.nameColor;
 
-    if (data.data[0].image !== document.getElementById('counter-avatar').src) {
-        document.getElementById('counter-avatar').src = data.data[0].image || '/default.png';
+    if ((data.data[0].image || '/default_thumbnail.jpg') !== document.getElementById('counter-avatar').src) {
+        document.getElementById('counter-avatar').src = data.data[0].image || '/default_thumbnail.jpg';
     }
 
     if (data.cardStyles.showChart) {

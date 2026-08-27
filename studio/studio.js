@@ -255,7 +255,7 @@ document.getElementById('close').onclick = function () {
 
 function fix(noOdo = false) {
     document.getElementById('name').innerText = data.data[0].name || 'User';
-    if (data.data[0].image !== document.getElementById('image').src) {
+    if ((data.data[0].image || '/default.png') !== document.getElementById('image').src) {
         document.getElementById('image').src = data.data[0].image || '/default.png';
     }
 
@@ -316,7 +316,7 @@ function fix(noOdo = false) {
     document.getElementById('dropdown-label2').innerText = data.ytStudioSettings.dropdownBottomText;
     document.getElementById('dropdown-label2').style.color = data.textColor;
 
-    document.getElementById('manual-input').style.display = data.ytStudioSettings.countEditBox ? '' : 'none';
+    document.getElementById('manual-input').style.display = data.ytStudioSettings.countEditBox ? 'block' : 'none';
 
     const color = getComputedStyle(document.querySelector('.header')).getPropertyValue('background-color').replace('rgb(', '').split(',').map(x => parseInt(x, 10));
     const brightness = (0.2126 * color[0] + 0.7152 * color[1] + 0.0722 * color[2]) / 255;

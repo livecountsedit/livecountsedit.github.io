@@ -113,8 +113,8 @@ body {
 }
 
 .avatar {
-    width: 8em;
-    height: 8em;
+    width: 15vh;
+    height: 15vh;
     vertical-align: middle;
     border-radius: var(--avatar-border-radius, 50%);
     border: 2px solid #fff;
@@ -123,8 +123,8 @@ body {
 }
 
 .thumbnail {
-    width: calc(128em / 9);
-    height: 8em;
+    width: 16vh;
+    height: 9vh;
     vertical-align: middle;
     border-radius: 5px;
     border: 2px solid #fff;
@@ -141,7 +141,7 @@ body {
 }
 
 .counter2 {
-    font-size: 50px;
+    font-size: 6vh;
 }
 
 .footer {
@@ -160,7 +160,6 @@ body {
 
 .page-footer {
     text-align: center;
-    bottom: 5px;
     left: 0;
     right: 0;
     position: absolute;

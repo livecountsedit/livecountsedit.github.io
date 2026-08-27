@@ -88,7 +88,7 @@ const MENU = {
                     value: 'User',
                     type: 'text',
                     path: 'data.data.0.name',
-                    id: 'usernameInput'
+                    id: 'usernameInput0'
                 },
                 {
                     title: 'Count',
@@ -395,8 +395,9 @@ const MENU = {
                     value: '',
                     path: 'data.data.0.id',
                     func: function (item) {
-                        regenerateDuplicatedID();
-                    }
+                        regenerateDuplicatedID(item);
+                    },
+                    id: 'channel-id-0'
                 },
                 {
                     type: 'html',
@@ -611,7 +612,7 @@ const MENU = {
                     className: 'partial-export-option'
                 },
                 {
-                    title: 'Counter values',
+                    title: 'Counter value',
                     value: true,
                     type: 'checkbox',
                     path: 'data.partialExports.counts',
@@ -923,121 +924,106 @@ function saveAPISettings(shouldAlert = true) {
     if (shouldAlert) alert('API settings saved!')
 }
 
-async function updateAPINow(bypass = false) {
-
-    if (!data.apiUpdates.enabled) {
-        if (!bypass) return alert('You need to enable API updates first.')
-        return;
+async function updateAPI(index) {
+    let url = data.apiUpdates.url;
+    url = url.includes('{{channelID}}') ? url.replace('{{channelID}}', data.data[index].id) : url + data.data[index].id;
+    
+    let fetchOptions = {
+        method: data.apiUpdates.method || 'GET'
     }
 
-    if (!data.apiUpdates.url || !data.data[0].id) {
-        if (!bypass) return alert('You must configure the API URL and channel ID first.')
-        return;
+    if (Object.keys(data.apiUpdates.headers).length > 0) {
+        fetchOptions.headers = data.apiUpdates.headers;
     }
 
-    if (data.debugMode) {
-        console.log('API updating...')
+    if (data.apiUpdates.method === 'POST' && Object.keys(data.apiUpdates.body).length > 0) {
+        fetchOptions.body = JSON.stringify(data.apiUpdates.body);
     }
 
-    try {
-        let url = data.apiUpdates.url;
-        url = url.includes('{{channelID}}') ? url.replace('{{channelID}}', data.data[0].id) : url + data.data[0].id;
-        
-        let fetchOptions = {
-            method: data.apiUpdates.method || 'GET'
-        }
+    const response = await fetch(url, fetchOptions);
+    const json = await response.json();
 
-        if (Object.keys(data.apiUpdates.headers).length > 0) {
-            fetchOptions.headers = data.apiUpdates.headers;
-        }
-
-        if (data.apiUpdates.method === 'POST' && Object.keys(data.apiUpdates.body).length > 0) {
-            fetchOptions.body = JSON.stringify(data.apiUpdates.body);
-        }
-
-        const response = await fetch(url, fetchOptions);
-        const json = await response.json();
-
-        let apiData = json;
-        if (data.apiUpdates.response.loop !== 'data') {
-            const loopPath = data.apiUpdates.response.loop.split('data.')[1];
-            if (loopPath) {
-                const parts = loopPath.split('.');
-                for (const part of parts) {
-                    apiData = apiData[part];
-                }
+    let apiData = json;
+    if (data.apiUpdates.response.loop !== 'data') {
+        const loopPath = data.apiUpdates.response.loop.split('data.')[1];
+        if (loopPath) {
+            const parts = loopPath.split('.');
+            for (const part of parts) {
+                apiData = apiData[part];
             }
         }
+    }
 
-        if (!Array.isArray(apiData)) {
-            apiData = [apiData];
-        }
+    if (!Array.isArray(apiData)) {
+        apiData = [apiData];
+    }
 
-        if (!apiData.length) {
-            throw new Error('No data returned from API');
-        }
+    if (!apiData.length) {
+        throw new Error('No data returned from API');
+    }
 
-        const item = apiData[0];
-        let nameUpdate, countUpdate, imageUpdate, bannerUpdate, viewsUpdate, videosUpdate, idUpdate, commentsUpdate;
+    const item = apiData[0];
+    let nameUpdate, countUpdate, imageUpdate, bannerUpdate, viewsUpdate, videosUpdate, idUpdate, commentsUpdate;
 
-        function getItemFromPath(item, path) {
-            const pathParts = path.split('.');
-            let result = item;
-            for (const part of pathParts) {
-                if (part.includes('[')) {
-                    const [arrName, index] = part.split('[');
-                    const idx = parseInt(index.split(']')[0]);
-                    result = result[arrName][idx];
-                } else {
-                    result = result[part];
-                }
+    function getItemFromPath(item, path) {
+        const pathParts = path.split('.');
+        let result = item;
+        for (const part of pathParts) {
+            if (part.includes('[')) {
+                const [arrName, index] = part.split('[');
+                const idx = parseInt(index.split(']')[0]);
+                result = result[arrName][idx];
+            } else {
+                result = result[part];
             }
-            return result;
         }
-        
-        if (data.apiUpdates.response.name.enabled) {
-            nameUpdate = getItemFromPath(item, data.apiUpdates.response.name.path)
-        }
-        
-        if (data.apiUpdates.response.count.enabled) {
-            countUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.count.path));
-        }
-        
-        if (data.apiUpdates.response.image.enabled) {
-            imageUpdate = getItemFromPath(item, data.apiUpdates.response.image.path);
-        }
+        return result;
+    }
+    
+    if (data.apiUpdates.response.name.enabled) {
+        nameUpdate = getItemFromPath(item, data.apiUpdates.response.name.path)
+    }
+    
+    if (data.apiUpdates.response.count.enabled) {
+        countUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.count.path));
+    }
+    
+    if (data.apiUpdates.response.image.enabled) {
+        imageUpdate = getItemFromPath(item, data.apiUpdates.response.image.path);
+    }
 
-        if (data.apiUpdates.response.banner?.enabled) {
-            bannerUpdate = getItemFromPath(item, data.apiUpdates.response.banner.path);
-        }
+    if (data.apiUpdates.response.banner?.enabled) {
+        bannerUpdate = getItemFromPath(item, data.apiUpdates.response.banner.path);
+    }
 
-        // views update: for Akshatmittal & Livecounts.net themes
-        // corresponds to likes on view counters
-        if (data.apiUpdates.response.views?.enabled) {
-            viewsUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.views.path));
-        }
+    // views update: for Akshatmittal & Livecounts.net themes
+    // corresponds to likes on view counters
+    if (data.apiUpdates.response.views?.enabled) {
+        viewsUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.views.path));
+    }
 
-        // corresponds to dislikes on view counters
-        if (data.apiUpdates.response.videos?.enabled) {
-            videosUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.videos.path));
-        }
+    // corresponds to dislikes on view counters
+    if (data.apiUpdates.response.videos?.enabled) {
+        videosUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.videos.path));
+    }
 
-        if (data.apiUpdates.response.comments?.enabled) {
-            commentsUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.comments.path));
-        }
-        
-        idUpdate = getItemFromPath(item, data.apiUpdates.response.id.path);
+    if (data.apiUpdates.response.comments?.enabled) {
+        commentsUpdate = parseFloat(getItemFromPath(item, data.apiUpdates.response.comments.path));
+    }
+    
+    idUpdate = getItemFromPath(item, data.apiUpdates.response.id.path);
 
-        function updateStuff() {
-            if (nameUpdate !== undefined) {
-                data.data[0].name = nameUpdate;
-            }
-            if (imageUpdate !== undefined) {
-                data.data[0].image = imageUpdate;
-            }
-            if (bannerUpdate !== undefined) {
-                data.data[0].banner = bannerUpdate;
-            }
+    function updateStuff() {
+        if (nameUpdate !== undefined) {
+            data.data[index].name = nameUpdate;
+        }
+        if (imageUpdate !== undefined) {
+            data.data[index].image = imageUpdate;
+        }
+        if (bannerUpdate !== undefined) {
+            data.data[index].banner = bannerUpdate;
+        }
+        if (index === 0) {
             if (viewsUpdate !== undefined && typeof viewsUpdate == 'number' && isFinite(viewsUpdate)) {
                 if (data.data[1]) data.data[1].count = viewsUpdate;
             }
@@ -1047,35 +1033,63 @@ async function updateAPINow(bypass = false) {
             if (commentsUpdate !== undefined && typeof commentsUpdate == 'number' && isFinite(commentsUpdate)) {
                 if (data.data[3]) data.data[3].count = commentsUpdate;
             }
-            if (countUpdate !== undefined && typeof countUpdate === 'number' && isFinite(countUpdate)) {
-                data.data[0].isSubCounter() ? data.data[0].adjustForAPI(countUpdate) : data.data[0].count = countUpdate;
-            }
         }
-        
-        if (data.apiUpdates.response.id.IDIncludes) {
-            if (idUpdate && idUpdate.includes(data.data[0].id)) {
-                updateStuff();
-            }
-        } else {
-            if (idUpdate === data.data[0].id) {
-                updateStuff();
-            }
+        if (countUpdate !== undefined && typeof countUpdate === 'number' && isFinite(countUpdate)) {
+            data.data[index].isSubCounter() ? data.data[index].adjustForAPI(countUpdate) : data.data[index].count = countUpdate;
         }
+    }
+    
+    if (data.apiUpdates.response.id.IDIncludes) {
+        if (idUpdate && idUpdate.includes(data.data[index].id)) {
+            updateStuff();
+        }
+    } else {
+        if (idUpdate === data.data[index].id) {
+            updateStuff();
+        }
+    }
 
-        if (nameUpdate !== undefined && document.getElementById('usernameInput').value !== nameUpdate) {
-            document.getElementById('usernameInput').value = nameUpdate;
-        }
+    if (nameUpdate !== undefined && document.getElementById('usernameInput' + index).value !== nameUpdate) {
+        document.getElementById('usernameInput' + index).value = nameUpdate;
+    }
 
-        if (imageUpdate !== undefined && document.getElementById('counterAvatarURL').value !== imageUpdate) {
-            document.getElementById('counterAvatarURL').value = imageUpdate;
-        }
+    if (imageUpdate !== undefined && document.getElementById('counterAvatarURL').value !== imageUpdate) {
+        document.getElementById('counterAvatarURL').value = imageUpdate;
+    }
 
-        if (bannerUpdate !== undefined && document.getElementById('counterBannerURL') && document.getElementById('counterBannerURL').value !== bannerUpdate) {
-            document.getElementById('counterBannerURL').value = bannerUpdate;
-        }
+    if (bannerUpdate !== undefined && document.getElementById('counterBannerURL') && document.getElementById('counterBannerURL').value !== bannerUpdate) {
+        document.getElementById('counterBannerURL').value = bannerUpdate;
+    }
+    
+}
 
+async function updateAPINow(bypass = false) {
+
+    if (!data.apiUpdates.enabled) {
+        if (!bypass) return alert('You need to enable API updates first.')
+        return;
+    }
+
+    if (!data.apiUpdates.url) {
+        if (!bypass) return alert('You must configure the API URL and channel ID first.')
+        return;
+    }
+
+    if (data.debugMode) {
+        console.log('API updating...')
+    }
+
+    const shouldFetchFirst = !COUNTER_THEME.includes('compare') || data.apiUpdates.updateSide != '2';
+    const shouldFetchSecond = COUNTER_THEME.includes('compare') && data.apiUpdates.updateSide != '1';
+
+    try {
+        if (shouldFetchFirst) {
+            await updateAPI(0);
+        }
+        if (shouldFetchSecond) {
+            await updateAPI(1);
+        }
         fix(true);
-        
         if (document.getElementById('apiUpdateStatus')) {
             document.getElementById('apiUpdateStatus').innerText = 'OK';
             document.getElementById('apiUpdateStatus').style.color = 'green';
@@ -1953,9 +1967,28 @@ function updateChart(val) {
     }
 }
 
+function updateChart2(val) {
+    data.maxChartValues = clamp(Math.floor(data.maxChartValues), 2, 5000);
+
+    if (chart2.series[0].data.length > data.maxChartValues) {
+        chart2.series[0].setData(chart2.series[0].data.slice(1-data.maxChartValues));
+    } else if (chart2.series[0].data.length == data.maxChartValues) {
+        chart2.series[0].removePoint(0);
+    }
+
+    chart2.series[0].addPoint([Date.now(), val]);
+
+    if (data.saveChartData) {
+        data.liveGraph2 = chart2.series[0].data.map(x => [x.x, x.y])
+    } else {
+        data.liveGraph2 = [];
+    }
+}
+
 function clearChart() {
     if (confirm('Are you sure you want to clear the chart?')) {
         data.liveGraph = [];
+        if (data.liveGraph2) data.liveGraph2 = [];
         renderChart();
     }
 }
@@ -1995,9 +2028,96 @@ function updateGainTypes(max = 1) {
     }
 } 
 
-function regenerateDuplicatedID() {
-    const index = data.data.findLastIndex(x => x.id === data.data[0].id);
-    if (index > 0) {
-        data.data[index].id = uuidGen();
+function regenerateDuplicatedID(item) {
+    const itemIndex = parseInt(item.id.split('-')[2]);
+    if (!data.data[itemIndex].id) {
+        data.data[itemIndex].id = uuidGen();
+        if (document.getElementById('channel-id-' + itemIndex)) {
+            document.getElementById('channel-id-' + itemIndex).value = data.data[itemIndex].id;
+        }
     }
+
+    const index = data.data.findLastIndex(x => x.id === data.data[itemIndex].id);
+    if (index !== itemIndex) {
+        alert('Duplicated ID detected!');
+        data.data[index].id = uuidGen();
+        if (document.getElementById('channel-id-' + index)) {
+            document.getElementById('channel-id-' + index).value = data.data[index].id;
+        }
+    }
+}
+
+// run this AFTER using anything that modifies counters
+function enableCompareMode() {
+
+    const extraKeys = {
+        apiUpdates: {
+            updateSide: '0'
+        }
+    };
+
+    example_data = mergeWithExampleData(extraKeys, example_data);
+    
+    const tab = MENU.tabs[0];
+    tab.title = 'Left Counter';
+    const duplicatedTab = {
+        title: 'Right Counter',
+        items: []
+    }
+    for (const item of tab.items) {
+        const newItem = {};
+        for (const key of Object.keys(item)) {
+            if (key === 'func') {
+                newItem.func = function (item) {
+                    updateGainType(1);
+                }
+            } else {
+                newItem[key] = structuredClone(item[key]);
+            }
+            if (key === 'path' || key === 'className' || key === 'id') {
+                newItem[key] = newItem[key].replace('0', '1');
+            }
+        }
+
+        if (newItem.title === 'Avatar URL' || newItem.title === 'Banner URL') {
+            newItem.id += '2';
+        }
+
+        if (newItem.type === 'html') {
+            newItem.value = newItem.value.replace(/counterAvatarURL/g, 'counterAvatarURL2')
+            .replace(/counterAvatarFile/g, 'counterAvatarFile2')
+            .replace(/counterBannerURL/g, 'counterBannerURL2')
+            .replace(/counterBannerFile/g, 'counterBannerFile2')
+        }
+
+        duplicatedTab.items.push(newItem);
+    }
+    MENU.tabs.splice(1, 0, duplicatedTab);
+
+    const apiTab = MENU.tabs.find(x => x.title === 'API Updates');
+    apiTab.items[0].title = 'Left channel ID';
+    const channelIDOption = {
+        title: 'Right channel ID',
+        type: 'text',
+        value: '',
+        path: 'data.data.1.id',
+        func: function (item) {
+            regenerateDuplicatedID(item);
+        },
+        id: 'channel-id-1'
+    }
+
+    const whichSideOption = {
+        title: 'Update which counter(s)',
+        type: 'select',
+        value: '',
+        path: 'data.apiUpdates.updateSide',
+        auto: false,
+        options: [['0', 'Both'],['1', 'Left counter only'], ['2', 'Right counter only']],
+        className: 'api-setting',
+    }
+    apiTab.items.splice(1, 0, channelIDOption);
+    apiTab.items.splice(4, 0, whichSideOption);
+
+    MENU.controls.push(['reverseCard', 'Swap channels', 'unoReverse()']);
 }

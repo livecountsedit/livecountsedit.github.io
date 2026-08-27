@@ -124,29 +124,18 @@
             <button class="collapsible-button">What is a save file and how do I export or import one?</button>
             <div class="collapsible-content">
                 <div class="collapsible-content-inner">
-                    It's a way for you to save your data as a file that you can then import later. To download a save file:
-                    <li><a href="/livecountsedit/index.html">Livecountsedit</a>/<a href="/livecountsnet/index.html">Livecounts.net</a>: Open the menu and press one of the "Export data" buttons.</li>
-                    <li><a href="/socialblade/index.html">SocialBlade</a>/<a href="/akshatmittal/index.html">Akshatmittal</a>: They are in the "Import & Export Data" options tab at the bottom.</li>
-                    <li><a href="/studio/index.html">Studio</a>: Click the "Export data" button after scrolling down on the menu.</li>
-                    <li><a href="/top50/index.html">Top 50</a>: Click the "Export data" button in the "Import & Export Data" settings tab (2nd to last tab)</li>
-                    <li>View and compare counters: coming soon!</li>
+                    <p>It's a way for you to save your data as a file that you can then import later.</p>
+                    <p>To download a save file, go to the "Import & Export Data" tab. Keep everything checked if you want to keep all your data, but you may want to <strong>uncheck Stream Settings & ID</strong> on Top 50 to avoid sharing your Nightbot code, and <strong>uncheck API updates</strong> if you use credentials in your API settings to avoid sharing those if you plan on sharing the save with someone else. After that, just press the "Export Data" button!</p>
+                    <p>To import a save file, use the "Import Data" button below, or on Top 50, the "Load Save (From Top 50 Save)" file input, and select your file. If you get prompted about a partial import, it is because you either left some boxes unchecked or the save file doesn't contain everything (e.g. was exported with a few boxes unchecked, or from a different counter/older version). Press "OK" if you want to merge with what you already have, keeping everything that isn't imported. "Cancel" will RESET everything that isn't imported.</p>
+                    
                 </div>
-                <p>The option for importing saves can be found near the option for exporting. Note that in Top 50, the import buttons are on the row below.</p>
             </div>
         </div>
         <div>
             <button class="collapsible-button">Why am I getting some sort of error (e.g. "QuotaExceededError") about my save file being too large?</button>
             <div class="collapsible-content">
                 <div class="collapsible-content-inner">
-                    Refer to <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/Problems-with-Local-Storage">this article</a>. Note that with a recent update, reasonable save files for <a href="/top50/index.html">Top 50</a>, <a href="/socialblade/index.html">SocialBlade</a>, and <a href="/akshatmittal/index.html">Akshatmittal</a> will not encounter this issue due to using another browser storage method that doesn't have low limitations. For the Livecountsedit, Livecounts.net, and YT Studio counters, their saves are still using local storage so they are subject to a 5 MiB (binary megabytes) limit combined.
-                </div>
-            </div>
-        </div>
-        <div>
-            <button class="collapsible-button">What is the difference between a public and a private save?</button>
-            <div class="collapsible-content">
-                <div class="collapsible-content-inner">
-                    On the <a href="/livecountsedit/index.html">Livecountsedit</a> and <a href="/livecountsnet/index.html">Livecounts.net</a> counters, a private save contains API update settings while public saves strip them out. Avoid sharing private saves if they contain sensitive data such as API credentials.
+                    Refer to <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/Problems-with-Local-Storage">this article</a>. Note that with a recent update, reasonable save files will not encounter this issue due to using another browser storage method that doesn't have low limitations. However, the <a href="../studio/old/index.html">old YT Studio</a> counter still uses local storage, which is subject to a 5 MiB (binary megabytes) limit.
                 </div>
             </div>
         </div>
@@ -162,7 +151,7 @@
             <button class="collapsible-button">Are save files from different counters compatible with each other?</button>
             <div class="collapsible-content">
                 <div class="collapsible-content-inner">
-                    <a href="/livecountsedit/index.html">Livecountsedit</a> and <a href="/livecountsnet/index.html">Livecounts.net</a> are compatible with each other but not with any other counters. This is due to them being our "guinea pigs" for a new, but now abandoned save format. <a href="/top50/index.html">Top 50</a>, <a href="/socialblade/index.html">SocialBlade</a>, and <a href="/akshatmittal/index.html">Akshatmittal</a> saves are all compatible with each other, and Top 50 has an option to import <a href="/studio/index.html">YT Studio</a> saves.
+                    Yes! Please be aware that you may end up importing the design or styles of a different counter, and that not all features are supported on all counters. Please be sure to uncheck anything, such as styles, that you don't want imported from another counter before importing your file.
                 </div>
             </div>
         </div>
@@ -171,8 +160,8 @@
             <button class="collapsible-button">How do I use API updates?</button>
             <div class="collapsible-content">
                 <div class="collapsible-content-inner">
-                    <p>The exact details on how each option works are a bit advanced if you don't know coding, but you can use one of the <a href="https://mixerno.space">mixerno.space</a> presets in <a href="/top50/index.html">Top 50</a>, <a href="/socialblade/index.html">SocialBlade</a>, and <a href="/akshatmittal/index.html">Akshatmittal</a> counters, and copy over the corresponding settings from one of these counters for other counters (they will receive the preset feature in the future). Make sure you configure the YouTube channel ID, or create new counters with ID field set to the corresponding ID on Top 50. You can convert a YouTube username to an ID using <a href="https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/">this tool</a>.</p>
-                    <p>If you use the "Force updates" option, the counter will be the real sub count, otherwise, you can make your own estimations for abbreviated YouTube counts. The SocialBlade and Akshatmittal counters come with an "overestimation leeway" option to specify how much to bring the count down by if you overestimate. For example, if your count hits 101M but the API still says 100M, you can use a 10% leeway to drop it down to 100.9M, or a 20% leeway to drop to 100.8M. Using a 0% leeway will drop to 100,999,999.</p>
+                    <p>The exact details on how each option works are a bit advanced if you don't know coding, but you can use one of the <a href="https://mixerno.space">mixerno.space</a> presets. Make sure you configure the YouTube channel ID, or create new counters with ID field set to the corresponding ID on Top 50. You can convert a YouTube username to an ID using <a href="https://www.streamweasels.com/tools/youtube-channel-id-and-user-id-convertor/">this tool</a>.</p>
+                    <p>If you use the "Force updates" option, the counter will be the real sub count, otherwise, you can make your own estimations for abbreviated YouTube counts. All single user counters and compare counters come with an "overestimation leeway" option to specify how much to bring the count down by if you overestimate. For example, if your count hits 101M but the API still says 100M, you can use a 10% leeway to drop it down to 100.9M, or a 20% leeway to drop to 100.8M. Using a 0% leeway will drop to 100,999,999.</p>
                     <p>Also, remember to save your API settings! They don't get saved automatically.</p>
                 </div>
             </div>
@@ -207,6 +196,16 @@
                 </div>
             </div>
         </div>
+        <div>
+            <button class="collapsible-button">What does "use observed gains" mean for fires and differences in Top 50, and should I use it or not?</button>
+            <div class="collapsible-content">
+                <div class="collapsible-content-inner">
+                    <p>There are two ways of determining gain in Livecountsedit, and those are <strong>observed gains</strong> and <strong>set gains</strong>.</p> 
+                    <p>Observed gains will look at the actual counter moving and take an average of some values (the number of points to sample can be changed using the "Calculate gain rate as average of" option) to estimate the gain rate of a channel. You should use this if your counters are being influenced by external means like API updates, or if you want to account for the randomness of the gains to make it more interesting.</p>
+                    <p>Set gains, which is what the fires and differences will use if you uncheck the use observed gains option, will simply literally look at your gain settings and calculate the true average gain rate using that. You should use this if you want your effects to be accurate to your settings, don't want them changing around randomly, and aren't using API updates.</p>
+                </div>
+            </div>
+        </div>
         <h3 class="group-header">Streaming</h3>
         <div>
             <button class="collapsible-button">How do I make a FYSC "faking your sub counts" interactive livestream?</button>
@@ -221,7 +220,7 @@
             <button class="collapsible-button">How do I use Livecountsedit in OBS Studio?</button>
             <div class="collapsible-content">
                 <div class="collapsible-content-inner">
-                    You should use a window capture source. For a tutorial on using browser sources in <a href="/top50/index.html">Top 50</a>, please see <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/OBS-Browser-Tutorial">this article</a>. Browser sources currently do not work on other counters that use save files. 
+                    You can use a window capture source. For a tutorial on using browser sources, please see <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/OBS-Browser-Tutorial">this article</a>. Note that importing and exporting data, as well as using Livecountsedit, can be tricky in OBS browser mode, so be sure to follow the tutorial. 
                 </div>
             </div>
         </div>

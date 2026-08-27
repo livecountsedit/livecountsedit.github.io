@@ -41,4 +41,15 @@ button {
     width: fit-content;
     background-color: red;
     color: white;
+    font-size: 2em;
+}
+
+dialog {
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+dialog::-webkit-scrollbar {
+  display: none;
 }

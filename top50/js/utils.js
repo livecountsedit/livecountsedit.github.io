@@ -332,25 +332,26 @@ function calculateFires() {
                     }
                 }
             } else if (data.fireIcons.type == 'gain') {
+                const gain = data.fireIcons.fireObservedGains ? getGain(data.data[i].id) : getSetGain(data.data[i]);
                 if (data.fireIcons.created[q].method == '>=') {
-                    if (getGain(data.data[i].id) >= data.fireIcons.created[q].threshold) {
+                    if (gain >= data.fireIcons.created[q].threshold) {
                         equation = true;
                     }
                 } else if (data.fireIcons.created[q].method == '==') {
-                    if (getGain(data.data[i].id) == data.fireIcons.created[q].threshold) {
+                    if (gain == data.fireIcons.created[q].threshold) {
                         equation = true;
                     }
                 } else if (data.fireIcons.created[q].method == '<=') {
-                    if (getGain(data.data[i].id) <= data.fireIcons.created[q].threshold) {
+                    if (gain <= data.fireIcons.created[q].threshold) {
                         equation = true;
                     }
                 } else {
-                    if (getGain(data.data[i].id) != data.fireIcons.created[q].threshold) {
+                    if (gain != data.fireIcons.created[q].threshold) {
                         equation = true;
                     }
                 }
             } else if (data.fireIcons.type == 'hour') {
-                let subs = getGain(data.data[i].id)
+                let subs = data.fireIcons.fireObservedGains ? getGain(data.data[i].id) : getSetGain(data.data[i]);
 
                 let updateInterval = data.updateInterval / 1000;
                 let updatesPerHour = 3600 / updateInterval;
