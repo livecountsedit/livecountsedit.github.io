@@ -681,7 +681,6 @@ function initializeCharts() {
                 const timeOffset = (dataPoints.length - index) * data.updateInterval;
                 return [now - timeOffset, getDisplayedCount(value) || 0];
             });
-            console.log(chartData)
         } else {
             // Start with current count - add at least 2 points so line is visible
             const now = Date.now();
