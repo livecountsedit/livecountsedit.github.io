@@ -123,8 +123,8 @@ body {
 }
 
 .thumbnail {
-    width: 16vh;
-    height: 9vh;
+    width: calc(15vh * 16 / 9);
+    height: 15vh;
     vertical-align: middle;
     border-radius: 5px;
     border: 2px solid #fff;
