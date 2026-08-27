@@ -2769,7 +2769,7 @@ function apiUpdate(interval) {
     }
 
     // Limit API requests to 90,000 per hour
-    // (thanks Dapocha for your API tracked top 10,000 insta crasher lol)
+    // (thanks Dapohca for your API tracked top 10,000 insta crasher lol)
     // Enough for an entire Top 50 to update once every 2s
     const HOURLY_REQUEST_LIMIT = 90000;
     const hourlyRequests = groups.length * 3.6e6 / data.apiUpdates.interval;
