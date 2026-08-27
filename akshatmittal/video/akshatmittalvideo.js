@@ -119,9 +119,11 @@ function hidenav() {
     if (document.querySelector('.left-sidebar').style.display === 'none') {
         document.querySelector('.left-sidebar').style.display = '';
         document.querySelector('.page-wrapper').style.marginLeft = '';
+        document.querySelector('.menu').style.width = '';
     } else {
         document.querySelector('.left-sidebar').style.display = 'none';
         document.querySelector('.page-wrapper').style.marginLeft = '0';
+        document.querySelector('.menu').style.width = '100%';
     }
 }
 

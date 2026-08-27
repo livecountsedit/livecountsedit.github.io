@@ -186,7 +186,7 @@ let example_data = {
         styles: true,
         customCSS: true,
         technicalSettings: true,
-        fireIcons: true,
+        fireSettings: true,
         differenceSettings: true,
         apiUpdates: true,
         streamSettings: true,
@@ -230,6 +230,13 @@ async function initLoad(redo, previousTheme) {
 
     if (!redo) {
         if (storedData) {
+
+            // fix stupid typo
+            if (storedData.partialExports.fireIcons && typeof storedData.partialExports.fireIcons === 'boolean') {
+                storedData.partialExports.fireSettings = storedData.partialExports.fireIcons;
+                delete storedData.partialExports.fireIcons;
+            }
+            
             data = mergeWithExampleData(storedData, example_data);
             data.data = data.data.map(x => new Channel(x));
             data.saveType = COUNTER_THEME;
