@@ -22,6 +22,7 @@ window.onload = async () => {
         footerText: 'Subscribers',
         maxChartValues: 450,
         nameColor: '#ffffff',
+        showBanners: true,
         showImages: true,
         textColor: '#ffffff',
         lceditThemeSettings: {
