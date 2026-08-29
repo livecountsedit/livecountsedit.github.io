@@ -280,8 +280,8 @@ function fix(noOdo = false) {
         document.getElementById('noTrophy').innerText = '';
     } else {
         document.getElementById('noTrophy').innerText = `
-            .trophy-icon {
-                display: none;
+            .vs-leader {
+                display: none !important;
             }
         `
     }
