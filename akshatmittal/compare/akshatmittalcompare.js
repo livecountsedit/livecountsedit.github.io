@@ -189,33 +189,19 @@ function updateCounters2(doGains = true) {
         gap = Math.abs(gap);
     }
     document.getElementById('yt_diff').innerText = gap;
-
-    var iconPath = "trophy-icon.png";
-    var ytNameVs1 = document.getElementById("yt_name_vs1");
-    var ytNameVs2 = document.getElementById("yt_name_vs2");
-
-    if (ytNameVs1.querySelector("img.trophy-icon")) ytNameVs1.querySelector("img.trophy-icon").remove();
-    if (ytNameVs2.querySelector("img.trophy-icon")) ytNameVs2.querySelector("img.trophy-icon").remove();
-
-    displayTrophy(count1, count2)
+    displayTrophy(count1, count2);
 }
 
 function displayTrophy(c1, c2) {
-    var iconPath = "trophy-icon.png";
-    var ytNameVs1 = document.getElementById("yt_name_vs1");
-    var ytNameVs2 = document.getElementById("yt_name_vs2");
     if (c1 > c2) {
-        var img = document.createElement("img");
-        img.src = iconPath;
-        img.className = "trophy-icon";
-        ytNameVs1.style.position = "relative";
-        ytNameVs1.appendChild(img);
+        document.querySelector('.vs-leader.w-left').style.display = 'block';
+        document.querySelector('.vs-leader.w-right').style.display = 'none';
     } else if (c1 < c2) {
-        var img = document.createElement("img");
-        img.src = iconPath;
-        img.className = "trophy-icon";
-        ytNameVs2.style.position = "relative";
-        ytNameVs2.appendChild(img);
+        document.querySelector('.vs-leader.w-left').style.display = 'none';
+        document.querySelector('.vs-leader.w-right').style.display = 'block';
+    } else {
+        document.querySelector('.vs-leader.w-left').style.display = 'none';
+        document.querySelector('.vs-leader.w-right').style.display = 'none';
     }
 }
 
