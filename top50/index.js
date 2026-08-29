@@ -419,7 +419,8 @@ async function initLoad(redo, previousTheme) {
     }
     updateStreamerMode();
     if (data.lastOnline && data.offlineGains && !data.pause) {
-        const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval;
+        // Subtract 1 since the counter also updates immediately upon load.
+        const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval - 1;
         for (let i = 0; i < data.data.length; i++) {
             if (isFinite(data.data[i].std_gain) && data.data[i].std_gain != null) {
                 const meanGain = parseFloat(data.data[i].mean_gain) || 0;

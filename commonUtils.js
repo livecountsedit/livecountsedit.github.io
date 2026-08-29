@@ -1,7 +1,7 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo', 'livecountseditcompare','akshatmittalcompare'];
 const DB_VERSION = 11;
-const VERSION = '7.10';
+const VERSION = '7.10.3';
 const SAVE_VERSION = 10;
 let obsMode;
 
@@ -876,13 +876,16 @@ class Channel {
 
     // Offline gains are gains added to compensate for the time the save wasn't loaded in the browser
     // e.g. when tab is closed. It DOES NOT refer to gains for users that are not active on stream.
-    offlineGain() {
+    offlineGain(gainImmediately = true) {
         // Don't do offline gains if disabled or paused, or if the last saved time isn't set
         // or if API updates are enabled and force updated
         if (data.pause || !data.offlineGains || typeof data.lastOnline !== 'number' 
             || !isFinite(data.lastOnline) || (data.apiUpdates.enabled && data.apiUpdates.forceUpdates)) return;
         
-        const intervalsElapsed = (Date.now() - data.lastOnline) / data.updateInterval;
+        let intervalsElapsed = (Date.now() - data.lastOnline) / data.updateInterval;
+
+        // Subtract 1 if the counter gains immediately after adjusting for offline gains.
+        if (gainImmediately) intervalsElapsed--;
 
         // Only do offline gains if at least 5 update intervals have passed
         if (intervalsElapsed < 5) return;
