@@ -86,9 +86,28 @@ h2 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: clip;
+  text-align: left;
   padding-left: 1px;
   font-size: 15px;
   src: url('../../fonts/Roboto-Regular.ttf') format('truetype');
+  display: block;
+  width: 100%;
+}
+
+.main .name.fade-name {
+  --name-fade-size: 1.8em;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 1) 0,
+    rgba(0, 0, 0, 1) calc(100% - var(--name-fade-size)),
+    rgba(0, 0, 0, 0) 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 1) 0,
+    rgba(0, 0, 0, 1) calc(100% - var(--name-fade-size)),
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
 .selected {

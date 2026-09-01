@@ -345,6 +345,15 @@
                             <option value="right">Right</option>
                         </select>
                     </label>
+                    <label><abbr title="Work best with short channel name">Name alignment:</abbr>
+                        <select id="nameAlignment" class="s-width">
+                            <option value="left">Left</option>
+                            <option value="center">Center</option>
+                            <option value="right">Right</option>
+                        </select>
+                    </label>
+                    <label>Fade name text: <input type="checkbox" id="fadeName"></label>
+                    <label>Fade length (px): <input type="number" class="xs-width" id="fadeNameLength" value="30" min="0" step="1" autocomplete="off"></label>
                     <label>Main font: <input class="m-width" id="mainFont" autocomplete="off"></label>
                     <label>Header/footer font: <input class="m-width" id="headerFont" autocomplete="off"></label>
                     <label><abbr title="Note: Not all font weights are supported on all fonts.">Counter font

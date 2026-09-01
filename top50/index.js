@@ -108,6 +108,9 @@ let example_data = {
     "intervalCount": 0,
     "gainAverageOf": 1,
     "counterAlignment": "left",
+    "nameAlignment": "left",
+    "fadeName": false,
+    "fadeNameLength": 30,
     "animatedCards": {
         "duration": 500,
         "enabled": false
@@ -1757,6 +1760,21 @@ document.getElementById('counterAlignment').addEventListener('change', function 
     fix();
 })
 
+document.getElementById('nameAlignment').addEventListener('change', function () {
+    data.nameAlignment = this.value;
+    fix();
+})
+
+document.getElementById('fadeName').addEventListener('change', function () {
+    data.fadeName = this.checked;
+    fix();
+})
+
+document.getElementById('fadeNameLength').addEventListener('change', function () {
+    data.fadeNameLength = Math.max(0, Number(this.value) || 0);
+    fix();
+})
+
 document.getElementById('imageBorder').addEventListener('change', function () {
     let num = this.value;
     data.imageBorder = num;
@@ -2239,6 +2257,9 @@ function fix() {
     document.getElementById('gainAverageOf').value = data.gainAverageOf || 1;
     document.getElementById('counterFontWeight').value = data.counterFontWeight || "400";
     document.getElementById('counterAlignment').value = data.counterAlignment;
+    document.getElementById('nameAlignment').value = data.nameAlignment || 'left';
+    document.getElementById('fadeName').checked = !!data.fadeName;
+    document.getElementById('fadeNameLength').value = data.fadeNameLength ?? 30;
     document.getElementById('useOdometerColors').checked = data.useOdometerColors;
     document.getElementById('maxChartValues').value = data.maxChartValues || 50;
     document.getElementById('numberFormat').value = data.numberFormat;
@@ -2247,6 +2268,31 @@ function fix() {
     const subCounters = document.getElementById('main').getElementsByClassName("count");
     for (const subCounter of subCounters) {
         subCounter.style.textAlign = data.counterAlignment;
+    }
+
+    const nameEls = document.querySelectorAll('.name');
+    for (const nameEl of nameEls) {
+        nameEl.style.textAlign = data.nameAlignment || 'left';
+        nameEl.classList.toggle('fade-name', !!data.fadeName);
+
+        if (!data.fadeName) {
+            nameEl.style.webkitMaskImage = '';
+            nameEl.style.maskImage = '';
+            continue;
+        }
+
+        const align = data.nameAlignment || 'left';
+        const fadeSize = `${Math.max(0, Number(data.fadeNameLength) || 0)}px`;
+        let gradient = `linear-gradient(to right, rgba(0,0,0,1) 0, rgba(0,0,0,1) calc(100% - ${fadeSize}), rgba(0,0,0,0) 100%)`;
+
+        if (align === 'right') {
+            gradient = `linear-gradient(to right, rgba(0,0,0,0) 0, rgba(0,0,0,1) ${fadeSize}, rgba(0,0,0,1) 100%)`;
+        } else if (align === 'center') {
+            gradient = `linear-gradient(to right, rgba(0,0,0,0) 0, rgba(0,0,0,1) 12%, rgba(0,0,0,1) 50%, rgba(0,0,0,1) 88%, rgba(0,0,0,0) 100%)`;
+        }
+
+        nameEl.style.webkitMaskImage = gradient;
+        nameEl.style.maskImage = gradient;
     }
 
     document.getElementById('header').style.fontFamily = data.headerFont || "Arial";
