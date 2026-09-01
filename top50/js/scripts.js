@@ -42,7 +42,7 @@ async function loadScripts() {
     <label>${object.author}</label>
     <a href="${object.url}">URL</a>
     <a href="https://github.com/livecountsedit/scripts/tree/main/listings/${object.id}">Source</a><br><br>
-    <img style="width: 200px; height: 100px;" src="https://raw.githubusercontent.com/livecountsedit/scripts/refs/heads/main/listings/${object.id}/image.png"><br>
+    <img style="height: 100px; max-width: 300px;" src="https://raw.githubusercontent.com/livecountsedit/scripts/refs/heads/main/listings/${object.id}/image.png"><br>
     <button>${data.scripts.includes(object.id) ? 'Uninstall' : 'Install'}</button>
   `;
 

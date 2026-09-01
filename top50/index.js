@@ -421,43 +421,46 @@ async function initLoad(redo, previousTheme) {
         }
     }
     updateStreamerMode();
-    if (data.lastOnline && data.offlineGains && !data.pause) {
+    if (data.lastOnline && data.offlineGains) {
         // Subtract 1 since the counter also updates immediately upon load.
         const intervalsPassed = (new Date().getTime() - data.lastOnline) / data.updateInterval - 1;
-        for (let i = 0; i < data.data.length; i++) {
-            if (isFinite(data.data[i].std_gain) && data.data[i].std_gain != null) {
-                const meanGain = parseFloat(data.data[i].mean_gain) || 0;
-                const stdGain = parseFloat(data.data[i].std_gain) || 0;
+        // Only do offline gains if at least 5 intervals have passed
+        if (intervalsPassed >= 5) {
+            for (let i = 0; i < data.data.length; i++) {
+                if (isFinite(data.data[i].std_gain) && data.data[i].std_gain != null) {
+                    const meanGain = parseFloat(data.data[i].mean_gain) || 0;
+                    const stdGain = parseFloat(data.data[i].std_gain) || 0;
 
-                /*
-                    The sum of N normally distributed random variables with mean M and standard deviation S
-                    is normally distributed with mean M*N and standard deviation S*sqrt(N).
-                 */
+                    /*
+                        The sum of N normally distributed random variables with mean M and standard deviation S
+                        is normally distributed with mean M*N and standard deviation S*sqrt(N).
+                    */
 
-                data.data[i].count += randomGaussian(
-                    meanGain * intervalsPassed,
-                    stdGain * Math.sqrt(intervalsPassed));
-            } else {
+                    data.data[i].count += randomGaussian(
+                        meanGain * intervalsPassed,
+                        stdGain * Math.sqrt(intervalsPassed));
+                } else {
 
-                /*
-                    The sum of N uniformly distributed random variables with minimum A and maximum B
-                    is approximately normally distributed with mean (A+B)*N/2 and standard deviation
-                    (B-A)*sqrt(N/12).
+                    /*
+                        The sum of N uniformly distributed random variables with minimum A and maximum B
+                        is approximately normally distributed with mean (A+B)*N/2 and standard deviation
+                        (B-A)*sqrt(N/12).
 
-                    See https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution#Approximating_a_Normal_distribution
-                    for more details.
-                */
+                        See https://en.wikipedia.org/wiki/Irwin%E2%80%93Hall_distribution#Approximating_a_Normal_distribution
+                        for more details.
+                    */
 
-                const minGain = parseFloat(data.data[i].min_gain) || 0;
-                const maxGain = parseFloat(data.data[i].max_gain) || 0;
+                    const minGain = parseFloat(data.data[i].min_gain) || 0;
+                    const maxGain = parseFloat(data.data[i].max_gain) || 0;
 
-                data.data[i].count += randomGaussian(
-                    (maxGain + minGain) * intervalsPassed / 2,
-                    (maxGain - minGain) * Math.sqrt(intervalsPassed / 12)
-                )
+                    data.data[i].count += randomGaussian(
+                        (maxGain + minGain) * intervalsPassed / 2,
+                        (maxGain - minGain) * Math.sqrt(intervalsPassed / 12)
+                    )
+                }
             }
+            data.lastOnline = new Date().getTime();
         }
-        data.lastOnline = new Date().getTime();
     }
     let design = setupDesign(redo);
     document.getElementById('main').innerHTML = design[0].innerHTML;
