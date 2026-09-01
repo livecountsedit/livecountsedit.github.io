@@ -1,7 +1,7 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo', 'livecountseditcompare','akshatmittalcompare'];
 const DB_VERSION = 11;
-const VERSION = '7.10.3';
+const VERSION = '7.10.5';
 const SAVE_VERSION = 10;
 let obsMode;
 
@@ -590,6 +590,9 @@ function processData(dat) {
             delete dat.counterAlignment;
             delete dat.nameColor;
             delete dat.footerColor;
+            delete dat.fadeName;
+            delete dat.fadeNameLength;
+            delete dat.nameAlignment;
         }
         if (!dat.partialExports.technicalSettings) {
             delete dat.abbreviate;

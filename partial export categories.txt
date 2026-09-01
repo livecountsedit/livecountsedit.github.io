@@ -1,3 +1,5 @@
+Note: This file is just for refrence to see what each piece of data in the save file should be categorized as when it comes to partial imports and exports.
+
 autosave - state
 debugMode - state
 editorShowsExactCount - state
@@ -101,3 +103,8 @@ data.data[i].custom_counter_data.updateProbability - technicalSettings
 data.data[i].gain_per_number - gains
 data.showBanners - designSettings
 data.nameColor - styles
+
+Introduced in save version 11 (v7.10.5):
+data.fadeName - styles
+data.fadeNameLength - styles
+data.nameAlignment - styles
