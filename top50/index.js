@@ -2649,7 +2649,7 @@ function custom() {
             returnText = '&returnText=' + returnText;
         }
 
-        const result = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rate=true';
+        const result = '$(urlfetch ' + apiurl + '' + code + '/$(userid)?values=' + min + ',' + max + returnText + ')&rates=true';
         navigator.clipboard.writeText(result);
         alert("Copied command to clipboard!")
     } else {
