@@ -1,7 +1,7 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo', 'livecountseditcompare','akshatmittalcompare'];
 const DB_VERSION = 11;
-const VERSION = '7.10.5';
+const VERSION = '7.10.7';
 const SAVE_VERSION = 10;
 let obsMode;
 
@@ -538,6 +538,7 @@ function processData(dat) {
             delete dat.showRankings;
             delete dat.showBanners;
             delete dat.rankingsWidth;
+            delete dat.showScrollbars;
             if (dat.cardStyles) {
                 delete dat.cardStyles.cardWidth;
                 delete dat.cardStyles.cardHeight;

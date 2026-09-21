@@ -175,6 +175,7 @@ let example_data = {
     'reverseAnimation': false,
     'saveType': COUNTER_THEME,
     'index': 1,
+    'showScrollbars': true,
     partialExports: {
         state: true,
         counters: true,
@@ -1976,6 +1977,11 @@ document.getElementById('animationType').addEventListener('change', function () 
     updateOdo();
 })
 
+document.getElementById('showScrollbars').addEventListener('click', function () {
+    data.showScrollbars = this.checked;
+    updateScrollbars();
+})
+
 function fix() {
     document.getElementById('main').style.height = data.cardStyles.containerHeight + "vh";
     document.getElementById('main').style.width = data.cardStyles.containerWidth + "vw";
@@ -2325,6 +2331,8 @@ function fix() {
     document.getElementById('fastestIcon').value = data.fastestIcon || '🔥';
     document.getElementById('slowestIcon').value = data.slowestIcon || '⌛️';
     document.getElementById('debugMode').checked = !!data.debugMode;
+    document.getElementById('showScrollbars').checked = !!data.showScrollbars;
+    updateScrollbars();
 
     document.querySelectorAll(".partial-export-option").forEach(x => {
         const part = x.getAttribute("partial-export");
@@ -4860,3 +4868,20 @@ document.getElementById("edit_min_gain").addEventListener('input', updateEditHou
 document.getElementById("edit_max_gain").addEventListener('input', updateEditHourlyEstimates);
 document.getElementById("edit_mean_gain").addEventListener('input', updateEditHourlyEstimates);
 document.getElementById("edit_std_gain").addEventListener('input', updateEditHourlyEstimates);
+
+function updateScrollbars() {
+    if (data.showScrollbars === false) {
+        document.getElementById("noScrollbars").innerText = `
+            .main {
+                scrollbar-width: none;    
+                -ms-overflow-style: none; 
+            }
+
+            .main::-webkit-scrollbar {
+                display: none;
+            }
+        `
+    } else {
+        document.getElementById("noScrollbars").innerText = "";   
+    }
+}
