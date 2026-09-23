@@ -4764,6 +4764,10 @@ function removeTopSetting(name) {
 }
 
 function createNewSection() {
+    let index = data.headerSettings.items.length;
+    while (data.headerSettings.items.some(x => x.name === "Item " + index)) {
+        index++;
+    }
     let item = {
         "attributes": {
             "text": "Text",
@@ -4782,7 +4786,7 @@ function createNewSection() {
             "id1": "",
             "id2": ""
         },
-        "name": "Item " + data.headerSettings.items.length,
+        "name": "Item " + index,
         "type": "text",
         "childOf": "",
         "placement": "header"
