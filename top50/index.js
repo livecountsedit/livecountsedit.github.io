@@ -1051,7 +1051,7 @@ function update(doGains = true) {
             }
 
             if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0 &&
-                (!data.fireIcons.waitForFirstGain || intervalNumber > 0)) {
+                fireIntervalSinceLoad >= Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0)) {
                 calculateFires();
             }
             setTimeout(function () {
@@ -2091,7 +2091,6 @@ function fix() {
     document.getElementById('differenceImageSize').value = data.differenceStyles.imageSize;
     document.getElementById('estimateUsingObservedGains').checked = data.differenceStyles.estimateUsingObservedGains;
     document.getElementById('fireObservedGains').checked = data.fireIcons.fireObservedGains;
-    document.getElementById('waitForFirstGain').checked = data.fireIcons.waitForFirstGain || false;
     document.getElementById('alignDifferences').value = data.differenceStyles.alignDifferences;
 
     let gapAlignment = `left: ${data.differenceStyles.left}%;`;
