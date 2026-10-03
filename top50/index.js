@@ -5129,30 +5129,21 @@ function updateScrollbars() {
 
         updateMessage.append(loader,title,message);
         document.body.appendChild(updateMessage);
-        cards.forEach(card => card.classList.add("builtin-content-hidden"));
 
-        const count=cards.length;
-        const revealDelay=count>1 ? TOTAL_REVEAL_DURATION/(count-1) : 0;
-
+        // Keep the live cards visible: the site's update has already switched
+        // the name, profile picture, count, and other card data instantly.
         setTimeout(() => {
-            cards.forEach((card,index) => {
+            if (updateMessage) {
+                updateMessage.classList.add("fade-out");
                 setTimeout(() => {
-                    card.classList.remove("builtin-content-hidden");
-                    if (index === count-1) {
-                        setTimeout(() => {
-                            if (updateMessage) {
-                                updateMessage.classList.add("fade-out");
-                                setTimeout(() => {
-                                    updateMessage?.remove();
-                                    updateMessage=null;
-                                    isActive=false;
-                                },250);
-                            } else isActive=false;
-                        },200);
-                    }
-                },index*revealDelay);
-            });
-        },300);
+                    updateMessage?.remove();
+                    updateMessage=null;
+                    isActive=false;
+                },250);
+            } else {
+                isActive=false;
+            }
+        }, TOTAL_REVEAL_DURATION);
     }
 
     function celebrate(card,milestone) {
