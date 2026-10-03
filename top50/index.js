@@ -18,7 +18,6 @@ let data = {};
 let gainTable = {};
 let glowingCards = [];
 let fires = new Map();
-let fireDelayUpdatesRemaining = 0;
 let appendedMDMStyles = false;
 
 // override function in importData
@@ -124,8 +123,7 @@ let example_data = {
         'fireBorderWidth': 0,
         'intervalsPerUpdate': 1,
         'fireObservedGains': true,
-        'initialFireDelayEnabled': false,
-        'initialFireDelay': 1,
+        'initialFireDelay': 0,
         'created': []
     },
     'apiUpdates': {
@@ -491,11 +489,6 @@ async function initLoad(redo, previousTheme) {
     fix();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
-    // Initialize the fire delay from this page load. Do not use the persisted intervalCount,
-    // since that would make the delay expire immediately after a reload.
-    fireDelayUpdatesRemaining = data.fireIcons.initialFireDelayEnabled
-        ? Math.max(1, parseInt(data.fireIcons.initialFireDelay) || 1)
-        : 0;
     if (!data.pause) {
         updateInterval = setInterval(update, data.updateInterval);
         update();
@@ -953,6 +946,7 @@ function setupMDMStyles() {
 
 function update(doGains = true) {
     let intervalNumber = data.intervalCount;
+    const fireIntervalSinceLoad = intervalNumber - fireCycleStartInterval;
     if (data.debugMode) console.time(`Update #${intervalNumber + 1} took`)
     if (data) {
         data.lastOnline = Date.now();
@@ -1056,13 +1050,9 @@ function update(doGains = true) {
                 extraTimeTillUpdate = i * 100;
             }
 
-            if (data.intervalCount % (parseInt(data.fireIcons.intervalsPerUpdate) || 1) === 0) {
-                if (fireDelayUpdatesRemaining > 0) {
-                    fireDelayUpdatesRemaining--;
-                    fires.clear();
-                } else {
-                    calculateFires();
-                }
+            if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0 &&
+                fireIntervalSinceLoad >= Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0)) {
+                calculateFires();
             }
             setTimeout(function () {
                 num = formatRank(i + 1);
@@ -1951,15 +1941,9 @@ document.getElementById('fireObservedGains').addEventListener('change', function
     fix();
 })
 
-document.getElementById('initialFireDelayEnabled').addEventListener('change', async function () {
-    data.fireIcons.initialFireDelayEnabled = this.checked;
-    fires.clear();
-    await saveInBrowser(COUNTER_THEME, false);
-})
-
 document.getElementById('initialFireDelay').addEventListener('change', async function () {
     let value = parseInt(this.value);
-    if (!isFinite(value) || value < 1) value = 1;
+    if (!isFinite(value) || value < 0) value = 0;
     this.value = value;
     data.fireIcons.initialFireDelay = value;
     fires.clear();
@@ -3470,8 +3454,7 @@ function loadFireIcons() {
     if (data.fireIcons.created.length == 0) {
         div.innerHTML = '<p>No fire icons created.</p>'
     }
-    document.getElementById('initialFireDelayEnabled').checked = data.fireIcons.initialFireDelayEnabled || false;
-    document.getElementById('initialFireDelay').value = Math.max(1, parseInt(data.fireIcons.initialFireDelay) || 1);
+    document.getElementById('initialFireDelay').value = Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0);
     document.getElementById('fireEnabled').checked = data.fireIcons.enabled || false;
     document.getElementById('fireType').value = data.fireIcons.type || 'gain';
     document.getElementById('firePosition').value = data.fireIcons.firePosition || 'above';
