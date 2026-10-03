@@ -3936,39 +3936,6 @@ function loadHeader() {
                 }
             }
         }
-        if (item.type == 'milestone') {
-            const milestoneHeight = Math.max(30, parseFloat(item.attributes.boxHeight) || 60);
-            const milestoneFontSize = Math.max(8, parseFloat(item.attributes.fontSize) || 15);
-            div.innerHTML = `<div class="battle-container" style="box-sizing: border-box; width: 100%; max-width: 100%; overflow: hidden; background-color: ${item.attributes.bgColor || '#141414'}; height: ${milestoneHeight}px; border-radius: ${item.attributes.roundAvatars ? '50px' : '0'};">
-                <div class="battle_container" style="width: 100%; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box;">
-                    <div class="battle_info" style="width: 100%; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; font-size: ${milestoneFontSize}px; line-height: 1.2; padding: 0 10px;">
-                        <p id="milestone_name_${item.name}" class="name" style="margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">\u200b</p>
-                        <p id="milestone_text_${item.name}" class="count" style="margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">\u200b</p>
-                    </div>
-                </div>
-            </div>`;
-            div.style.fontWeight = item.attributes.fontWeight || "400";
-            div.style.color = item.attributes.color || "#ffffff";
-            const updateMilestone = () => {
-                const channels = [...data.data].filter(x => x && isFinite(getDisplayedCount(x.count)));
-                let closest = null;
-                for (const channel of channels) {
-                    const count = Math.floor(getDisplayedCount(channel.count));
-                    const next = getNextMilestone(count, item.attributes.milestoneInterval);
-                    if (!next) continue;
-                    const distance = next - count;
-                    if (!closest || distance < closest.distance) closest = {channel, count, target: next, distance};
-                }
-                const nameEl = document.getElementById('milestone_name_' + item.name);
-                const textEl = document.getElementById('milestone_text_' + item.name);
-                if (!nameEl || !textEl) return;
-                if (!closest) { nameEl.innerText = 'No milestone available'; textEl.innerText = ''; return; }
-                nameEl.innerText = closest.channel.name || 'Unknown';
-                textEl.innerText = `${formatNumber(closest.distance)} to ${formatNumber(closest.target)}`;
-            };
-            updateMilestone();
-            headerIntervals.push(setInterval(updateMilestone, Math.max(0.25, parseFloat(item.attributes.updateInterval) || 2) * 1000));
-        }
         if (item.type == 'battle') {
 
             div.innerHTML = `<div class="battle-container battle" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
@@ -4802,8 +4769,7 @@ async function loadTopSettings(itemName, itemType) {
                             <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
                             <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
                             <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
-                            <option value="milestone" ${item.type === "milestone" ? "selected" : ""}>Closest Milestone</option>
-                            <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
+                                            <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
                         </select>
                     </div>
                 </div>
