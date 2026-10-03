@@ -123,6 +123,7 @@ let example_data = {
         'fireBorderWidth': 0,
         'intervalsPerUpdate': 1,
         'fireObservedGains': true,
+        'waitForFirstGain': false,
         'created': []
     },
     'apiUpdates': {
@@ -1048,7 +1049,8 @@ function update(doGains = true) {
                 extraTimeTillUpdate = i * 100;
             }
 
-            if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0) {
+            if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0 &&
+                (!data.fireIcons.waitForFirstGain || intervalNumber > 0)) {
                 calculateFires();
             }
             setTimeout(function () {
@@ -1937,6 +1939,14 @@ document.getElementById('fireObservedGains').addEventListener('change', function
     fix();
 })
 
+document.getElementById('waitForFirstGain').addEventListener('change', function () {
+    data.fireIcons.waitForFirstGain = this.checked;
+    if (this.checked && data.intervalCount === 0) {
+        fires.clear();
+    }
+    fix();
+})
+
 document.getElementById('estimateUsingObservedGains').addEventListener('change', function () {
     data.differenceStyles.estimateUsingObservedGains = this.checked;  
     fix();
@@ -2078,6 +2088,7 @@ function fix() {
     document.getElementById('differenceImageSize').value = data.differenceStyles.imageSize;
     document.getElementById('estimateUsingObservedGains').checked = data.differenceStyles.estimateUsingObservedGains;
     document.getElementById('fireObservedGains').checked = data.fireIcons.fireObservedGains;
+    document.getElementById('waitForFirstGain').checked = data.fireIcons.waitForFirstGain || false;
     document.getElementById('alignDifferences').value = data.differenceStyles.alignDifferences;
 
     let gapAlignment = `left: ${data.differenceStyles.left}%;`;
