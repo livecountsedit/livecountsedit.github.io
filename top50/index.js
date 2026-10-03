@@ -4817,7 +4817,7 @@ async function loadTopSettings(itemName, itemType) {
                 </details>
                 <hr style="margin: 15px 0;">
                 ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings :
-                item.type == 'box' ? boxSettings : ''}
+                item.type == 'milestone' ? milestoneSettings : item.type == 'box' ? boxSettings : ''}
                 <hr style="margin: 15px 0;">
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button type="button" onclick="removeTopSetting('${item.name}')"
@@ -4869,7 +4869,7 @@ function createNewSection() {
             "fontWeight": "400",
             "boxHeight": 60,
             "id1": "",
-            "id2": ""
+            "id2": "",
             "milestoneInterval": 0,
         },
         "name": "Item " + index,
