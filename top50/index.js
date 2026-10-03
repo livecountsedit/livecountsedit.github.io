@@ -5130,20 +5130,35 @@ function updateScrollbars() {
         updateMessage.append(loader,title,message);
         document.body.appendChild(updateMessage);
 
-        // Keep the live cards visible: the site's update has already switched
-        // the name, profile picture, count, and other card data instantly.
+        // Cards stay hidden/reveal one-by-one, but their contents are not
+        // delayed: the normal page update has already swapped each card's
+        // name, avatar, count, etc. before this animation starts.
+        cards.forEach(card => card.classList.add("builtin-content-hidden"));
+
+        const count=cards.length;
+        const revealDelay=count>1 ? TOTAL_REVEAL_DURATION/(count-1) : 0;
+
         setTimeout(() => {
-            if (updateMessage) {
-                updateMessage.classList.add("fade-out");
+            cards.forEach((card,index) => {
                 setTimeout(() => {
-                    updateMessage?.remove();
-                    updateMessage=null;
-                    isActive=false;
-                },250);
-            } else {
-                isActive=false;
-            }
-        }, TOTAL_REVEAL_DURATION);
+                    card.classList.remove("builtin-content-hidden");
+                    if (index === count-1) {
+                        setTimeout(() => {
+                            if (updateMessage) {
+                                updateMessage.classList.add("fade-out");
+                                setTimeout(() => {
+                                    updateMessage?.remove();
+                                    updateMessage=null;
+                                    isActive=false;
+                                },250);
+                            } else {
+                                isActive=false;
+                            }
+                        },200);
+                    }
+                },index*revealDelay);
+            });
+        },300);
     }
 
     function celebrate(card,milestone) {
