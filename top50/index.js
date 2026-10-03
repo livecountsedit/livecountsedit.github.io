@@ -1939,11 +1939,12 @@ document.getElementById('fireObservedGains').addEventListener('change', function
     fix();
 })
 
-document.getElementById('waitForFirstGain').addEventListener('change', function () {
+document.getElementById('waitForFirstGain').addEventListener('change', async function () {
     data.fireIcons.waitForFirstGain = this.checked;
     if (this.checked && data.intervalCount === 0) {
         fires.clear();
     }
+    await saveInBrowser(COUNTER_THEME, false);
 })
 
 document.getElementById('estimateUsingObservedGains').addEventListener('change', function () {
