@@ -5130,23 +5130,16 @@ function updateScrollbars() {
         updateMessage.append(loader,title,message);
         document.body.appendChild(updateMessage);
 
-        // Move the actual cards into their new ranking immediately.
-        // This makes the surpassing channel swap into the correct position
-        // at once, including its existing name/avatar/count, before the
-        // one-by-one reveal animation begins.
-        const sortedCards = [...cards].sort((a,b) => getCardValue(b) - getCardValue(a));
-        if (sortedCards.length && sortedCards[0].parentElement) {
-            const parent = sortedCards[0].parentElement;
-            sortedCards.forEach(card => parent.appendChild(card));
-        }
-
+        // Cards stay hidden/reveal one-by-one, but their contents are not
+        // delayed: the normal page update has already swapped each card's
+        // name, avatar, count, etc. before this animation starts.
         cards.forEach(card => card.classList.add("builtin-content-hidden"));
 
-        const count=sortedCards.length;
+        const count=cards.length;
         const revealDelay=count>1 ? TOTAL_REVEAL_DURATION/(count-1) : 0;
 
         setTimeout(() => {
-            sortedCards.forEach((card,index) => {
+            cards.forEach((card,index) => {
                 setTimeout(() => {
                     card.classList.remove("builtin-content-hidden");
                     if (index === count-1) {
