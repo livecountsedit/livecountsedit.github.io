@@ -3937,11 +3937,13 @@ function loadHeader() {
             }
         }
         if (item.type == 'milestone') {
-            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor || '#141414'}; height: ${item.attributes.boxHeight || 60}px; border-radius: ${item.attributes.roundAvatars ? '50px' : '0'};">
-                <div class="battle_container">
-                    <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize || 15)}px;">
-                        <p id="milestone_name_${item.name}" class="name">\u200b</p>
-                        <p id="milestone_text_${item.name}" class="count">\u200b</p>
+            const milestoneHeight = Math.max(30, parseFloat(item.attributes.boxHeight) || 60);
+            const milestoneFontSize = Math.max(8, parseFloat(item.attributes.fontSize) || 15);
+            div.innerHTML = `<div class="battle-container" style="box-sizing: border-box; width: 100%; max-width: 100%; overflow: hidden; background-color: ${item.attributes.bgColor || '#141414'}; height: ${milestoneHeight}px; border-radius: ${item.attributes.roundAvatars ? '50px' : '0'};">
+                <div class="battle_container" style="width: 100%; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box;">
+                    <div class="battle_info" style="width: 100%; min-width: 0; max-width: 100%; overflow: hidden; box-sizing: border-box; font-size: ${milestoneFontSize}px; line-height: 1.2; padding: 0 10px;">
+                        <p id="milestone_name_${item.name}" class="name" style="margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">\u200b</p>
+                        <p id="milestone_text_${item.name}" class="count" style="margin: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">\u200b</p>
                     </div>
                 </div>
             </div>`;
