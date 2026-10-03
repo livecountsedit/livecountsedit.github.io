@@ -18,6 +18,7 @@ let data = {};
 let gainTable = {};
 let glowingCards = [];
 let fires = new Map();
+let fireDelayUpdatesRemaining = 0;
 let appendedMDMStyles = false;
 
 // override function in importData
@@ -946,7 +947,6 @@ function setupMDMStyles() {
 
 function update(doGains = true) {
     let intervalNumber = data.intervalCount;
-    const fireIntervalSinceLoad = intervalNumber - fireCycleStartInterval;
     if (data.debugMode) console.time(`Update #${intervalNumber + 1} took`)
     if (data) {
         data.lastOnline = Date.now();
