@@ -3936,6 +3936,37 @@ function loadHeader() {
                 }
             }
         }
+        if (item.type == 'milestone') {
+            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor || '#141414'}; height: ${item.attributes.boxHeight || 60}px; border-radius: ${item.attributes.roundAvatars ? '50px' : '0'};">
+                <div class="battle_container">
+                    <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize || 15)}px;">
+                        <p id="milestone_name_${item.name}" class="name">\u200b</p>
+                        <p id="milestone_text_${item.name}" class="count">\u200b</p>
+                    </div>
+                </div>
+            </div>`;
+            div.style.fontWeight = item.attributes.fontWeight || "400";
+            div.style.color = item.attributes.color || "#ffffff";
+            const updateMilestone = () => {
+                const channels = [...data.data].filter(x => x && isFinite(getDisplayedCount(x.count)));
+                let closest = null;
+                for (const channel of channels) {
+                    const count = Math.floor(getDisplayedCount(channel.count));
+                    const next = getNextMilestone(count, item.attributes.milestoneInterval);
+                    if (!next) continue;
+                    const distance = next - count;
+                    if (!closest || distance < closest.distance) closest = {channel, count, target: next, distance};
+                }
+                const nameEl = document.getElementById('milestone_name_' + item.name);
+                const textEl = document.getElementById('milestone_text_' + item.name);
+                if (!nameEl || !textEl) return;
+                if (!closest) { nameEl.innerText = 'No milestone available'; textEl.innerText = ''; return; }
+                nameEl.innerText = closest.channel.name || 'Unknown';
+                textEl.innerText = `${formatNumber(closest.distance)} to ${formatNumber(closest.target)}`;
+            };
+            updateMilestone();
+            headerIntervals.push(setInterval(updateMilestone, Math.max(0.25, parseFloat(item.attributes.updateInterval) || 2) * 1000));
+        }
         if (item.type == 'battle') {
 
             div.innerHTML = `<div class="battle-container battle" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
@@ -4314,6 +4345,19 @@ function loadHeader() {
     updateOdo()
 }
 
+function getNextMilestone(count, interval = 0) {
+    const value = Math.max(0, Number(count) || 0);
+    const custom = Number(interval) || 0;
+    if (custom > 0) return Math.ceil((value + 1) / custom) * custom;
+    const bases = [1000,10000,100000,1000000,10000000,100000000,1000000000,10000000000,100000000000,1000000000000];
+    for (const base of bases) {
+        const step = value < base * 10 ? base : base * 10;
+        const target = Math.ceil((value + 1) / step) * step;
+        if (target > value) return target;
+    }
+    return Math.ceil((value + 1) / Math.pow(10, Math.floor(Math.log10(Math.max(value,1))))) * Math.pow(10, Math.floor(Math.log10(Math.max(value,1))));
+}
+
 function findClosestBattle(index, rankRange, threshold, thresholdType, type) {
     const toConsider = [...data.data]
         .slice(rankRange[0] - 1, rankRange[1])
@@ -4626,7 +4670,27 @@ async function loadTopSettings(itemName, itemType) {
                             class="section_attribute_battleAlign header_option"><label>Align counters to sides</label></div>
                 </div>
             </details>
+        `;        let milestoneSettings = `
+            <div class="section-basic-options header-option-group">
+                <div><label><strong>Update interval (seconds):</strong></label>
+                    <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 2}" class="section_attribute_updateInterval header_option xs-width" min="0.25" step="0.25" />
+                </div>
+                <div><label><strong>Custom milestone interval:</strong></label>
+                    <input type="number" value="${escapeHTML(item.attributes.milestoneInterval) || 0}" class="section_attribute_milestoneInterval header_option m-width" min="0" />
+                </div>
+            </div>
+            <p style="margin:8px 0;color:#666;">Shows the Top 50 channel closest to its next subscriber milestone. Use 0 for automatic milestones.</p>
+            <details class="section-advanced-options"><summary><strong>Styling Options</strong></summary>
+                <div class="header-option-group">
+                    <div><label>Background:</label><input type="color" value="${escapeHTML(item.attributes.bgColor) || '#141414'}" class="section_attribute_bgColor header_option" /></div>
+                    <div><label>Text color:</label><input type="color" value="${escapeHTML(item.attributes.color) || '#ffffff'}" class="section_attribute_color header_option" /></div>
+                    <div><label>Height:</label><input type="number" value="${escapeHTML(item.attributes.boxHeight) || 60}" class="section_attribute_boxHeight header_option xs-width" /></div>
+                    <div><label>Font size:</label><input type="number" value="${escapeHTML(item.attributes.fontSize) || 15}" class="section_attribute_fontSize header_option xs-width" /></div>
+                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round corners</label></div>
+                </div>
+            </details>
         `;
+
         let userSettings = `
             <div class="section-basic-options header-option-group">
                 <div><label><strong>User Type:</strong></label>
@@ -4736,6 +4800,7 @@ async function loadTopSettings(itemName, itemType) {
                             <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
                             <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
                             <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
+                            <option value="milestone" ${item.type === "milestone" ? "selected" : ""}>Closest Milestone</option>
                             <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
                         </select>
                     </div>
@@ -4805,6 +4870,7 @@ function createNewSection() {
             "boxHeight": 60,
             "id1": "",
             "id2": ""
+            "milestoneInterval": 0,
         },
         "name": "Item " + index,
         "type": "text",
