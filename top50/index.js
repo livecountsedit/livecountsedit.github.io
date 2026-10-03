@@ -18,7 +18,7 @@ let data = {};
 let gainTable = {};
 let glowingCards = [];
 let fires = new Map();
-let fireCycleStartInterval = 0;
+let fireDelayUpdatesRemaining = 0;
 let appendedMDMStyles = false;
 
 // override function in importData
@@ -491,8 +491,11 @@ async function initLoad(redo, previousTheme) {
     fix();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
-    // Start the initial fire-delay timer from this page load, using the loaded interval count.
-    fireCycleStartInterval = data.intervalCount || 0;
+    // Initialize the fire delay from this page load. Do not use the persisted intervalCount,
+    // since that would make the delay expire immediately after a reload.
+    fireDelayUpdatesRemaining = data.fireIcons.initialFireDelayEnabled
+        ? Math.max(1, parseInt(data.fireIcons.initialFireDelay) || 1)
+        : 0;
     if (!data.pause) {
         updateInterval = setInterval(update, data.updateInterval);
         update();
@@ -950,7 +953,6 @@ function setupMDMStyles() {
 
 function update(doGains = true) {
     let intervalNumber = data.intervalCount;
-    const fireIntervalSinceLoad = intervalNumber - fireCycleStartInterval;
     if (data.debugMode) console.time(`Update #${intervalNumber + 1} took`)
     if (data) {
         data.lastOnline = Date.now();
@@ -1054,10 +1056,13 @@ function update(doGains = true) {
                 extraTimeTillUpdate = i * 100;
             }
 
-            if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0 &&
-                (!data.fireIcons.initialFireDelayEnabled ||
-                 fireIntervalSinceLoad >= Math.max(1, parseInt(data.fireIcons.initialFireDelay) || 1))) {
-                calculateFires();
+            if (data.intervalCount % (parseInt(data.fireIcons.intervalsPerUpdate) || 1) === 0) {
+                if (fireDelayUpdatesRemaining > 0) {
+                    fireDelayUpdatesRemaining--;
+                    fires.clear();
+                } else {
+                    calculateFires();
+                }
             }
             setTimeout(function () {
                 num = formatRank(i + 1);
