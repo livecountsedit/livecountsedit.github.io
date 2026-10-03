@@ -310,11 +310,6 @@ function isValidHeaderName(name) {
 function calculateFires() {
     fires.clear();
     for (let i = 0; i < data.data.length; i++) {
-        // When enabled, wait until this specific channel has completed
-        // its first update interval before calculating fire icons for it.
-        if (data.fireIcons.waitForFirstGain && (!gainTable[data.data[i].id] || gainTable[data.data[i].id].length < 2)) {
-            continue;
-        }
         for (let q = 0; q < data.fireIcons.created.length; q++) {
             let equation = false;
             //either gain or total
