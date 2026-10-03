@@ -1944,7 +1944,6 @@ document.getElementById('waitForFirstGain').addEventListener('change', function 
     if (this.checked && data.intervalCount === 0) {
         fires.clear();
     }
-    fix();
 })
 
 document.getElementById('estimateUsingObservedGains').addEventListener('change', function () {
