@@ -18,6 +18,7 @@ let data = {};
 let gainTable = {};
 let glowingCards = [];
 let fires = new Map();
+let fireCycleStartInterval = 0;
 let appendedMDMStyles = false;
 
 // override function in importData
@@ -490,6 +491,8 @@ async function initLoad(redo, previousTheme) {
     fix();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
+    // Start the initial fire-delay timer from this page load, using the loaded interval count.
+    fireCycleStartInterval = data.intervalCount || 0;
     if (!data.pause) {
         updateInterval = setInterval(update, data.updateInterval);
         update();
@@ -1052,7 +1055,8 @@ function update(doGains = true) {
             }
 
             if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0 &&
-                fireIntervalSinceLoad >= Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0)) {
+                (!data.fireIcons.initialFireDelayEnabled ||
+                 fireIntervalSinceLoad >= Math.max(1, parseInt(data.fireIcons.initialFireDelay) || 1))) {
                 calculateFires();
             }
             setTimeout(function () {
