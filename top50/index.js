@@ -490,6 +490,7 @@ async function initLoad(redo, previousTheme) {
     fix();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
+    fireDelayUpdatesRemaining = Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0);
     if (!data.pause) {
         updateInterval = setInterval(update, data.updateInterval);
         update();
@@ -1039,6 +1040,15 @@ function update(doGains = true) {
                 }
             }
         }
+        const fireIntervals = Math.max(1, parseInt(data.fireIcons.intervalsPerUpdate) || 1);
+        if (data.fireIcons.enabled && data.intervalCount % fireIntervals === 0) {
+            if (fireDelayUpdatesRemaining > 0) {
+                fireDelayUpdatesRemaining--;
+                fires.clear();
+            } else {
+                calculateFires();
+            }
+        }
         for (let i = 0; i < data.max; i++) {
             glowingCards = [];
             let extraTimeTillUpdate = 0;
@@ -1050,11 +1060,7 @@ function update(doGains = true) {
                 extraTimeTillUpdate = i * 100;
             }
 
-            if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0 &&
-                fireIntervalSinceLoad >= Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0)) {
-                calculateFires();
-            }
-            setTimeout(function () {
+setTimeout(function () {
                 num = formatRank(i + 1);
                 const currentCard = document.getElementsByClassName("card")[i];
                 if (currentCard) {
