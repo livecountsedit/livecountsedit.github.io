@@ -123,7 +123,7 @@ let example_data = {
         'fireBorderWidth': 0,
         'intervalsPerUpdate': 1,
         'fireObservedGains': true,
-        'waitForFirstGain': false,
+        'initialFireDelay': 0,
         'created': []
     },
     'apiUpdates': {
@@ -946,6 +946,7 @@ function setupMDMStyles() {
 
 function update(doGains = true) {
     let intervalNumber = data.intervalCount;
+    const fireIntervalSinceLoad = intervalNumber - fireCycleStartInterval;
     if (data.debugMode) console.time(`Update #${intervalNumber + 1} took`)
     if (data) {
         data.lastOnline = Date.now();
@@ -1327,6 +1328,7 @@ function update(doGains = true) {
     if (data.debugMode) console.timeEnd(`Update #${intervalNumber + 1} took`);
 }
 
+let fireCycleStartInterval = data.intervalCount;
 let selected = null;
 document.getElementById('quickSelectButton').addEventListener('click', function (e) {
     if (!pickingChannels) {
@@ -1939,11 +1941,12 @@ document.getElementById('fireObservedGains').addEventListener('change', function
     fix();
 })
 
-document.getElementById('waitForFirstGain').addEventListener('change', async function () {
-    data.fireIcons.waitForFirstGain = this.checked;
-    if (this.checked && data.intervalCount === 0) {
-        fires.clear();
-    }
+document.getElementById('initialFireDelay').addEventListener('change', async function () {
+    let value = parseInt(this.value);
+    if (!isFinite(value) || value < 0) value = 0;
+    this.value = value;
+    data.fireIcons.initialFireDelay = value;
+    fires.clear();
     await saveInBrowser(COUNTER_THEME, false);
 })
 
@@ -3452,6 +3455,7 @@ function loadFireIcons() {
     if (data.fireIcons.created.length == 0) {
         div.innerHTML = '<p>No fire icons created.</p>'
     }
+    document.getElementById('initialFireDelay').value = Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0);
     document.getElementById('fireEnabled').checked = data.fireIcons.enabled || false;
     document.getElementById('fireType').value = data.fireIcons.type || 'gain';
     document.getElementById('firePosition').value = data.fireIcons.firePosition || 'above';
