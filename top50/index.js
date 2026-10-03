@@ -123,7 +123,8 @@ let example_data = {
         'fireBorderWidth': 0,
         'intervalsPerUpdate': 1,
         'fireObservedGains': true,
-        'initialFireDelay': 0,
+        'initialFireDelayEnabled': false,
+        'initialFireDelay': 1,
         'created': []
     },
     'apiUpdates': {
@@ -1941,9 +1942,15 @@ document.getElementById('fireObservedGains').addEventListener('change', function
     fix();
 })
 
+document.getElementById('initialFireDelayEnabled').addEventListener('change', async function () {
+    data.fireIcons.initialFireDelayEnabled = this.checked;
+    fires.clear();
+    await saveInBrowser(COUNTER_THEME, false);
+})
+
 document.getElementById('initialFireDelay').addEventListener('change', async function () {
     let value = parseInt(this.value);
-    if (!isFinite(value) || value < 0) value = 0;
+    if (!isFinite(value) || value < 1) value = 1;
     this.value = value;
     data.fireIcons.initialFireDelay = value;
     fires.clear();
@@ -3454,7 +3461,8 @@ function loadFireIcons() {
     if (data.fireIcons.created.length == 0) {
         div.innerHTML = '<p>No fire icons created.</p>'
     }
-    document.getElementById('initialFireDelay').value = Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0);
+    document.getElementById('initialFireDelayEnabled').checked = data.fireIcons.initialFireDelayEnabled || false;
+    document.getElementById('initialFireDelay').value = Math.max(1, parseInt(data.fireIcons.initialFireDelay) || 1);
     document.getElementById('fireEnabled').checked = data.fireIcons.enabled || false;
     document.getElementById('fireType').value = data.fireIcons.type || 'gain';
     document.getElementById('firePosition').value = data.fireIcons.firePosition || 'above';
