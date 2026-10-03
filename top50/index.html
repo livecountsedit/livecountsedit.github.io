@@ -436,7 +436,7 @@
                             <option value="replaceName">Replace Name</option>
                         </select></label>
                     <label>Use observed gains to set fire icons: <input type="checkbox" id="fireObservedGains"></label>
-                    <label>Wait for first gain before starting fire cycle: <input type="checkbox" id="waitForFirstGain"></label>
+                    <label>Initial fire delay (update intervals): <input type="number" id="initialFireDelay" min="0" step="1" value="0"></label>
                     <div id="fireIconsCreate">
                         <button id="fireIconCreateButton" onclick="addFireIcon()">Add Fire Icon</button>
                     </div>
@@ -805,9 +805,9 @@
     <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
     <script src="../converter/converter.js?v=7.10"></script>
     <script src="../commonUtils.js?v=7.10.8"></script>
-    <script src="./js/utils.js?v=7.10.1"></script>
+    <script src="./js/utils.js?v=7.10.2"></script>
     <script src="./js/scripts.js?v=7.10.5"></script>
-    <script src="./index.js?v=7.10.10"></script>
+    <script src="./index.js?v=7.10.11"></script>
     <center>
         <a href="../about/discord.html" class="discord">Join the Discord for support, suggestions, and bug
             reports</a>
