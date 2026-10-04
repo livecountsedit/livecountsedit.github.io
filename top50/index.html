@@ -777,6 +777,15 @@
                         <hr>
                         <p class="obs-mode">Note: All OBS browser source imports/exports are full imports/exports. Partial saves do not apply.</p>
                         <button class="no-obs-mode" onclick="exportData(true);">Export data</button>
+                        <button class="no-obs-mode" onclick="exportCSVAlienArt();">Export CSV (Alien Art)</button>
+                        <button class="no-obs-mode" onclick="exportCSVFlourish();">Export CSV (Flourish)</button>
+                        <br>
+                        <label class="no-obs-mode" style="display: inline-block; margin-top: 8px;">
+                            Track minutely CSV data while on page (CSV only)
+                            <input type="checkbox" id="csvTrackMinutely" autocomplete="off"
+                                onchange="toggleCSVTracking(this.checked)">
+                        </label>
+                        <span class="no-obs-mode" id="csvTrackingStatus" style="margin-left: 8px;"></span>
                         <button class="obs-mode" onclick="obsImport();">Import data (OBS browser source)</button>
                         <input type="file" id="obsImportFile" autocomplete="off" accept=".json,.txt">
                         <button class="obs-mode" onclick="obsExport();">Export data (OBS browser source)</button>
@@ -804,7 +813,7 @@
     <hr><br>
     <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
     <script src="../converter/converter.js?v=7.10"></script>
-    <script src="../commonUtils.js?v=7.10.8"></script>
+    <script src="../commonUtils.js?v=7.10.10"></script>
     <script src="./js/utils.js?v=7.10.2"></script>
     <script src="./js/scripts.js?v=7.10.5"></script>
     <script src="./index.js?v=7.10.11"></script>
