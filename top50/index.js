@@ -4949,7 +4949,6 @@ function updateScrollbars() {
     const CARD_SELECTOR = ".card";
     const ANIMATION_DURATION = 7000;
     const FADE_DURATION = 500;
-    const BACKGROUND_GIF = "https://i.ibb.co/h1JYTktj/rocket-ezgif-com-video-to-gif-converter.gif";
 
     const MILESTONES = [];
     for (let m = 100000; m < 100000000; m += 100000) MILESTONES.push({min:m,max:m+5000,text:m.toLocaleString()});
@@ -5108,41 +5107,7 @@ function updateScrollbars() {
     }
 
     function celebrate(card,milestone) {
-        if (card.dataset.builtinCelebrationLock === "true") return;
-        card.dataset.builtinCelebrationLock="true";
-
-        const overlay=document.createElement("div");
-        overlay.className="builtin-celebration-overlay";
-        overlay.style.opacity="0";
-
-        const bg=document.createElement("img");
-        bg.className="builtin-celebration-bg";
-        bg.src=BACKGROUND_GIF+"?t="+Date.now();
-
-        const content=document.createElement("div");
-        content.className="builtin-celebration-content";
-
-        const text=document.createElement("div");
-        text.className="builtin-celebration-text";
-        text.textContent=milestone.text;
-
-        content.appendChild(text);
-        overlay.append(bg,content);
-        if (getComputedStyle(card).position === "static") card.style.position="relative";
-        card.appendChild(overlay);
-
-        setTimeout(() => {
-            overlay.style.transition=`opacity ${FADE_DURATION}ms ease-in`;
-            overlay.style.opacity="1";
-        },10);
-        setTimeout(() => {
-            overlay.style.transition=`opacity ${FADE_DURATION}ms ease-out`;
-            overlay.style.opacity="0";
-            setTimeout(() => {
-                overlay.remove();
-                card.dataset.builtinCelebrationLock="false";
-            },FADE_DURATION);
-        },ANIMATION_DURATION-FADE_DURATION);
+        // Milestone rocket animation intentionally disabled.
     }
 
     function checkMilestones() {
