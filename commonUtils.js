@@ -1225,3 +1225,169 @@ function download(fileData, fileName = 'export.json') {
     a.click();
     delete a;
 }
+let csvTrackingEnabled = false;
+let csvTrackingInterval = null;
+let csvTrackingHistory = [];
+
+function getCSVTrackingSnapshot() {
+    const channels = (data.data || []).filter(channel => channel && channel.name);
+
+    return {
+        timestamp: new Date().toISOString(),
+        channels: channels.map(channel => ({
+            id: channel.id || channel.name,
+            name: String(channel.name),
+            image: channel.image || '',
+            count: channel.count ?? ''
+        }))
+    };
+}
+
+function updateCSVTrackingStatus() {
+    const status = document.getElementById('csvTrackingStatus');
+    if (!status) return;
+
+    status.textContent = csvTrackingHistory.length
+        ? `Recorded ${csvTrackingHistory.length} minute snapshot${csvTrackingHistory.length === 1 ? '' : 's'}.`
+        : 'No snapshots recorded yet.';
+}
+
+function recordCSVTrackingSnapshot(force = false) {
+    if (!csvTrackingEnabled && !force) return;
+
+    const snapshot = getCSVTrackingSnapshot();
+    if (!snapshot.channels.length) return;
+
+    csvTrackingHistory.push(snapshot);
+    updateCSVTrackingStatus();
+}
+
+function toggleCSVTracking(enabled) {
+    csvTrackingEnabled = !!enabled;
+
+    if (csvTrackingInterval) {
+        clearInterval(csvTrackingInterval);
+        csvTrackingInterval = null;
+    }
+
+    if (csvTrackingEnabled) {
+        // Capture the current Top 50 immediately, then once every minute.
+        recordCSVTrackingSnapshot(true);
+        csvTrackingInterval = setInterval(() => {
+            recordCSVTrackingSnapshot();
+        }, 60000);
+    }
+
+    updateCSVTrackingStatus();
+}
+
+function getCSVExportHistory() {
+    if (csvTrackingHistory.length) {
+        return csvTrackingHistory;
+    }
+
+    return [getCSVTrackingSnapshot()];
+}
+
+function csvEscape(value) {
+    const text = String(value ?? '');
+    return '"' + text.replace(/"/g, '""') + '"';
+}
+
+function downloadCSVRows(rows, fileName) {
+    const csvData = rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
+    const file = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function exportCSV() {
+    const rows = [['icon', 'name', 'count']];
+
+    (data.data || []).forEach(channel => {
+        rows.push([channel.image || '', channel.name || '', channel.count ?? '']);
+    });
+
+    downloadCSVRows(rows, (COUNTER_THEME || 'export') + '.csv');
+}
+
+function exportCSVAlienArt() {
+    const history = getCSVExportHistory();
+    const items = [];
+    const itemMap = new Map();
+
+    history.forEach(snapshot => {
+        snapshot.channels.forEach(channel => {
+            const key = String(channel.id || channel.name);
+            if (!itemMap.has(key)) {
+                itemMap.set(key, items.length);
+                items.push({
+                    id: key,
+                    name: channel.name,
+                    image: channel.image
+                });
+            }
+        });
+    });
+
+    const rows = [
+        [''].concat(items.map(item => item.name)),
+        ['image'].concat(items.map(item => item.image || ''))
+    ];
+
+    history.forEach(snapshot => {
+        const values = new Map(snapshot.channels.map(channel => [
+            String(channel.id || channel.name),
+            channel.count
+        ]));
+
+        rows.push([
+            snapshot.timestamp,
+            ...items.map(item => values.has(item.id) ? values.get(item.id) : '')
+        ]);
+    });
+
+    downloadCSVRows(rows, (COUNTER_THEME || 'export') + '-alienart.csv');
+}
+
+function exportCSVFlourish() {
+    const history = getCSVExportHistory();
+    const items = [];
+    const itemMap = new Map();
+
+    history.forEach(snapshot => {
+        snapshot.channels.forEach(channel => {
+            const key = String(channel.id || channel.name);
+            if (!itemMap.has(key)) {
+                itemMap.set(key, items.length);
+                items.push({
+                    id: key,
+                    name: channel.name,
+                    image: channel.image
+                });
+            }
+        });
+    });
+
+    const rows = [
+        ['Name', 'Image', ...history.map(snapshot => snapshot.timestamp)]
+    ];
+
+    items.forEach(item => {
+        const values = history.map(snapshot => {
+            const channel = snapshot.channels.find(x =>
+                String(x.id || x.name) === item.id
+            );
+            return channel ? channel.count : '';
+        });
+
+        rows.push([item.name, item.image || '', ...values]);
+    });
+
+    downloadCSVRows(rows, (COUNTER_THEME || 'export') + '-flourish.csv');
+}
+
+updateCSVTrackingStatus();
