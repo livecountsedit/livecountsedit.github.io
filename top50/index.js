@@ -1172,19 +1172,13 @@ setTimeout(function () {
                                             thisCardGlows = true;
                                             nextCardGlows = true;
                                             break;
+                                        // Speed-based glow effects are intentionally disabled.
                                         case 'fasterSet':
-                                            bottomGainSet < topGainSet ? thisCardGlows = true : nextCardGlows = true;
-                                            break;
                                         case 'slowerSet':
-                                            bottomGainSet > topGainSet ? thisCardGlows = true : nextCardGlows = true;
-                                            break;
                                         case 'fasterObserved':
-                                            bottomGainObserved < topGainObserved ? thisCardGlows = true : nextCardGlows = true;
-                                            break;
                                         case 'slowerObserved':
-                                            bottomGainObserved > topGainObserved ? thisCardGlows = true : nextCardGlows = true;
-                                            break;                                       
-                                    }
+                                            break;
+}
 
                                     if (thisCardGlows) {
                                         if (!glowingCards[i] || glowingCards[i] > j + 1) {
@@ -5105,60 +5099,12 @@ function updateScrollbars() {
     }
 
     function executeUpdate(cards) {
-        isActive = true;
-        if (updateMessage) updateMessage.remove();
-
-        updateMessage = document.createElement("div");
-        updateMessage.className = "builtin-update-message";
-
-        const loader = document.createElement("div");
-        loader.className = "builtin-line-loader";
-        for (let i=0;i<3;i++) {
-            const line=document.createElement("div");
-            line.className="builtin-loader-line";
-            loader.appendChild(line);
+        // Keep surpass detection from blocking or hiding the normal Top 50 update.
+        isActive = false;
+        if (updateMessage) {
+            updateMessage.remove();
+            updateMessage = null;
         }
-
-        const title=document.createElement("div");
-        title.className="builtin-loading-title";
-        title.textContent="Please wait...";
-
-        const message=document.createElement("div");
-        message.className="builtin-loading-text";
-        message.textContent="We are checking for changed information.";
-
-        updateMessage.append(loader,title,message);
-        document.body.appendChild(updateMessage);
-
-        // Cards stay hidden/reveal one-by-one, but their contents are not
-        // delayed: the normal page update has already swapped each card's
-        // name, avatar, count, etc. before this animation starts.
-        cards.forEach(card => card.classList.add("builtin-content-hidden"));
-
-        const count=cards.length;
-        const revealDelay=count>1 ? TOTAL_REVEAL_DURATION/(count-1) : 0;
-
-        setTimeout(() => {
-            cards.forEach((card,index) => {
-                setTimeout(() => {
-                    card.classList.remove("builtin-content-hidden");
-                    if (index === count-1) {
-                        setTimeout(() => {
-                            if (updateMessage) {
-                                updateMessage.classList.add("fade-out");
-                                setTimeout(() => {
-                                    updateMessage?.remove();
-                                    updateMessage=null;
-                                    isActive=false;
-                                },250);
-                            } else {
-                                isActive=false;
-                            }
-                        },200);
-                    }
-                },index*revealDelay);
-            });
-        },300);
     }
 
     function celebrate(card,milestone) {
