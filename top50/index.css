@@ -951,3 +951,24 @@ center .settingType {
 .material-symbols-outlined {
     font-family: 'Material Symbols Outlined' !important;
 }
+
+/* CSV tracking option */
+#importExportSettings #csvTrackingMinutely {
+  width: 18px;
+  height: 18px;
+  margin: 0 0 0 6px;
+  vertical-align: middle;
+}
+
+#importExportSettings label[style*="display: inline-block"] {
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+#importExportSettings #csvTrackingStatus {
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+}
