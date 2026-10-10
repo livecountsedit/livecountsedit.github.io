@@ -666,7 +666,7 @@ const MENU = {
                 },
                 {
                     type: 'html',
-                    value: '<br><p class="obs-mode">Note: All OBS browser source imports/exports are full imports/exports. Partial saves do not apply.</p><button class="no-obs-mode" onclick="exportData()">Export Data</button><button class="obs-mode" onclick="obsExport()">Export Data (OBS Browser Source)</button>'
+                    value: '<br><p class="obs-mode">Note: All OBS browser source imports/exports are full imports/exports. Partial saves do not apply.</p><button class="no-obs-mode" onclick="exportData()">Export Data</button><button class="no-obs-mode" onclick="exportCSV()">Export CSV</button><button class="obs-mode" onclick="obsExport()">Export Data (OBS Browser Source)</button>'
                 },
                 {
                     type: 'html',
