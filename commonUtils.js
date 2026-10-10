@@ -1,7 +1,7 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo', 'livecountseditcompare','akshatmittalcompare'];
 const DB_VERSION = 11;
-const VERSION = '7.10.8';
+const VERSION = '7.10.9';
 const SAVE_VERSION = 10;
 let obsMode;
 
