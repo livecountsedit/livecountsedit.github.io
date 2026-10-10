@@ -18,7 +18,6 @@ let data = {};
 let gainTable = {};
 let glowingCards = [];
 let fires = new Map();
-let fireDelayUpdatesRemaining = 0;
 let appendedMDMStyles = false;
 
 // override function in importData
@@ -124,7 +123,6 @@ let example_data = {
         'fireBorderWidth': 0,
         'intervalsPerUpdate': 1,
         'fireObservedGains': true,
-        'initialFireDelay': 0,
         'created': []
     },
     'apiUpdates': {
@@ -490,7 +488,6 @@ async function initLoad(redo, previousTheme) {
     fix();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
-    fireDelayUpdatesRemaining = Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0);
     if (!data.pause) {
         updateInterval = setInterval(update, data.updateInterval);
         update();
@@ -1040,15 +1037,6 @@ function update(doGains = true) {
                 }
             }
         }
-        const fireIntervals = Math.max(1, parseInt(data.fireIcons.intervalsPerUpdate) || 1);
-        if (data.fireIcons.enabled && data.intervalCount % fireIntervals === 0) {
-            if (fireDelayUpdatesRemaining > 0) {
-                fireDelayUpdatesRemaining--;
-                fires.clear();
-            } else {
-                calculateFires();
-            }
-        }
         for (let i = 0; i < data.max; i++) {
             glowingCards = [];
             let extraTimeTillUpdate = 0;
@@ -1060,7 +1048,10 @@ function update(doGains = true) {
                 extraTimeTillUpdate = i * 100;
             }
 
-setTimeout(function () {
+            if (data.intervalCount % data.fireIcons.intervalsPerUpdate === 0) {
+                calculateFires();
+            }
+            setTimeout(function () {
                 num = formatRank(i + 1);
                 const currentCard = document.getElementsByClassName("card")[i];
                 if (currentCard) {
@@ -1172,13 +1163,19 @@ setTimeout(function () {
                                             thisCardGlows = true;
                                             nextCardGlows = true;
                                             break;
-                                        // Speed-based glow effects are intentionally disabled.
                                         case 'fasterSet':
-                                        case 'slowerSet':
-                                        case 'fasterObserved':
-                                        case 'slowerObserved':
+                                            bottomGainSet < topGainSet ? thisCardGlows = true : nextCardGlows = true;
                                             break;
-}
+                                        case 'slowerSet':
+                                            bottomGainSet > topGainSet ? thisCardGlows = true : nextCardGlows = true;
+                                            break;
+                                        case 'fasterObserved':
+                                            bottomGainObserved < topGainObserved ? thisCardGlows = true : nextCardGlows = true;
+                                            break;
+                                        case 'slowerObserved':
+                                            bottomGainObserved > topGainObserved ? thisCardGlows = true : nextCardGlows = true;
+                                            break;                                       
+                                    }
 
                                     if (thisCardGlows) {
                                         if (!glowingCards[i] || glowingCards[i] > j + 1) {
@@ -1328,7 +1325,6 @@ setTimeout(function () {
     if (data.debugMode) console.timeEnd(`Update #${intervalNumber + 1} took`);
 }
 
-let fireCycleStartInterval = data.intervalCount;
 let selected = null;
 document.getElementById('quickSelectButton').addEventListener('click', function (e) {
     if (!pickingChannels) {
@@ -1939,15 +1935,6 @@ document.getElementById('showCounts').addEventListener('change', function () {
 document.getElementById('fireObservedGains').addEventListener('change', function () {
     data.fireIcons.fireObservedGains = this.checked;  
     fix();
-})
-
-document.getElementById('initialFireDelay').addEventListener('change', async function () {
-    let value = parseInt(this.value);
-    if (!isFinite(value) || value < 0) value = 0;
-    this.value = value;
-    data.fireIcons.initialFireDelay = value;
-    fires.clear();
-    await saveInBrowser(COUNTER_THEME, false);
 })
 
 document.getElementById('estimateUsingObservedGains').addEventListener('change', function () {
@@ -3454,7 +3441,6 @@ function loadFireIcons() {
     if (data.fireIcons.created.length == 0) {
         div.innerHTML = '<p>No fire icons created.</p>'
     }
-    document.getElementById('initialFireDelay').value = Math.max(0, parseInt(data.fireIcons.initialFireDelay) || 0);
     document.getElementById('fireEnabled').checked = data.fireIcons.enabled || false;
     document.getElementById('fireType').value = data.fireIcons.type || 'gain';
     document.getElementById('firePosition').value = data.fireIcons.firePosition || 'above';
@@ -4308,19 +4294,6 @@ function loadHeader() {
     updateOdo()
 }
 
-function getNextMilestone(count, interval = 0) {
-    const value = Math.max(0, Number(count) || 0);
-    const custom = Number(interval) || 0;
-    if (custom > 0) return Math.ceil((value + 1) / custom) * custom;
-    const bases = [1000,10000,100000,1000000,10000000,100000000,1000000000,10000000000,100000000000,1000000000000];
-    for (const base of bases) {
-        const step = value < base * 10 ? base : base * 10;
-        const target = Math.ceil((value + 1) / step) * step;
-        if (target > value) return target;
-    }
-    return Math.ceil((value + 1) / Math.pow(10, Math.floor(Math.log10(Math.max(value,1))))) * Math.pow(10, Math.floor(Math.log10(Math.max(value,1))));
-}
-
 function findClosestBattle(index, rankRange, threshold, thresholdType, type) {
     const toConsider = [...data.data]
         .slice(rankRange[0] - 1, rankRange[1])
@@ -4633,27 +4606,7 @@ async function loadTopSettings(itemName, itemType) {
                             class="section_attribute_battleAlign header_option"><label>Align counters to sides</label></div>
                 </div>
             </details>
-        `;        let milestoneSettings = `
-            <div class="section-basic-options header-option-group">
-                <div><label><strong>Update interval (seconds):</strong></label>
-                    <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 2}" class="section_attribute_updateInterval header_option xs-width" min="0.25" step="0.25" />
-                </div>
-                <div><label><strong>Custom milestone interval:</strong></label>
-                    <input type="number" value="${escapeHTML(item.attributes.milestoneInterval) || 0}" class="section_attribute_milestoneInterval header_option m-width" min="0" />
-                </div>
-            </div>
-            <p style="margin:8px 0;color:#666;">Shows the Top 50 channel closest to its next subscriber milestone. Use 0 for automatic milestones.</p>
-            <details class="section-advanced-options"><summary><strong>Styling Options</strong></summary>
-                <div class="header-option-group">
-                    <div><label>Background:</label><input type="color" value="${escapeHTML(item.attributes.bgColor) || '#141414'}" class="section_attribute_bgColor header_option" /></div>
-                    <div><label>Text color:</label><input type="color" value="${escapeHTML(item.attributes.color) || '#ffffff'}" class="section_attribute_color header_option" /></div>
-                    <div><label>Height:</label><input type="number" value="${escapeHTML(item.attributes.boxHeight) || 60}" class="section_attribute_boxHeight header_option xs-width" /></div>
-                    <div><label>Font size:</label><input type="number" value="${escapeHTML(item.attributes.fontSize) || 15}" class="section_attribute_fontSize header_option xs-width" /></div>
-                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""} class="section_attribute_roundAvatars header_option"><label>Round corners</label></div>
-                </div>
-            </details>
         `;
-
         let userSettings = `
             <div class="section-basic-options header-option-group">
                 <div><label><strong>User Type:</strong></label>
@@ -4763,7 +4716,7 @@ async function loadTopSettings(itemName, itemType) {
                             <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
                             <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
                             <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
-                                            <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
+                            <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
                         </select>
                     </div>
                 </div>
@@ -4779,7 +4732,7 @@ async function loadTopSettings(itemName, itemType) {
                 </details>
                 <hr style="margin: 15px 0;">
                 ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings :
-                item.type == 'milestone' ? milestoneSettings : item.type == 'box' ? boxSettings : ''}
+                item.type == 'box' ? boxSettings : ''}
                 <hr style="margin: 15px 0;">
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button type="button" onclick="removeTopSetting('${item.name}')"
@@ -4831,8 +4784,7 @@ function createNewSection() {
             "fontWeight": "400",
             "boxHeight": 60,
             "id1": "",
-            "id2": "",
-            "milestoneInterval": 0,
+            "id2": ""
         },
         "name": "Item " + index,
         "type": "text",
@@ -4937,216 +4889,3 @@ function updateScrollbars() {
         document.getElementById("noScrollbars").innerText = "";   
     }
 }
-
-// Built-in surpass / milestone celebration
-(function() {
-    'use strict';
-
-    const CHECK_INTERVAL = 1000;
-    const SURPASS_DELAY = 10;
-    const TOTAL_REVEAL_DURATION = 7500;
-    const GAP_THRESHOLD = 1;
-    const CARD_SELECTOR = ".card";
-    const ANIMATION_DURATION = 7000;
-    const FADE_DURATION = 500;
-
-    const MILESTONES = [];
-    for (let m = 100000; m < 100000000; m += 100000) MILESTONES.push({min:m,max:m+5000,text:m.toLocaleString()});
-    for (let m = 100000000; m < 1000000000; m += 1000000) MILESTONES.push({min:m,max:m+5000,text:m.toLocaleString()});
-    for (let m = 1000000000; m <= 20000000000; m += 10000000) MILESTONES.push({min:m,max:m+5000,text:m.toLocaleString()});
-
-    let isActive = false;
-    let previousValues = {};
-    let previousRank = {};
-    let surpassTimeout = null;
-    let currentSurpassEvent = null;
-    let updateMessage = null;
-    const lastMilestoneValues = new WeakMap();
-    const triggeredMilestones = new WeakMap();
-
-    const style = document.createElement("style");
-    style.textContent = `
-        .card.builtin-content-hidden {
-            background-color: transparent !important;
-            background-image: none !important;
-            border-color: transparent !important;
-            box-shadow: none !important;
-        }
-        .card.builtin-content-hidden > *:not(.num):not(.builtin-celebration-overlay) {
-            opacity: 0 !important;
-            transform: scale(.9) translateY(12px) !important;
-            pointer-events: none;
-        }
-        .card.builtin-content-hidden .num {
-            opacity: 1 !important;
-            visibility: visible !important;
-        }
-        .builtin-update-message {
-            position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff; padding: 0; z-index: 999999;
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; pointer-events: none;
-            font-family: Roboto, Arial, sans-serif !important;
-            text-align: center;
-            animation: builtin-overlay-in .25s ease-out forwards;
-        }
-        .builtin-update-message.fade-out {
-            opacity: 0;
-            transform: translate(-50%, -52%) scale(.95);
-            transition: opacity .25s ease-in, transform .25s ease-in;
-        }
-        .builtin-line-loader {
-            display: flex; gap: 10px; margin-bottom: 22px;
-            height: 54px; align-items: center;
-        }
-        .builtin-loader-line {
-            width: 7px; height: 48px; background: #fff;
-            border-radius: 3.5px;
-            animation: builtin-line-bounce .9s ease-in-out infinite;
-            box-shadow: 0 0 12px rgba(0,0,0,.75);
-        }
-        .builtin-loader-line:nth-child(2) { animation-delay: .15s; }
-        .builtin-loader-line:nth-child(3) { animation-delay: .3s; }
-        .builtin-loading-title {
-            font-size: 3.6rem; font-weight: 700;
-            letter-spacing: .5px; margin-bottom: 10px; color: #fff;
-            text-shadow: 0 3px 14px rgba(0,0,0,.95);
-        }
-        .builtin-loading-text {
-            font-size: 1.9rem; font-weight: 600; color: #fff;
-            text-shadow: 0 2px 11px rgba(0,0,0,.95);
-        }
-        .builtin-celebration-overlay {
-            position:absolute; inset:0; display:flex;
-            align-items:center; justify-content:center;
-            z-index:30 !important; overflow:hidden; border-radius:inherit;
-        }
-        .builtin-celebration-bg {
-            position:absolute; width:100%; height:100%;
-            object-fit:cover; opacity:.75; inset:0;
-        }
-        .builtin-celebration-content {
-            display:flex; align-items:center; justify-content:center;
-            position:relative; z-index:31; width:100%; height:100%;
-        }
-        .builtin-celebration-text {
-            font-size:36px; font-family:Roboto, Arial, sans-serif !important;
-            font-weight:700 !important; color:#fff;
-            text-shadow:0 0 10px rgba(0,0,0,.7);
-            animation:builtin-color-change 2s infinite;
-            text-align:center;
-        }
-        @keyframes builtin-overlay-in {
-            from { opacity:0; transform:translate(-50%,-48%) scale(.95); }
-            to { opacity:1; transform:translate(-50%,-50%) scale(1); }
-        }
-        @keyframes builtin-line-bounce {
-            0%,100% { transform:scaleY(.35); opacity:.4; }
-            50% { transform:scaleY(1.05); opacity:1; }
-        }
-        @keyframes builtin-color-change {
-            0% { color:#ffc4d8 } 20% { color:#d4c0fa }
-            40% { color:#bcdbf5 } 60% { color:#f7f7be }
-            80% { color:#bcf5bc } 100% { color:#f5bccf }
-        }
-    `;
-    document.head.appendChild(style);
-
-    function getCardValue(card) {
-        const el = card.querySelector(".num_text");
-        return el ? parseInt(el.textContent.replace(/,/g, ""), 10) || 0 : 0;
-    }
-
-    function checkForSurpassing() {
-        if (isActive) return null;
-        const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
-        const currentValues = {};
-        let hasChange = false;
-
-        cards.forEach(card => {
-            const id = card.id;
-            currentValues[id] = getCardValue(card);
-            if (previousValues[id] !== currentValues[id]) hasChange = true;
-        });
-
-        if (!Object.keys(previousValues).length) {
-            previousValues = currentValues;
-            cards.forEach((card,index) => previousRank[card.id] = index);
-            return null;
-        }
-        if (!hasChange) return null;
-
-        const ranking = cards.map(card => ({
-            id: card.id, value: currentValues[card.id], element: card
-        })).sort((a,b) => b.value - a.value);
-
-        let event = null;
-        ranking.forEach((card,newIndex) => {
-            const oldIndex = previousRank[card.id];
-            if (oldIndex > newIndex) {
-                const below = ranking[newIndex + 1];
-                if (below && card.value - below.value >= GAP_THRESHOLD) {
-                    event = {cards, timestamp:Date.now()};
-                }
-            }
-        });
-
-        previousValues = currentValues;
-        ranking.forEach((card,index) => previousRank[card.id] = index);
-        return event;
-    }
-
-    function executeUpdate(cards) {
-        // Keep surpass detection from blocking or hiding the normal Top 50 update.
-        isActive = false;
-        if (updateMessage) {
-            updateMessage.remove();
-            updateMessage = null;
-        }
-    }
-
-    function celebrate(card,milestone) {
-        // Milestone rocket animation intentionally disabled.
-    }
-
-    function checkMilestones() {
-        document.querySelectorAll(CARD_SELECTOR).forEach(card => {
-            const raw=card.dataset.count;
-            if (!raw) return;
-            const value=parseInt(raw,10);
-            const prev=lastMilestoneValues.get(card) ?? value;
-            lastMilestoneValues.set(card,value);
-
-            let triggered=triggeredMilestones.get(card);
-            if (!triggered) {
-                triggered=new Set();
-                triggeredMilestones.set(card,triggered);
-            }
-
-            for (const milestone of MILESTONES) {
-                if (triggered.has(milestone.min)) continue;
-                if (prev < milestone.min && value >= milestone.min && value <= milestone.max) {
-                    triggered.add(milestone.min);
-                    celebrate(card,milestone);
-                    break;
-                }
-            }
-        });
-    }
-
-    setInterval(() => {
-        if (!isActive) {
-            const surpass=checkForSurpassing();
-            if (surpass) {
-                if (surpassTimeout) clearTimeout(surpassTimeout);
-                currentSurpassEvent=surpass;
-                surpassTimeout=setTimeout(() => {
-                    executeUpdate(currentSurpassEvent.cards);
-                    currentSurpassEvent=null;
-                },SURPASS_DELAY);
-            }
-        }
-        checkMilestones();
-    },CHECK_INTERVAL);
-})();
