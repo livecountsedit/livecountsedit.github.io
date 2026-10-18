@@ -38,7 +38,7 @@ async function uninstallAllScripts() {
 async function uninstallAllAIScripts() {
     if (!data.scripts.some(x => scriptList[x].ai)) return alert("There are no AI-generated scripts installed.")
     if (confirm("Are you sure you want to uninstall all AI-generated scripts?")) {
-        data.scripts = data.scripts.filter(x => !scriptList[x].ai);
+        data.scripts = data.scripts.filter(x => scriptList[x] && !scriptList[x].ai);
         await saveInBrowser(COUNTER_THEME, false);
         window.location.reload();
     }
