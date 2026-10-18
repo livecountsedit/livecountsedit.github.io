@@ -972,3 +972,12 @@ center .settingType {
   font-family: 'Roboto', sans-serif;
   font-size: 14px;
 }
+
+.badge {
+    padding: 3px;
+    background-color: red;
+    border-radius: 5px;
+    width: fit-content;
+    margin: 3px;
+    color: white;
+}

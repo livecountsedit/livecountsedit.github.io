@@ -732,6 +732,26 @@
             <div>
                 <p><strong>Disclaimer:</strong> The add-ons listed below are contributed by the Livecountsedit community, and although they are reviewed to make sure they're safe, they aren't considered official and we cannot guarantee they are free of mistakes, nor guarantee they are compatible with each other, all Top 50 features, or future updates. Please provide any feedback to the original creator in our <a href="/about/discord.html">Discord server</a>.</p>
                 <p id="loadedScripts"></p>
+                <button onclick="uninstallAllScripts()">Uninstall all</button> <button onclick="uninstallAllAIScripts()">Uninstall all AI-generated add-ons</button><br>
+                <select id="scriptSorter" class="l-width">
+                    <option value="lastUpdated">Sort by: Most recently updated</option>
+                    <option value="lastPublished">Sort by: Most recently published</option>
+                    <option value="lastCreated">Sort by: Most recently created</option>
+                    <option value="firstPublished">Sort by: First published</option>
+                    <option value="oldest">Sort by: Oldest</option>
+                    <option value="name">Sort by: Name</option>
+                </select>
+                <select id="scriptAuthorFilter" class="m-width">
+                    <option value="any">Author: any</option>
+                </select>
+                <select id="scriptTagFilter" class="m-width">
+                    <option value="any">Tag: any</option>
+                </select>
+                <select id="scriptAIFilter" class="l-width">
+                    <option value="hide">AI-generated add-ons: Hide</option>
+                    <option value="show">AI-generated add-ons: Show</option>
+                </select><br>
+                <p id="pageList">Pages: </p>
                 <hr>
                 <div id="scriptList">
 
