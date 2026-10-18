@@ -96,7 +96,7 @@ function renderScripts(list) {
         });
 
         container.appendChild(div);
-        updateColors();
+        adjustColors();
     }
 }
 
