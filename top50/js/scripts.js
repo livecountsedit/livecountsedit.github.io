@@ -96,8 +96,8 @@ function renderScripts(list) {
         });
 
         container.appendChild(div);
-        adjustColors();
     }
+    adjustColors();
 }
 
 function showScripts() {
