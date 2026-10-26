@@ -981,3 +981,24 @@ center .settingType {
     margin: 3px;
     color: white;
 }
+
+.effect-menu-div {
+    display: flex;
+    color: white;
+    padding: 0.5em;
+    margin: 0.5em 0;
+    border-radius: 0.2em;
+}
+
+.effect-menu-div-inner-1 {
+    align-items: center;
+}
+
+.effect-menu-div-inner-2 {
+    padding: 0.2em;
+    border-radius: 0.2em;
+}
+
+.section-advanced-options {
+    margin-top: 10px;
+}

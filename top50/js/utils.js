@@ -40,7 +40,7 @@ function replaceHeaderVariables(text) {
         // Replace $name (without number) with name at this rank
         result = result.replace(/\$name(?!\d|\(|\()/g, () => {
             if (index >= 0 && index < sortedData.length && sortedData[index]) {
-                return escapeHTML(sortedData[index].name || 'N/A');
+                return sortedData[index].name || 'N/A';
             }
             return 'N/A';
         });
@@ -133,7 +133,7 @@ function replaceHeaderVariables(text) {
         const rank = rankParen || rankDirect;
         const index = parseInt(rank) - 1; // Convert to 0-based index
         if (index >= 0 && index < sortedData.length && sortedData[index]) {
-            return escapeHTML(sortedData[index].name || 'N/A');
+            return sortedData[index].name || 'N/A';
         }
         return 'N/A';
     });
@@ -393,9 +393,9 @@ function applyFire(currentCard, i, enable) {
             let icon = data.fireIcons.created[fireIcon].icon;
             let fire = document.createElement('img');
             fire.classList = 'fireIcon';
-            fire.style = `height: 1.5em;
-                border: solid ${escapeHTML(data.fireIcons.fireBorderWidth)}px ${escapeHTML(data.fireIcons.fireBorderColor)};`;
-            fire.src = escapeHTML(icon);
+            fire.style.height = '1.5em';
+            fire.style.border = `solid ${data.fireIcons.fireBorderWidth}px ${data.fireIcons.fireBorderColor};`;
+            fire.src = icon;
 
             if (firePosition == 'replace') {
                 currentCard.querySelector(".num").innerHTML = fire.outerHTML;
@@ -424,7 +424,7 @@ function applyFire(currentCard, i, enable) {
             } else if (firePosition == 'mdm') {
                 currentCard.querySelector(".num").style.color = `${data.fireIcons.created[fireIcon].color}`;
                 currentCard.querySelector(".num").style.border = `solid ${data.fireIcons.fireBorderColor} ${data.fireIcons.fireBorderWidth}px`
-                currentCard.querySelector(".num").style.backgroundImage = `url(${escapeHTML(icon)})`;
+                currentCard.querySelector(".num").style.backgroundImage = `url(${icon})`;
                 currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
                 currentCard.querySelector(".num_text").style.marginTop = data.fireIcons.created[fireIcon].margin ? data.fireIcons.created[fireIcon].margin + "px" : "";
                 currentCard.querySelector(".num_text").style.marginLeft = data.fireIcons.created[fireIcon].marginLeft ? data.fireIcons.created[fireIcon].marginLeft + "px" : "";

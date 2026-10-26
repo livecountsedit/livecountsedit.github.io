@@ -1,3 +1,20 @@
+const BLANK_IMAGE_URL = new URL('../blank.png', document.baseURI).href;
+const DEFAULT_AVATAR = '../default.png';
+const COUNTER_THEME = "top50";
+window.COUNTER_THEME = "top50";
+const ZERO_WIDTH_SPACE = '\u200b';
+const FONT_WEIGHTS = `
+<option value="100">Thin</option>
+<option value="200">Extra Light</option>
+<option value="300">Light</option>
+<option value="400">Regular</option>
+<option value="500">Medium</option>
+<option value="600">Semibold</option>
+<option value="700">Bold</option>
+<option value="800">Extra Bold</option>
+<option value="900">Black</option>
+`
+
 let apiurl = window.location.href.includes('lcedit.com') ? "https://api.lcedit.com/" : 'http://localhost:1112/';
 let currentIndex = 0;
 let auditTimeout;
@@ -5,9 +22,6 @@ let saveInterval;
 let chart;
 let code;
 let charts = {}; // Store chart instances by channel ID
-const BLANK_IMAGE_URL = new URL('../blank.png', document.baseURI).href;
-const COUNTER_THEME = "top50";
-window.COUNTER_THEME = "top50";
 let nextUpdateAudit = false;
 let specificChannels = [];
 let pickingChannels = false;
@@ -220,7 +234,6 @@ async function initLoad(redo, previousTheme) {
                 a.href = URL.createObjectURL(file);
                 a.download = 'data.json';
                 a.click();
-                delete a;
             }
             storedData = oldSave;
         } catch (err) {
@@ -541,6 +554,61 @@ function setupDesign(redo) {
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
     }
 
+    function createCard(dataIndex) {
+        const htmlcard = document.createElement('div');
+        const cid = channels[dataIndex] ? channels[dataIndex].id : '';
+
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `card card_${dataIndex}`;
+        cardDiv.id = `card_${cid}`;
+
+        const numDiv = document.createElement('div');
+        numDiv.className = 'num';
+        numDiv.id = `num_${cid}`;
+        const numText = document.createElement('div');
+        numText.className = 'num_text';
+        numText.innerText = formatRank(dataIndex + 1);
+        numDiv.appendChild(numText);
+
+        const image = document.createElement('img');
+        image.src = channels[dataIndex] ? (channels[dataIndex].image || DEFAULT_AVATAR) : '../blank.png';
+        image.id = `image_${cid}`;
+        image.className = 'image';
+
+        const nameCountDiv = document.createElement('div');
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'name';
+        nameDiv.id = `name_${cid}`;
+        nameDiv.innerText = channels[dataIndex] ? channels[dataIndex].name : ZERO_WIDTH_SPACE;
+        const countDiv = document.createElement('div');
+        countDiv.id = `count_${cid}`;
+        countDiv.className = 'count odometer';
+        countDiv.innerText = channels[dataIndex] ? getDisplayedCount(channels[dataIndex]) : 0;
+        nameCountDiv.append(nameDiv, countDiv);
+
+        const gapImage = document.createElement('img');
+        gapImage.className = 'gapimg';
+
+        const subGap = document.createElement('div');
+        subGap.className = 'subgap';
+        const subGapText = document.createElement('span');
+        subGapText.className = 'text';
+        const subGapOdometer = document.createElement('span');
+        subGapOdometer.className = 'odometer no_color_transition';
+        subGap.append(subGapText, subGapOdometer);
+
+        const differenceLine = document.createElement('div');
+        differenceLine.className = 'difference_line';
+
+        const chart = document.createElement('div');
+        chart.className = 'chart';
+        chart.id = `chart_${cid}`;
+
+        cardDiv.append(numDiv, image, nameCountDiv, gapImage, subGap, differenceLine, chart);
+        htmlcard.appendChild(cardDiv);
+        return htmlcard;
+    }
+
     if (data.theme.includes('H') || data.animatedCards.enabled) {
         let cards = parseInt(data.theme.split('H')[0].split('top')[1]);
         toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(5, 1fr);";
@@ -560,30 +628,8 @@ function setupDesign(redo) {
             toReturn[1] = "margin-top: 0px; display: grid; grid-template-columns: repeat(1, 1fr);";
         }
 
-        for (let l = 1; l <= cards; l++) {
-            const dataIndex = c - 1;
-            const htmlcard = document.createElement('div');
-            const cid = channels[dataIndex] ? channels[dataIndex].id : '';
-            htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
-                <div class="num" id="num_${cid}"><div class="num_text">${c}</div></div>
-                <img src="../blank.png" alt="" id="image_${cid}" class="image">
-                <div>
-                    <div class="name" id="name_${cid}">\u200b</div>
-                    <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
-                </div>
-                <img src="" class="gapimg">
-                <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
-                <div class="difference_line"></div>
-                <div class="chart" id="chart_${cid}"></div>
-            </div>`;
-
-            if (channels[dataIndex]) {
-                if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
-                    htmlcard.querySelector('.image').src = channels[dataIndex].image || '../default.png'
-                }
-                htmlcard.querySelector('.name').innerText = channels[dataIndex].name || '\u200b'
-            }
-            c += 1;
+        for (let dataIndex = 0; dataIndex < cards; dataIndex++) {
+            const htmlcard = createCard(dataIndex);
             main.innerHTML += htmlcard.innerHTML;
         }
     } else {
@@ -614,28 +660,9 @@ function setupDesign(redo) {
             const maxCards = data.max / columns;
             for (let t = 1; t <= maxCards; t++) {
                 const dataIndex = c - 1;
-                const htmlcard = document.createElement('div');
-                const cid = channels[dataIndex] ? channels[dataIndex].id : '';
-                htmlcard.innerHTML = `<div class="card card_${dataIndex}" id="card_${cid}">
-                <div class="num" id="num_${cid}"><div class="num_text">${c}</div></div>
-                <img src="../blank.png" alt="" id="image_${cid}" class="image">
-                <div>
-                    <div class="name" id="name_${cid}">\u200b</div>
-                    <div class="count odometer" id="count_${cid}">${getDisplayedCount(Math.floor(channels[dataIndex] ? channels[dataIndex].count : 0))}</div>
-                </div>
-                <img src="" class="gapimg">
-                <div class="subgap"><span class="text"></span><span class="odometer no_color_transition"></span></div>
-                <div class="difference_line"></div>
-                <div class="chart" id="chart_${cid}"></div>
-                </div>`;
-                if (channels[dataIndex]) {
-                    if (htmlcard.querySelector('.image').src != channels[dataIndex].image) {
-                        htmlcard.querySelector('.image').src = channels[dataIndex].image || '../default.png'
-                    }
-                    htmlcard.querySelector('.name').innerText = channels[dataIndex].name || '\u200b'
-                }
+                const htmlcard = createCard(dataIndex);
                 htmlcolumn.innerHTML += htmlcard.innerHTML;
-                c += 1;
+                c++;
             }
             main.appendChild(htmlcolumn);
         }
@@ -648,7 +675,7 @@ function setupDesign(redo) {
         toReturn[2] = '.card {margin: 5px;}'
     }
 
-    document.getElementById('customCSSOverrides').innerHTML = data['customCSS'] || '';
+    document.getElementById('customCSSOverrides').innerText = data['customCSS'] || '';
     document.getElementById('customCSS').value = data['customCSS'] || '';
 
     // Initialize charts if showChart is enabled
@@ -841,7 +868,7 @@ function create() {
     let image = '';
     if (!addImage1) {
         if (addImage2.files.length === 0) {
-            image = '../default.png';
+            image = DEFAULT_AVATAR;
             bruh();
             return;
         } else {
@@ -943,6 +970,18 @@ function setupMDMStyles() {
     appendedMDMStyles = true;
 }
 
+function updateQuickSelectMenu() {
+    let past = document.getElementById('quickSelect').value;
+    document.getElementById('quickSelect').innerHTML = '<option value="">Select</option>';
+    for (const channel of data.data) {
+        const opt = document.createElement('option');
+        opt.value = channel.id;
+        opt.innerText = channel.name;
+        document.getElementById('quickSelect').appendChild(opt);
+    }
+    document.getElementById('quickSelect').value = past || '';
+}
+
 function update(doGains = true) {
     let intervalNumber = data.intervalCount;
     if (data.debugMode) console.time(`Update #${intervalNumber + 1} took`)
@@ -952,16 +991,12 @@ function update(doGains = true) {
         let fastestCount = -Infinity;
         let slowest = ""
         let slowestCount = Infinity;
-        let past = document.getElementById('quickSelect').value;
-        document.getElementById('quickSelect').innerHTML = "";
-        let selections = ['<option value="select">Select</option>'];
         for (let i = 0; i < data.data.length; i++) {
             if (!data.data[i]) {
                 data.data.splice(i, 1);
                 i--;
                 continue;
             }
-            selections.push('<option value="' + data.data[i].id + '">' + data.data[i].name + '</option>')
             data.data[i].lastCount = parseFloat(data.data[i].count);
             data.data[i].min_gain = parseFloat(data.data[i].min_gain);
             data.data[i].max_gain = parseFloat(data.data[i].max_gain);
@@ -1005,8 +1040,6 @@ function update(doGains = true) {
             gainTable[data.data[i].id].push(getDisplayedCount(data.data[i].count));
             gainTable[data.data[i].id] = gainTable[data.data[i].id].slice(-(Math.max(data.maxChartValues, data.gainAverageOf) + 1));
         }
-        document.getElementById('quickSelect').innerHTML = selections.join("");
-        document.getElementById('quickSelect').value = past || 'select';
         if (!data.animatedCards.enabled) {
             if (document.getElementById('sorter').value == "fastest") {
                 data.data = data.data.sort(function (a, b) {
@@ -1029,7 +1062,7 @@ function update(doGains = true) {
         if (document.getElementById('order').value == "asc") {
             data.data = data.data.reverse();
         }
-
+        updateQuickSelectMenu();
         if (data.fireIcons.enabled) {
             if (data.fireIcons.firePosition == 'mdm') {
                 if (!appendedMDMStyles) {
@@ -1060,7 +1093,7 @@ function update(doGains = true) {
                     }
                     if (data.data[i]) {
                         if (!data.data[i].image) {
-                            data.data[i].image = "../default.png";
+                            data.data[i].image = DEFAULT_AVATAR;
                         }
                         if (data.data[i].bg) {
                             currentCard.style.background = data.data[i].bg;
@@ -1250,14 +1283,14 @@ function update(doGains = true) {
                             currentCard.querySelector(".image").src = BLANK_IMAGE_URL
                         }
                         currentCard.querySelector(".name").id = "name_"
-                        currentCard.querySelector(".name").innerText = '\u200b'
+                        currentCard.querySelector(".name").innerText = ZERO_WIDTH_SPACE
                         currentCard.querySelector(".count").id = "count_"
                         currentCard.querySelector(".count").innerText = '0'
                         currentCard.querySelector(".subgap").querySelector(".odometer").innerText = 0;
                         currentCard.querySelector(".subgap").querySelector(".text").innerText = 0;
                         currentCard.querySelector(".num").innerHTML = `<div class="num_text">${num}</div>`;
                         currentCard.querySelector(".num").style.backgroundImage = `url('')`;
-                        currentCard.querySelector(".num").style.color = `${data.textColor}`;
+                        currentCard.querySelector(".num").style.color = data.textColor;
                         currentCard.querySelector(".num_text").style.marginTop = "";
                         currentCard.querySelector(".num_text").style.marginLeft = "";
                         if (charts[id]) {
@@ -1550,7 +1583,7 @@ function deleteAllChannels() {
         if (selectedCard) {
             selectedCard.classList.remove("selected");
             selectedCard.style.border = "solid 0.1em " + data.boxBorder;
-            document.getElementById('quickSelect').value = 'select';
+            document.getElementById('quickSelect').value = '';
         }
         refresh();
         for (const key of Object.keys(charts)) {
@@ -1573,7 +1606,8 @@ function deleteChannel() {
             const selectedCard = document.querySelector(".selected");
             if (selectedCard) selectedCard.classList.remove("selected");
             selectedCard.style.border = "solid 0.1em " + data.boxBorder;
-            document.getElementById('quickSelect').value = 'select';
+            document.getElementById('quickSelect').value = '';
+            updateQuickSelectMenu();
             refresh()
         }
     } else {
@@ -2773,7 +2807,7 @@ function createDummyChannels(count, min, max) {
             count: Math.round(randomGaussian(1000, 100)),
             min_gain: min,
             max_gain: max,
-            image: '../default.png',
+            image: DEFAULT_AVATAR,
             id: uuidGen()
         })
     }
@@ -3104,7 +3138,7 @@ function selectorFunction(e) {
             } catch { }
         }
         if (!id || id == selected) {
-            document.getElementById('quickSelect').value = 'select';
+            document.getElementById('quickSelect').value = '';
             if (selected != null) {
                 document.getElementById('card_' + selected + '').classList.remove('selected');
                 document.getElementById('card_' + selected + '').style.border = "solid 0.1em " + data.boxBorder + "";
@@ -3120,7 +3154,7 @@ function selectorFunction(e) {
             }
         } else {
             selected = id;
-            document.getElementById('quickSelect').value = selected || 'select';
+            document.getElementById('quickSelect').value = selected || '';
             if (document.getElementById('card_' + selected + '')) {
                 document.getElementById('card_' + selected + '').classList.add('selected');
                 document.getElementById('card_' + selected + '').style.border = "";
@@ -3293,18 +3327,11 @@ function addFireIcon() {
             <label>Rank margin (top, left) in pixels:<br><span class="no-wrap"><input class="s-width" type="number" step="any" id="fireIconRankMargin" placeholder="Default">, 
             <input class="s-width" type="number" step="any" id="fireIconRankMarginLeft" placeholder="Default"></span></label>
             <label>Rank font weight: <select class="s-width" id="fireIconRankFontWeight">
-                <option value="100">Thin</option>
-                <option value="200">Extra Light</option>
-                <option value="300">Light</option>
-                <option value="400">Regular</option>
-                <option value="500">Medium</option>
-                <option value="600">Semibold</option>
-                <option value="700">Bold</option>
-                <option value="800">Extra Bold</option>
-                <option value="900" selected>Black</option>
+                ${FONT_WEIGHTS}
             </select></label>
             <button onclick="saveFireIcon()">Add</button>
         `
+        div.querySelector('option[value="900"]').setAttribute('selected', true);
         document.getElementById('addFireMenu').appendChild(div);
         adjustColors();
     }
@@ -3392,51 +3419,125 @@ function loadFireIcons() {
     div.innerHTML = '';
     for (let i = 0; i < data.fireIcons.created.length; i++) {
         let fireIcon = data.fireIcons.created[i];
-        let icon = fireIcon.icon;
-        if (icon) {
-            icon = `<img src="${escapeHTML(icon)}" class="fireIcon">`
-        }
         if (i != 0) {
             div.innerHTML += "<hr>";
         }
-        let html = `
-            <div style="display: flex; color: #FFF; padding: 0.5em; margin: 0.5em 0; border-radius: 0.2em;">
-                <div style="align-items: center;">
-                    <div style="color: #FFF; padding: 0.2em; border-radius: 0.2em;">${icon}</div><br>
-                    <label>Name:<br><input class="m-width" placeholder="Name" value="${escapeHTML(fireIcon.name)}" id="new_fire_name_${i}"></label>
-                    <label>Condition:<br><span class="no-wrap"><select id="new_fire_method_${i}" class="s-width">
-                        <option ${fireIcon.method == '>=' ? 'selected' : ''} value=">=">Count ≥</option>
-                        <option ${fireIcon.method == '==' ? 'selected' : ''} value="==">Count =</option>
-                        <option ${fireIcon.method == '<=' ? 'selected' : ''} value="<=">Count ≤</option>
-                        <option ${fireIcon.method == '!=' ? 'selected' : ''} value="!=">Count ≠</option>
-                    </select><input type="number" step="any" id="new_fire_threshold_${i}" class="s-width" value="${escapeHTML(fireIcon.threshold)}"><br></span></label>
-                    <label>Rank color: <input type="color" id="new_fire_color_${i}" value="${escapeHTML(fireIcon.color)}"></label>
-                    <label>Rank margin (top, left) (px):<br><span class="no-wrap">
-                    <input type="number" id="new_fire_margin_${i}" class="s-width" placeholder="Default" value="${escapeHTML(fireIcon.margin)}"></span>,
-                    <input type="number" id="new_fire_marginLeft_${i}" class="s-width" placeholder="Default" value="${escapeHTML(fireIcon.marginLeft)}">
-                    </label>
-                    <label>Rank font weight: <select class="s-width" id="new_fire_font_weight_${i}">
-                        <option ${fireIcon.fontWeight == '100' ? 'selected' : ''} value="100">Thin</option>
-                        <option ${fireIcon.fontWeight == '200' ? 'selected' : ''} value="200">Extra Light</option>
-                        <option ${fireIcon.fontWeight == '300' ? 'selected' : ''} value="300">Light</option>
-                        <option ${fireIcon.fontWeight == '400' ? 'selected' : ''} value="400">Regular</option>
-                        <option ${fireIcon.fontWeight == '500' ? 'selected' : ''} value="500">Medium</option>
-                        <option ${fireIcon.fontWeight == '600' ? 'selected' : ''} value="600">Semibold</option>
-                        <option ${fireIcon.fontWeight == '700' ? 'selected' : ''} value="700">Bold</option>
-                        <option ${fireIcon.fontWeight == '800' ? 'selected' : ''} value="800">Extra Bold</option>
-                        <option ${fireIcon.fontWeight == '900' ? 'selected' : ''} value="900">Black</option>
-                    </select></label>
-                </div><br>
-                <div class="fire-list-controls">
-                    <div><button onclick="saveFireEdits(${i})" title="Save"><span class="material-symbols-outlined">save</span></button></div>
-                    <div><button onclick="deleteFireIcon(${i})" title="Delete" ><span class="material-symbols-outlined">delete</span></button></div>
-                    <div><button onclick="reOrderFire('up',${i})" title="Move up"><span class="material-symbols-outlined">keyboard_arrow_up</span></button></div>
-                    <div><button onclick="reOrderFire('down',${i})" title="Move down"><span class="material-symbols-outlined">keyboard_arrow_down</span></button></button></div>
-                    <div><button onclick="reOrderFire('top',${i})" title="Move to top"><span class="material-symbols-outlined">keyboard_double_arrow_up</span></button></button></div>
-                    <div><button onclick="reOrderFire('bottom',${i})" title="Move to bottom"><span class="material-symbols-outlined">keyboard_double_arrow_down</span></button></button></div>
-                </div>
-            </div>`
-        div.innerHTML += html;
+
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'effect-menu-div';
+
+        const iconInnerDiv1 = document.createElement('div');
+        iconInnerDiv1.className = 'effect-menu-div-inner-1';
+
+        const iconInnerDiv2 = document.createElement('div');
+        iconInnerDiv2.className = 'effect-menu-div-inner-2';
+        const iconImage = document.createElement('img');
+        iconImage.className = 'fireIcon';
+        iconImage.src = fireIcon.icon;
+        iconInnerDiv2.append(iconImage);
+
+        const nameLabel = document.createElement('label');
+        nameLabel.innerText = 'Name:';
+        const nameInput = document.createElement('input');
+        nameInput.className = 'm-width';
+        nameInput.placeholder = 'Name';
+        nameInput.setAttribute('value', fireIcon.name);
+        nameInput.id = `new_fire_name_${i}`;
+        nameLabel.append(document.createElement('br'), nameInput);
+        
+        const conditionLabel = document.createElement('label');
+        conditionLabel.innerText = 'Condition:';
+        const span1 = document.createElement('span');
+        span1.className = 'no-wrap';
+        const methodSelect = document.createElement('select');
+        methodSelect.className = 's-width';
+        methodSelect.id = `new_fire_method_${i}`;
+        const cleanComparisonOperators = {
+            '>=': '≥',
+            '==': '=',
+            '<=': '≤',
+            '!=': '≠'
+        }
+        for (x in cleanComparisonOperators) {
+            const opt = document.createElement('option');
+            opt.value = x;
+            if (fireIcon.method == x) {
+                opt.setAttribute('selected', true);
+            }
+            opt.innerText = `Count ${cleanComparisonOperators[x]}`
+            methodSelect.append(opt);
+        }
+        const thresholdInput = document.createElement('input');
+        thresholdInput.type = 'number';
+        thresholdInput.step = 'any';
+        thresholdInput.id = `new_fire_threshold_${i}`;
+        thresholdInput.className = 's-width';
+        thresholdInput.setAttribute('value', fireIcon.threshold);
+        span1.append(methodSelect, thresholdInput, document.createElement('br'));
+        conditionLabel.append(document.createElement('br'), span1);
+
+        const rankColorLabel = document.createElement('label');
+        rankColorLabel.innerText = 'Rank color: ';
+        const rankColorInput = document.createElement('input');
+        rankColorInput.type = 'color';
+        rankColorInput.id = `new_fire_color_${i}`;
+        rankColorInput.className = 's-width';
+        rankColorInput.setAttribute('value', fireIcon.color);
+        rankColorLabel.append(rankColorInput);
+
+        const rankMarginLabel = document.createElement('label');
+        rankMarginLabel.innerText = 'Rank margin (top, left) (px):';
+        const span2 = document.createElement('span');
+        span2.className = 'no-wrap';
+        const rankMarginTopInput = document.createElement('input');
+        rankMarginTopInput.type = 'number';
+        rankMarginTopInput.step = 'any';
+        rankMarginTopInput.id = `new_fire_margin_${i}`;
+        rankMarginTopInput.className = 's-width';
+        rankMarginTopInput.placeholder = 'Default';
+        rankMarginTopInput.setAttribute('value', fireIcon.margin);
+        span2.append(rankMarginTopInput);
+        span2.innerHTML += ', ';
+        const rankMarginLeftInput = document.createElement('input');
+        rankMarginLeftInput.type = 'number';
+        rankMarginLeftInput.step = 'any';
+        rankMarginLeftInput.id = `new_fire_marginLeft_${i}`;
+        rankMarginLeftInput.className = 's-width';
+        rankMarginLeftInput.placeholder = 'Default';
+        rankMarginLeftInput.setAttribute('value', fireIcon.marginLeft);
+        span2.append(rankMarginLeftInput);
+        rankMarginLabel.append(document.createElement('br'), span2);
+
+        const rankFontWeightLabel = document.createElement('label');
+        rankFontWeightLabel.innerText = 'Rank font weight: ';
+        const rankFontWeightSelect = document.createElement('select');
+        rankFontWeightSelect.className = 'ms-width';
+        rankFontWeightSelect.id = `new_fire_font_weight_${i}`;
+        const fontWeights = ['Thin', 'Extra Light', 'Light', 'Regular', 'Medium', 'Semibold', 'Bold', 'Extra Bold', 'Black'];
+        for (let j = 0; j < 9; j++) {
+            const opt = document.createElement('option');
+            opt.value = j * 100 + 100;
+            if (fireIcon.fontWeight == (j * 100 + 100)) {
+                opt.setAttribute('selected', true);
+            }
+            opt.innerText = fontWeights[j];
+            rankFontWeightSelect.append(opt);
+        }
+        rankFontWeightLabel.append(rankFontWeightSelect);
+
+        iconInnerDiv1.append(iconInnerDiv2, nameLabel, conditionLabel, rankColorLabel, rankMarginLabel, rankFontWeightLabel);
+        iconDiv.append(iconInnerDiv1);
+        iconDiv.innerHTML += `<br>
+        <div class="fire-list-controls">
+            <div><button onclick="saveFireEdits(${i})" title="Save"><span class="material-symbols-outlined">save</span></button></div>
+            <div><button onclick="deleteFireIcon(${i})" title="Delete" ><span class="material-symbols-outlined">delete</span></button></div>
+            <div><button onclick="reOrderFire('up',${i})" title="Move up"><span class="material-symbols-outlined">keyboard_arrow_up</span></button></div>
+            <div><button onclick="reOrderFire('down',${i})" title="Move down"><span class="material-symbols-outlined">keyboard_arrow_down</span></button></button></div>
+            <div><button onclick="reOrderFire('top',${i})" title="Move to top"><span class="material-symbols-outlined">keyboard_double_arrow_up</span></button></button></div>
+            <div><button onclick="reOrderFire('bottom',${i})" title="Move to bottom"><span class="material-symbols-outlined">keyboard_double_arrow_down</span></button></button></div>
+        </div>`;
+
+        div.append(iconDiv);
     }
     if (data.fireIcons.created.length == 0) {
         div.innerHTML = '<p>No fire icons created.</p>'
@@ -3615,53 +3716,153 @@ function loadDifferenceEffects () {
         if (i != 0) {
             div.innerHTML += "<hr>";
         }
-        div.innerHTML += `
-            <div style="display: flex; padding: 0.5em; margin: 0.5em 0; border-radius: 0.2em;">
-                <div style="align-items: center">
-                    <div style="padding: 0.2em; border-radius: 0.2em;">${icon}</div><br>
-                    <label>Name:<br><input class="m-width" placeholder="Name" value="${escapeHTML(diffEffect.name)}" id="new_diff_name_${i}"></label>
-                    <label>Condition:<br><span class="no-wrap"><select id="new_diff_method_${i}" class="s-width">
-                        <option ${diffEffect.method == '<=' ? 'selected' : ''} value="<=">Gap ≤</option>
-                        <option ${diffEffect.method == '==' ? 'selected' : ''} value="==">Gap =</option>
-                        <option ${diffEffect.method == '>=' ? 'selected' : ''} value=">=">Gap ≥</option>
-                        <option ${diffEffect.method == '!=' ? 'selected' : ''} value="!=">Gap ≠</option>
-                        <option ${diffEffect.method == 'h<=' ? 'selected' : ''} value="h<=">Hours ≤</option>
-                        <option ${diffEffect.method == 'h>=' ? 'selected' : ''} value="h>=">Hours ≥</option>
-                    </select><input type="number" step="any" class="s-width" id="new_diff_threshold_${i}" value="${escapeHTML(diffEffect.threshold)}"><br></span></label>
-                    <label>Icon shaking: <input type="checkbox" id="new_diff_shaking_${i}" ${diffEffect.iconShaking ? 'checked' : ''}>
-                    <label>Color: <input type="color" id="new_diff_color_${i}" value="${escapeHTML(diffEffect.color)}"></label>
-                    <label>Glow:<br><select id="new_diff_glow_${i}" class="l-width">
-                        <option ${diffEffect.glow == 'none' ? 'selected' : ''} value="none">No glow</option>
-                        <option ${diffEffect.glow == 'bottom' ? 'selected' : ''} value="bottom">Bottom glows</option>
-                        <option ${diffEffect.glow == 'top' ? 'selected' : ''} value="top">Top glows</option>
-                        <option ${diffEffect.glow == 'fasterSet' ? 'selected' : ''} value="fasterSet">Faster (set gain) glows</option>
-                        <option ${diffEffect.glow == 'fasterObserved' ? 'selected' : ''} value="fasterObserved">Faster (observed gain) glows</option>
-                        <option ${diffEffect.glow == 'slowerSet' ? 'selected' : ''} value="slowerSet">Slower (set gain) glows</option>
-                        <option ${diffEffect.glow == 'slowerObserved' ? 'selected' : ''} value="slowerObserved">Slower (observed gain) glows</option>
-                        <option ${diffEffect.glow == 'both' ? 'selected' : ''} value="both">Both glow</option>
-                    </select></label>
-                    <label>Glow color: <input type="color" id="new_diff_glow_color_${i}" value="${escapeHTML(diffEffect.glowColor)}"></label>
-                    <label>Show when:<br><select id="new_diff_show_when_${i}" class="l-width">
-                        <option ${diffEffect.showWhen == 'always' ? 'selected' : ''} value="always">Always</option>
-                        <option ${diffEffect.showWhen == 'bottomFasterSet' ? 'selected' : ''} value="bottomFasterSet">Bottom faster (set gain)</option>
-                        <option ${diffEffect.showWhen == 'bottomFasterObserved' ? 'selected' : ''} value="bottomFasterObserved">Bottom faster (observed gain)</option>
-                        <option ${diffEffect.showWhen == 'topFasterSet' ? 'selected' : ''} value="topFasterSet">Top faster (set gain)</option>
-                        <option ${diffEffect.showWhen == 'topFasterObserved' ? 'selected' : ''} value="topFasterObserved">Top faster (observed gain)</option>
-                    </select></label>
-                </div>
-                <div class="fire-list-controls">
-                    <div><button onclick="saveDiffEdits(${i})" title="Save"><span class="material-symbols-outlined">save</span></button></div>
-                    <div><button onclick="deleteDiffEffect(${i})" title="Delete" ><span class="material-symbols-outlined">delete</span></button></div>
-                    <div><button onclick="reOrderDiff('up',${i})" title="Move up"><span class="material-symbols-outlined">keyboard_arrow_up</span></button></div>
-                    <div><button onclick="reOrderDiff('down',${i})" title="Move down"><span class="material-symbols-outlined">keyboard_arrow_down</span></button></button></div>
-                    <div><button onclick="reOrderDiff('top',${i})" title="Move to top"><span class="material-symbols-outlined">keyboard_double_arrow_up</span></button></button></div>
-                    <div><button onclick="reOrderDiff('bottom',${i})" title="Move to bottom"><span class="material-symbols-outlined">keyboard_double_arrow_down</span></button></button></div>
-                </div>
-            </div>
-        `
+
+        const iconDiv = document.createElement('div');
+        iconDiv.className = 'effect-menu-div';
+
+        const iconInnerDiv1 = document.createElement('div');
+        iconInnerDiv1.className = 'effect-menu-div-inner-1';
+
+        const iconInnerDiv2 = document.createElement('div');
+        iconInnerDiv2.className = 'effect-menu-div-inner-2';
+        const iconImage = document.createElement('img');
+        iconImage.className = 'fireIcon';
+        iconImage.src = diffEffect.icon;
+        iconInnerDiv2.append(iconImage);
+
+        const nameLabel = document.createElement('label');
+        nameLabel.innerText = 'Name:';
+        const nameInput = document.createElement('input');
+        nameInput.className = 'm-width';
+        nameInput.placeholder = 'Name';
+        nameInput.setAttribute('value', diffEffect.name);
+        nameInput.id = `new_diff_name_${i}`;
+        nameLabel.append(document.createElement('br'), nameInput);
+
+        const conditionLabel = document.createElement('label');
+        conditionLabel.innerText = 'Condition:';
+        const span1 = document.createElement('span');
+        span1.className = 'no-wrap';
+        const methodSelect = document.createElement('select');
+        methodSelect.className = 's-width';
+        methodSelect.id = `new_diff_method_${i}`;
+        const cleanComparisonOperators = {
+            '<=': 'Gap ≤',
+            '==': 'Gap =',
+            '>=': 'Gap ≥',
+            '!=': 'Gap ≠',
+            'h<=': 'Hours ≤',
+            'h>=': 'Hours ≥'
+        }
+        for (x in cleanComparisonOperators) {
+            const opt = document.createElement('option');
+            opt.value = x;
+            if (diffEffect.method == x) {
+                opt.setAttribute('selected', true);
+            }
+            opt.innerText = cleanComparisonOperators[x]
+            methodSelect.append(opt);
+        }
+        const thresholdInput = document.createElement('input');
+        thresholdInput.type = 'number';
+        thresholdInput.step = 'any';
+        thresholdInput.id = `new_diff_threshold_${i}`;
+        thresholdInput.className = 's-width';
+        thresholdInput.setAttribute('value', diffEffect.threshold);
+        span1.append(methodSelect, thresholdInput, document.createElement('br'));
+        conditionLabel.append(document.createElement('br'), span1);
+        
+        const shakingLabel = document.createElement('label');
+        shakingLabel.innerText = 'Icon shaking: ';
+        const shakingCheckbox = document.createElement('input');
+        shakingCheckbox.type = 'checkbox';
+        shakingCheckbox.id = `new_diff_shaking_${i}`;
+        if (diffEffect.iconShaking) shakingCheckbox.setAttribute('checked', true);
+        shakingLabel.append(shakingCheckbox);
+
+        const diffColorLabel = document.createElement('label');
+        diffColorLabel.innerText = 'Color: ';
+        const diffColorInput = document.createElement('input');
+        diffColorInput.type = 'color';
+        diffColorInput.id = `new_diff_color_${i}`;
+        diffColorInput.className = 's-width';
+        diffColorInput.setAttribute('value', diffEffect.color);
+        diffColorLabel.append(diffColorInput);
+
+        const glowLabel = document.createElement('label');
+        glowLabel.innerText = 'Glow:';
+        const glowSelect = document.createElement('select');
+        glowSelect.id = `new_diff_glow_${i}`;
+        const cleanGlowNames = {
+            none: 'No glow',
+            bottom: 'Bottom glows',
+            top: 'Top glows',
+            fasterSet: 'Faster (set gain) glows',
+            fasterObserved: 'Faster (observed gain) glows',
+            slowerSet: 'Slower (set gain) glows',
+            slowerObserved: 'Slower (observed gain) glows',
+            both: 'Both glow'
+        }
+        for (x in cleanGlowNames) {
+            const opt = document.createElement('option');
+            opt.value = x;
+            if (diffEffect.glow == x) {
+                opt.setAttribute('selected', true);
+            }
+            opt.innerText = cleanGlowNames[x];
+            glowSelect.append(opt);
+        }
+        glowLabel.append(document.createElement('br'), glowSelect);
+
+        const glowColorLabel = document.createElement('label');
+        glowColorLabel.innerText = 'Glow color: ';
+        const glowColorInput = document.createElement('input');
+        glowColorInput.type = 'color';
+        glowColorInput.id = `new_diff_glow_color_${i}`;
+        glowColorInput.className = 's-width';
+        glowColorInput.setAttribute('value', diffEffect.glowColor);
+        glowColorLabel.append(glowColorInput);
+
+        const showWhenLabel = document.createElement('label');
+        showWhenLabel.innerText = 'Show when:';
+        const showWhenSelect = document.createElement('select');
+        showWhenSelect.id = `new_diff_show_when_${i}`;
+        showWhenSelect.className = 'l-width';
+        const cleanShowWhenNames = {
+            always: 'Always',
+            bottomFasterSet: 'Bottom faster (set gain)',
+            bottomFasterObserved: 'Bottom faster (observed gain)',
+            topFasterSet: 'Top faster (set gain)',
+            topFasterObserved: 'Top faster (observed gain)'
+        }
+        for (x in cleanShowWhenNames) {
+            const opt = document.createElement('option');
+            opt.value = x;
+            if (diffEffect.showWhen == x) {
+                opt.setAttribute('selected', true);
+            }
+            opt.innerText = cleanShowWhenNames[x];
+            showWhenSelect.append(opt);
+        }
+        showWhenLabel.append(document.createElement('br'), showWhenSelect);
+        
+        iconInnerDiv1.append(iconInnerDiv2, nameLabel, conditionLabel, shakingLabel, diffColorLabel, glowLabel, glowColorLabel, showWhenLabel)
+        div.append(iconDiv);
+        iconDiv.append(iconInnerDiv1);
+        iconDiv.innerHTML += `<br>
+        <div class="fire-list-controls">
+            <div><button onclick="saveDiffEdits(${i})" title="Save"><span class="material-symbols-outlined">save</span></button></div>
+            <div><button onclick="deleteDiffEffect(${i})" title="Delete" ><span class="material-symbols-outlined">delete</span></button></div>
+            <div><button onclick="reOrderDiff('up',${i})" title="Move up"><span class="material-symbols-outlined">keyboard_arrow_up</span></button></div>
+            <div><button onclick="reOrderDiff('down',${i})" title="Move down"><span class="material-symbols-outlined">keyboard_arrow_down</span></button></button></div>
+            <div><button onclick="reOrderDiff('top',${i})" title="Move to top"><span class="material-symbols-outlined">keyboard_double_arrow_up</span></button></button></div>
+            <div><button onclick="reOrderDiff('bottom',${i})" title="Move to bottom"><span class="material-symbols-outlined">keyboard_double_arrow_down</span></button></button></div>
+        </div>`;
+
+        div.append(iconDiv);
     }
     if (!data.differenceStyles.created.length) {
-        div.innerHTML = '<p>No difference effects created.</p>'
+        div.innerHTML = '<p>No difference effects created.</p>';
     }
     adjustColors();
 }
@@ -3905,39 +4106,101 @@ function loadHeader() {
                             const scrollText = string;
                             const scrollDirection = item.attributes.scrollDirection || 'left';
                             const directionClass = scrollDirection === 'right' ? 'scroll-right' : 'scroll-left';
-                            const animationDuration = item.attributes.scrollTime * 1000;
                             // Duplicate content for seamless scrolling
                             const duplicatedText = `${scrollText} • ${scrollText} • `;
-                            div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms;">${escapeHTML(duplicatedText + duplicatedText)}</span></div>`;
+                            const headerScrollingText = document.createElement('div');
+                            headerScrollingText.className = `header-scrolling-text ${directionClass}`;
+                            const span = document.createElement('span');
+                            span.className = 'scroll-content';
+                            span.style.animationDuration = `${item.attributes.scrollTime}s`;
+                            span.innerText = duplicatedText + duplicatedText;
+                            headerScrollingText.append(span);
+                            div.append(headerScrollingText);
                         } else {
-                            div.innerHTML = `<p class="header-text">${escapeHTML(string)}</p>`;
+                            const p = document.createElement('p');
+                            p.className = 'header-text';
+                            p.innerText = string;
+                            div.append(p);
                         }
                     }, item.attributes.updateInterval * 1000));
                 }
             }
         }
         if (item.type == 'battle') {
+            const battleContainer = document.createElement('div');
+            battleContainer.className = 'battle-container battle';
+            battleContainer.style.backgroundColor = item.attributes.bgColor;
+            battleContainer.style.height = item.attributes.boxHeight;
+            
+            const battleContainerLeft = document.createElement('div');
+            battleContainerLeft.className = 'battle_container battle_container_left';
+            
+            const leftImage = document.createElement('img');
+            leftImage.style.float = 'left';
+            leftImage.style.borderRadius = item.attributes.roundAvatars ? '50%' : (data.imageBorder + '%');
+            leftImage.style.height = leftImage.style.width = item.attributes.imageSize + 'mm';
+            leftImage.src = DEFAULT_AVATAR;
+            leftImage.id = `battle_image1_${item.name}`;
+            const leftBattleInfo = document.createElement('div');
+            leftBattleInfo.className = 'battle_info';
+            leftBattleInfo.style.fontSize = item.attributes.fontSize + 'px';
+            const leftName = document.createElement('p');
+            leftName.id = `battle_name1_${item.name}`;
+            leftName.className = 'name';
+            leftName.style.lineHeight = item.attributes.fontSize * 1.2 + 'px';
+            leftName.innerText = ZERO_WIDTH_SPACE;
+            const leftCount = document.createElement('p');
+            leftCount.id = `battle_count1_${item.name}`;
+            leftCount.className = `odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}`;
+            leftCount.innerText = 0;
+            leftBattleInfo.append(leftName, leftCount);
 
-            div.innerHTML = `<div class="battle-container battle" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
-                <div class="battle_container battle_container_left" ${item.attributes.roundAvatars ? '' : 'style="border-radius: 0;"'}>
-                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : escapeHTML(data.imageBorder)}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image1_${item.name}"></img>
-                    <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize)}px;">
-                        <p id="battle_name1_${item.name}" class="name" style="line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
-                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count1_${item.name}">0</p>
-                    </div>
-                </div>
-                <div style="font-size: ${escapeHTML(item.attributes.fontSize)}px; ${item.attributes.battleAlign ? "text-align: center;" : ""}">
-                    <p>Difference:</p>
-                    <p class="odometer battle_difference count no_color_transition" id="battle_difference_${item.name}">0</p>
-                </div>
-                <div class="reverse battle_container battle_container_right" ${item.attributes.roundAvatars ? '' : 'style="border-radius: 0;"'}>
-                <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize)}px; ${item.attributes.battleAlign ? "text-align: right;" : ""}">
-                        <p id="battle_name2_${item.name}" class="name" style="line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
-                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="battle_count2_${item.name}">0</p>
-                    </div>
-                    <img style="float: right; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm; width: ${item.attributes.imageSize}mm;" src="../default.png" id="battle_image2_${item.name}"></img>
-                </div>
-                </div>`;
+            battleContainerLeft.append(leftImage, leftBattleInfo);
+
+            const diffContainer = document.createElement('div');
+            diffContainer.style.fontSize = item.attributes.fontSize + 'px';
+            if (item.attributes.battleAlign) diffContainer.style.textAlign = 'center';
+            const p = document.createElement('p');
+            p.innerText = 'Difference';
+            const diffCount = document.createElement('p');
+            diffCount.className = 'odometer battle_difference count no_color_transition';
+            diffCount.id = `battle_difference_${item.name}`;
+            diffCount.innerText = 0;
+            diffContainer.append(p, diffCount);
+
+            const battleContainerRight = document.createElement('div');
+            battleContainerRight.className = 'reverse battle_container battle_container_right';
+
+            const rightBattleInfo = document.createElement('div');
+            rightBattleInfo.className = 'battle_info';
+            rightBattleInfo.style.fontSize = item.attributes.fontSize + 'px';
+            if (item.attributes.battleAlign) rightBattleInfo.style.textAlign = 'right';
+            const rightName = document.createElement('p');
+            rightName.id = `battle_name2_${item.name}`;
+            rightName.className = 'name';
+            rightName.style.lineHeight = item.attributes.fontSize * 1.2 + 'px';
+            rightName.innerText = ZERO_WIDTH_SPACE;
+            const rightCount = document.createElement('p');
+            rightCount.id = `battle_count2_${item.name}`;
+            rightCount.className = `odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}`;
+            rightCount.innerText = 0;
+            rightBattleInfo.append(rightName, rightCount);
+            const rightImage = document.createElement('img');
+            rightImage.style.float = 'right';
+            rightImage.style.borderRadius = item.attributes.roundAvatars ? '50%' : (data.imageBorder + '%');
+            rightImage.style.height = rightImage.style.width = item.attributes.imageSize + 'mm';
+            rightImage.src = DEFAULT_AVATAR;
+            rightImage.id = `battle_image2_${item.name}`;
+            
+            if (!item.attributes.roundAvatars) {
+                battleContainer.style.borderRadius = 0;
+                battleContainerLeft.style.borderRadius = 0;
+                battleContainerRight.style.borderRadius = 0;
+            }
+            
+            battleContainerRight.append(rightBattleInfo, rightImage);
+            battleContainer.append(battleContainerLeft, diffContainer, battleContainerRight);
+            div.append(battleContainer);
             div.style.fontWeight = item.attributes.fontWeight || "400";
             div.style.color = item.attributes.color;
             headerIntervals.push(setInterval(func = function () {
@@ -4063,20 +4326,20 @@ function loadHeader() {
                 let count1 = user1 ? getDisplayedCount(user1.count) : 0;
                 let count2 = user2 ? getDisplayedCount(user2.count) : 0;
 
-                document.getElementById('battle_name1_' + item.name).innerText = user1 ? (left1 + user1.name + right1) : "\u200b";
+                document.getElementById('battle_name1_' + item.name).innerText = user1 ? (left1 + user1.name + right1) : ZERO_WIDTH_SPACE;
                 document.getElementById('battle_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
                 if (user1 && document.getElementById('battle_image1_' + item.name).src !== user1.image) {
                     document.getElementById('battle_image1_' + item.name).src = user1.image;
                 } else if (!user1) {
-                    document.getElementById('battle_image1_' + item.name).src = "../default.png";
+                    document.getElementById('battle_image1_' + item.name).src = DEFAULT_AVATAR;
                 }
 
-                document.getElementById('battle_name2_' + item.name).innerText = user2 ? (left2 + user2.name + right2) : "\u200b";
+                document.getElementById('battle_name2_' + item.name).innerText = user2 ? (left2 + user2.name + right2) : ZERO_WIDTH_SPACE;
                 document.getElementById('battle_count2_' + item.name).innerText = getDisplayedCount(user2 ? user2.count : 0);
                 if (user2 && document.getElementById('battle_image2_' + item.name).src !== user2.image) {
                     document.getElementById('battle_image2_' + item.name).src = user2.image;
                 } else if (!user2) {
-                    document.getElementById('battle_image2_' + item.name).src = "../default.png";
+                    document.getElementById('battle_image2_' + item.name).src = DEFAULT_AVATAR;
                 }
                 document.getElementById('battle_difference_' + item.name).innerText = Math.floor(count1 - count2);
 
@@ -4146,14 +4409,41 @@ function loadHeader() {
             }, item.attributes.updateInterval * 1000));
         }
         if (item.type == 'user') {
-            div.innerHTML = `<div class="battle-container" style="background-color: ${item.attributes.bgColor}; height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
-                <div class="battle_container" style="max-height: ${item.attributes.boxHeight}px; ${item.attributes.roundAvatars ? '' : 'border-radius: 0;'}">
-                    <img style="float: left; border-radius: ${item.attributes.roundAvatars ? 50 : data.imageBorder}%; height: ${item.attributes.imageSize}mm;" src="../default.png" id="user_image1_${item.name}"></img>
-                    <div class="battle_info" style="font-size: ${escapeHTML(item.attributes.fontSize)}px;">
-                        <p id="user_name1_${item.name}" class="name" style="line-height: ${item.attributes.fontSize * 1.2}px;">\u200b</p>
-                        <p class="odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}" id="user_count1_${item.name}">0</p>
-                    </div>
-                </div>`;
+            const battleContainer = document.createElement('div');
+            battleContainer.className = 'battle-container';
+            battleContainer.style.backgroundColor = item.attributes.bgColor;
+            battleContainer.style.height = item.attributes.boxHeight + 'px';
+
+            const innerBattleContainer = document.createElement('div');
+            innerBattleContainer.className = 'battle_container';
+            innerBattleContainer.style.maxHeight = item.attributes.boxHeight + 'px';
+            if (!item.attributes.roundAvatars) {
+                battleContainer.style.borderRadius = 0;
+                innerBattleContainer.style.borderRadius = 0;
+            }
+            const avatar = document.createElement('img');
+            avatar.style.float = 'left';
+            avatar.style.borderRadius = item.attributes.roundAvatars ? '50%' : (data.imageBorder + '%');
+            avatar.style.height = item.attributes.imageSize + 'mm';
+            avatar.src = DEFAULT_AVATAR;
+            avatar.id = `user_image1_${item.name}`;
+            const battleInfo = document.createElement('div');
+            battleInfo.className = 'battle_info';
+            battleInfo.style.fontSize = item.attributes.fontSize + 'px';
+            const name = document.createElement('p');
+            name.id = `user_name1_${item.name}`;
+            name.className = 'name';
+            name.style.lineHeight = item.attributes.fontSize * 1.2 + 'px';
+            name.innerText = ZERO_WIDTH_SPACE;
+            const count = document.createElement('p');
+            count.className = `odometer count ${item.attributes.odometerColors ? "" : "no_color_transition"}`;
+            count.id = `user_count1_${item.name}`;
+            count.innerText = 0;
+            battleInfo.append(name, count);
+            innerBattleContainer.append(avatar, battleInfo);
+            battleContainer.append(innerBattleContainer);
+            div.append(battleContainer);
+
             div.style.fontWeight = item.attributes.fontWeight || "400";
             div.style.color = item.attributes.color;
             headerIntervals.push(setInterval(func = function () {
@@ -4179,12 +4469,12 @@ function loadHeader() {
                         break;
                 }
 
-                document.getElementById('user_name1_' + item.name).innerText = user1 ? (left + user1.name + right) : "\u200b";
+                document.getElementById('user_name1_' + item.name).innerText = user1 ? (left + user1.name + right) : ZERO_WIDTH_SPACE;
                 document.getElementById('user_count1_' + item.name).innerText = getDisplayedCount(user1 ? user1.count : 0);
                 if (user1 && document.getElementById('user_image1_' + item.name).src !== user1.image) {
                     document.getElementById('user_image1_' + item.name).src = user1.image;
                 } else if (!user1) {
-                    document.getElementById('user_image1_' + item.name).src = "../default.png";
+                    document.getElementById('user_image1_' + item.name).src = DEFAULT_AVATAR;
                 }
 
                 if (!user1 && item.attributes.hideInvalid) {
@@ -4229,7 +4519,7 @@ function loadHeader() {
                     if (data.fireIcons.enabled && item.attributes.applyFire) {
                         const fireIcon = user1 ? fires.get(user1.id) : undefined;
                         if (fireIcon != undefined) {
-                            div.querySelector(".battle-container").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fireIcon].icon)})`
+                            div.querySelector(".battle-container").style.backgroundImage = `url(${data.fireIcons.created[fireIcon].icon})`
                             div.querySelector(".battle_info").style.color = data.fireIcons.created[fireIcon].color;
                             div.querySelector(".battle_info").style.fontWeight = data.fireIcons.created[fireIcon].fontWeight;
                         } else {
@@ -4435,77 +4725,97 @@ async function loadTopSettings(itemName, itemType) {
                 fixUserSettings(userType.value);
             }
         }
-        let textSettings = `
-            <div class="section-basic-options">
-                <div style="grid-column: 1 / -1;"><label><strong>Text content:</strong></label>
-                    <textarea rows="3" class="section_attribute_text header_option"
-                        placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)">${item.attributes.text || ''}</textarea>
-                    <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                        <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $abbhourly(rank), $abbcount(rank), $rank<br>
-                        <strong>Repeat:</strong> $repeat(start-end, part1, part2, ...) - Repeats template for each rank in range<br>
-                        <strong>Example:</strong> "$name(1) gains $hourly(1) per hour" or "$repeat(1-10, $rank. $name - $count)"
-                    </p>
-                </div>
-                <div class="header-option-group">
-                    <div><label><strong>Text color:</strong></label>
-                        <input type="color" value="${item.attributes.color || '#ffffff'}"
-                            class="section_attribute_color header_option" />
-                    </div>
-                    <div><label><strong>Font size:</strong></label>
-                        <input type="number" value="${item.attributes.size || '20'}"
-                            class="section_attribute_size header_option xs-width" placeholder="20" />
-                    </div>
-                </div>
-            </div>
-            <details class="section-advanced-options" style="margin-top: 10px;">
-                <summary><strong>Advanced Options (click to toggle)</strong></summary>
-                <div style="margin-top: 10px;" class="header-option-group">
-                    <div>
-                        <label>Font weight:</label>
-                        <select class="section_attribute_fontWeight header_option ms-width">
-                            <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''
-            }>Regular</option>
-                            <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                            <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                            <option value="500" ${item.attributes.fontWeight == "500" ? 'selected' : ''}>Medium</option>
-                            <option value="600" ${item.attributes.fontWeight == "600" ? 'selected' : ''}>Semibold</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Auto-scroll duration (seconds) (0 = disabled):</label>
-                        <input type="number" value="${escapeHTML(item.attributes.scrollTime) || '0'}"
-                            class="section_attribute_scrollTime header_option xs-width" /><br>
-                    </div>
-                    <div>
-                        <label>Scroll direction:</label>
-                        <select class="section_attribute_scrollDirection header_option s-width">
-                            <option value="left" ${!item.attributes.scrollDirection || item.attributes.scrollDirection === 'left'
-                ? 'selected' : ''}>Left</option>
-                            <option value="right" ${item.attributes.scrollDirection === 'right' ? 'selected' : ''}>Right</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="header-option-group">
-                    <div>
-                        <label>List length:</label>
-                        <input type="number" value="${escapeHTML(item.attributes.length) || 0}"
-                            class="section_attribute_length header_option xs-width" /><br>
-                    </div>
-                    <div>
-                        <label>Sort order:</label>
-                        <select class="section_attribute_sortOrder header_option ms-width">
-                            <option value="asc" ${item.attributes.sortOrder === 'asc' ? 'selected' : ''}>Ascending</option>
-                            <option value="desc" ${item.attributes.sortOrder === 'desc' ? 'selected' : ''}>Descending</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Update interval (seconds):</label>
-                        <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 0}"
-                            class="section_attribute_updateInterval header_option xs-width" />
-                    </div>
-                </div>
-            </details>
-        `;
+
+        function setSelect(elem, val) {
+            elem.querySelectorAll('option').forEach(x => {
+                if (val == x.value) {
+                    x.setAttribute('selected', true);
+                }
+            });
+        }
+
+        function createTextSettings() {
+            const result = document.createElement('div');
+
+            const basicSettingsContainer = document.createElement('div');
+            basicSettingsContainer.className = 'section-basic-options';
+            const basicSettingsContainerInner = document.createElement('div');
+            basicSettingsContainerInner.style.gridColumn = '1 / -1';
+            basicSettingsContainerInner.innerHTML = `<label><strong>Text content:</strong></label>
+            <textarea rows="3" class="section_attribute_text header_option"
+                placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)"></textarea>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $abbhourly(rank), $abbcount(rank), $rank<br>
+                <strong>Repeat:</strong> $repeat(start-end, part1, part2, ...) - Repeats template for each rank in range<br>
+                <strong>Example:</strong> "$name(1) gains $hourly(1) per hour" or "$repeat(1-10, $rank. $name - $count)"
+            </p>`
+            basicSettingsContainerInner.querySelector('textarea').innerText = item.attributes.text || '';
+            const basicSettingsHOG = document.createElement('div');
+            basicSettingsHOG.className = 'header-option-group';
+            const textColorSetting = document.createElement('div');
+            textColorSetting.innerHTML = `<label><strong>Text color:</strong></label>
+            <input type="color" class="section_attribute_color header_option"/>`
+            textColorSetting.querySelector('input').setAttribute('value', item.attributes.color || '#ffffff');
+            const fontSizeSetting = document.createElement('div');
+            fontSizeSetting.innerHTML = `<label><strong>Font size:</strong></label>
+            <input type="number" class="section_attribute_size header_option xs-width" placeholder="20"/>`;
+            fontSizeSetting.querySelector('input').setAttribute('value', item.attributes.size || '20');
+            basicSettingsHOG.append(textColorSetting,fontSizeSetting);
+            basicSettingsContainer.append(basicSettingsContainerInner, basicSettingsHOG);
+
+            const advancedSettingsContainer = document.createElement('details');
+            advancedSettingsContainer.className = 'section-advanced-options';
+            advancedSettingsContainer.innerHTML = '<summary><strong>Advanced Options (click to toggle)</strong></summary>';
+            
+            const advancedSettingsHOG1 = document.createElement('div');
+            advancedSettingsHOG1.className = 'header-option-group';
+            advancedSettingsHOG1.style.marginTop = '10px';
+            const fontWeightSetting = document.createElement('div');
+            fontWeightSetting.innerHTML = `<label>Font weight:</label>
+            <select class="section_attribute_fontWeight header_option ms-width">
+                ${FONT_WEIGHTS}
+            </select>`;
+            setSelect(fontWeightSetting, item.attributes.fontWeight);
+            const autoScrollSetting = document.createElement('div');
+            autoScrollSetting.innerHTML = `<label>Auto-scroll duration (seconds) (0 = disabled):</label>
+            <input type="number" value="${escapeHTML(item.attributes.scrollTime) || '0'}"
+            class="section_attribute_scrollTime header_option xs-width" /><br>`;
+            autoScrollSetting.querySelector('input').setAttribute('value', item.attributes.scrollTime);
+            const scrollDirectionSetting = document.createElement('div');
+            scrollDirectionSetting.innerHTML = `<label>Scroll direction:</label>
+            <select class="section_attribute_scrollDirection header_option s-width">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+            </select>`;
+            setSelect(scrollDirectionSetting, item.attributes.scrollDirection);
+            advancedSettingsHOG1.append(fontWeightSetting, autoScrollSetting, scrollDirectionSetting);
+
+            const advancedSettingsHOG2 = document.createElement('div');
+            advancedSettingsHOG2.className = 'header-option-group';
+            const listLengthSetting = document.createElement('div');
+            listLengthSetting.innerHTML = `<label>List length:</label>
+            <input type="number" class="section_attribute_length header_option xs-width"/><br>`;
+            listLengthSetting.querySelector('input').setAttribute('value', item.attributes.length || 0);
+            const sortOrderSetting = document.createElement('div');
+            sortOrderSetting.innerHTML = `<label>Sort order:</label>
+            <select class="section_attribute_sortOrder header_option ms-width">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>`
+            setSelect(sortOrderSetting, item.attributes.sortOrder);
+            const updateIntervalSetting = document.createElement('div');
+            updateIntervalSetting.innerHTML = `<label>Update interval (seconds):</label>
+            <input type="number" class="section_attribute_updateInterval header_option xs-width"/>`;
+            updateIntervalSetting.querySelector('input').setAttribute('value', item.attributes.updateInterval || 2);
+            advancedSettingsHOG2.append(listLengthSetting, sortOrderSetting, updateIntervalSetting);
+            
+            advancedSettingsContainer.append(advancedSettingsHOG1, advancedSettingsHOG2);
+            result.append(basicSettingsContainer, advancedSettingsContainer);
+            return result;
+        }
+
+        const textSettings = createTextSettings().innerHTML;
+
         let battleSettings = `
             <div class="section-basic-options header-option-group">
                 <div><label><strong>Battle type:</strong></label>

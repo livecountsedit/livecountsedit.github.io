@@ -676,7 +676,6 @@ function exportData(shouldAlert = true) {
     a.href = URL.createObjectURL(file);
     a.download = (COUNTER_THEME || 'export') + '.json';
     a.click();
-    delete a;
 }
 
 class Channel {
@@ -1068,7 +1067,6 @@ function promptOBSMode() {
     yesButton.onclick = () => {
         dialog.close();
         dialog.remove();
-        delete dialog;
         enableOBSMode();
     }
     const noButton = document.createElement('button');
@@ -1077,7 +1075,6 @@ function promptOBSMode() {
     noButton.onclick = () => {
         dialog.close();
         dialog.remove();
-        delete dialog;
     }
     buttonsDiv.append(yesButton, noButton);
     dialog.append(div, buttonsDiv);
@@ -1106,7 +1103,7 @@ function obsExport() {
         navigator.clipboard.writeText(JSON.stringify(data));
         showDialog('Data copied to clipboard.<br>Be sure to read our <a href="https://github.com/livecountsedit/livecountsedit.github.io/wiki/OBS-Browser-Tutorial">OBS Browser tutorial</a> so you know how to get the data out of the browser source!')
     } catch (err) {
-        showDialog('An error occurred while trying to export data :(')
+        showDialog('An error occurred while trying to expordet data :(')
         console.error(err);
     }
 
@@ -1124,7 +1121,6 @@ function showDialog(html) {
     button.onclick = () => {
         dialog.close();
         dialog.remove();
-        delete dialog;
     }
     buttonDiv.append(button);
     dialog.append(div, buttonDiv);
@@ -1223,7 +1219,6 @@ function download(fileData, fileName = 'export.json') {
     a.href = URL.createObjectURL(file);
     a.download = fileName;
     a.click();
-    delete a;
 }
 let csvTrackingEnabled = false;
 let csvTrackingInterval = null;
