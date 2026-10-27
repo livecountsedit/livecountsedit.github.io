@@ -304,7 +304,7 @@ function mean(a, b) {
 }
 
 function isValidHeaderName(name) {
-    return typeof name === 'string' && name && name.trim() && !name.match(/[<>'"&\\]/)
+    return typeof name === 'string' && name && name.trim() //&& !name.match(/[<>'"&\\]/)
 }
 
 function calculateFires() {

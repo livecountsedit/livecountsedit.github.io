@@ -3151,6 +3151,7 @@ function selectorFunction(e) {
                 document.getElementById('edit_bg_color').value = "";
                 document.getElementById('edit_count').value = "";
                 document.getElementById('edit_image1').value = "";
+                document.getElementById('edit_channel_id').innerText = 'ID: '
             }
         } else {
             selected = id;
@@ -3712,7 +3713,6 @@ function loadDifferenceEffects () {
     div.innerHTML = '';
     for (let i = 0; i < data.differenceStyles.created.length; i++) {
         let diffEffect = data.differenceStyles.created[i];
-        let icon = diffEffect.icon ? `<img src=${escapeHTML(diffEffect.icon)} style="height: 1.5em; width: 1.5em;">` : '<p>(no icon)</p>';
         if (i != 0) {
             div.innerHTML += "<hr>";
         }
@@ -4043,14 +4043,23 @@ function loadHeader() {
                 if (item.attributes.scrollTime > 0 && parseFloat(item.attributes.scrollTime) > 0) {
                     const scrollDirection = item.attributes.scrollDirection || 'left';
                     const directionClass = scrollDirection === 'right' ? 'scroll-right' : 'scroll-left';
-                    // Calculate animation duration: scrollTime is in seconds, convert to milliseconds
-                    const animationDuration = parseFloat(item.attributes.scrollTime) * 1000;
                     // Duplicate content for seamless scrolling - duplicate multiple times for smooth loop
                     const separator = ' • ';
                     const duplicatedText = `${displayText}${separator}${displayText}${separator}`;
-                    div.innerHTML = `<div class="header-scrolling-text ${directionClass}"><span class="scroll-content" style="animation-duration: ${animationDuration}ms; animation-name: ${directionClass === 'scroll-left' ? 'scroll-left' : 'scroll-right'}; animation-timing-function: linear; animation-iteration-count: infinite;">${escapeHTML(duplicatedText + duplicatedText)}</span></div>`;
+                    
+                    const headerScrollingText = document.createElement('div');
+                    headerScrollingText.className = `header-scrolling-text ${directionClass}`;
+                    const span = document.createElement('span');
+                    span.className = 'scroll-content';
+                    span.style.animationDuration = `${item.attributes.scrollTime}s`;
+                    span.innerText = duplicatedText + duplicatedText;
+                    headerScrollingText.append(span);
+                    div.append(headerScrollingText);
                 } else {
-                    div.innerHTML = `<p class="header-text">${escapeHTML(displayText)}</p>`;
+                    const p = document.createElement('p');
+                    p.className = 'header-text';
+                    p.innerText = displayText;
+                    div.append(p);
                 }
             };
 
@@ -4303,7 +4312,7 @@ function loadHeader() {
                         const fire2 = user2 ? fires.get(user2.id) : undefined;
 
                         if (fire1 != undefined) {
-                            div.querySelector(".battle_container_left").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fire1].icon)})`
+                            div.querySelector(".battle_container_left").style.backgroundImage = `url("${data.fireIcons.created[fire1].icon}")`
                             div.querySelector(".battle_container_left .battle_info").style.color = data.fireIcons.created[fire1].color;
                             div.querySelector(".battle_container_left .battle_info").style.fontWeight = data.fireIcons.created[fire1].fontWeight;
                         } else {
@@ -4312,7 +4321,7 @@ function loadHeader() {
                             div.querySelector(".battle_container_left .battle_info").style.fontWeight = '';
                         }
                         if (fire2 != undefined) {
-                            div.querySelector(".battle_container_right").style.backgroundImage = `url(${escapeHTML(data.fireIcons.created[fire2].icon)})`
+                            div.querySelector(".battle_container_right").style.backgroundImage = `url("${data.fireIcons.created[fire2].icon}")`
                             div.querySelector(".battle_container_right .battle_info").style.color = data.fireIcons.created[fire2].color;
                             div.querySelector(".battle_container_right .battle_info").style.fontWeight = data.fireIcons.created[fire2].fontWeight;
                         } else {
@@ -4674,6 +4683,7 @@ async function saveTopSettings(shouldAlert = true) {
         items: items
     }
     await saveInBrowser(COUNTER_THEME, shouldAlert)
+    if (shouldAlert) loadTopSettings()
     loadHeader()
 }
 
@@ -4754,7 +4764,7 @@ async function loadTopSettings(itemName, itemType) {
             basicSettingsContainerInner.innerHTML = `<label><strong>Text content:</strong></label>
             <textarea rows="3" class="section_attribute_text header_option"
                 placeholder="Enter text here. Use variables like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1), or $repeat(1-50, $name, hi, $rank)"></textarea>
-            <p style="font-size: 12px; color: #666; margin-top: 5px;">
+            <p class="option-small-text">
                 <strong>Variables:</strong> $name(rank), $hourly(rank), $count(rank), $abbhourly(rank), $abbcount(rank), $rank<br>
                 <strong>Repeat:</strong> $repeat(start-end, part1, part2, ...) - Repeats template for each rank in range<br>
                 <strong>Example:</strong> "$name(1) gains $hourly(1) per hour" or "$repeat(1-10, $rank. $name - $count)"
@@ -4914,7 +4924,7 @@ async function loadTopSettings(itemName, itemType) {
             const rankingOption = document.createElement('div');
             rankingOption.className = 'header_option_nth_fastest';
             rankingOption.innerHTML = `<label><strong>nth closest battle (e.g. 1 = closest, 2 = 2nd closest):</strong></label>
-            <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1" value="${escapeHTML(item.attributes.ranking != null ? item.attributes.ranking : '')}">`;
+            <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1">`;
             setValue(rankingOption, fixNum(item.attributes.ranking, ''));
             basicSettingsContainer.append(battleTypeSetting, updateIntervalSetting, showRankSetting, applyFireSetting, 
                 restrictRanksSetting, hideInvalidSetting, thresholdTypeSetting, thresholdSetting, rankingOption);
@@ -4957,9 +4967,6 @@ async function loadTopSettings(itemName, itemType) {
             return result;
         }
 
-        const textSettings = createTextSettings().innerHTML;
-        const battleSettings = createBattleSettings().innerHTML;
-        
         function createUserSettings() {
             const result = document.createElement('div');
             const basicSettingsContainer = document.createElement('div');
@@ -5031,62 +5038,103 @@ async function loadTopSettings(itemName, itemType) {
             return result;
         }
 
-        const userSettings = createUserSettings().innerHTML;
-        let boxSettings = `
-            <div class="section-basic-options">
-                <div><label><strong>Number of rows:</strong></label>
-                    <input type="number" value="${escapeHTML(item.attributes.rows) || 0}" class="section_attribute_rows header_option xs-width"
-                        placeholder="0" />
-                </div>
-            </div>
-            <p style="margin-top: 10px; color: #666;">Boxes are containers that can hold other sections. Use "Child of" below to
-                nest sections inside boxes.</p>
-            `;
-        div.innerHTML = `
-            <div style="padding: 15px; margin-bottom: 15px; border-radius: 5px; border: 2px solid #ddd;">
-                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
-                    <div><label><strong>Section name:</strong></label>
-                        <input type="text" value="${escapeHTML(item.name)}" class="section_option_name header_option l-width"
-                            placeholder="My Section" />
-                    </div>
-                    <div><label><strong>Place in:</strong></label>
-                        <select class="section_option_placement header_option m-width">
-                            <option value="header" ${(item.placement || 'header') === 'header' ? 'selected' : ''}>Header</option>
-                            <option value="footer" ${(item.placement || 'header') === 'footer' ? 'selected' : ''}>Footer</option>
-                        </select>
-                    </div>
-                    <div><label><strong>Section type:</strong></label>
-                        <select class="section_option_type header_option m-width" value="${escapeHTML(item.type)}"
-                            onchange="loadTopSettings('${item.name}', this.value)">
-                            <option value="text" ${item.type === "text" ? "selected" : ""}>Text</option>
-                            <option value="battle" ${item.type === "battle" ? "selected" : ""}>Battle</option>
-                            <option value="user" ${item.type === "user" ? "selected" : ""}>User</option>
-                            <option value="box" ${item.type === "box" ? "selected" : ""}>Box (Container)</option>
-                        </select>
-                    </div>
-                </div>
-                <details class="section-nesting-option" style="margin-bottom: 10px;">
-                    <summary><strong>Nesting (advanced) (click to toggle)</strong></summary>
-                    <div style="margin-top: 10px;">
-                        <label>Parent box name:</label>
-                        <input type="text" value="${escapeHTML(item.childOf) || ""}" class="section_option_childOf header_option l-width"
-                            placeholder="Leave blank for top level" />
-                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Enter the name of a box section to nest this
-                            inside it.</p>
-                    </div>
-                </details>
-                <hr style="margin: 15px 0;">
-                ${item.type == 'text' ? textSettings : item.type == 'battle' ? battleSettings : item.type == 'user' ? userSettings :
-                item.type == 'box' ? boxSettings : ''}
-                <hr style="margin: 15px 0;">
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button type="button" onclick="removeTopSetting('${item.name}')"
-                        style="background-color: #dc3545;">Delete</button>
-                    <button type="button" onclick="reorderTopSetting('${item.name}', 'up')">↑ Move Up</button>
-                    <button type="button" onclick="reorderTopSetting('${item.name}', 'down')">↓ Move Down</button>
-                </div>
-            </div>
-        `;
+        function createBoxSettings() {
+            const result = document.createElement('div');
+            const basicSettingsContainer = document.createElement('div');
+            basicSettingsContainer.innerHTML = `<div><label><strong>Number of rows:</strong></label>
+                <input type="number" class="section_attribute_rows header_option xs-width" placeholder="0"/>
+            </div>`;
+            setValue(basicSettingsContainer, fixNum(item.attributes.rows, 0));
+            result.append(basicSettingsContainer);
+            result.innerHTML += `<p class="option-small-text">Boxes are containers that can hold other sections. Use "Child of" below to nest sections inside boxes.</p>`;
+            return result;
+        }
+
+        function createMainSettings() {
+            const outerDiv = document.createElement('div');
+            outerDiv.className = 'header-settings-div-outer';
+            const innerDiv = document.createElement('div');
+            innerDiv.className = 'header-settings-div-inner';
+            const nameSetting = document.createElement('div');
+            nameSetting.innerHTML = `<label><strong>Section name:</strong></label>
+            <input type="text" class="section_option_name header_option l-width" placeholder="My Section" />`;
+            setValue(nameSetting, item.name);
+            const placementSetting = document.createElement('div');
+            placementSetting.innerHTML = `<label><strong>Place in:</strong></label>
+            <select class="section_option_placement header_option m-width">
+                <option value="header">Header</option>
+                <option value="footer">Footer</option>
+            </select>`;
+            setSelect(placementSetting, item.placement);
+            const sectionTypeSetting = document.createElement('div');
+            sectionTypeSetting.innerHTML = `<label><strong>Section type:</strong></label>
+            <select class="section_option_type header_option m-width">
+                <option value="text">Text</option>
+                <option value="battle">Battle</option>
+                <option value="user">User</option>
+                <option value="box">Box (Container)</option>
+            </select>`;
+            setSelect(sectionTypeSetting, item.type);
+            sectionTypeSetting.querySelector('select').onchange = e => {
+                loadTopSettings(item.name, e.target.value);
+            };
+            innerDiv.append(nameSetting, placementSetting, sectionTypeSetting);
+
+            const nestingOption = document.createElement('details');
+            nestingOption.className = 'section-nesting-option';
+            nestingOption.style.marginBottom = '10px';
+            nestingOption.innerHTML = `<summary><strong>Nesting (advanced) (click to toggle)</strong></summary>
+            <div style="margin-top: 10px;">
+                <label>Parent box name:</label>
+                <input type="text" class="section_option_childOf header_option l-width"
+                    placeholder="Leave blank for top level" />
+                <p class="option-small-text">Enter the name of a box section to nest this
+                    inside it.</p>
+            </div>`;
+            setValue(nestingOption, item.childOf || '');
+            const hr1 = document.createElement('hr');
+            hr1.className = 'header-option-hr';
+            let itemOptions;
+            switch (item.type) {
+                case 'battle':
+                    itemOptions = createBattleSettings();
+                    break;
+                case 'user':
+                    itemOptions = createUserSettings();
+                    break;
+                case 'box':
+                    itemOptions = createBoxSettings();
+                    break;
+                default:
+                    itemOptions = createTextSettings();
+            }
+            const hr2 = document.createElement('hr');
+            hr2.className = 'header-option-hr';
+            const headerControlOptions = document.createElement('div');
+            headerControlOptions.className = 'header-control-options';
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'danger-button';
+            deleteButton.innerText = 'Delete';
+            deleteButton.onclick = () => {
+                removeTopSetting(item.name);
+            };
+            const moveUpButton = document.createElement('button');
+            moveUpButton.innerText = '↑ Move Up';
+            moveUpButton.onclick = () => {
+                reorderTopSetting(item.name, 'up');
+            };
+            const moveDownButton = document.createElement('button');
+            moveDownButton.innerText = '↓ Move Down';
+            moveDownButton.onclick = () => {
+                reorderTopSetting(item.name, 'down');
+            };
+            headerControlOptions.append(deleteButton,moveUpButton,moveDownButton);
+            outerDiv.append(innerDiv,nestingOption,hr1,itemOptions,hr2,headerControlOptions);
+            return outerDiv;
+        }
+
+        div.append(createMainSettings());
+
         document.getElementById("sections").appendChild(div);
         fixHeaderSettings();
     });
@@ -5175,7 +5223,7 @@ function reorderTopSetting(item, direction) {
 
 function saveCustomCSS() {
     const css = document.getElementById('customCSS').value;
-    document.getElementById('customCSSOverrides').innerHTML = css;
+    document.getElementById('customCSSOverrides').innerText = css;
     data['customCSS'] = css;
 }
 
@@ -5189,7 +5237,7 @@ function updateAddHourlyEstimates() {
     // Minimum practical interval is 4 ms
     const updateIntervals = 3.6e6 / Math.max(4,data.updateInterval);
     const mean = updateIntervals * (usingMeanGain ? addMeanGain : (addMinGain + addMaxGain) / 2);
-    const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? addStdGain : (addMinGain - addMaxGain / Math.sqrt(12))));
+    const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? addStdGain : (addMinGain - addMaxGain) / Math.sqrt(12)));
     document.getElementById("addHourlyMean").innerText = Math.abs(mean) > 10 ? formatNumber(Math.round(mean)) : formatNumber(mean, {maximumSignificantDigits: 2});
     document.getElementById("addHourlyStDev").innerText = stdev > 10 ? formatNumber(Math.round(stdev)) : formatNumber(stdev, {maximumSignificantDigits: 2});
 }
@@ -5204,7 +5252,7 @@ function updateEditHourlyEstimates() {
     // Minimum practical interval is 4 ms
     const updateIntervals = 3.6e6 / Math.max(4,data.updateInterval);
     const mean = updateIntervals * (usingMeanGain ? editMeanGain : (editMinGain + editMaxGain) / 2);
-    const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? editStdGain : (editMinGain - editMaxGain / Math.sqrt(12))));
+    const stdev = Math.sqrt(updateIntervals) * Math.abs((usingMeanGain ? editStdGain : (editMinGain - editMaxGain) / Math.sqrt(12)));
     document.getElementById("editHourlyMean").innerText = Math.abs(mean) > 10 ? formatNumber(Math.round(mean)) : formatNumber(mean, {maximumSignificantDigits: 2});
     document.getElementById("editHourlyStDev").innerText = stdev > 10 ? formatNumber(Math.round(stdev)) : formatNumber(stdev, {maximumSignificantDigits: 2});
 }

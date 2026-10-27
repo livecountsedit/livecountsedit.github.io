@@ -1,22 +1,9 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo', 'livecountseditcompare','akshatmittalcompare'];
 const DB_VERSION = 11;
-const VERSION = '7.10.9';
+const VERSION = '7.10.11';
 const SAVE_VERSION = 10;
 let obsMode;
-
-function escapeHTML(text) {
-    if (text != null) {
-        text = text.toString();
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
-    return "";
-}
 
 function abb(n) {
     let s = Math.sign(n);
