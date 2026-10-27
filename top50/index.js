@@ -1384,7 +1384,7 @@ document.getElementById('sorter').addEventListener('change', function (e) {
 })
 
 document.getElementById('quickSelect').addEventListener('change', function (e) {
-    if (document.getElementById('quickSelect').value !== 'select') {
+    if (document.getElementById('quickSelect').value) {
         let newForm = {
             target: { id: "image_" + document.getElementById('quickSelect').value }
         }
@@ -3197,7 +3197,7 @@ function selectorFunction(e) {
 
 function refresh() {
     const currentChannel = document.getElementById('quickSelect').value;
-    if (!currentChannel || currentChannel == 'select') {
+    if (!currentChannel) {
         document.getElementById('edit_min_gain').value = "";
         document.getElementById('edit_mean_gain').value = "";
         document.getElementById('edit_std_gain').value = "";
@@ -4734,6 +4734,16 @@ async function loadTopSettings(itemName, itemType) {
             });
         }
 
+        function setValue(elem, val) {
+            elem.querySelector('input').setAttribute('value', val);
+        }
+
+        function setChecked(elem, val) {
+            if (val) {
+                elem.querySelector('input').setAttribute('checked', true);
+            }
+        }
+
         function createTextSettings() {
             const result = document.createElement('div');
 
@@ -4755,11 +4765,11 @@ async function loadTopSettings(itemName, itemType) {
             const textColorSetting = document.createElement('div');
             textColorSetting.innerHTML = `<label><strong>Text color:</strong></label>
             <input type="color" class="section_attribute_color header_option"/>`
-            textColorSetting.querySelector('input').setAttribute('value', item.attributes.color || '#ffffff');
+            setValue(textColorSetting, item.attributes.color || '#ffffff');
             const fontSizeSetting = document.createElement('div');
             fontSizeSetting.innerHTML = `<label><strong>Font size:</strong></label>
             <input type="number" class="section_attribute_size header_option xs-width" placeholder="20"/>`;
-            fontSizeSetting.querySelector('input').setAttribute('value', item.attributes.size || '20');
+            setValue(fontSizeSetting, item.attributes.size || '20');
             basicSettingsHOG.append(textColorSetting,fontSizeSetting);
             basicSettingsContainer.append(basicSettingsContainerInner, basicSettingsHOG);
 
@@ -4775,12 +4785,11 @@ async function loadTopSettings(itemName, itemType) {
             <select class="section_attribute_fontWeight header_option ms-width">
                 ${FONT_WEIGHTS}
             </select>`;
-            setSelect(fontWeightSetting, item.attributes.fontWeight);
+            setSelect(fontWeightSetting, item.attributes.fontWeight || "400");
             const autoScrollSetting = document.createElement('div');
             autoScrollSetting.innerHTML = `<label>Auto-scroll duration (seconds) (0 = disabled):</label>
-            <input type="number" value="${escapeHTML(item.attributes.scrollTime) || '0'}"
-            class="section_attribute_scrollTime header_option xs-width" /><br>`;
-            autoScrollSetting.querySelector('input').setAttribute('value', item.attributes.scrollTime);
+            <input type="number" class="section_attribute_scrollTime header_option xs-width" /><br>`;
+            setValue(autoScrollSetting, item.attributes.scrollTime || 0);
             const scrollDirectionSetting = document.createElement('div');
             scrollDirectionSetting.innerHTML = `<label>Scroll direction:</label>
             <select class="section_attribute_scrollDirection header_option s-width">
@@ -4795,7 +4804,7 @@ async function loadTopSettings(itemName, itemType) {
             const listLengthSetting = document.createElement('div');
             listLengthSetting.innerHTML = `<label>List length:</label>
             <input type="number" class="section_attribute_length header_option xs-width"/><br>`;
-            listLengthSetting.querySelector('input').setAttribute('value', item.attributes.length || 0);
+            setValue(listLengthSetting, item.attributes.length || 0);
             const sortOrderSetting = document.createElement('div');
             sortOrderSetting.innerHTML = `<label>Sort order:</label>
             <select class="section_attribute_sortOrder header_option ms-width">
@@ -4806,7 +4815,7 @@ async function loadTopSettings(itemName, itemType) {
             const updateIntervalSetting = document.createElement('div');
             updateIntervalSetting.innerHTML = `<label>Update interval (seconds):</label>
             <input type="number" class="section_attribute_updateInterval header_option xs-width"/>`;
-            updateIntervalSetting.querySelector('input').setAttribute('value', item.attributes.updateInterval || 2);
+            setValue(updateIntervalSetting, item.attributes.updateInterval || 2);
             advancedSettingsHOG2.append(listLengthSetting, sortOrderSetting, updateIntervalSetting);
             
             advancedSettingsContainer.append(advancedSettingsHOG1, advancedSettingsHOG2);
@@ -4814,189 +4823,215 @@ async function loadTopSettings(itemName, itemType) {
             return result;
         }
 
-        const textSettings = createTextSettings().innerHTML;
+        function createBattleAndUserStyling() {
+            const advancedSettingsHOG1 = document.createElement('div');
+            advancedSettingsHOG1.style.marginTop = '10px';
+            advancedSettingsHOG1.className = 'header-option-group';
+            const backgroundColorSetting = document.createElement('div');
+            backgroundColorSetting.innerHTML = `<label>Background color:</label>
+            <input type="color" class="section_attribute_bgColor header_option"/>`;
+            setValue(backgroundColorSetting, item.attributes.bgColor || '#000000');
+            const textColorSetting = document.createElement('div');
+            textColorSetting.innerHTML = `<label>Text color:</label>
+            <input type="color" class="section_attribute_color header_option"/>`;
+            setValue(textColorSetting, item.attributes.color || '#ffffff');
+            const heightSetting = document.createElement('div');
+            heightSetting.innerHTML = `<label>Height:</label>
+            <input type="number" class="section_attribute_boxHeight header_option xs-width"/>`;
+            setValue(heightSetting, fixNum(item.attributes.boxHeight, 60));
+            const imageSizeSetting = document.createElement('div');
+            imageSizeSetting.innerHTML = `<label>Image size:</label>
+            <input type="number" class="section_attribute_imageSize header_option xs-width"/>`;
+            setValue(imageSizeSetting, fixNum(item.attributes.imageSize, 15));
+            const fontSizeSetting = document.createElement('div');
+            fontSizeSetting.innerHTML = `<label>Font size:</label>
+            <input type="number" class="section_attribute_fontSize header_option xs-width" />`;
+            setValue(fontSizeSetting, fixNum(item.attributes.fontSize, 15));
+            const fontWeightSetting = document.createElement('div');
+            fontWeightSetting.innerHTML = `<label>Font weight:</label>
+            <select class="section_attribute_fontWeight header_option ms-width">
+                ${FONT_WEIGHTS}
+            </select>`;
+            setSelect(fontWeightSetting, item.attributes.fontWeight);
+            advancedSettingsHOG1.append(backgroundColorSetting,textColorSetting,heightSetting,
+                imageSizeSetting,fontSizeSetting,fontWeightSetting);
+            return advancedSettingsHOG1;
+        }
+        function createBattleSettings() {
+            const result = document.createElement('div');
 
-        let battleSettings = `
-            <div class="section-basic-options header-option-group">
-                <div><label><strong>Battle type:</strong></label>
-                    <select class="section_attribute_type header_option header_option_user_type m-width">
-                        <option value="closest" ${item.attributes.type === 'closest' ? 'selected' : ''}>Closest Battle (auto)
-                        </option>
-                        <option value="fastest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Closing (auto)</option>
-                        <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Custom Users</option>
-                    </select>
-                </div>
-                <div><label><strong>Update interval (seconds):</strong></label>
-                    <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 2}"
-                        class="section_attribute_updateInterval header_option xs-width" placeholder="2" />
-                </div>
-                <div><label><strong>Show rank:</strong></label>
-                    <select class="section_attribute_battleRankPos header_option m-width">
-                        <option value="none" ${item.attributes.battleRankPos === 'none' ? 'selected' : ''}>Don't show rank</option>
-                        <option value="outside" ${item.attributes.battleRankPos === 'outside' ? 'selected' : ''}>On the outside</option>
-                        <option value="inside" ${item.attributes.battleRankPos === 'inside' ? 'selected' : ''}>On the inside</option>
-                        <option value="left" ${item.attributes.battleRankPos === 'left' ? 'selected' : ''}>On the left</option>
-                        <option value="right" ${item.attributes.battleRankPos === 'right' ? 'selected' : ''}>On the right</option>
-                        <option value="outsideName" ${item.attributes.battleRankPos === 'outsideName' ? 'selected' : ''}>On the outside, in name</option>
-                        <option value="insideName" ${item.attributes.battleRankPos === 'insideName' ? 'selected' : ''}>On the inside, in name</option>
-                        <option value="before" ${item.attributes.battleRankPos === 'before' ? 'selected' : ''}>Before name</option>
-                        <option value="after" ${item.attributes.battleRankPos === 'after' ? 'selected' : ''}>After name</option>
-                    </select>
-                </div>
-                <div><label><strong>Apply fire effect:</strong></label>
-                    <input type="checkbox" class="section_attribute_applyFire header_option" ${item.attributes.applyFire ? 'checked' : ''}>
-                </div>
-                <div><label><strong>Restrict to ranks (e.g. 1-25, 51+):</strong></label>
-                    <input type="text" class="section_attribute_restrictRanks header_option s-width" value="${escapeHTML(item.attributes.restrictRanks) || ''}" placeholder="1+"">
-                </div>
-                <div><label><strong>Hide if no valid battle:</strong></label>
-                    <input type="checkbox" class="section_attribute_hideInvalid header_option" ${item.attributes.hideInvalid ? 'checked' : ''}>
-                </div>
-                <div><label><strong>Threshold type:</strong></label>
-                    <select class="section_attribute_thresholdType header_option m-width">
-                        <option value="count" ${item.attributes.thresholdType === 'count' ? 'selected' : ''}>Count</option>
-                        <option value="hours" ${item.attributes.thresholdType === 'hours' ? 'selected' : ''}>Hours until closing</option> 
-                    </select>
-                </div>
-                <div><label><strong>Threshold (leave blank for none):</strong></label>
-                    <input type="number" class="section_attribute_threshold header_option s-width optional" placeholder="None" value="${escapeHTML(item.attributes.threshold != null ? item.attributes.threshold : '')}">
-                </div>
-                <div class="header_option_nth_fastest"><label><strong>nth closest battle (e.g. 1 = closest, 2 = 2nd closest):</strong></label>
-                    <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1" value="${escapeHTML(item.attributes.ranking != null ? item.attributes.ranking : '')}">
-                </div>
-            </div>
-            <div style="margin-top: 10px;" class="header-option-group header_option_user_id">
-                <div>
-                    <label><strong>User 1 ID:</strong></label>
-                    <input value="${escapeHTML(item.attributes.id1) || ""}" class="section_attribute_id1 header_option l-width" /><br>
-                </div>
-                <div>
-                    <label><strong>User 2 ID:</strong></label>
-                    <input value="${escapeHTML(item.attributes.id2) || ""}" class="section_attribute_id2 header_option l-width" />
-                </div>
-            </div>
-            <details class="section-advanced-options" style="margin-top: 10px;">
-                <summary><strong>Styling Options (click to toggle)</strong></summary>
-                <div style="margin-top: 10px;" class="header-option-group">
-                    <div><label>Background color:</label>
-                        <input type="color" value="${escapeHTML(item.attributes.bgColor) || '#000000'}"
-                            class="section_attribute_bgColor header_option" />
-                    </div>
-                    <div><label>Text color:</label>
-                        <input type="color" value="${escapeHTML(item.attributes.color) || '#ffffff'}"
-                            class="section_attribute_color header_option" />
-                    </div>
-                    <div><label>Height:</label>
-                        <input type="number" value="${escapeHTML(item.attributes.boxHeight) || '60'}"
-                            class="section_attribute_boxHeight header_option xs-width" />
-                    </div>
-                    <div><label>Image size:</label>
-                        <input type="number" value="${escapeHTML(item.attributes.imageSize) || '15'}"
-                            class="section_attribute_imageSize header_option xs-width" />
-                    </div>
-                    <div><label>Font size:</label>
-                        <input type="number" value="${escapeHTML(item.attributes.fontSize) || '15'}"
-                            class="section_attribute_fontSize header_option xs-width" />
-                    </div>
-                    <div><label>Font weight:</label>
-                        <select class="section_attribute_fontWeight header_option s-width">
-                            <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''
-            }>Regular</option>
-                            <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                            <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="header-option-group">
-                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""}
-                            class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
-                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""}
-                            class="section_attribute_roundAvatars header_option"><label>Round avatars</label></div>
-                    <div><input type="checkbox" ${item.attributes.battleAlign ? "checked" : ""}
-                            class="section_attribute_battleAlign header_option"><label>Align counters to sides</label></div>
-                </div>
-            </details>
-        `;
-        let userSettings = `
-            <div class="section-basic-options header-option-group">
-                <div><label><strong>User Type:</strong></label>
-                    <select class="section_attribute_type header_option header_option_user_type m-width">
-                        <option value="fastest" ${item.attributes.type === 'fastest' ? 'selected' : ''}>Fastest Growing</option>
-                        <option value="custom" ${item.attributes.type === 'custom' ? 'selected' : ''}>Specific User</option>
-                    </select>
-                </div>
-                <div><label><strong>Update interval (seconds):</strong></label>
-                    <input type="number" value="${escapeHTML(item.attributes.updateInterval) || 2}"
-                        class="section_attribute_updateInterval header_option xs-width" placeholder="2" />
-                </div>
-                <div><label><strong>Show rank:</strong></label>
-                    <select class="section_attribute_userRankPos header_option m-width">
-                        <option value="none" ${item.attributes.userRankPos === 'none' ? 'selected' : ''}>Don't show rank</option>
-                        <option value="left" ${item.attributes.userRankPos === 'left' ? 'selected' : ''}>On the left</option>
-                        <option value="right" ${item.attributes.userRankPos === 'right' ? 'selected' : ''}>On the right</option>
-                        <option value="before" ${item.attributes.userRankPos === 'before' ? 'selected' : ''}>Before name</option>
-                        <option value="after" ${item.attributes.userRankPos === 'after' ? 'selected' : ''}>After name</option>
-                    </select>
-                </div>
-                <div><label><strong>Apply fire effect:</strong></label>
-                    <input type="checkbox" class="section_attribute_applyFire header_option" ${item.attributes.applyFire ? 'checked' : ''}>
-                </div>
-                <div><label><strong>Restrict to ranks (e.g. 1-25, 51+):</strong></label>
-                    <input type="text" class="section_attribute_restrictRanks header_option s-width" value="${escapeHTML(item.attributes.restrictRanks) || ''}" placeholder="1+"">
-                </div>
-                <div><label><strong>Hide if no valid user:</strong></label>
-                    <input type="checkbox" class="section_attribute_hideInvalid header_option" ${item.attributes.hideInvalid ? 'checked' : ''}>
-                </div>
-                <div class="header_option_nth_fastest"><label><strong>nth fastest channel (e.g. 1 = fastest, 2 = 2nd fastest):</strong></label>
-                    <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1" value="${escapeHTML(item.attributes.ranking != null ? item.attributes.ranking : '')}">
-                </div>
-            </div>
-            <div style="margin-top: 10px;" class="header_option_user_id">
-                <label><strong>User ID:</strong></label>
-                <input value="${escapeHTML(item.attributes.id1) || ""}" class="section_attribute_id1 header_option l-width"
-                    placeholder="Select using Edit Channel to find" />
-            </div>
-        </div>
-            <details class="section-advanced-options" style="margin-top: 10px;">
-                <summary><strong>Styling Options (click to toggle)</strong></summary>
-                <div style="margin-top: 10px;" class="header-option-group">
-                    <div><label>Background color:</label>
-                        <input type="color" value="${escapeHTML(item.attributes.bgColor) || '#000000'}"
-                            class="section_attribute_bgColor header_option" />
-                    </div>
-                    <div><label>Text color:</label>
-                        <input type="color" value="${escapeHTML(item.attributes.color) || '#ffffff'}"
-                            class="section_attribute_color header_option" />
-                    </div>
-                    <div><label>Height:</label>
-                        <input type="number" value="${escapeHTML(item.attributes.boxHeight) || '20'}"
-                            class="section_attribute_boxHeight header_option xs-width" />
-                    </div>
-                    <div><label>Image size:</label>
-                        <input type="number" value="${escapeHTML(item.attributes.imageSize) || '15'}"
-                            class="section_attribute_imageSize header_option xs-width" />
-                    </div>
-                    <div><label>Font size:</label>
-                        <input type="number" value="${escapeHTML(item.attributes.fontSize) || '15'}"
-                            class="section_attribute_fontSize header_option xs-width" />
-                    </div>
-                    <div><label>Font weight:</label>
-                        <select class="section_attribute_fontWeight header_option ms-width">
-                            <option value="400" ${!item.attributes.fontWeight || item.attributes.fontWeight == "400" ? 'selected' : ''
-            }>Regular</option>
-                            <option value="700" ${item.attributes.fontWeight == "700" ? 'selected' : ''}>Bold</option>
-                            <option value="300" ${item.attributes.fontWeight == "300" ? 'selected' : ''}>Light</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="header-option-group">
-                    <div><input type="checkbox" ${item.attributes.odometerColors ? "checked" : ""}
-                            class="section_attribute_odometerColors header_option"><label>Use odometer colors</label></div>
-                    <div><input type="checkbox" ${item.attributes.roundAvatars ? "checked" : ""}
-                            class="section_attribute_roundAvatars header_option"><label>Round avatar</label></div>
-                </div>
-            </details>
-        `;
+            const basicSettingsContainer = document.createElement('div');
+            basicSettingsContainer.className = 'section-basic-options header-option-group';
+            const battleTypeSetting = document.createElement('div');
+            battleTypeSetting.innerHTML = `<label><strong>Battle type:</strong></label>
+            <select class="section_attribute_type header_option header_option_user_type m-width">
+                <option value="closest">Closest Battle (auto)</option>
+                <option value="fastest">Fastest Closing (auto)</option>
+                <option value="custom">Custom Users</option>
+            </select>`
+            setSelect(battleTypeSetting, item.attributes.type);
+            const updateIntervalSetting = document.createElement('div');
+            updateIntervalSetting.innerHTML = `<label><strong>Update interval (seconds):</strong></label>
+            <input type="number" class="section_attribute_updateInterval header_option xs-width" placeholder="2"/>`;
+            setValue(updateIntervalSetting, item.attributes.updateInterval || 2);
+            const showRankSetting = document.createElement('div');
+            showRankSetting.innerHTML = `<label><strong>Show rank:</strong></label>
+            <select class="section_attribute_battleRankPos header_option m-width">
+                <option value="none">Don't show rank</option>
+                <option value="outside">On the outside</option>
+                <option value="inside">On the inside</option>
+                <option value="left">On the left</option>
+                <option value="right">On the right</option>
+                <option value="outsideName">On the outside, in name</option>
+                <option value="insideName">On the inside, in name</option>
+                <option value="before">Before name</option>
+                <option value="after">After name</option>
+            </select>`;
+            setSelect(showRankSetting, item.attributes.battleRankPos);
+            const applyFireSetting = document.createElement('div');
+            applyFireSetting.innerHTML = `<label><strong>Apply fire effect:</strong></label>
+            <input type="checkbox" class="section_attribute_applyFire header_option">`;
+            setChecked(applyFireSetting, item.attributes.applyFire);
+            const restrictRanksSetting = document.createElement('div');
+            restrictRanksSetting.innerHTML = `<label><strong>Restrict to ranks (e.g. 1-25, 51+):</strong></label>
+            <input type="text" class="section_attribute_restrictRanks header_option s-width" placeholder="1+"">`;
+            setValue(restrictRanksSetting, item.attributes.restrictRanks || '');
+            const hideInvalidSetting = document.createElement('div');
+            hideInvalidSetting.innerHTML = `<label><strong>Hide if no valid battle:</strong></label>
+            <input type="checkbox" class="section_attribute_hideInvalid header_option">`;
+            setChecked(hideInvalidSetting, item.attributes.hideInvalid);
+            const thresholdTypeSetting = document.createElement('div');
+            thresholdTypeSetting.innerHTML = `<label><strong>Threshold type:</strong></label>
+            <select class="section_attribute_thresholdType header_option m-width">
+                <option value="count">Count</option>
+                <option value="hours">Hours until closing</option> 
+            </select>`;
+            setSelect(thresholdTypeSetting, item.attributes.thresholdType);
+            const thresholdSetting = document.createElement('div');
+            thresholdSetting.innerHTML = `<label><strong>Threshold (leave blank for none):</strong></label>
+            <input type="number" class="section_attribute_threshold header_option s-width optional" placeholder="None">`;
+            setValue(thresholdSetting, fixNum(item.attributes.threshold, ''));
+            const rankingOption = document.createElement('div');
+            rankingOption.className = 'header_option_nth_fastest';
+            rankingOption.innerHTML = `<label><strong>nth closest battle (e.g. 1 = closest, 2 = 2nd closest):</strong></label>
+            <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1" value="${escapeHTML(item.attributes.ranking != null ? item.attributes.ranking : '')}">`;
+            setValue(rankingOption, fixNum(item.attributes.ranking, ''));
+            basicSettingsContainer.append(battleTypeSetting, updateIntervalSetting, showRankSetting, applyFireSetting, 
+                restrictRanksSetting, hideInvalidSetting, thresholdTypeSetting, thresholdSetting, rankingOption);
+            
+            const userIDHOG = document.createElement('div');
+            userIDHOG.style.marginTop = '10px';
+            userIDHOG.className = 'header-option-group header_option_user_id';
+            const user1Setting = document.createElement('div');
+            user1Setting.innerHTML = `<label><strong>User 1 ID:</strong></label>
+            <input class="section_attribute_id1 header_option l-width" placeholder="Select using Edit Channel to find"/><br>`;
+            setValue(user1Setting, item.attributes.id1 || '');
+            const user2Setting = document.createElement('div');
+            user2Setting.innerHTML = `<label><strong>User 2 ID:</strong></label>
+            <input class="section_attribute_id2 header_option l-width" placeholder="Select using Edit Channel to find"/>`
+            setValue(user2Setting, item.attributes.id2 || '');
+            userIDHOG.append(user1Setting, user2Setting);
+
+            const advancedSettingsContainer = document.createElement('details');
+            advancedSettingsContainer.className = 'section-advanced-options';
+            advancedSettingsContainer.innerHTML = '<summary><strong>Styling Options (click to toggle)</strong></summary>';
+            advancedSettingsContainer.style.marginTop = '10px';
+            
+            const advancedSettingsHOG1 = createBattleAndUserStyling()
+            
+            const advancedSettingsHOG2 = document.createElement('div');
+            advancedSettingsHOG2.className = 'header-option-group';
+            const odometerColorsSetting = document.createElement('div');
+            odometerColorsSetting.innerHTML = `<input type="checkbox" class="section_attribute_odometerColors header_option"><label>Use odometer colors</label>`;
+            setChecked(odometerColorsSetting, item.attributes.odometerColors);
+            const roundAvatarsSetting = document.createElement('div');
+            roundAvatarsSetting.innerHTML = `<input type="checkbox" class="section_attribute_roundAvatars header_option"><label>Round avatars</label>`;
+            setChecked(roundAvatarsSetting, item.attributes.roundAvatars);
+            const battleAlignSetting = document.createElement('div');
+            battleAlignSetting.innerHTML = `<input type="checkbox" class="section_attribute_battleAlign header_option"><label>Align counters to sides</label>`;
+            setChecked(battleAlignSetting, item.attributes.battleAlign);
+            advancedSettingsHOG2.append(odometerColorsSetting, roundAvatarsSetting, battleAlignSetting);
+            
+            advancedSettingsContainer.append(advancedSettingsHOG1,advancedSettingsHOG2);
+            result.append(basicSettingsContainer, userIDHOG, advancedSettingsContainer);
+            return result;
+        }
+
+        const textSettings = createTextSettings().innerHTML;
+        const battleSettings = createBattleSettings().innerHTML;
+        
+        function createUserSettings() {
+            const result = document.createElement('div');
+            const basicSettingsContainer = document.createElement('div');
+            basicSettingsContainer.className = 'section-basic-options header-option-group';
+            const userTypeSetting = document.createElement('div');
+            userTypeSetting.innerHTML = `<label><strong>User Type:</strong></label>
+            <select class="section_attribute_type header_option header_option_user_type m-width">
+                <option value="fastest">Fastest Growing</option>
+                <option value="custom">Specific User</option>
+            </select>`;
+            setSelect(userTypeSetting, item.attributes.type);
+            const updateIntervalSetting = document.createElement('div');
+            updateIntervalSetting.innerHTML = `<label><strong>Update interval (seconds):</strong></label>
+            <input type="number" class="section_attribute_updateInterval header_option xs-width" placeholder="2" />`;
+            setValue(updateIntervalSetting, item.attributes.updateInterval || 2);
+            const userRankPosSetting = document.createElement('div');
+            userRankPosSetting.innerHTML = `<label><strong>Show rank:</strong></label>
+            <select class="section_attribute_userRankPos header_option m-width">
+                <option value="none">Don't show rank</option>
+                <option value="left>On the left</option>
+                <option value="right">On the right</option>
+                <option value="before">Before name</option>
+                <option value="after">After name</option>
+            </select>`;
+            setSelect(userRankPosSetting, item.attributes.userRankPos);
+            const applyFireSetting = document.createElement('div');
+            applyFireSetting.innerHTML = `<label><strong>Apply fire effect:</strong></label><input type="checkbox" class="section_attribute_applyFire header_option">`;
+            setChecked(applyFireSetting, item.attributes.applyFire);
+            const restrictRanksSetting = document.createElement('div');
+            restrictRanksSetting.innerHTML = `<label><strong>Restrict to ranks (e.g. 1-25, 51+):</strong></label>
+            <input type="text" class="section_attribute_restrictRanks header_option s-width" placeholder="1+"">`;
+            setValue(restrictRanksSetting, item.attributes.restrictRanks || '');
+            const hideInvalidSetting = document.createElement('div');
+            hideInvalidSetting.innerHTML = `<label><strong>Hide if no valid user:</strong></label><input type="checkbox" class="section_attribute_hideInvalid header_option">`;
+            setChecked(hideInvalidSetting, item.attributes.hideInvalid);
+            const rankingOption = document.createElement('div');
+            rankingOption.className = 'header_option_nth_fastest';
+            rankingOption.innerHTML = `<label><strong>nth fastest channel (e.g. 1 = fastest, 2 = 2nd fastest):</strong></label>
+            <input type="number" class="section_attribute_ranking header_option xs-width optional" placeholder="1">`;
+            setValue(rankingOption, fixNum(item.attributes.ranking, ''));
+            basicSettingsContainer.append(userTypeSetting, updateIntervalSetting, userRankPosSetting,
+                applyFireSetting, restrictRanksSetting, hideInvalidSetting, rankingOption);
+            
+            const userIDOption = document.createElement('div');
+            userIDOption.style.marginTop = '10px';
+            userIDOption.className = 'header_option_user_id';
+            userIDOption.innerHTML = `<label><strong>User ID:</strong></label>
+                <input class="section_attribute_id1 header_option l-width" placeholder="Select using Edit Channel to find"/>`;
+            setValue(userIDOption, item.attributes.id1 || '');
+
+            const advancedSettingsContainer = document.createElement('details');
+            advancedSettingsContainer.className = 'section-advanced-options';
+            advancedSettingsContainer.innerHTML = '<summary><strong>Styling Options (click to toggle)</strong></summary>';
+            advancedSettingsContainer.style.marginTop = '10px';
+
+            const advancedSettingsHOG1 = createBattleAndUserStyling()
+
+            const advancedSettingsHOG2 = document.createElement('div');
+            advancedSettingsHOG2.className = 'header-option-group';
+            const odometerColorsSetting = document.createElement('div');
+            odometerColorsSetting.innerHTML = `<input type="checkbox" class="section_attribute_odometerColors header_option"><label>Use odometer colors</label>`;
+            setChecked(odometerColorsSetting, item.attributes.odometerColors);
+            const roundAvatarsSetting = document.createElement('div');
+            roundAvatarsSetting.innerHTML = `<input type="checkbox" class="section_attribute_roundAvatars header_option"><label>Round avatars</label>`;
+            setChecked(roundAvatarsSetting, item.attributes.roundAvatars);
+            advancedSettingsHOG2.append(odometerColorsSetting, roundAvatarsSetting);
+            advancedSettingsContainer.append(advancedSettingsHOG1,advancedSettingsHOG2);
+            result.append(basicSettingsContainer, userIDOption, advancedSettingsContainer);
+            return result;
+        }
+
+        const userSettings = createUserSettings().innerHTML;
         let boxSettings = `
             <div class="section-basic-options">
                 <div><label><strong>Number of rows:</strong></label>

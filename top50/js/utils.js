@@ -497,4 +497,9 @@ function estimatePassingTime(topChannel, bottomChannel) {
     : diff / (bottomGainSet - topGainSet);
 }
 
+function fixNum(num, fallback) {
+    if (isFinite(num) && num !== '' && num !== null) return num;
+    else return fallback;
+}
+
 initializeCopyButtons();
