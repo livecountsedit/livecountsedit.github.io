@@ -981,3 +981,59 @@ center .settingType {
     margin: 3px;
     color: white;
 }
+
+.effect-menu-div {
+    display: flex;
+    color: white;
+    padding: 0.5em;
+    margin: 0.5em 0;
+    border-radius: 0.2em;
+}
+
+.effect-menu-div-inner-1 {
+    align-items: center;
+}
+
+.effect-menu-div-inner-2 {
+    padding: 0.2em;
+    border-radius: 0.2em;
+}
+
+.section-advanced-options {
+    margin-top: 10px;
+}
+
+.header-settings-div-outer {
+    padding: 15px; 
+    margin-bottom: 15px; 
+    border-radius: 5px; 
+    border: 2px solid #ddd;
+}
+
+.header-settings-div-inner {
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+    margin-bottom: 15px; 
+    flex-wrap: wrap;
+}
+
+.option-small-text {
+    color: #666 !important;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.header-item-hr {
+    margin: 15px 0;
+}
+
+.header-control-buttons {
+    display: flex; 
+    gap: 10px; 
+    flex-wrap: wrap;
+}
+
+.danger-button {
+    background-color: #dc3545;
+}
