@@ -124,7 +124,7 @@ function replaceHeaderVariables(text) {
             parts.push(rankParts.join(' ')); // Join parts with spaces
         }
 
-        return parts.join('\n'); // Join each rank's output with newlines
+        return parts.join(' ');
     });
 
     // Match patterns like $name1 or $name(1), $hourly1 or $hourly(1), $count1 or $count(1)
