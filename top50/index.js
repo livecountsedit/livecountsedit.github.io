@@ -4036,9 +4036,11 @@ function loadHeader() {
             div.style.color = item.attributes.color;
             div.style.fontSize = item.attributes.size + "px";
             div.style.fontWeight = item.attributes.fontWeight || "400";
+            
 
             // Function to update the displayed text
             const updateDisplayText = () => {
+                div.replaceChildren();
                 displayText = replaceHeaderVariables(item.attributes.text || '');
                 if (item.attributes.scrollTime > 0 && parseFloat(item.attributes.scrollTime) > 0) {
                     const scrollDirection = item.attributes.scrollDirection || 'left';
@@ -4986,7 +4988,7 @@ async function loadTopSettings(itemName, itemType) {
             userRankPosSetting.innerHTML = `<label><strong>Show rank:</strong></label>
             <select class="section_attribute_userRankPos header_option m-width">
                 <option value="none">Don't show rank</option>
-                <option value="left>On the left</option>
+                <option value="left">On the left</option>
                 <option value="right">On the right</option>
                 <option value="before">Before name</option>
                 <option value="after">After name</option>
