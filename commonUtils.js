@@ -1,8 +1,8 @@
 const AUTOSAVE_INTERVAL = 15000;
 const DB_TABLES = ['socialblade', 'top50', 'akshatmittal', 'livecountsnet', 'livecountsedit', 'studio', 'livecountseditvideo', 'akshatmittalvideo', 'livecountseditcompare','akshatmittalcompare'];
 const DB_VERSION = 11;
-const VERSION = '7.10.11';
-const SAVE_VERSION = 10;
+const VERSION = '7.10.13';
+const SAVE_VERSION = 13;
 let obsMode;
 
 function abb(n) {
@@ -326,7 +326,6 @@ async function saveDataInBrowser(table, dat) {
 
 async function saveInBrowser(table, shouldAlert = false) {
     try {
-        data.lastOnline = Date.now();
         await saveDataInBrowser(table, data);
         if (shouldAlert) {
             if (navigator.storage && navigator.storage.persist && navigator.storage.persisted) {
@@ -423,6 +422,7 @@ function processData(dat) {
             delete dat.pause;
             delete dat.streamerMode;
             delete dat.settingsTab;
+            delete dat.lastOnline;
         }
         if (!dat.partialExports.audits) {
             delete dat.audits;
@@ -588,11 +588,12 @@ function processData(dat) {
             delete dat.odometerSpeed;
             delete dat.offlineGains;
             delete dat.updateInterval;
-            delete dat.randomCountUpdateTime;
-            delete dat.waterFallCountUpdateTime;
+            delete dat.countUpdateMethod;
             delete dat.gainAverageOf;
             delete dat.animatedCards;
             delete dat.gapMethod;
+            delete dat.selectShowRanks;
+            delete dat.selectShowCounts;
         }
         if (!dat.partialExports.apiUpdates) {
             delete dat.apiUpdates;
@@ -999,6 +1000,16 @@ async function importData(imported) {
             console.error(err);
             imported = {};
         }
+    }
+
+    // old waterfall/random count update settings
+    if ('randomCountUpdateTime' in imported) {
+        if (imported.randomCountUpdateTime) imported.countUpdateMethod = 'random';
+        delete imported.randomCountUpdateTime;
+    }
+    if ('waterFallCountUpdateTime' in imported) {
+        if (imported.waterFallCountUpdateTime) imported.countUpdateMethod = 'waterfall';
+        delete imported.waterFallCountUpdateTime;
     }
 
     const partialImports = structuredClone(data.partialExports);

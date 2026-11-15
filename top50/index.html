@@ -188,7 +188,7 @@
                     <h2>Edit Channel</h2>
                     <br>
                     <select id="quickSelect" class="l-width">
-                        <option value="select">Select</option>
+                        <option value="">Select</option>
                     </select><br>
                     <button id="quickSelectButton">Quick Select</button>
                     <button id="refreshButton" onclick="refresh()">Refresh</button>
@@ -387,9 +387,14 @@
                             id="animatedCardChangesDuration" autocomplete="off"></label>
                     <label>Abbreviate counts: <input type="checkbox" id="abbreviate"></label>
                     <label>Allow negative counts: <input type="checkbox" id="allowNegative"></label>
-                    <label>Random count updates: <input type="checkbox" id="randomCountUpdateTime"></label>
-                    <label>Waterfall count updates: <input type="checkbox" id="waterFallCountUpdateTime"></label>
+                    <label>Count update method: <select id="countUpdateMethod" class="m-width">
+                        <option value="default">Simultaneous (default)</option>
+                        <option value="random">Random</option>
+                        <option value="waterfall">Waterfall</option>
+                    </select></label>
                     <label>Channel editor shows exact internal count: <input type="checkbox" id="editorShowsExactCount"></label>
+                    <label>Show ranks in quick select menu: <input type="checkbox" id="selectShowRanks"></label>
+                    <label>Show counts in quick select menu: <input type="checkbox" id="selectShowCounts"></label>
                     <label>Maximum chart values (2-50): <input type="number" class="xs-width" id="maxChartValues" placeholder="50" min="2" max="50"></label>
                 </div>
                 <div class="half-column">

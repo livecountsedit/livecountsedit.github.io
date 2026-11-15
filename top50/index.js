@@ -109,8 +109,7 @@ let example_data = {
     'audits': false,
     'auditStats': [0, 0, 0, 0],
     "allowNegative": false,
-    "randomCountUpdateTime": false,
-    "waterFallCountUpdateTime": false,
+    countUpdateMethod: 'default',
     "verticallyCenterRanks": false,
     "boxBGLength": "0",
     "boxBGGain": "#f7f5fe",
@@ -190,6 +189,8 @@ let example_data = {
     'saveType': COUNTER_THEME,
     'index': 1,
     'showScrollbars': true,
+    selectShowRanks: false,
+    selectShowCounts: false,
     partialExports: {
         state: true,
         counters: true,
@@ -253,6 +254,16 @@ async function initLoad(redo, previousTheme) {
                 storedData.partialExports.fireSettings = storedData.partialExports.fireIcons;
                 delete storedData.partialExports.fireIcons;
             }
+
+            // old waterfall/random count update settings
+            if ('randomCountUpdateTime' in storedData) {
+                if (storedData.randomCountUpdateTime) storedData.countUpdateMethod = 'random';
+                delete storedData.randomCountUpdateTime;
+            }
+            if ('waterFallCountUpdateTime' in storedData) {
+                if (storedData.waterFallCountUpdateTime) storedData.countUpdateMethod = 'waterfall';
+                delete storedData.waterFallCountUpdateTime;
+            }
             
             data = mergeWithExampleData(storedData, example_data);
             data.data = data.data.map(x => new Channel(x));
@@ -312,7 +323,7 @@ async function initLoad(redo, previousTheme) {
         delete data.differenceStyles.showDifferenceWhen;
         delete data.differenceStyles.color;
         delete data.differenceThreshold;
-    }
+    }    
 
     // Old menu
     if ('settingsEnabled' in data) {
@@ -499,6 +510,7 @@ async function initLoad(redo, previousTheme) {
     document.body.style.color = data.textColor;
     updateOdo();
     fix();
+    updateQuickSelectMenu();
     document.querySelectorAll("#container,#settings").forEach(x => x.style.backgroundColor = document.getElementById("backPicker").value);
     adjustColors();
     if (!data.pause) {
@@ -583,7 +595,8 @@ function setupDesign(redo) {
         const countDiv = document.createElement('div');
         countDiv.id = `count_${cid}`;
         countDiv.className = 'count odometer';
-        countDiv.innerText = channels[dataIndex] ? getDisplayedCount(channels[dataIndex]) : 0;
+        countDiv.innerText = channels[dataIndex] ? getDisplayedCount(channels[dataIndex].count) : 0;
+        //console.log(getDisplayedCount(channels[dataIndex]))
         nameCountDiv.append(nameDiv, countDiv);
 
         const gapImage = document.createElement('img');
@@ -973,10 +986,11 @@ function setupMDMStyles() {
 function updateQuickSelectMenu() {
     let past = document.getElementById('quickSelect').value;
     document.getElementById('quickSelect').innerHTML = '<option value="">Select</option>';
-    for (const channel of data.data) {
+    for (let i = 0; i < data.data.length; i++) {
+        const channel = data.data[i];
         const opt = document.createElement('option');
         opt.value = channel.id;
-        opt.innerText = channel.name;
+        opt.innerText = `${data.selectShowRanks ? '#' + formatRank(i + 1) + ' ' : ''}${channel.name}${data.selectShowCounts ? ' (' + formatNumber(getDisplayedCount(channel.count)) + ')' : ''}`;
         document.getElementById('quickSelect').appendChild(opt);
     }
     document.getElementById('quickSelect').value = past || '';
@@ -1074,10 +1088,10 @@ function update(doGains = true) {
             glowingCards = [];
             let extraTimeTillUpdate = 0;
             const interval = data.updateInterval;
-            if (data.randomCountUpdateTime) {
+            if (data.countUpdateMethod === 'random') {
                 extraTimeTillUpdate = random(0, interval);
             }
-            if (data.waterFallCountUpdateTime) {
+            if (data.countUpdateMethod === 'waterfall') {
                 extraTimeTillUpdate = i * 100;
             }
 
@@ -1761,12 +1775,8 @@ document.getElementById('allowNegative').addEventListener('change', function () 
     data.allowNegative = this.checked;
 });
 
-document.getElementById('randomCountUpdateTime').addEventListener('change', function () {
-    data.randomCountUpdateTime = this.checked;
-});
-
-document.getElementById('waterFallCountUpdateTime').addEventListener('change', function () {
-    data.waterFallCountUpdateTime = this.checked;
+document.getElementById('countUpdateMethod').addEventListener('change', function () {
+    data.countUpdateMethod = this.value;
 });
 
 document.getElementById('importFromGoogleFonts').addEventListener('change', function () {
@@ -2016,6 +2026,16 @@ document.getElementById('showScrollbars').addEventListener('click', function () 
     updateScrollbars();
 })
 
+document.getElementById('selectShowRanks').addEventListener('click', function () {
+    data.selectShowRanks = this.checked;
+    updateQuickSelectMenu();
+})
+
+document.getElementById('selectShowCounts').addEventListener('click', function () {
+    data.selectShowCounts = this.checked;
+    updateQuickSelectMenu();
+})
+
 function fix() {
     document.getElementById('main').style.height = data.cardStyles.containerHeight + "vh";
     document.getElementById('main').style.width = data.cardStyles.containerWidth + "vw";
@@ -2038,8 +2058,7 @@ function fix() {
     document.getElementById('reverseAnimation').checked = data.reverseAnimation;
     document.getElementById('allowNegative').checked = data.allowNegative;
     document.getElementById('animatedCardChanges').checked = data.animatedCards.enabled;
-    document.getElementById('randomCountUpdateTime').checked = data.randomCountUpdateTime;
-    document.getElementById('waterFallCountUpdateTime').checked = data.waterFallCountUpdateTime;
+    document.getElementById('countUpdateMethod').value = data.countUpdateMethod
     document.getElementById('fastest').checked = data.fastest;
     document.getElementById('slowest').checked = data.slowest;
     document.getElementById('abbreviate').checked = data.abbreviate;
@@ -2366,6 +2385,8 @@ function fix() {
     document.getElementById('slowestIcon').value = data.slowestIcon || '⌛️';
     document.getElementById('debugMode').checked = !!data.debugMode;
     document.getElementById('showScrollbars').checked = !!data.showScrollbars;
+    document.getElementById('selectShowRanks').checked = !!data.selectShowRanks;
+    document.getElementById('selectShowCounts').checked = !!data.selectShowCounts;
     updateScrollbars();
 
     document.querySelectorAll(".partial-export-option").forEach(x => {
@@ -2633,6 +2654,7 @@ document.getElementById('updateint').addEventListener('change', function () {
     int = int * 1000;
     updateInterval = setInterval(update, int);
     data.updateInterval = int;
+    update();
 })
 
 document.getElementById('min_gain_global').addEventListener('change', function () {

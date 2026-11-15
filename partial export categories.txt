@@ -1,11 +1,13 @@
 Note: This file is just for refrence to see what each piece of data in the save file should be categorized as when it comes to partial imports and exports.
 
-autosave - state
-debugMode - state
-editorShowsExactCount - state
-intervalCount - state
-pause - state
-streamerMode - state
+data.autosave - state
+data.debugMode - state
+data.editorShowsExactCount - state
+data.intervalCount - state
+data.pause - state
+data.streamerMode - state
+data.lastOnline - state
+
 data - counters
 data.data[i].name - names
 data.data[i].count - counts
@@ -108,3 +110,11 @@ Introduced in save version 11 (v7.10.5):
 data.fadeName - styles
 data.fadeNameLength - styles
 data.nameAlignment - styles
+
+Introducted in save version 12 (v7.10.7 - but forgot to update save version):
+data.showScrollBars - designSettings
+
+Introduced in save version 13 (v7.10.13)
+data.countUpdateMethod - technicalSettings
+data.selectShowRanks - technicalSettings
+data.selectShowCounts - technicalSettings
