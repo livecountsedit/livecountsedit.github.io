@@ -173,6 +173,7 @@ let example_data = {
         'totalSections': 0,
         'headerHeight': 0,
         'boxWidth': '',
+        'footerBoxWidth': '',
         'sectionGap': 0,
         'items': []
     },
@@ -255,15 +256,7 @@ async function initLoad(redo, previousTheme) {
                 delete storedData.partialExports.fireIcons;
             }
 
-            // old waterfall/random count update settings
-            if ('randomCountUpdateTime' in storedData) {
-                if (storedData.randomCountUpdateTime) storedData.countUpdateMethod = 'random';
-                delete storedData.randomCountUpdateTime;
-            }
-            if ('waterFallCountUpdateTime' in storedData) {
-                if (storedData.waterFallCountUpdateTime) storedData.countUpdateMethod = 'waterfall';
-                delete storedData.waterFallCountUpdateTime;
-            }
+            fixData(storedData);
             
             data = mergeWithExampleData(storedData, example_data);
             data.data = data.data.map(x => new Channel(x));
@@ -280,6 +273,7 @@ async function initLoad(redo, previousTheme) {
             totalSections: 0,
             headerHeight: 0,
             boxWidth: '',
+            footerBoxWidth: '',
             sectionGap: 10,
             footerHeight: 0,
             footerGap: 10,
@@ -4005,6 +3999,7 @@ function loadHeader() {
             totalSections: 0,
             headerHeight: 0,
             boxWidth: '',
+            footerBoxWidth: '',
             sectionGap: 10,
             footerHeight: 0,
             footerGap: 10,
@@ -4023,8 +4018,8 @@ function loadHeader() {
 
     if (footerEl) {
         footerEl.style.height = (data.headerSettings.footerHeight ?? 0) + 'px';
-        if (data.headerSettings.boxWidth && data.headerSettings.boxWidth.trim() !== '') {
-            footerEl.style.gridTemplateColumns = data.headerSettings.boxWidth.split(',').map(x => x.trim() + 'fr').join(' ');
+        if (data.headerSettings.footerBoxWidth && data.headerSettings.footerBoxWidth.trim() !== '') {
+            footerEl.style.gridTemplateColumns = data.headerSettings.footerBoxWidth.split(',').map(x => x.trim() + 'fr').join(' ');
         }
         footerEl.style.gap = (data.headerSettings.footerGap ?? 10) + "px";
     }
@@ -4701,6 +4696,7 @@ async function saveTopSettings(shouldAlert = true) {
         totalSections: document.getElementById("totalSections").value || 0,
         headerHeight: document.getElementById("heightSections").value || 0,
         boxWidth: document.getElementById("sizeSections").value || '',
+        footerBoxWidth: document.getElementById("sizeSectionsFooter").value || '',
         sectionGap: document.getElementById("gapSections").value || 10,
         footerHeight: document.getElementById("footerHeightSections") ? (document.getElementById("footerHeightSections").value || 0) : 0,
         footerGap: document.getElementById("footerGapSections") ? (document.getElementById("footerGapSections").value || 10) : 10,
@@ -4716,6 +4712,7 @@ async function loadTopSettings(itemName, itemType) {
         document.getElementById("totalSections").value = data.headerSettings.totalSections || '';
         document.getElementById("heightSections").value = data.headerSettings.headerHeight || 0;
         document.getElementById("sizeSections").value = data.headerSettings.boxWidth || '';
+        document.getElementById("sizeSectionsFooter").value = data.headerSettings.footerBoxWidth || '';
         document.getElementById("gapSections").value = data.headerSettings.sectionGap || 10;
         if (document.getElementById("footerHeightSections")) {
             document.getElementById("footerHeightSections").value = data.headerSettings.footerHeight ?? 0;

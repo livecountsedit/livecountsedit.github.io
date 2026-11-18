@@ -118,3 +118,6 @@ Introduced in save version 13 (v7.10.13)
 data.countUpdateMethod - technicalSettings
 data.selectShowRanks - technicalSettings
 data.selectShowCounts - technicalSettings
+
+Introduced in save version 14 (v7.10.14)
+data.headerSettings.footerBoxWidth - headerSettings

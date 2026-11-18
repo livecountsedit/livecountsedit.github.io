@@ -978,6 +978,23 @@ class Channel {
     }
 }
 
+function fixData(imported) {
+    // old waterfall/random count update settings
+    if ('randomCountUpdateTime' in imported) {
+        if (imported.randomCountUpdateTime) imported.countUpdateMethod = 'random';
+        delete imported.randomCountUpdateTime;
+    }
+    if ('waterFallCountUpdateTime' in imported) {
+        if (imported.waterFallCountUpdateTime) imported.countUpdateMethod = 'waterfall';
+        delete imported.waterFallCountUpdateTime;
+    }
+
+    // new footer box sizing option
+    if ('headerSettings' in imported && 'boxWidth' in imported.headerSettings && !('footerBoxWidth' in imported.headerSettings)) {
+        imported.headerSettings.footerBoxWidth = imported.headerSettings.boxWidth;
+    }
+}
+
 async function importData(imported) {
     // v7 Livecountsedit and Livecounts.net saves
     if (typeof imported.saveType === 'number') {
@@ -1002,15 +1019,7 @@ async function importData(imported) {
         }
     }
 
-    // old waterfall/random count update settings
-    if ('randomCountUpdateTime' in imported) {
-        if (imported.randomCountUpdateTime) imported.countUpdateMethod = 'random';
-        delete imported.randomCountUpdateTime;
-    }
-    if ('waterFallCountUpdateTime' in imported) {
-        if (imported.waterFallCountUpdateTime) imported.countUpdateMethod = 'waterfall';
-        delete imported.waterFallCountUpdateTime;
-    }
+    fixData(imported);
 
     const partialImports = structuredClone(data.partialExports);
     if (imported.partialExports) {
